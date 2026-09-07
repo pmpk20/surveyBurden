@@ -6,6 +6,8 @@
 /.quarto/
 /doc/
 /Meta/
+/docs/
+/pkgdown/
 
 # internal working notes, never part of the repo
 /docs/superpowers/

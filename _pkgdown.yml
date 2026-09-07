@@ -1,0 +1,37 @@
+url: https://pmpk20.github.io/surveyBurden/
+
+template:
+  bootstrap: 5
+
+reference:
+  - title: One-call pipeline
+    contents:
+      - burden_report
+      - summary_line
+  - title: Read a Qualtrics survey
+    contents:
+      - read_qsf
+      - fetch_qsf
+      - as_qsf_raw
+      - parse_qsf
+  - title: Score questions
+    contents:
+      - classify_question
+      - gfs_weights
+      - score_burden
+  - title: Resolve paths
+    contents:
+      - resolve_flow
+      - resolve_live_blocks
+      - resolve_paths
+      - classify_reachability
+  - title: Path burden
+    contents:
+      - path_burden
+      - path_burden_profile
+      - respondent_burden
+  - title: Diagnostics
+    contents:
+      - calculation_certainty
+      - validate_times
+      - instrument_summary

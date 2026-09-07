@@ -16,3 +16,6 @@
 ^\.superpowers$
 ^docs$
 ^codecov\.yml$
+^_pkgdown\.yml$
+^pkgdown$
+^CODE_OF_CONDUCT\.md$

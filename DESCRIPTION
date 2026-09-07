@@ -1,0 +1,32 @@
+Package: surveyBurden
+Title: Ex-Ante Path-Aware Survey Instrument Burden Assessment
+Version: 0.0.0.9000
+Authors@R: 
+    person("Peter", "King", , "p.king1@leeds.ac.uk", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-8550-466X"))
+Description: Estimates the response burden of a Qualtrics survey instrument
+    before it is fielded. Parses a '.qsf' export (or fetches a live survey
+    through the Qualtrics API), reconstructs the respondent paths the
+    survey's flow and display logic allow, scores every question with the
+    published GfS / Axhausen burden weights, and reports the burden across
+    those paths as a structured object.
+License: MIT + file LICENSE
+URL: https://github.com/pmpk20/surveyBurden
+BugReports: https://github.com/pmpk20/surveyBurden/issues
+Depends:
+    R (>= 4.1)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 8.0.0
+Suggests:
+    httr2,
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0),
+    withr
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+Imports:
+    cli,
+    jsonlite,
+    tibble

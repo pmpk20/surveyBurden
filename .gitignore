@@ -1,0 +1,19 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+/.quarto/
+/doc/
+/Meta/
+
+# internal working notes, never part of the repo
+/docs/superpowers/
+/.superpowers/
+*.bundle
+
+# local data and paradata are never committed
+/*.csv
+*_Paradata*.csv
+*_ResponseMatrix*.csv
+*_RouteAndTiming*.csv

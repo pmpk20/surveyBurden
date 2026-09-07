@@ -1,0 +1,17 @@
+^LICENSE\.md$
+^surveyBurden_roadmap\.md$
+^data-raw$
+^.*\.csv$
+^.*\.bundle$
+^\.github$
+^paper\.md$
+^paper\.bib$
+^paper_files$
+^cran-comments\.md$
+^codemeta\.json$
+^CITATION\.cff$
+^\.vscode$
+^\.Rproj\.user$
+^.*\.Rproj$
+^\.superpowers$
+^docs$

@@ -1,0 +1,614 @@
+{
+  "SurveyEntry": {
+    "SurveyID": "SV_synthetic",
+    "SurveyName": "Synthetic Edge Cases",
+    "SurveyDescription": "",
+    "SurveyLanguage": "EN",
+    "SurveyStatus": "Active"
+  },
+  "SurveyElements": [
+    {
+      "SurveyID": "SV_synthetic",
+      "Element": "BL",
+      "PrimaryAttribute": "Survey Blocks",
+      "SecondaryAttribute": "",
+      "Payload": {
+        "0": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "INTRO",
+          "ID": "BL_intro",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID_longdb"
+            }
+          ]
+        },
+        "1": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "EMPTY BLOCK",
+          "ID": "BL_empty",
+          "BlockElements": []
+        },
+        "2": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "EXOTIC TYPES",
+          "ID": "BL_types",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID_notext"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID_matmulti"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID_rank"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID_cs"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID_star"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID_sbs"
+            }
+          ]
+        },
+        "3": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "GATE",
+          "ID": "BL_gate",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID_gate"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID_dl_ed"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID_dl_or"
+            }
+          ]
+        },
+        "4": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "NESTED BRANCH TARGET",
+          "ID": "BL_branch",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID_branchq"
+            }
+          ]
+        },
+        "5": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "SCREENOUT AREA",
+          "ID": "BL_screen",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID_screenq"
+            }
+          ]
+        },
+        "6": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "FINAL",
+          "ID": "BL_final",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID_final"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_synthetic",
+      "Element": "FL",
+      "PrimaryAttribute": "Survey Flow",
+      "SecondaryAttribute": "",
+      "Payload": {
+        "Type": "Root",
+        "FlowID": "FL_1",
+        "Flow": [
+          {
+            "Type": "EmbeddedData",
+            "FlowID": "FL_ed",
+            "EmbeddedData": [
+              {
+                "Description": "edFlag",
+                "Type": "Custom",
+                "Field": "edFlag",
+                "VariableType": "String",
+                "Value": "1"
+              }
+            ]
+          },
+          {
+            "Type": "BlockRandomizer",
+            "FlowID": "FL_rand",
+            "SubSet": 1,
+            "EvenPresentation": true,
+            "Flow": [
+              {
+                "Type": "Standard",
+                "ID": "BL_intro",
+                "FlowID": "FL_BL_intro"
+              },
+              {
+                "Type": "Standard",
+                "ID": "BL_empty",
+                "FlowID": "FL_BL_empty"
+              }
+            ]
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL_types",
+            "FlowID": "FL_BL_types"
+          },
+          {
+            "Type": "Branch",
+            "FlowID": "FL_b_outer",
+            "Description": "outer",
+            "BranchLogic": {
+              "0": {
+                "0": {
+                  "LogicType": "Question",
+                  "QuestionID": "QID_gate",
+                  "Operator": "Selected",
+                  "LeftOperand": "q://QID_gate/SelectableChoice/1",
+                  "ChoiceLocator": "q://QID_gate/SelectableChoice/1",
+                  "Type": "Expression"
+                },
+                "Type": "If"
+              },
+              "Type": "BooleanExpression",
+              "inPage": false
+            },
+            "Flow": [
+              {
+                "Type": "Branch",
+                "FlowID": "FL_b_inner",
+                "Description": "inner",
+                "BranchLogic": {
+                  "0": {
+                    "0": {
+                      "LogicType": "Question",
+                      "QuestionID": "QID_notext",
+                      "Operator": "Selected",
+                      "LeftOperand": "q://QID_notext/SelectableChoice/1",
+                      "ChoiceLocator": "q://QID_notext/SelectableChoice/1",
+                      "Type": "Expression"
+                    },
+                    "Type": "If"
+                  },
+                  "Type": "BooleanExpression",
+                  "inPage": false
+                },
+                "Flow": [
+                  {
+                    "Type": "Standard",
+                    "ID": "BL_branch",
+                    "FlowID": "FL_BL_branch"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL_gate",
+            "FlowID": "FL_BL_gate"
+          },
+          {
+            "Type": "Branch",
+            "FlowID": "FL_b_screen",
+            "Description": "screen-out",
+            "BranchLogic": {
+              "0": {
+                "0": {
+                  "LogicType": "Question",
+                  "QuestionID": "QID_screenq",
+                  "Operator": "Selected",
+                  "LeftOperand": "q://QID_screenq/SelectableChoice/2",
+                  "ChoiceLocator": "q://QID_screenq/SelectableChoice/2",
+                  "Type": "Expression"
+                },
+                "Type": "If"
+              },
+              "Type": "BooleanExpression",
+              "inPage": false
+            },
+            "Flow": [
+              {
+                "Type": "EndSurvey",
+                "FlowID": "FL_end"
+              }
+            ]
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL_screen",
+            "FlowID": "FL_BL_screen"
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL_final",
+            "FlowID": "FL_BL_final"
+          }
+        ],
+        "Properties": {
+          "Count": 8
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_synthetic",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID_longdb",
+      "SecondaryAttribute": "This paragraph exists only to ",
+      "Payload": {
+        "QuestionID": "QID_longdb",
+        "QuestionType": "DB",
+        "Selector": "TB",
+        "SubSelector": "",
+        "QuestionText": "This paragraph exists only to exceed one hundred words so the descriptive-block length branch of the scorer is exercised by the synthetic fixture. This paragraph exists only to exceed one hundred words so the descriptive-block length branch of the scorer is exercised by the synthetic fixture. This paragraph exists only to exceed one hundred words so the descriptive-block length branch of the scorer is exercised by the synthetic fixture. This paragraph exists only to exceed one hundred words so the descriptive-block length branch of the scorer is exercised by the synthetic fixture. This paragraph exists only to exceed one hundred words so the descriptive-block length branch of the scorer is exercised by the synthetic fixture. This paragraph exists only to exceed one hundred words so the descriptive-block length branch of the scorer is exercised by the synthetic fixture.",
+        "DataExportTag": "QID_longdb",
+        "QuestionDescription": "This paragraph exists only to "
+      }
+    },
+    {
+      "SurveyID": "SV_synthetic",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID_notext",
+      "SecondaryAttribute": "",
+      "Payload": {
+        "QuestionID": "QID_notext",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "",
+        "DataExportTag": "QID_notext",
+        "QuestionDescription": "",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_synthetic",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID_matmulti",
+      "SecondaryAttribute": "Select every option that appli",
+      "Payload": {
+        "QuestionID": "QID_matmulti",
+        "QuestionType": "Matrix",
+        "Selector": "Likert",
+        "SubSelector": "MultipleAnswer",
+        "QuestionText": "Select every option that applies in each row.",
+        "DataExportTag": "QID_matmulti",
+        "QuestionDescription": "Select every option that appli",
+        "Choices": {
+          "1": {
+            "Display": "Row one"
+          },
+          "2": {
+            "Display": "Row two"
+          },
+          "3": {
+            "Display": "Row three"
+          }
+        },
+        "Answers": {
+          "1": {
+            "Display": "A"
+          },
+          "2": {
+            "Display": "B"
+          },
+          "3": {
+            "Display": "C"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_synthetic",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID_rank",
+      "SecondaryAttribute": "Rank these in order of prefere",
+      "Payload": {
+        "QuestionID": "QID_rank",
+        "QuestionType": "RO",
+        "Selector": "DL",
+        "SubSelector": "",
+        "QuestionText": "Rank these in order of preference.",
+        "DataExportTag": "QID_rank",
+        "QuestionDescription": "Rank these in order of prefere",
+        "Choices": {
+          "1": {
+            "Display": "Alpha"
+          },
+          "2": {
+            "Display": "Bravo"
+          },
+          "3": {
+            "Display": "Charlie"
+          },
+          "4": {
+            "Display": "Delta"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_synthetic",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID_cs",
+      "SecondaryAttribute": "Allocate 100 points across the",
+      "Payload": {
+        "QuestionID": "QID_cs",
+        "QuestionType": "CS",
+        "Selector": "HSLIDER",
+        "SubSelector": "",
+        "QuestionText": "Allocate 100 points across the options.",
+        "DataExportTag": "QID_cs",
+        "QuestionDescription": "Allocate 100 points across the",
+        "Choices": {
+          "1": {
+            "Display": "Option A"
+          },
+          "2": {
+            "Display": "Option B"
+          },
+          "3": {
+            "Display": "Option C"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_synthetic",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID_star",
+      "SecondaryAttribute": "Rate your satisfaction.",
+      "Payload": {
+        "QuestionID": "QID_star",
+        "QuestionType": "Slider",
+        "Selector": "STAR",
+        "SubSelector": "",
+        "QuestionText": "Rate your satisfaction.",
+        "DataExportTag": "QID_star",
+        "QuestionDescription": "Rate your satisfaction.",
+        "Choices": {
+          "1": {
+            "Display": "Overall"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_synthetic",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID_sbs",
+      "SecondaryAttribute": "Side-by-side question (unmappe",
+      "Payload": {
+        "QuestionID": "QID_sbs",
+        "QuestionType": "SBS",
+        "Selector": "SBSMatrix",
+        "SubSelector": "",
+        "QuestionText": "Side-by-side question (unmapped type).",
+        "DataExportTag": "QID_sbs",
+        "QuestionDescription": "Side-by-side question (unmappe",
+        "Choices": {
+          "1": {
+            "Display": "Row one"
+          },
+          "2": {
+            "Display": "Row two"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_synthetic",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID_gate",
+      "SecondaryAttribute": "Do you own a car?",
+      "Payload": {
+        "QuestionID": "QID_gate",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Do you own a car?",
+        "DataExportTag": "QID_gate",
+        "QuestionDescription": "Do you own a car?",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_synthetic",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID_dl_ed",
+      "SecondaryAttribute": "Shown only when the embedded f",
+      "Payload": {
+        "QuestionID": "QID_dl_ed",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Shown only when the embedded flag is set.",
+        "DataExportTag": "QID_dl_ed",
+        "QuestionDescription": "Shown only when the embedded f",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "EmbeddedField",
+              "LeftOperand": "edFlag",
+              "Operator": "EqualTo",
+              "RightOperand": "1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_synthetic",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID_dl_or",
+      "SecondaryAttribute": "Shown when gate=Yes OR embedde",
+      "Payload": {
+        "QuestionID": "QID_dl_or",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Shown when gate=Yes OR embedded flag set.",
+        "DataExportTag": "QID_dl_or",
+        "QuestionDescription": "Shown when gate=Yes OR embedde",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID_gate",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID_gate/SelectableChoice/1",
+              "ChoiceLocator": "q://QID_gate/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "1": {
+            "0": {
+              "LogicType": "EmbeddedField",
+              "LeftOperand": "edFlag",
+              "Operator": "EqualTo",
+              "RightOperand": "1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_synthetic",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID_branchq",
+      "SecondaryAttribute": "Only reached through nested br",
+      "Payload": {
+        "QuestionID": "QID_branchq",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Only reached through nested branches.",
+        "DataExportTag": "QID_branchq",
+        "QuestionDescription": "Only reached through nested br",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_synthetic",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID_screenq",
+      "SecondaryAttribute": "Answer before the potential sc",
+      "Payload": {
+        "QuestionID": "QID_screenq",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Answer before the potential screen-out.",
+        "DataExportTag": "QID_screenq",
+        "QuestionDescription": "Answer before the potential sc",
+        "Choices": {
+          "1": {
+            "Display": "Continue"
+          },
+          "2": {
+            "Display": "Stop"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_synthetic",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID_final",
+      "SecondaryAttribute": "Final question.",
+      "Payload": {
+        "QuestionID": "QID_final",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Final question.",
+        "DataExportTag": "QID_final",
+        "QuestionDescription": "Final question.",
+        "Choices": {
+          "1": {
+            "Display": "Done"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -11,6 +11,7 @@ Description: Estimates the response burden of a Qualtrics survey instrument
     published GfS / Axhausen burden weights, and reports the burden across
     those paths as a structured object.
 License: MIT + file LICENSE
+Language: en-GB
 URL: https://github.com/pmpk20/surveyBurden
 BugReports: https://github.com/pmpk20/surveyBurden/issues
 Depends:
@@ -22,6 +23,7 @@ Suggests:
     httr2,
     knitr,
     rmarkdown,
+    spelling,
     testthat (>= 3.0.0),
     withr
 Config/testthat/edition: 3

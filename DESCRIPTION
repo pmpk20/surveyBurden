@@ -1,6 +1,6 @@
 Package: surveyBurden
 Title: Ex-Ante Path-Aware Survey Instrument Burden Assessment
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: 
     person("Peter", "King", , "p.king1@leeds.ac.uk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-8550-466X"))

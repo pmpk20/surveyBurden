@@ -1,5 +1,5 @@
 ---
-title: 'surveyBurden: path-aware ex-ante survey instrument burden from a Qualtrics definition'
+title: 'surveyBurden: path-aware ex-ante survey burden from a Qualtrics survey'
 tags:
   - R
   - survey methodology
@@ -13,41 +13,54 @@ authors:
 affiliations:
   - name: Institute for Transport Studies, University of Leeds, United Kingdom
     index: 1
-date: 7 September 2026
+date: 8 September 2026
 bibliography: paper.bib
 ---
 
 # Summary
 
 `surveyBurden` is an R package [@rcore] that estimates the response burden of a
-survey instrument before it is fielded, directly from its machine-readable
-definition. It reads a Qualtrics survey, either a `.qsf` export or a live
-definition pulled through the Qualtrics API, reconstructs the respondent paths
-that the survey flow and display logic allow, and applies the published GfS /
-Axhausen item burden-scoring scheme [@schmid2019; @heimgartner2024] to every
-question on every path. It then reports how burden is distributed across the
-whole structural path space: an achievable minimum, quartiles, median and
-maximum in GfS points, the share contributed by each block, the highest-burden
-questions, and a set of quality-control diagnostics. A single call,
-`burden_report("survey.qsf")`, runs the whole pipeline. Lower-level functions
-expose each step, from parsing through question scoring, flow resolution and
-path enumeration, for inspection or reuse.
+survey from its design alone, with no response data. Qualtrics is a widely used
+commercial survey platform; a Qualtrics survey exports as a `.qsf` file, which
+is JSON. `surveyBurden` reads a `.qsf` file, or a live survey through the
+Qualtrics API, reconstructs the respondent paths that the survey's flow and
+display logic permit, and applies the published GfS / Axhausen item
+burden-scoring scheme [@schmid2019; @heimgartner2024], hereafter "GfS points",
+to every question on every path. Because it needs only the survey design, it can
+be run before fielding to compare design options, or afterwards to audit an
+instrument already in the field.
 
-The result is a structured object rather than printed text, so each component
-can be extracted and analysed on its own. A Qualtrics definition does not
-contain everything the scoring scheme needs, so the package keeps two kinds of
-quantity apart: those the scheme specifies directly, such as question type,
-response action and the number of alternatives, and those it has to infer, such
-as approximate line counts and response-unit structure. Every question's score
-is labelled with the rule that produced it.
+`burden_report("survey.qsf")` runs the whole pipeline and returns a structured
+object. It reports the burden across the full set of paths the flow and display
+logic allow — the minimum, quartiles, median and maximum in GfS points — and,
+for the instrument as a whole, the share of burden contributed by each block,
+the highest-burden questions, and quality-control diagnostics. These path
+summaries count each feasible path once; supplying observed respondent routes
+turns them into population-weighted figures. Lower-level functions expose each
+step — parsing, question scoring, flow resolution, path enumeration — for
+inspection or reuse.
+
+Assigning a GfS score needs the question type, response action and number of
+answer options, which a `.qsf` provides, and the number of rows in a grid or
+options in a list, and the on-screen length of instruction text, which it does
+not. Where the `.qsf` is missing what the scheme needs, the package applies a
+documented, configurable rule — for example, scoring a dropdown as a rating, or
+estimating text length from a word count — and labels the question `inferred`
+rather than `auto`, with a string recording which rule was used. Questions that
+cannot be resolved are left unscored and flagged for a human.
 
 # Statement of need
 
-Response burden is a central construct in survey methodology. It is associated
-with nonresponse and breakoff, and reducing it is a routine design goal
-[@yan2022; @yan2008]. Yet burden is still usually assessed by hand, with an
-analyst reading through the questionnaire and forming a judgement, or it is
-reduced to a single length or duration figure for an "average" respondent.
+Response burden is a central construct in survey methodology. It has an
+objective side — the length, question types and effort a survey demands — and a
+perceived side, how burdensome respondents find it [@yan2022]. `surveyBurden`
+scores the objective side. Objective burden is associated with nonresponse and
+dropout, and with satisficing behaviour such as speeding and straightlining
+among respondents who continue [@tourangeau2018; @peytchev2009], though the
+evidence is mixed, and reducing it is a routine design goal. Yet it is still
+usually assessed by hand — an analyst reading through the questionnaire and
+forming a judgement — or reduced to a single length or duration for an
+"average" respondent.
 
 Contemporary web surveys make that inadequate. Conditional routing, branch logic
 and question-level display logic mean that different respondents complete
@@ -55,67 +68,51 @@ materially different instruments: the questions asked, their number and their
 difficulty all vary with earlier answers. A burden assessment that treats the
 instrument as a fixed sequence describes a path that few respondents take.
 
-Tools exist to read Qualtrics definitions in R. The `qualtRics` package
-[@qualtRics] retrieves survey metadata and responses, and the GfS / Axhausen
-framework provides published item weights [@schmid2019; @heimgartner2024].
-However, we are not aware of an open-source tool that connects a machine-readable
-survey definition to established burden scoring in a path-aware way,
-reconstructing the feasible respondent paths and reporting how burden is
-distributed across them. `surveyBurden` is aimed at survey methodologists and
-applied researchers who want a transparent, reproducible burden assessment at
-the design stage, and at anyone auditing an instrument that has already been
-programmed.
+Existing tools address adjacent tasks. The `qualtRics` package [@qualtRics]
+retrieves survey metadata and responses but not the branching structure needed
+to reconstruct respondent paths. Question-characteristic coding schemes such as
+the Survey Quality Predictor [@saris2014] rate items for measurement quality
+rather than response effort, and are applied by hand. The GfS / Axhausen
+framework [@axhausen2015; @schmid2019; @heimgartner2024] provides published item
+weights but is normally computed manually and reported as a single
+instrument-level figure; @calastri2020 apply it to one multi-component travel
+survey and note that it cannot be applied where the number of questions a
+respondent receives depends on their own answers. We are not aware of an
+open-source tool that connects a machine-readable survey to established burden
+scoring in a path-aware way, reconstructing the feasible respondent paths and
+reporting how burden is distributed across them. `surveyBurden` is aimed at
+survey methodologists and applied researchers who want a transparent,
+reproducible burden assessment at the design stage, and at anyone auditing an
+instrument that has already been programmed.
 
 # Functionality
 
-- **Qualtrics ingestion.** `read_qsf()` accepts a `.qsf` path, a bare survey id,
-  or a survey-builder URL. `fetch_qsf()` pulls a live definition through the
-  Qualtrics API. Both are normalised to one internal representation, and
-  `parse_qsf()` produces a question catalogue.
-- **GfS scoring, with the inference made explicit.** `gfs_weights()` holds the
-  GfS / Axhausen point weights. `score_burden()` then works in three layers:
-  what Qualtrics records the question as, what response action that implies, and
-  which scheme category best represents that action. Where the structure fixes
-  the mapping, the score is marked `auto`. Where the definition does not contain
-  what the scheme needs, for example a dropdown that has no matching category or
-  rendered lines of text that a `.qsf` does not store, the package applies a
-  documented, configurable inference rule and marks the question `inferred`.
-  Genuinely undetermined questions are left unscored and flagged for a human.
-  Every question carries a `score_flag` and a `score_basis` string recording
-  which rule was applied and why.
-- **Flow reconstruction.** `resolve_flow()` enumerates the block sequences that
-  the survey flow permits, forking at each branch and screen-out without
-  evaluating the branch conditions.
-- **Display-logic handling.** `resolve_paths()` partitions the questions on each
-  path into always shown, possibly shown, and never shown, folding grouped
-  If / ElseIf conditions into a single feasibility statement per question.
-- **Path enumeration.** `path_burden_profile()` enumerates the feasible burden
-  values within each path by resolving display-logic gates, exactly for small
-  coupling components and with a documented approximation for large ones. The
-  result is a profile of feasible burden values, each counted once, and is not a
-  probability distribution over respondents. When observed respondent routes are
-  supplied, `respondent_burden()` weights each route by how often it occurs and
-  returns a population-weighted average.
-- **Structured report.** `burden_report()` returns an object whose components
-  include the instrument summary, the burden spread, the per-block and per-path
-  breakdowns, the scored question catalogue, the calculation-certainty summary,
-  and the readability diagnostics. Printing the object renders a formatted
-  report; `summary()` gives a one-line headline.
-- **Diagnostics.** The report keeps readability signals (long question stems,
-  long response labels, long grids) separate from the GfS score, flags large
-  screen-out shares, and states, for the given survey, which parts of the
-  calculation are exact and which rest on documented approximations. The
-  points-to-minutes conversion uses the GfS rule of thumb of roughly 12 points
-  per minute and is user-configurable.
+The pipeline has four stages, each with exposed functions. **Ingestion:**
+`read_qsf()` accepts a `.qsf` path, a survey id or a survey-builder URL;
+`fetch_qsf()` pulls a live survey through the API; `parse_qsf()` produces a
+question catalogue. **Scoring:** `gfs_weights()` holds the point weights and
+`score_burden()` maps each question to a scheme category, marking every score
+`auto` or `inferred`. **Path reconstruction:** `resolve_flow()` enumerates the
+block sequences the survey flow permits, forking at each branch without
+evaluating conditions; `resolve_paths()` classifies each question on a path as
+always, possibly or never shown; `path_burden_profile()` enumerates the feasible
+burden values within each path, exactly for small display-logic components and
+with a documented approximation for large ones. **Reporting:**
+`respondent_burden()` weights paths by observed routes when supplied, and
+`burden_report()` assembles the structured report, whose components include the
+instrument summary, the burden spread, per-block and per-path breakdowns, the
+scored question catalogue, a calculation-certainty summary, and readability
+diagnostics (long stems, long response labels, long grids) kept separate from
+the GfS score. The points-to-minutes conversion uses the GfS rule of thumb of
+roughly twelve points per minute and is user-configurable.
 
-The package includes an automated test suite and passes `R CMD check` cleanly.
-
-# Validation
-
-The flow reconstruction has been checked against a fielded web survey, and every
-observed respondent's routing corresponded to one of the enumerated structural
-paths. A synthetic fixture exercises question types and flow structures beyond
-the worked example.
+The package is around 1,500 lines of R with 166 unit tests, and passes
+`R CMD check` cleanly on Linux, macOS and Windows. The flow reconstruction has
+been checked against a large fielded web survey — every completed respondent's
+routing corresponded to an enumerated structural path, and feeding respondents'
+answers through the display logic reproduced which questions they were shown
+with 98% agreement — and a companion methods paper reports this validation in
+full.
 
 # Acknowledgements
 

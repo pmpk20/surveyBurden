@@ -10,17 +10,17 @@ classify_question(payload)
 \item{payload}{The \code{Payload} list of one \code{SQ} survey element.}
 }
 \value{
-A one-row \link[tibble:tibble]{tibble} with columns \code{question_id},
-\code{std_type}, \code{qualtrics_type}, \code{selector}, \code{subselector}, \code{n_options},
-\code{n_rows}, \code{n_cols}, \code{text_words}, \code{max_label_words} (longest response
-option / matrix label, in words; \code{NA} if the question has no labels),
-\code{label_text} (all response/answer labels lowercased and joined with
-\code{" | "}, truncated; \code{NA} if none), \code{options_numeric} (\code{TRUE} if the
-question has >= 3 response options and every one is a number),
-\code{question_text} (HTML-stripped, truncated to 200 characters), \code{is_hidden}
-(\code{TRUE} if injected CSS/JS hides the question from the respondent),
-\code{has_display_logic}, \code{display_logic_refs} (list column), \code{has_validation}
-and \code{flag}.
+A named \code{list} with elements \code{question_id}, \code{std_type},
+\code{qualtrics_type}, \code{selector}, \code{subselector}, \code{n_options}, \code{n_rows},
+\code{n_cols}, \code{text_words}, \code{max_label_words} (longest response option / matrix
+label, in words; \code{NA} if the question has no labels), \code{label_text} (all
+response/answer labels lowercased and joined with \code{" | "}, truncated; \code{NA}
+if none), \code{options_numeric} (\code{TRUE} if the question has >= 3 response
+options and every one is a number), \code{question_text} (HTML-stripped,
+truncated to 200 characters), \code{is_hidden} (\code{TRUE} if injected CSS/JS hides
+the question from the respondent), \code{has_display_logic},
+\code{display_logic_refs} (character vector), \code{has_validation} and \code{flag}.
+\code{\link[=parse_qsf]{parse_qsf()}} assembles one tibble from these across every live question.
 }
 \description{
 Maps a Qualtrics \code{QuestionType} / \code{Selector} / \code{SubSelector} combination to a

@@ -1,5 +1,13 @@
 # surveyBurden (development version)
 
+* `burden_report()` is faster again: `parse_qsf()` and `score_burden()` now
+  build their catalogue in one pass instead of constructing a one-row tibble
+  per question and row-binding hundreds of them (that machinery was ~60% of the
+  remaining runtime). INFUZE core survey: ~4s to ~3s; the bundled demo ~1s to
+  ~0.5s. Catalogue contents are byte-identical.
+* **Breaking (internal API):** `classify_question()` now returns a named `list`
+  rather than a one-row tibble. It is a building block for `parse_qsf()`, which
+  is unchanged. `score_burden()`'s output is unchanged.
 * A survey with several block randomisers now raises **one** combined
   "BlockRandomizer" warning that names the flow nodes, instead of one warning
   per randomiser.

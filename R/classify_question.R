@@ -7,17 +7,17 @@
 #'
 #' @param payload The `Payload` list of one `SQ` survey element.
 #'
-#' @return A one-row [tibble][tibble::tibble] with columns `question_id`,
-#'   `std_type`, `qualtrics_type`, `selector`, `subselector`, `n_options`,
-#'   `n_rows`, `n_cols`, `text_words`, `max_label_words` (longest response
-#'   option / matrix label, in words; `NA` if the question has no labels),
-#'   `label_text` (all response/answer labels lowercased and joined with
-#'   `" | "`, truncated; `NA` if none), `options_numeric` (`TRUE` if the
-#'   question has >= 3 response options and every one is a number),
-#'   `question_text` (HTML-stripped, truncated to 200 characters), `is_hidden`
-#'   (`TRUE` if injected CSS/JS hides the question from the respondent),
-#'   `has_display_logic`, `display_logic_refs` (list column), `has_validation`
-#'   and `flag`.
+#' @return A named `list` with elements `question_id`, `std_type`,
+#'   `qualtrics_type`, `selector`, `subselector`, `n_options`, `n_rows`,
+#'   `n_cols`, `text_words`, `max_label_words` (longest response option / matrix
+#'   label, in words; `NA` if the question has no labels), `label_text` (all
+#'   response/answer labels lowercased and joined with `" | "`, truncated; `NA`
+#'   if none), `options_numeric` (`TRUE` if the question has >= 3 response
+#'   options and every one is a number), `question_text` (HTML-stripped,
+#'   truncated to 200 characters), `is_hidden` (`TRUE` if injected CSS/JS hides
+#'   the question from the respondent), `has_display_logic`,
+#'   `display_logic_refs` (character vector), `has_validation` and `flag`.
+#'   [parse_qsf()] assembles one tibble from these across every live question.
 #'
 #' @details `flag` is one of `"auto"` (confident structural mapping),
 #'   `"inferred"` (mapping needs an assumption, e.g. dropdown scored by option
@@ -60,7 +60,7 @@ classify_question <- function(payload) {
   options_numeric <- length(opt_labels) >= 3 &&
     all(!is.na(suppressWarnings(as.numeric(gsub("[[:space:],]", "", opt_labels)))))
 
-  tibble::tibble(
+  list(
     question_id        = payload$QuestionID %||% NA_character_,
     std_type           = spec$std_type,
     qualtrics_type     = qt,
@@ -69,15 +69,15 @@ classify_question <- function(payload) {
     n_options          = as.integer(n_options),
     n_rows             = as.integer(n_rows),
     n_cols             = as.integer(n_cols),
-    text_words         = word_count(stem_plain),
+    text_words         = as.integer(word_count(stem_plain)),
     max_label_words    = as.integer(max_label_words),
     label_text         = label_text,
-    options_numeric    = options_numeric,
+    options_numeric    = isTRUE(options_numeric),
     question_text      = truncate_chars(stem_plain),
-    is_hidden          = is_hidden_question(payload),
+    is_hidden          = isTRUE(is_hidden_question(payload)),
     has_display_logic  = !is.null(payload$DisplayLogic),
-    display_logic_refs = list(refs),
-    has_validation     = has_forced_response(payload$Validation),
+    display_logic_refs = refs,
+    has_validation     = isTRUE(has_forced_response(payload$Validation)),
     flag               = spec$flag
   )
 }

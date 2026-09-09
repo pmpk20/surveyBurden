@@ -36,13 +36,16 @@ score_burden <- function(catalogue, weights = gfs_weights()) {
     cli::cli_abort("{.arg catalogue} must be a tibble from {.fn parse_qsf}.")
   }
 
-  scored <- lapply(seq_len(nrow(catalogue)), function(i) score_item(catalogue[i, ], weights))
-  add <- do.call(rbind, scored)
+  cols <- as.list(catalogue)
+  rows <- lapply(seq_len(nrow(catalogue)),
+                 function(i) lapply(cols, function(col) col[[i]]))
+  scored <- lapply(rows, score_item, weights)
 
-  catalogue$gfs_points  <- add$gfs_points
-  catalogue$est_seconds <- add$gfs_points / weights$points_per_minute * 60
-  catalogue$score_flag  <- add$score_flag
-  catalogue$score_basis <- add$score_basis
+  gfs <- vapply(scored, `[[`, numeric(1), "gfs_points")
+  catalogue$gfs_points  <- gfs
+  catalogue$est_seconds <- gfs / weights$points_per_minute * 60
+  catalogue$score_flag  <- vapply(scored, `[[`, character(1), "score_flag")
+  catalogue$score_basis <- vapply(scored, `[[`, character(1), "score_basis")
   catalogue
 }
 
@@ -58,7 +61,7 @@ quantity_cue_pattern <- function() {
   )
 }
 
-#' Score one catalogue row. Returns a 1-row tibble: gfs_points, score_flag, score_basis.
+#' Score one catalogue row. Returns a named list: gfs_points, score_flag, score_basis.
 #' @noRd
 score_item <- function(r, w) {
   fld <- function(nm, default = NULL) if (nm %in% names(r)) r[[nm]] else default
@@ -73,7 +76,7 @@ score_item <- function(r, w) {
   cue <- quantity_cue_pattern()
 
   out <- function(pts, basis, fl = flag) {
-    tibble::tibble(gfs_points = pts, score_flag = fl, score_basis = basis)
+    list(gfs_points = as.numeric(pts), score_flag = fl, score_basis = basis)
   }
 
   # A question hidden from the respondent carries no burden, whatever its type.

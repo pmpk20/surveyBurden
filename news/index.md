@@ -27,6 +27,10 @@
   which is unchanged.
   [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)’s
   output is unchanged.
+- The README is shorter and leads with a workflow diagram; the single
+  long vignette is split into focused guides (“Get started”, “Reading
+  the report”, “The GfS scoring method”, “Paths and display logic”,
+  “Calibration and limits”).
 - Each question’s display-logic tree is parsed once per
   [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
   and shared between the burden engine and the certainty breakdown,

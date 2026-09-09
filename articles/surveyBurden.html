@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Assessing survey burden with surveyBurden • surveyBurden</title>
+<title>Get started with surveyBurden • surveyBurden</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Assessing survey burden with surveyBurden">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Get started with surveyBurden">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -31,6 +31,15 @@
       <ul class="navbar-nav me-auto">
 <li class="active nav-item"><a class="nav-link" href="../articles/surveyBurden.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="../articles/reading-the-report.html">Reading the burden report</a></li>
+    <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS scoring method</a></li>
+    <li><a class="dropdown-item" href="../articles/paths-and-display-logic.html">Paths and display logic</a></li>
+    <li><a class="dropdown-item" href="../articles/calibration.html">Calibration and limitations</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -51,7 +60,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Assessing survey burden with surveyBurden</h1>
+      <h1>Get started with surveyBurden</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/pmpk20/surveyBurden/blob/main/vignettes/surveyBurden.Rmd" class="external-link"><code>vignettes/surveyBurden.Rmd</code></a></small>
@@ -60,99 +69,55 @@
 
     
     
+<p><code>surveyBurden</code> estimates <strong>ex-ante instrument
+burden</strong>: the response effort a programmed Qualtrics survey
+demands, worked out before fielding from the instrument alone. It reads
+the survey, scores every question with the published GfS / Axhausen
+point scheme, reconstructs the routes the flow and display logic allow,
+and reports how burden varies across those routes.</p>
+<p>In the terms of Yan and Williams (2022) this is the
+<em>instrument</em> side of respondent burden – length, difficulty, and
+the effort the design requires. It is not the <em>perceived</em> burden
+a particular respondent reports feeling, and it is not a completion-time
+predictor.</p>
+<p>This article gets you to a first report. The others go deeper:</p>
+<ul>
+<li>
+<code><a href="../articles/reading-the-report.html">vignette("reading-the-report")</a></code> – what each part of the
+printed output means.</li>
+<li>
+<code><a href="../articles/gfs-scoring.html">vignette("gfs-scoring")</a></code> – how a Qualtrics widget
+becomes points.</li>
+<li>
+<code><a href="../articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code> – flow, skip logic,
+and the structural-versus-population-weighted distinction.</li>
+<li>
+<code><a href="../articles/calibration.html">vignette("calibration")</a></code> – the
+<code>words_per_line</code> and points-per-minute assumptions, and the
+limitations.</li>
+</ul>
+<div class="section level2">
+<h2 id="install">Install<a class="anchor" aria-label="anchor" href="#install"></a>
+</h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"pmpk20/surveyBurden"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="one-call">One call<a class="anchor" aria-label="anchor" href="#one-call"></a>
+</h2>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/pmpk20/surveyBurden" class="external-link">surveyBurden</a></span><span class="op">)</span></span>
 <span><span class="va">demo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"demo_travel_survey.qsf"</span>, package <span class="op">=</span> <span class="st">"surveyBurden"</span><span class="op">)</span></span></code></pre></div>
-<p>This vignette is both a user guide and a short methodological
-specification. Every code chunk below runs against the small fictional
-“Neighbourhood Travel Survey” that ships with the package, so the
-numbers shown are the numbers the current package produces. To use your
-own survey, replace <code>demo</code> with a path to a <code>.qsf</code>
-file, a bare <code>SV_...</code> survey id, or a Qualtrics
-survey-builder URL.</p>
-<p>A few chunks show patterns the vignette cannot run here, such as a
-live API fetch or a calibration against your own completion times. Those
-are marked as illustrative and are not evaluated.</p>
-<div class="section level2">
-<h2 id="overview">1. Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
-</h2>
-<p><code>surveyBurden</code> estimates <strong>ex-ante instrument
-burden</strong>: the response effort a programmed survey instrument
-demands, worked out before fielding from the instrument alone. In the
-terms of Yan and Williams (2022) this is the <em>instrument</em> side of
-respondent burden, that is length, difficulty, and the effort the design
-requires. It is not the <em>perceived</em> burden a particular
-respondent reports feeling, which also depends on topic salience,
-motivation, and context.</p>
-<p>The package reads a Qualtrics survey, scores every question with the
-published GfS / Axhausen point scheme, reconstructs the routes the flow
-and display logic allow, and reports how burden varies across those
-routes.</p>
-<p>Six terms are used throughout, with fixed meanings:</p>
-<table class="table">
-<colgroup>
-<col width="50%">
-<col width="50%">
-</colgroup>
-<thead><tr class="header">
-<th>term</th>
-<th>meaning</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td><strong>question burden</strong></td>
-<td>the GfS point score for one question, from its type and
-structure</td>
-</tr>
-<tr class="even">
-<td><strong>path burden</strong></td>
-<td>the total question burden along one structural path through the
-survey flow</td>
-</tr>
-<tr class="odd">
-<td><strong>structural burden profile</strong></td>
-<td>the set of feasible burden values across a path’s display-logic
-sub-states, each counted once. Not a probability distribution.</td>
-</tr>
-<tr class="even">
-<td><strong>population-weighted respondent burden</strong></td>
-<td>burden averaged over real respondent routes, where route frequencies
-stand in for the sub-state probabilities. Produced only when
-<code>routes</code> are supplied.</td>
-</tr>
-<tr class="odd">
-<td><strong>calculation certainty</strong></td>
-<td>the split, for a given survey, between parts of the calculation that
-are exact and parts that rest on documented approximations</td>
-</tr>
-<tr class="even">
-<td><strong>readability diagnostics</strong></td>
-<td>counts of long question stems, long matrix labels, and long grids.
-Reading-load signals, reported separately, never folded into the GfS
-score.</td>
-</tr>
-</tbody>
-</table>
-<p><strong>What the package is not.</strong> It is not a new theory of
-respondent burden. It is not a measure of perceived burden. It is not a
-completion-time predictor: it converts points to minutes only through a
-published rule of thumb, described in section 12. It is not a
-stated-choice or discrete choice burden model.</p>
-<p>One call runs the whole pipeline.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">demo</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Reading survey</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Reading survey <span style="color: #B2B2B2;">[21ms]</span></span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Scoring questions and resolving paths</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Scoring questions and resolving paths <span style="color: #B2B2B2;">[239ms]</span></span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Checking calculation certainty</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[32ms]</span></span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Enumerating display-logic combinations</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Enumerating display-logic combinations <span style="color: #B2B2B2;">[26ms]</span></span></span>
-<span><span class="co">#&gt; </span></span>
+<p><code><a href="../reference/burden_report.html">burden_report()</a></code> runs the whole pipeline. Every code
+chunk in these articles runs against the small fictional “Neighbourhood
+Travel Survey” that ships with the package, so the numbers shown are the
+numbers the current package produces. To use your own survey, replace
+<code>demo</code> with a path to a <code>.qsf</code> file, a bare
+<code>SV_...</code> survey id, or a Qualtrics survey-builder URL (see
+<code><a href="../articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code> for the API route).</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">demo</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">report</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Burden Report: Neighbourhood Travel Survey (demo)</span> <span style="color: #00BBBB;">────────────────────</span></span></span>
@@ -227,298 +192,86 @@ stated-choice or discrete choice burden model.</p>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 1 matrix/grid question has more than 6 rows. Long grids invite satisficing (respondents picking the same answer down the column instead of reading each row): QID19</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 2 of 4 structural paths are screen-outs (the survey ends early there) rather than complete responses.</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> The point range above comes from checking every combination of optional questions this survey's skip logic could show. Each combination is counted once; we have no data on how likely each one is for a given respondent, so this is a structural range, not a probability -- it does NOT mean "there's a 50% chance a respondent sees the median burden".</span></span></code></pre></div>
-<p>The bundled demo is deliberately small. On a fielded instrument these
-counts run to hundreds of questions and dozens of paths. The rest of
-this vignette explains each part of that output.</p>
+<p>The printout opens with a one-line <strong>verdict</strong>: the
+median completing-path burden in points and minutes, its ratio to the
+399-point GfS benchmark, and the range across completing paths. Below
+it:</p>
+<ul>
+<li>
+<strong>Instrument</strong> – structural counts (questions, blocks,
+branch points, loop blocks, early exits).</li>
+<li>
+<strong>Paths</strong> – how many distinct routes the flow allows,
+and how many complete rather than screen out.</li>
+<li>
+<strong>Burden</strong> – the headline spread of path burden, in
+points, minutes and a 0–1 index, with the published benchmark
+underneath.</li>
+<li>
+<strong>Burden by block</strong>, <strong>Highest-burden
+questions</strong>, <strong>Readability diagnostics</strong>,
+<strong>Calculation certainty</strong>, <strong>QC
+warnings</strong>.</li>
+</ul>
+<p><code><a href="../articles/reading-the-report.html">vignette("reading-the-report")</a></code> walks each of these in
+turn.</p>
 </div>
 <div class="section level2">
-<h2 id="input-and-parsing">2. Input and parsing<a class="anchor" aria-label="anchor" href="#input-and-parsing"></a>
+<h2 id="vocabulary">Vocabulary<a class="anchor" aria-label="anchor" href="#vocabulary"></a>
 </h2>
-<p><code><a href="../reference/read_qsf.html">read_qsf()</a></code> accepts a path to a <code>.qsf</code> export,
-a bare <code>SV_...</code> survey id, or a survey-builder URL. A path is
-read locally. An id or URL is fetched through the Qualtrics API by
-<code><a href="../reference/fetch_qsf.html">fetch_qsf()</a></code>, which needs <code>QUALTRICS_API_KEY</code> and
-<code>QUALTRICS_BASE_URL</code> in the environment. All three inputs
-normalise to one internal representation of class <code>qsf_raw</code>,
-so nothing downstream depends on where the survey came from.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">qsf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_qsf.html">read_qsf</a></span><span class="op">(</span><span class="va">demo</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">qsf</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "qsf_raw"</span></span></code></pre></div>
-<p><code><a href="../reference/parse_qsf.html">parse_qsf()</a></code> turns that representation into a question
-catalogue: one row per live question, with the structural facts the
-scorer needs.</p>
+<p>Five terms are used throughout, with fixed meanings:</p>
+<table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
+<thead><tr class="header">
+<th>term</th>
+<th>meaning</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><strong>question burden</strong></td>
+<td>the GfS point score for one question, from its type and
+structure</td>
+</tr>
+<tr class="even">
+<td><strong>path burden</strong></td>
+<td>the total question burden along one structural path through the
+survey flow</td>
+</tr>
+<tr class="odd">
+<td><strong>structural burden profile</strong></td>
+<td>the set of feasible burden values across a path’s display-logic
+sub-states, each counted once. Not a probability distribution.</td>
+</tr>
+<tr class="even">
+<td><strong>population-weighted respondent burden</strong></td>
+<td>burden averaged over real respondent routes, where route frequencies
+stand in for the sub-state probabilities. Produced only when
+<code>routes</code> are supplied.</td>
+</tr>
+<tr class="odd">
+<td><strong>calculation certainty</strong></td>
+<td>the split, for a given survey, between parts of the calculation that
+are exact and parts that rest on documented approximations</td>
+</tr>
+<tr class="even">
+<td><strong>readability diagnostics</strong></td>
+<td>counts of long question stems, long matrix labels, and long grids.
+Reading-load signals, reported separately, never folded into the GfS
+score.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level2">
+<h2 id="the-report-object">The report object<a class="anchor" aria-label="anchor" href="#the-report-object"></a>
+</h2>
+<p><code>report</code> is a structured object, not printed text. Pull
+out each part:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">catalogue</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/parse_qsf.html">parse_qsf</a></span><span class="op">(</span><span class="va">qsf</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">catalogue</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 26</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">catalogue</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] "question_id"        "flow_order"         "block_id"          </span></span>
-<span><span class="co">#&gt;  [4] "block_name"         "std_type"           "qualtrics_type"    </span></span>
-<span><span class="co">#&gt;  [7] "selector"           "subselector"        "n_options"         </span></span>
-<span><span class="co">#&gt; [10] "n_rows"             "n_cols"             "text_words"        </span></span>
-<span><span class="co">#&gt; [13] "max_label_words"    "label_text"         "options_numeric"   </span></span>
-<span><span class="co">#&gt; [16] "question_text"      "is_hidden"          "has_display_logic" </span></span>
-<span><span class="co">#&gt; [19] "display_logic_refs" "has_validation"     "in_loop"           </span></span>
-<span><span class="co">#&gt; [22] "loop_max"           "flag"</span></span></code></pre></div>
-<p>The API-fetch pattern looks like this. It is not run here.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span></span>
-<span>  QUALTRICS_API_KEY  <span class="op">=</span> <span class="st">"your-api-key"</span>,</span>
-<span>  QUALTRICS_BASE_URL <span class="op">=</span> <span class="st">"https://yourdatacenter.qualtrics.com"</span></span>
-<span><span class="op">)</span></span>
-<span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/burden_report.html">burden_report</a></span><span class="op">(</span></span>
-<span>  <span class="st">"https://yourorg.qualtrics.com/survey-builder/SV_xxxxxxxxxxxxxxxx/edit"</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p><code>QUALTRICS_BASE_URL</code> is the API datacenter host, found
-under Account Settings then Qualtrics IDs. It can differ from your
-survey-builder host. The fetch is checked against live surveys to return
-the same result as the corresponding <code>.qsf</code> export.</p>
-</div>
-<div class="section level2">
-<h2 id="question-classification">3. Question classification<a class="anchor" aria-label="anchor" href="#question-classification"></a>
-</h2>
-<p><code><a href="../reference/classify_question.html">classify_question()</a></code> maps each Qualtrics widget to a
-standard question type. The Qualtrics type alone is not enough: a single
-<code>MC</code> widget can be a yes/no item, a rating scale, a dropdown,
-or a multi-select, depending on its selector and options. Classification
-resolves that.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">catalogue</span><span class="op">$</span><span class="va">std_type</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;   descriptive        matrix  multi_choice     open_text single_choice </span></span>
-<span><span class="co">#&gt;             1             4             1             3            17</span></span></code></pre></div>
-<p>For the demo this is 17 single-choice questions, 4 matrix questions,
-3 open-text questions, 1 multi-select, and 1 descriptive text block. The
-<code>std_type</code> column drives scoring in the next section.</p>
-</div>
-<div class="section level2">
-<h2 id="gfs-scoring">4. GfS scoring<a class="anchor" aria-label="anchor" href="#gfs-scoring"></a>
-</h2>
-<p><code><a href="../reference/gfs_weights.html">gfs_weights()</a></code> holds the GfS / Axhausen point weights
-(Heimgartner and Axhausen 2024, Table 1) transcribed verbatim, one
-weight per response action, plus a points-per-minute conversion. No
-weights are invented.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gfs_weights.html">gfs_weights</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">w</span><span class="op">$</span><span class="va">yes_no</span></span>
-<span><span class="co">#&gt; [1] 1</span></span>
-<span><span class="va">w</span><span class="op">$</span><span class="va">rating_small</span></span>
-<span><span class="co">#&gt; [1] 2</span></span>
-<span><span class="va">w</span><span class="op">$</span><span class="va">rating_large</span></span>
-<span><span class="co">#&gt; [1] 3</span></span>
-<span><span class="va">w</span><span class="op">$</span><span class="va">points_per_minute</span></span>
-<span><span class="co">#&gt; [1] 12</span></span></code></pre></div>
-<p><code><a href="../reference/score_burden.html">score_burden()</a></code> then works in <strong>three
-layers</strong>:</p>
-<ol style="list-style-type: decimal">
-<li>what Qualtrics says the widget is (for example <code>MC</code> with
-a dropdown selector);</li>
-<li>what response action that implies (for example choose one value from
-an ordered list);</li>
-<li>which Table 1 category best represents that action (for example a
-rating).</li>
-</ol>
-<p>Where step 3 is fixed by the structure, for example a two-option
-choice is a closed yes/no item whatever it asks, the mapping is
-deterministic and the score is marked <code>auto</code>. Where the
-<code>.qsf</code> does not carry what the scheme needs, the package
-applies an <strong>explicit, documented inference rule</strong> and
-marks the item <code>inferred</code>. Every scored question carries a
-<code>score_basis</code> string that records the rule applied.</p>
-<p><code>score_flag</code> has four values:</p>
-<ul>
-<li>
-<code>auto</code>: the GfS mapping is deterministic from the
-structure.</li>
-<li>
-<code>inferred</code>: the structure is clear, but choosing the
-Table 1 category involved an explicit judgement, for example a dropdown
-mapped to “rating” as the closest category, a numeric-looking dropdown
-mapped to “simple numerical answer”, or a slider. The number is still
-determinate.</li>
-<li>
-<code>manual</code>: a human should check; the mapping is genuinely
-uncertain.</li>
-<li>
-<code>unknown</code>: an unmapped type, left unscored as
-<code>NA</code>.</li>
-</ul>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">scored</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/score_burden.html">score_burden</a></span><span class="op">(</span><span class="va">catalogue</span>, weights <span class="op">=</span> <span class="va">w</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">scored</span><span class="op">$</span><span class="va">score_flag</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     auto inferred </span></span>
-<span><span class="co">#&gt;       19        7</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">scored</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">scored</span><span class="op">$</span><span class="va">gfs_points</span><span class="op">)</span>,</span>
-<span>            <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"question_id"</span>, <span class="st">"std_type"</span>, <span class="st">"gfs_points"</span>, <span class="st">"score_flag"</span>, <span class="st">"score_basis"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 5</span></span></span>
-<span><span class="co">#&gt;   question_id std_type     gfs_points score_flag score_basis                    </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> QID21       matrix               18 auto       matrix, 6 rows x GfS rating &gt;5…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> QID19       matrix               14 auto       matrix, 7 rows x GfS rating &lt;=…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> QID14       multi_choice         12 auto       multi-select, 6 options -&gt; GfS…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> QID20       matrix               12 auto       matrix, 6 rows x GfS rating &lt;=…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> QID1        descriptive          11 inferred   transition/instruction text: 1…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> QID7        matrix                8 auto       matrix, 4 rows x GfS rating &lt;=…</span></span></code></pre></div>
-<p>This is the distinction between <strong>GfS-native</strong>
-quantities, that is question type, response action, and number of
-alternatives, all specified by the scheme, and
-<strong>package-derived</strong> ones, that is estimated line counts and
-response-unit structure, inferred because the <code>.qsf</code> lacks
-them.</p>
-<div class="section level3">
-<h3 id="documented-inference-rules-where-table-1-is-silent">Documented inference rules where Table 1 is silent<a class="anchor" aria-label="anchor" href="#documented-inference-rules-where-table-1-is-silent"></a>
-</h3>
-<ul>
-<li>Table 1 counts rendered “lines” of instruction text. A
-<code>.qsf</code> stores words, not a rendered width, so lines are
-estimated as words / <code>words_per_line</code> (default 12). This is a
-pragmatic conversion heuristic, not a calibrated constant; override it
-with <code>burden_report(words_per_line = ...)</code>. Section 11 states
-this assumption in full.</li>
-<li>Dropdowns (<code>MC</code> with a <code>DL</code> selector) have no
-Table 1 row. They are scored as a rating (2.0 for up to 5 options, 3.0
-for more), or as a simple numerical answer (1.0) when the options are
-numbers and the question asks for a quantity or a date.</li>
-<li>Sliders are not in Table 1. They are scored as a numerical answer
-when the axis label carries units, otherwise as a rating.</li>
-<li>A question hidden from the respondent by injected CSS or JavaScript
-scores 0.</li>
-<li>Loop and Merge blocks are scored per iteration and multiplied by the
-block’s explicit iteration cap. Within-loop display logic is not
-enumerated.</li>
-</ul>
-</div>
-<div class="section level3">
-<h3 id="a--question-stems-are-not-separately-scored">4a. Question stems are not separately scored<a class="anchor" aria-label="anchor" href="#a--question-stems-are-not-separately-scored"></a>
-</h3>
-<p>Table 1’s “question or transition, up to 3 lines = 2.0” is applied to
-standalone instruction blocks only. It is not added on top of every
-question’s response score. The GfS scheme may intend the reading cost of
-a question stem to be absorbed into the item weight; settling that needs
-the underlying GfS methodology, not Table 1 alone. A question with a
-long disambiguation stem is therefore scored conservatively, and its
-stem length is reported separately as a readability diagnostic (section
-11).</p>
-</div>
-<div class="section level3">
-<h3 id="b--multi-answer-matrices-have-no-table-1-rule">4b. Multi-answer matrices have no Table 1 rule<a class="anchor" aria-label="anchor" href="#b--multi-answer-matrices-have-no-table-1-rule"></a>
-</h3>
-<p>A grid where each cell allows multiple answers, that is “tick all
-that apply” across two axes, is scored as
-<code>rows x cols x 0.5</code>. Each cell is one trivial closed yes/no
-decision, and GfS scores a closed yes/no at 1.0, discounted here for the
-working-memory efficiency of answering in a grid. This proxy is
-<strong>orientation-invariant</strong>: it is symmetric in rows and
-columns, so unlike an earlier <code>rows x 4.0</code> proxy it does not
-change with how Qualtrics happened to store the grid. It is a documented
-inference, not GfS. The weight is
-<code>gfs_weights()$matrix_cell_multi</code>.</p>
-</div>
-</div>
-<div class="section level2">
-<h2 id="survey-flow">5. Survey flow<a class="anchor" aria-label="anchor" href="#survey-flow"></a>
-</h2>
-<p>Contemporary web surveys are not a fixed sequence.
-<code><a href="../reference/resolve_flow.html">resolve_flow()</a></code> walks the <code>SurveyFlow</code>, forking
-at every <code>Branch</code> into a condition-true and a condition-false
-continuation, and at every <code>EndSurvey</code> into a screen-out.
-Branch conditions are <strong>not evaluated</strong>, so both outcomes
-are always kept. The result is every block sequence a respondent could
-encounter.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/resolve_flow.html">resolve_flow</a></span><span class="op">(</span><span class="va">qsf</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 4</span></span></span>
-<span><span class="co">#&gt;   path_id block_ids  terminates_early decisions</span></span>
-<span><span class="co">#&gt;     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       1 <span style="color: #949494;">&lt;chr [2]&gt;</span>  TRUE             <span style="color: #949494;">&lt;lgl [1]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>       2 <span style="color: #949494;">&lt;chr [3]&gt;</span>  TRUE             <span style="color: #949494;">&lt;lgl [2]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>       3 <span style="color: #949494;">&lt;chr [12]&gt;</span> FALSE            <span style="color: #949494;">&lt;lgl [3]&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>       4 <span style="color: #949494;">&lt;chr [11]&gt;</span> FALSE            <span style="color: #949494;">&lt;lgl [3]&gt;</span></span></span></code></pre></div>
-<p>The demo produces 4 structural paths: 2 that reach a real submission
-(“complete”), and 2 that hit an <code>EndSurvey</code> first
-(“screen-out”). A fielded instrument typically produces dozens.</p>
-</div>
-<div class="section level2">
-<h2 id="display-logic">6. Display logic<a class="anchor" aria-label="anchor" href="#display-logic"></a>
-</h2>
-<p>Within a path, <code><a href="../reference/resolve_paths.html">resolve_paths()</a></code> partitions the questions
-into three sets: <strong>always shown</strong>, <strong>may be
-shown</strong> (gated by a condition that cannot be evaluated before
-fielding), and <strong>never shown on this path</strong> (the gate’s
-trigger question is not on the path).</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/resolve_paths.html">resolve_paths</a></span><span class="op">(</span><span class="va">qsf</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  path_id      <span class="op">=</span> <span class="va">rp</span><span class="op">$</span><span class="va">path_id</span>,</span>
-<span>  screen_out   <span class="op">=</span> <span class="va">rp</span><span class="op">$</span><span class="va">terminates_early</span>,</span>
-<span>  n_always     <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lengths.html" class="external-link">lengths</a></span><span class="op">(</span><span class="va">rp</span><span class="op">$</span><span class="va">q_always</span><span class="op">)</span>,</span>
-<span>  n_maybe      <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/lengths.html" class="external-link">lengths</a></span><span class="op">(</span><span class="va">rp</span><span class="op">$</span><span class="va">q_maybe</span><span class="op">)</span>,</span>
-<span>  n_gates      <span class="op">=</span> <span class="va">rp</span><span class="op">$</span><span class="va">n_gates</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt;   path_id screen_out n_always n_maybe n_gates</span></span>
-<span><span class="co">#&gt; 1       1       TRUE        2       0       0</span></span>
-<span><span class="co">#&gt; 2       2       TRUE        3       0       0</span></span>
-<span><span class="co">#&gt; 3       3      FALSE       20       6       4</span></span>
-<span><span class="co">#&gt; 4       4      FALSE       20       3       3</span></span></code></pre></div>
-<p>Qualtrics display logic is stored as <code>If</code> /
-<code>ElseIf</code> / <code>AndIf</code> groups. The package folds each
-group left to right: <code>ElseIf</code> clauses are combined with OR,
-<code>AndIf</code> clauses with AND. A group with a missing type falls
-back to AND. This matters because flattening everything to AND would
-under-count the cases where a question appears if any one of several
-conditions holds.</p>
-</div>
-<div class="section level2">
-<h2 id="path-enumeration">7. Path enumeration<a class="anchor" aria-label="anchor" href="#path-enumeration"></a>
-</h2>
-<p><code><a href="../reference/path_burden_profile.html">path_burden_profile()</a></code> goes inside the “may be shown” set
-and enumerates the feasible display-logic states.</p>
-<ul>
-<li>Conditional questions are grouped into <strong>coupling
-components</strong>. Two questions couple if they share a gate, directly
-or through a chain of gates.</li>
-<li>Small components are enumerated <strong>exactly</strong>: every
-joint state of their gates, respecting single-choice mutual exclusion
-and AND-across-gates conditions.</li>
-<li>Large components, for example dozens of questions keyed off one
-popular trigger such as employment status, fall back to a
-<strong>primary-gate approximation</strong> for that component: each
-question is scored against its first gate, and the rest are held
-permissive.</li>
-<li>Separate components are convolved as independent.</li>
-<li>Loop and Merge blocks are unrolled to the explicit <code>?v=N</code>
-cap, with the iteration count treated as uniform over 1 to N in the
-structural profile.</li>
-</ul>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pbp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/path_burden_profile.html">path_burden_profile</a></span><span class="op">(</span><span class="va">qsf</span><span class="op">)</span></span>
-<span><span class="va">pbp</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"path_id"</span>, <span class="st">"terminates_early"</span>, <span class="st">"burden_min"</span>, <span class="st">"burden_median"</span>, <span class="st">"burden_max"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 5</span></span></span>
-<span><span class="co">#&gt;   path_id terminates_early burden_min burden_median burden_max</span></span>
-<span><span class="co">#&gt;     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       1 TRUE                     12            12         12</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>       2 TRUE                     14            14         14</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>       3 FALSE                   106           124        143</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>       4 FALSE                   106           122        139</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">pbp</span><span class="op">$</span><span class="va">profile</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>  <span class="co"># feasible burden values on complete path 3</span></span>
-<span><span class="co">#&gt; [1] 36</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">pbp</span><span class="op">$</span><span class="va">profile</span><span class="op">[[</span><span class="fl">4</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>  <span class="co"># feasible burden values on complete path 4</span></span>
-<span><span class="co">#&gt; [1] 22</span></span></code></pre></div>
-<p>Each row of a <code>profile</code> table is one feasible burden value
-with a structural weight from the gate combinatorics and the uniform
-loop-iteration assumption. That weight is not a respondent probability.
-Section 9 returns to this point.</p>
-</div>
-<div class="section level2">
-<h2 id="burden-aggregation">8. Burden aggregation<a class="anchor" aria-label="anchor" href="#burden-aggregation"></a>
-</h2>
-<p><code>$burden</code> is built by pooling the per-path structural
-profiles for the complete paths and taking order statistics across the
-pooled values.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">report</span><span class="op">$</span><span class="va">burden</span></span>
+<code class="sourceCode R"><span><span class="va">report</span><span class="op">$</span><span class="va">burden</span>      <span class="co"># min / p25 / median / p75 / max, in points, minutes and index</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 4</span></span></span>
 <span><span class="co">#&gt;   statistic points minutes  index</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
@@ -527,284 +280,37 @@ pooled values.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> median       123   10.2  0.082 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> p75          129   10.8  0.086 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> max          143   11.9  0.095<span style="text-decoration: underline;">3</span></span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">report</span><span class="op">$</span><span class="va">burden</span>, <span class="st">"basis"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "structural"</span></span></code></pre></div>
-<ul>
-<li>
-<code>points</code> is the GfS point total. <code>minutes</code> is
-<code>points</code> divided by the points-per-minute rate.
-<code>index</code> is <code>points / rare_threshold</code> (default
-1500), a 0 to 1 rescaling where 0 is a blank instrument and 1.0 is the
-level Heimgartner and Axhausen’s sample found rare.</li>
-<li>
-<code>attr(, "basis")</code> is <code>"structural"</code> when the
-display-logic profile was enumerated (the default), and
-<code>"naive"</code> when <code>profile = FALSE</code>. The naive band
-scores each optional question as independently hideable for the minimum
-and independently shown for the maximum. That is faster, but its minimum
-can fall below anything actually reachable, and it reports no median.
-The structural basis is the one to quote.</li>
-<li>The <strong>benchmark</strong> line under the printed table is the
-published GfS reference point: a median of 399 points across the 79
-scored survey waves in Heimgartner and Axhausen (2024).</li>
-</ul>
-<p>The per-path detail sits in <code>$paths</code>.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">report</span><span class="op">$</span><span class="va">paths</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"path_id"</span>, <span class="st">"status"</span>, <span class="st">"burden_floor"</span>, <span class="st">"burden_ceiling"</span>,</span>
-<span>                 <span class="st">"burden_min"</span>, <span class="st">"burden_median"</span>, <span class="st">"burden_max"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 7</span></span></span>
-<span><span class="co">#&gt;   path_id status burden_floor burden_ceiling burden_min burden_median burden_max</span></span>
-<span><span class="co">#&gt;     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       1 scree…           12             12         12            12         12</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>       2 scree…           14             14         14            14         14</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>       3 compl…          103            145        106           124        143</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>       4 compl…          103            139        106           122        139</span></span></code></pre></div>
-<p><code>burden_floor</code> and <code>burden_ceiling</code> are the
-naive per-path bounds. <code>burden_min</code> /
-<code>burden_median</code> / <code>burden_max</code> are the structural
-profile for that path, and are <code>NA</code> when
-<code>profile = FALSE</code>.</p>
-</div>
-<div class="section level2">
-<h2 id="structural-versus-population-weighted-burden">9. Structural versus population-weighted burden<a class="anchor" aria-label="anchor" href="#structural-versus-population-weighted-burden"></a>
-</h2>
-<p>This distinction is central and is easy to state wrongly.</p>
-<p>The default result is a <strong>structural burden profile</strong>.
-It lists every feasible combination of optional questions once. It
-carries no respondent probabilities. When the report says the median is
-123 points, it means the median across those feasible combinations. It
-does <strong>not</strong> mean that half of respondents face at least
-that much burden. Nobody has told the package how common each
-combination is.</p>
-<p>To get a real average over respondents you need observed routes. Give
-<code><a href="../reference/burden_report.html">burden_report()</a></code> a data frame of respondents and it adds a
-<strong>population-weighted respondent burden</strong>. In words: the
-average burden is the sum, over the observed routes, of each route’s
-burden multiplied by how often that route occurred. Writing the observed
-frequency of route k as w_k and its burden as B_k:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>B</mi><mo accent="true">‾</mo></mover><mo>=</mo><munder><mo>∑</mo><mi>k</mi></munder><msub><mi>w</mi><mi>k</mi></msub><mspace width="0.167em"></mspace><msub><mi>B</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">\bar{B} = \sum_k w_k \, B_k</annotation></semantics></math></p>
-<p>The structural profile is what you have without the w_k. The
-population-weighted result is what the w_k buy you.</p>
-<p>The recognised route columns are <code>loop_&lt;id&gt;</code> (the
-iteration count for a Loop and Merge block, keyed by the driving
-question id or the block id) and <code>visit_&lt;block_id&gt;</code>
-(<code>TRUE</code> to include a branch-gated optional block). The demo
-has two loop blocks, <code>BL6</code> and <code>BL8</code>. Here is a
-small constructed set of 50 respondent routes:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">routes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  loop_BL6 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">5</span>, <span class="fl">0.4</span><span class="op">)</span>,   <span class="co"># "Other adults" loop, cap 5</span></span>
-<span>  loop_BL8 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">3</span>, <span class="fl">0.5</span><span class="op">)</span>    <span class="co"># "Vehicle details" loop, cap 3</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">demo</span>, routes <span class="op">=</span> <span class="va">routes</span><span class="op">)</span><span class="op">$</span><span class="va">population</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Reading survey</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Reading survey <span style="color: #B2B2B2;">[7ms]</span></span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Scoring questions and resolving paths</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Scoring questions and resolving paths <span style="color: #B2B2B2;">[79ms]</span></span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Checking calculation certainty</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[21ms]</span></span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Enumerating display-logic combinations</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Enumerating display-logic combinations <span style="color: #B2B2B2;">[63ms]</span></span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 4</span></span></span>
-<span><span class="co">#&gt;   statistic points minutes  index</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> min         100     8.33 0.066<span style="text-decoration: underline;">7</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> p25         110.    9.19 0.073<span style="text-decoration: underline;">5</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> median      116     9.67 0.077<span style="text-decoration: underline;">3</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> p75         122.   10.1  0.081<span style="text-decoration: underline;">2</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> max         132    11    0.088</span></span></code></pre></div>
-<p>These numbers are weighted by the route frequencies in
-<code>routes</code>. Real route data would come from a fielded response
-file, not from <code><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom()</a></code>.</p>
-<p>Without routes, <code><a href="../reference/respondent_burden.html">respondent_burden()</a></code> still gives a
-per-path table, and <code><a href="../reference/summary_line.html">summary_line()</a></code> turns it into a
-sentence.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/summary_line.html">summary_line</a></span><span class="op">(</span><span class="fu"><a href="../reference/respondent_burden.html">respondent_burden</a></span><span class="op">(</span><span class="va">demo</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Typical respondent burden is about 118 GfS points (~10 min). The lightest complete route is ~117 pts (~10 min); with the Loop &amp; Merge sections fully repeated it reaches ~143 pts (~12 min)."</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="calculation-certainty">10. Calculation certainty<a class="anchor" aria-label="anchor" href="#calculation-certainty"></a>
-</h2>
-<p><code><a href="../reference/calculation_certainty.html">calculation_certainty()</a></code>, printed as the “Calculation
-certainty” block of the report, states for your survey which parts of
-the calculation are exact and which rest on a documented
-approximation.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">report</span><span class="op">$</span><span class="va">certainty</span><span class="op">$</span><span class="va">paths</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"n_full"</span>, <span class="st">"n_exact"</span>, <span class="st">"n_with_unresolved"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; $n_full</span></span>
-<span><span class="co">#&gt; [1] 2</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $n_exact</span></span>
-<span><span class="co">#&gt; [1] 0</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $n_with_unresolved</span></span>
-<span><span class="co">#&gt; [1] 2</span></span>
-<span><span class="va">report</span><span class="op">$</span><span class="va">certainty</span><span class="op">$</span><span class="va">display_logic</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"n_conditional"</span>, <span class="st">"n_exact"</span>, <span class="st">"n_approx"</span>,</span>
-<span>                                 <span class="st">"n_components"</span>, <span class="st">"cross_component_independence"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; $n_conditional</span></span>
-<span><span class="co">#&gt; [1] 6</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $n_exact</span></span>
-<span><span class="co">#&gt; [1] 6</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $n_approx</span></span>
-<span><span class="co">#&gt; [1] 0</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $n_components</span></span>
-<span><span class="co">#&gt; [1] 4</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $cross_component_independence</span></span>
-<span><span class="co">#&gt; [1] TRUE</span></span>
-<span><span class="va">report</span><span class="op">$</span><span class="va">certainty</span><span class="op">$</span><span class="va">loops</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"n_known"</span>, <span class="st">"n_unknown"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; $n_known</span></span>
-<span><span class="co">#&gt; [1] 2</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $n_unknown</span></span>
-<span><span class="co">#&gt; [1] 0</span></span>
-<span><span class="va">report</span><span class="op">$</span><span class="va">certainty</span><span class="op">$</span><span class="va">scores</span></span>
-<span><span class="co">#&gt; $auto</span></span>
-<span><span class="co">#&gt; [1] 19</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $inferred</span></span>
-<span><span class="co">#&gt; [1] 7</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $manual</span></span>
-<span><span class="co">#&gt; [1] 0</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $unknown</span></span>
-<span><span class="co">#&gt; [1] 0</span></span></code></pre></div>
-<p>For the demo: neither complete path resolves to a single burden
-value, because both carry an unresolved display-logic condition; all 6
-conditional questions are enumerated exactly, none by the primary-gate
-approximation; both loop blocks have a known cap; and of the 26 item
-scores, 19 are <code>auto</code> and 7 are <code>inferred</code>, with
-none needing manual review.</p>
-<p>The reader should take away one thing: a result can be fully
-reproducible without every underlying interpretation being certain. The
-certainty block makes the uncertain parts countable.</p>
-</div>
-<div class="section level2">
-<h2 id="readability-diagnostics">11. Readability diagnostics<a class="anchor" aria-label="anchor" href="#readability-diagnostics"></a>
-</h2>
-<p><code>$readability</code> reports three counts:
-<code>long_stems</code> (question stems over <code>stem_threshold</code>
-words, default 40), <code>long_labels</code> (matrix row or option
-labels over <code>label_threshold</code> words, default 10), and
-<code>long_grids</code> (matrix questions with more than 6 rows).</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">report</span><span class="op">$</span><span class="va">readability</span><span class="op">$</span><span class="va">stem_threshold</span></span>
-<span><span class="co">#&gt; [1] 40</span></span>
-<span><span class="va">report</span><span class="op">$</span><span class="va">readability</span><span class="op">$</span><span class="va">label_threshold</span></span>
-<span><span class="co">#&gt; [1] 10</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">report</span><span class="op">$</span><span class="va">readability</span><span class="op">$</span><span class="va">long_stems</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">report</span><span class="op">$</span><span class="va">readability</span><span class="op">$</span><span class="va">long_labels</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0</span></span>
-<span><span class="va">report</span><span class="op">$</span><span class="va">readability</span><span class="op">$</span><span class="va">long_grids</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"question_id"</span>, <span class="st">"block_name"</span>, <span class="st">"n_rows"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 3</span></span></span>
-<span><span class="co">#&gt;   question_id block_name n_rows</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> QID19       Travel          7</span></span></code></pre></div>
-<p>These are reading-load signals. <strong>None of them changes any GfS
-score.</strong> They are reported separately so that a long grid or a
-wordy stem is visible without being silently priced into the burden
-total.</p>
-<p>The <code>words_per_line</code> assumption behind the
-descriptive-text score deserves a plain statement. GfS refers to
-rendered lines of text. A <code>.qsf</code> stores words, not the width
-the respondent’s browser will render them at. The package therefore
-approximates lines as words divided by a configurable words-per-line
-figure (default 12). It is a practical proxy, not a calibration, and it
-is the reason the descriptive-text score for a long instruction block
-should be read as approximate.</p>
-</div>
-<div class="section level2">
-<h2 id="limitations">12. Limitations<a class="anchor" aria-label="anchor" href="#limitations"></a>
-</h2>
-<ul>
-<li>The Qualtrics-to-GfS mapping is sometimes inferential. Where a
-widget has no exact match in Table 1, the package applies a documented
-rule and flags the question <code>inferred</code>.</li>
-<li>The GfS scheme predates modern web survey interfaces. It was
-calibrated on earlier survey practice.</li>
-<li>Rendered text length cannot be recovered from a <code>.qsf</code>.
-The file stores words, not an on-screen line count.</li>
-<li>
-<code>words_per_line</code> is a configurable proxy for that missing
-line count, not a measured constant.</li>
-<li>Display-logic reconstruction depends on what the <code>.qsf</code>
-encodes. Logic controlled outside Qualtrics, or unusual constructs, may
-need manual interpretation.</li>
-<li>Structural enumeration gives no respondent probabilities. Without
-route data, every feasible combination is counted once, and “median”
-means the median across combinations, not across respondents.</li>
-<li>Loop and Merge can make the path space large. The package unrolls to
-the explicit cap and treats the iteration count as uniform.</li>
-<li>The points-to-minutes conversion is the published GfS rule of thumb,
-roughly 12 points per minute. It is a scale, not a completion-time
-prediction. Set a survey-specific figure with
-<code><a href="../reference/validate_times.html">validate_times()</a></code> on your own completion-time data. This is
-not run here; it needs a completion-time file the package does not
-ship:</li>
-</ul>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gfs_weights.html">gfs_weights</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">w</span><span class="op">$</span><span class="va">points_per_minute</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/validate_times.html">validate_times</a></span><span class="op">(</span><span class="va">demo</span>, <span class="st">"times.csv"</span><span class="op">)</span><span class="op">$</span><span class="va">implied_points_per_minute</span></span>
-<span><span class="fu"><a href="../reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">demo</span>, weights <span class="op">=</span> <span class="va">w</span><span class="op">)</span></span></code></pre></div>
-<ul>
-<li>Burden scores are not predictions of completion time, dropout, or
-satisficing. Those are empirical questions about respondent behaviour,
-outside the scope of this package.</li>
-</ul>
-</div>
-<div class="section level2">
-<h2 id="reproducible-worked-example">13. Reproducible worked example<a class="anchor" aria-label="anchor" href="#reproducible-worked-example"></a>
-</h2>
-<p>One end-to-end pass on the bundled demo. This runs on a clean install
-with no private files.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">demo</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Reading survey</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Reading survey <span style="color: #B2B2B2;">[7ms]</span></span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Scoring questions and resolving paths</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Scoring questions and resolving paths <span style="color: #B2B2B2;">[78ms]</span></span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Checking calculation certainty</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[22ms]</span></span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Enumerating display-logic combinations</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Enumerating display-logic combinations <span style="color: #B2B2B2;">[28ms]</span></span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">report</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">report</span><span class="op">$</span><span class="va">items</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">report</span><span class="op">$</span><span class="va">items</span><span class="op">$</span><span class="va">gfs_points</span><span class="op">)</span>,</span>
+<span>                  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"question_id"</span>, <span class="st">"std_type"</span>, <span class="st">"gfs_points"</span>, <span class="st">"score_flag"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
+<span><span class="co">#&gt;   question_id std_type     gfs_points score_flag</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> QID21       matrix               18 auto      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> QID19       matrix               14 auto      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> QID14       multi_choice         12 auto      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> QID20       matrix               12 auto      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> QID1        descriptive          11 inferred  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> QID7        matrix                8 auto</span></span></code></pre></div>
+<p>Other components: <code>report$instrument</code> (the structural
+counts), <code>report$paths</code> (one row per structural path),
+<code>report$blocks</code> (burden by block),
+<code>report$readability</code>, <code>report$certainty</code> and
+<code>report$warnings</code>. Scalars such as the points-per-minute rate
+live on attributes: <code>attr(report, "points_per_minute")</code>.</p>
+<p><code>summary(report)</code> prints just the headline:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">report</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Neighbourhood Travel Survey (demo)</span> <span style="color: #00BBBB;">──────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; 26 questions, 12 blocks, 4 structural paths (2 complete).</span></span>
 <span><span class="co">#&gt; Median completing path: 123 GfS points, ~10 min - 0.3x the benchmark median of</span></span>
 <span><span class="co">#&gt; 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.</span></span>
 <span><span class="co">#&gt; Benchmark: median 399 points across 79 GfS-scored waves.</span></span></code></pre></div>
-<p>The headline: 26 questions across 12 blocks, 4 structural paths of
-which 2 are complete, and a structural burden spread of 106 / 123 / 143
-points, well below the 399-point GfS benchmark.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">report</span><span class="op">$</span><span class="va">burden</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 4</span></span></span>
-<span><span class="co">#&gt;   statistic points minutes  index</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> min          106    8.83 0.070<span style="text-decoration: underline;">7</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> p25          117    9.75 0.078 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> median       123   10.2  0.082 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> p75          129   10.8  0.086 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> max          143   11.9  0.095<span style="text-decoration: underline;">3</span></span></span></code></pre></div>
-<p>The spread from minimum to maximum is the effect of the survey’s
-optional questions and loop iterations, not measurement noise.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+</div>
+<div class="section level2">
+<h2 id="a-short-worked-example">A short worked example<a class="anchor" aria-label="anchor" href="#a-short-worked-example"></a>
+</h2>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">report</span><span class="op">$</span><span class="va">paths</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"path_id"</span>, <span class="st">"status"</span>, <span class="st">"n_questions_floor"</span>,</span>
 <span>                 <span class="st">"n_questions_ceiling"</span>, <span class="st">"burden_min"</span>, <span class="st">"burden_max"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 6</span></span></span>
@@ -814,31 +320,10 @@ optional questions and loop iterations, not measurement noise.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>       2 screen_out                 3                   3         14         14</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>       3 complete                  20                  26        106        143</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>       4 complete                  20                  23        106        139</span></span></code></pre></div>
-<p>Path 1 and path 2 are screen-outs worth 12 and 14 points. The two
-complete paths differ mainly in one branch-gated block.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">report</span><span class="op">$</span><span class="va">items</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">report</span><span class="op">$</span><span class="va">items</span><span class="op">$</span><span class="va">gfs_points</span><span class="op">)</span>,</span>
-<span>             <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"question_id"</span>, <span class="st">"block_name"</span>, <span class="st">"std_type"</span>, <span class="st">"n_rows"</span>, <span class="st">"n_cols"</span>,</span>
-<span>               <span class="st">"n_options"</span>, <span class="st">"gfs_points"</span>, <span class="st">"score_flag"</span><span class="op">)</span><span class="op">]</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 26 × 8</span></span></span>
-<span><span class="co">#&gt;    question_id block_name std_type n_rows n_cols n_options gfs_points score_flag</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> QID21       Attitudes  matrix        6      7        <span style="color: #BB0000;">NA</span>         18 auto      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> QID19       Travel     matrix        7      4        <span style="color: #BB0000;">NA</span>         14 auto      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> QID14       Vehicles   multi_c…     <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>         6         12 auto      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> QID20       Travel     matrix        6      4        <span style="color: #BB0000;">NA</span>         12 auto      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> QID1        Welcome    descrip…     <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>         0         11 inferred  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> QID7        About you  matrix        4      3        <span style="color: #BB0000;">NA</span>          8 auto      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> QID25       Closing    open_te…     <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>         0          6 auto      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> QID6        About you  single_…     <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>         6          3 auto      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> QID11       Other adu… single_…     <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>         6          3 auto      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> QID16       Vehicle d… single_…     <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>         6          3 auto      </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 16 more rows</span></span></span></code></pre></div>
-<p>The heaviest questions are the attitude and frequency matrices. The
-<code>score_flag</code> column shows which scores are deterministic
-(<code>auto</code>) and which rest on a documented inference
-(<code>inferred</code>); <code>score_basis</code> in the same table
-records the exact rule for each.</p>
+<p>The two screen-out paths end early after the area check; the two
+complete paths differ mainly in one branch-gated block. The spread from
+minimum to maximum is the effect of the survey’s optional questions and
+loop iterations, not measurement noise.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
@@ -847,13 +332,8 @@ records the exact rule for each.</p>
 <li>Heimgartner, D. and Axhausen, K. W. (2024). Predicting response
 rates once again. <em>Findings</em>. <a href="https://findingspress.org/article/125481-predicting-response-rates-once-again" class="external-link uri">https://findingspress.org/article/125481-predicting-response-rates-once-again</a>
 </li>
-<li>Schmid, B. and Axhausen, K. W. (2019). In-store or online grocery
-shopping before and during the COVID-19 pandemic.</li>
 <li>Yan, T. and Williams, D. (2022). Response burden: a review and
 conceptual framework. <em>Journal of Official Statistics</em>.</li>
-<li>Yan, T. and Tourangeau, R. (2008). Fast times and easy questions:
-the effects of age, experience, and question complexity on web survey
-response times. <em>Applied Cognitive Psychology</em>.</li>
 </ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

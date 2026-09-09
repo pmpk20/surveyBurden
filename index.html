@@ -33,6 +33,15 @@
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="articles/surveyBurden.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="articles/reading-the-report.html">Reading the burden report</a></li>
+    <li><a class="dropdown-item" href="articles/gfs-scoring.html">The GfS scoring method</a></li>
+    <li><a class="dropdown-item" href="articles/paths-and-display-logic.html">Paths and display logic</a></li>
+    <li><a class="dropdown-item" href="articles/calibration.html">Calibration and limitations</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -166,7 +175,7 @@
 <span><span class="co">#&gt; Benchmark: median 399 points across 79 GfS-scored waves.</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="working-with-the-report-object">Working with the report object<a class="anchor" aria-label="anchor" href="#working-with-the-report-object"></a>
+<h2 id="reading-the-report">Reading the report<a class="anchor" aria-label="anchor" href="#reading-the-report"></a>
 </h2>
 <p><code>report</code> is a structured object, not printed text. Pull out each part:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -188,12 +197,26 @@
 <code>report$blocks</code> — question burden by block, with each block’s share.</li>
 </ul>
 <p>Scalar settings (the points-per-minute rate, the rare-value threshold) are stored as attributes: <code>attr(report, "points_per_minute")</code>, <code>attr(report, "rare_threshold")</code>.</p>
+<p>Each printed section is explained in <code><a href="articles/reading-the-report.html">vignette("reading-the-report")</a></code>.</p>
+</div>
+<div class="section level2">
+<h2 id="how-it-works">How it works<a class="anchor" aria-label="anchor" href="#how-it-works"></a>
+</h2>
+<pre class="mermaid"><code>flowchart LR
+    src["Qualtrics survey&lt;br&gt;(.qsf file or API)"] --&gt; read["read_qsf()"]
+    read --&gt; score["parse_qsf() +&lt;br&gt;score_burden()"]
+    score --&gt; paths["resolve_paths() +&lt;br&gt;path_burden_profile()"]
+    paths --&gt; report["burden_report()"]
+    report --&gt; out["verdict line +&lt;br&gt;8 report sections"]</code></pre>
+<p><code><a href="reference/burden_report.html">burden_report()</a></code> runs the whole pipeline. The lower-level functions expose each step for inspection or reuse; see the reference table below.</p>
+<p>surveyBurden scores every question with the published GfS / Axhausen burden scheme (Heimgartner &amp; Axhausen 2024, Table 1), then follows the survey’s flow and display logic to work out which questions can appear together and how burden varies across the feasible respondent paths. The score for one question is its <strong>question burden</strong>; the total along one route is a <strong>path burden</strong>. The default result is a <strong>structural burden profile</strong>: each feasible path and display-logic sub-state is counted once, so the reported “median” is the middle value across those combinations, not the burden half of respondents exceed. Given real respondent route data, the report instead reports a <strong>population-weighted respondent burden</strong>.</p>
+<p>The package describes the instrument, not the respondent: it does not claim that burden causes dropout, satisficing or slower responses. The methodology is set out in <code><a href="articles/gfs-scoring.html">vignette("gfs-scoring")</a></code> and <code><a href="articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="fetching-from-qualtrics">Fetching from Qualtrics<a class="anchor" aria-label="anchor" href="#fetching-from-qualtrics"></a>
 </h2>
 <p>Set your credentials as environment variables, then pass a survey URL or ID to <code><a href="reference/burden_report.html">burden_report()</a></code>:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Sys.setenv.html" class="external-link">Sys.setenv</a></span><span class="op">(</span></span>
 <span>  QUALTRICS_API_KEY  <span class="op">=</span> <span class="st">"your-api-key"</span>,</span>
 <span>  QUALTRICS_BASE_URL <span class="op">=</span> <span class="st">"https://yourdatacenter.qualtrics.com"</span></span>
@@ -202,88 +225,6 @@
 <p>Only the survey ID (<code>SV_...</code>) is needed, so a survey-builder link, a distribution link (<code>.../jfe/form/SV_...</code>), or the bare <code>SV_</code> id all work. <code><a href="reference/burden_report.html">burden_report()</a></code> fetches the survey <strong>definition</strong>, not its responses.</p>
 <p><code>QUALTRICS_BASE_URL</code> is the API datacenter host, which can differ from your survey-builder host. Check Account Settings, then Qualtrics IDs. Credentials are read from the environment and never appear in code.</p>
 <p>You can only score a survey you can access. <code><a href="reference/burden_report.html">burden_report()</a></code> reads the survey <strong>definition</strong> through the <code>survey-definitions</code> API, which requires a token with the “Manage Survey” permission on that survey — normally a survey in your own Qualtrics account. A public participation link (<code>.../jfe/form/SV_...</code>) only lets a respondent <em>take</em> the survey; it does not expose the definition. To score someone else’s survey you need either their <code>.qsf</code> export or an API token for the account that owns it.</p>
-</div>
-<div class="section level2">
-<h2 id="what-surveyburden-does">What surveyBurden does<a class="anchor" aria-label="anchor" href="#what-surveyburden-does"></a>
-</h2>
-<p>It takes a Qualtrics <code>.qsf</code> export (a JSON file), or a live survey through the API, and scores every question with the published GfS / Axhausen burden scheme (Heimgartner &amp; Axhausen 2024, Table 1). It then follows the survey’s flow and display logic, works out which questions can appear together, and reports how burden varies across the possible respondent paths. The score for one question is its <strong>question burden</strong>; the total along one route through the survey is a <strong>path burden</strong>.</p>
-<p>A survey often contains many questions that not every respondent sees. Skip logic, branches and display rules send different people down different routes. A burden figure worked out by hand, or a single expected duration, describes one route that few respondents take. surveyBurden reconstructs the programmed routes and reports the resulting profile: the shortest route, the longest route, and the spread between them.</p>
-<p>The package describes the instrument, not the respondent. It does not claim that burden causes dropout, satisficing or slower responses — those are empirical questions that sit outside what this package does.</p>
-<div class="section level3">
-<h3 id="how-it-works">How it works<a class="anchor" aria-label="anchor" href="#how-it-works"></a>
-</h3>
-<ol style="list-style-type: decimal">
-<li>
-<strong>Read the Qualtrics survey.</strong> Load the <code>.qsf</code>, or fetch it through the API, and normalise to one internal form.</li>
-<li>
-<strong>Identify and score the questions.</strong> Classify each Qualtrics widget as a standard question type, then assign its GfS point score.</li>
-<li>
-<strong>Reconstruct which questions can appear together.</strong> Walk the survey flow and the display logic to find the feasible respondent paths.</li>
-<li>
-<strong>Summarise burden across those paths.</strong> Pool the per-path results into the headline spread and the block breakdown.</li>
-</ol>
-</div>
-<div class="section level3">
-<h3 id="gfs-scoring">GfS scoring<a class="anchor" aria-label="anchor" href="#gfs-scoring"></a>
-</h3>
-<p>surveyBurden implements the published GfS / Axhausen scheme; it does not invent a new burden scale. The point weights are transcribed from the published table into <code><a href="reference/gfs_weights.html">gfs_weights()</a></code>.</p>
-<p>Some Qualtrics constructs do not map exactly onto the original scheme. A dropdown has no row in the table; a slider is not in the scheme; the table counts rendered lines of text, which a <code>.qsf</code> does not store. Where the mapping is uncertain, the package records that through a <code>score_flag</code> on the question (<code>auto</code>, <code>inferred</code>, <code>manual</code> or <code>unknown</code>) and a <code>score_basis</code> string naming the rule applied. It does not pretend the classification is exact.</p>
-<table class="table">
-<thead><tr>
-<th>response action</th>
-<th>GfS points</th>
-</tr></thead>
-<tbody>
-<tr>
-<td>yes / no question</td>
-<td>1</td>
-</tr>
-<tr>
-<td>rating scale, up to 5 options</td>
-<td>2</td>
-</tr>
-<tr>
-<td>rating scale, more than 5 options</td>
-<td>3</td>
-</tr>
-<tr>
-<td>first answer to an open question</td>
-<td>6</td>
-</tr>
-<tr>
-<td>two-alternative stated-choice task</td>
-<td>2</td>
-</tr>
-</tbody>
-</table>
-<p>The full table is in Heimgartner &amp; Axhausen (2024), <a href="https://findingspress.org/article/125481-predicting-response-rates-once-again" class="external-link uri">https://findingspress.org/article/125481-predicting-response-rates-once-again</a>. It is not reproduced here.</p>
-</div>
-<div class="section level3">
-<h3 id="path-specific-burden">Path-specific burden<a class="anchor" aria-label="anchor" href="#path-specific-burden"></a>
-</h3>
-<p>Suppose a survey asks whether the respondent owns a car; only car owners then see five follow-up questions about their vehicles. A single burden total mixes the two groups and describes neither. surveyBurden represents both routes. It handles flow branches, question-level display logic, optional (skippable) questions, Loop &amp; Merge blocks that repeat once per selected item, complete paths, and screen-out paths where the survey ends early.</p>
-<p>The default result is a <strong>structural burden profile</strong>: each feasible path and each display-logic sub-state is counted once. It is not a probability distribution over respondents — the “median” is the middle value across the feasible combinations, not the burden half of respondents exceed.</p>
-<p>If you have real respondent route data, supply it and the report adds the <strong>population-weighted respondent burden</strong>:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># routes: one row per respondent. Recognised columns are loop_&lt;id&gt; (the</span></span>
-<span><span class="co"># iteration count for a Loop &amp; Merge block, keyed by its driving question id or</span></span>
-<span><span class="co"># block id) and visit_&lt;block_id&gt; (TRUE to include a branch-gated block).</span></span>
-<span><span class="va">routes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  loop_BL6 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">3</span>, <span class="fl">2</span><span class="op">)</span>,   <span class="co"># "Other adults" loop</span></span>
-<span>  loop_BL8 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">2</span>, <span class="fl">1</span><span class="op">)</span>    <span class="co"># "Vehicle details" loop</span></span>
-<span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">qsf</span>, routes <span class="op">=</span> <span class="va">routes</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="points-and-minutes">Points and minutes<a class="anchor" aria-label="anchor" href="#points-and-minutes"></a>
-</h3>
-<p>The GfS framework uses roughly 12 points per minute as a rule of thumb, from the original framework. It is a rough scale, not a web-specific calibration, and not a prediction of completion time. Override it by setting <code>points_per_minute</code> on a weights object:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/gfs_weights.html">gfs_weights</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="va">w</span><span class="op">$</span><span class="va">points_per_minute</span> <span class="op">&lt;-</span> <span class="fl">15</span></span>
-<span><span class="fu"><a href="reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">qsf</span>, weights <span class="op">=</span> <span class="va">w</span><span class="op">)</span></span></code></pre></div>
-<p>For a figure specific to your survey, run <code><a href="reference/validate_times.html">validate_times()</a></code> on your own completion-time data and use the rate it returns.</p>
-</div>
 </div>
 <div class="section level2">
 <h2 id="pipeline-and-api-reference">Pipeline and API reference<a class="anchor" aria-label="anchor" href="#pipeline-and-api-reference"></a>
@@ -366,7 +307,7 @@
 </tr>
 </tbody>
 </table>
-<p>Every function has a help page: <code><a href="reference/burden_report.html">?burden_report</a></code>, <code><a href="reference/score_burden.html">?score_burden</a></code>, and so on. The vignette walks through the whole workflow: <code><a href="articles/surveyBurden.html">vignette("surveyBurden")</a></code>.</p>
+<p>Every function has a help page: <code><a href="reference/burden_report.html">?burden_report</a></code>, <code><a href="reference/score_burden.html">?score_burden</a></code>, and so on. The guides cover the workflow end to end — start with <code><a href="articles/surveyBurden.html">vignette("surveyBurden")</a></code>, then <code><a href="articles/reading-the-report.html">vignette("reading-the-report")</a></code>, <code><a href="articles/gfs-scoring.html">vignette("gfs-scoring")</a></code>, <code><a href="articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code> and <code><a href="articles/calibration.html">vignette("calibration")</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="limitations">Limitations<a class="anchor" aria-label="anchor" href="#limitations"></a>
@@ -379,7 +320,7 @@
 <li>The structural burden profile is not a respondent probability distribution.</li>
 <li>The points-to-minutes conversion is a rule of thumb, not a completion-time forecast.</li>
 </ul>
-<p>The vignette covers each of these in full.</p>
+<p>See <code><a href="articles/calibration.html">vignette("calibration")</a></code> for the detail.</p>
 </div>
 <div class="section level2">
 <h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>

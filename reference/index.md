@@ -2,6 +2,8 @@
 
 ## One-call pipeline
 
+Run the whole analysis and get the structured report.
+
 - [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
   [`summary(`*`<burden_report>`*`)`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
   : Ex-ante instrument burden report
@@ -9,6 +11,8 @@
   : One-sentence summary of a burden object
 
 ## Read a Qualtrics survey
+
+Load a .qsf, or fetch a live survey, into one internal form.
 
 - [`read_qsf()`](https://pmpk20.github.io/surveyBurden/reference/read_qsf.md)
   : Read a Qualtrics survey definition
@@ -28,6 +32,8 @@
 
 ## Score questions
 
+Classify each question and apply the GfS / Axhausen point weights.
+
 - [`classify_question()`](https://pmpk20.github.io/surveyBurden/reference/classify_question.md)
   : Classify a single Qualtrics question payload
 - [`gfs_weights()`](https://pmpk20.github.io/surveyBurden/reference/gfs_weights.md)
@@ -36,6 +42,8 @@
   : Score per-question ex-ante burden
 
 ## Resolve paths
+
+Walk the flow and display logic to the feasible respondent paths.
 
 - [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md)
   : Enumerate feasible respondent paths through the survey flow
@@ -53,6 +61,8 @@
 
 ## Path burden
 
+Turn the resolved paths into per-path and population-weighted burden.
+
 - [`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md)
   : Burden per respondent path
 - [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md)
@@ -61,6 +71,8 @@
   : Expected burden by respondent route
 
 ## Diagnostics
+
+Check where the calculation is exact and calibrate points to minutes.
 
 - [`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md)
   : Where the burden calculation is exact, and where it rests on

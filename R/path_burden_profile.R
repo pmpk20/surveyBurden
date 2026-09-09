@@ -220,14 +220,19 @@ component_dist_exact <- function(grp, gvars, states, parsed, gfs, q_always) {
   grid <- expand.grid(lapply(states, seq_along), KEEP.OUT.ATTRS = FALSE)
   n <- nrow(grid)
 
+  # column-wise integer indices (df `[r, j]` per cell is slow in a tight loop),
+  # per-question burden and predicate looked up once, not per grid row.
+  gcols   <- lapply(grid, as.integer)
+  ng      <- seq_along(gvars)
+  preds   <- lapply(grp, function(q) parsed[[q]]$predicate)
+  gfs_grp <- vapply(grp, function(q) gfs[[q]] %||% 0, numeric(1))
+
   burdens <- vapply(seq_len(n), function(r) {
-    assign <- stats::setNames(
-      lapply(seq_along(gvars), function(j) states[[j]][[grid[r, j]]]),
-      gvars
-    )
+    assign <- lapply(ng, function(j) states[[j]][[gcols[[j]][r]]])
+    names(assign) <- gvars
     b <- 0
-    for (q in grp) {
-      if (isTRUE(parsed[[q]]$predicate(assign, shown0))) b <- b + (gfs[[q]] %||% 0)
+    for (qi in seq_along(grp)) {
+      if (isTRUE(preds[[qi]](assign, shown0))) b <- b + gfs_grp[qi]
     }
     b
   }, numeric(1))

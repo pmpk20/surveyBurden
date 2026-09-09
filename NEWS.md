@@ -14,6 +14,9 @@
 * The display-logic convolution builds its intermediate `(burden, weight)`
   frames with a bare constructor instead of `data.frame()` (called 1000+ times
   on a survey with heavy display logic). Numbers are unchanged.
+* The exact display-logic enumeration indexes its state grid column-wise and
+  hoists the per-question burden and predicate lookups out of the row loop.
+  Numbers are unchanged.
 * A survey with several block randomisers now raises **one** combined
   "BlockRandomizer" warning that names the flow nodes, instead of one warning
   per randomiser.

@@ -3,6 +3,6 @@ bibentry(
   title    = "surveyBurden: Ex-Ante Path-Aware Survey Instrument Burden Assessment",
   author   = person("Peter", "King"),
   year     = "2026",
-  note     = "R package version 0.0.0.9000",
+  note     = "R package version 0.1.0",
   url      = "https://github.com/pmpk20/surveyBurden"
 )

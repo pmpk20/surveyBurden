@@ -36,6 +36,22 @@ test_that("burden_engine output is identical with precomputed paths + scored + b
   expect_identical(a, b)
 })
 
+test_that("burden_engine output is identical with a precomputed parsed_dl map", {
+  q <- q_fx(); w <- gfs_weights()
+  sc <- score_burden(parse_qsf(q), w)
+  a <- burden_engine(q, weights = w)
+  b <- burden_engine(q, weights = w, parsed_dl = parse_all_display_logic(q, sc))
+  expect_identical(a, b)
+})
+
+test_that("calculation_certainty output is identical with a precomputed parsed_dl map", {
+  q <- q_fx(); w <- gfs_weights()
+  sc <- score_burden(parse_qsf(q), w)
+  a <- calculation_certainty(q, weights = w)
+  b <- calculation_certainty(q, weights = w, parsed_dl = parse_all_display_logic(q, sc))
+  expect_identical(a, b)
+})
+
 test_that("path_burden_profile output is identical when handed a prebuilt engine", {
   q <- q_fx(); w <- gfs_weights()
   a <- path_burden_profile(q, weights = w)

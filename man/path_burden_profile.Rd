@@ -8,7 +8,8 @@ path_burden_profile(
   qsf,
   weights = gfs_weights(),
   max_paths = 10000L,
-  engine = NULL
+  engine = NULL,
+  parsed_dl = NULL
 )
 }
 \arguments{

@@ -11,10 +11,10 @@
 #' @param qsf A path to a `.qsf`, or a `qsf_raw` object from [read_qsf()].
 #' @param weights A [gfs_weights()] list.
 #' @param max_paths Passed to [resolve_paths()].
-#' @param paths,scored,blocks Optional precomputed [resolve_paths()],
-#'   [score_burden()] and [resolve_live_blocks()] results for this `qsf`
-#'   (internal reuse by [burden_report()]; `NULL` computes them here, leaving
-#'   the public behaviour unchanged).
+#' @param paths,scored,blocks,parsed_dl Optional precomputed [resolve_paths()],
+#'   [score_burden()], [resolve_live_blocks()] and parsed display-logic results
+#'   for this `qsf` (internal reuse by [burden_report()]; `NULL` computes them
+#'   here, leaving the public behaviour unchanged).
 #'
 #' @return An object of class `calculation_certainty` (list):
 #'   \describe{
@@ -43,7 +43,8 @@
 #' }
 #' @export
 calculation_certainty <- function(qsf, weights = gfs_weights(), max_paths = 10000L,
-                                  paths = NULL, scored = NULL, blocks = NULL) {
+                                  paths = NULL, scored = NULL, blocks = NULL,
+                                  parsed_dl = NULL) {
   qsf    <- if (inherits(qsf, "qsf_raw")) qsf else read_qsf(qsf)
   if (is.null(paths))  paths  <- resolve_paths(qsf, max_paths = max_paths)
   if (is.null(scored)) scored <- score_burden(parse_qsf(qsf), weights = weights)
@@ -79,7 +80,7 @@ calculation_certainty <- function(qsf, weights = gfs_weights(), max_paths = 1000
   )
 
   # --- display logic: exact enumeration vs primary-gate approximation ---
-  dl_cert <- dl_certainty(qsf, scored, full)
+  dl_cert <- dl_certainty(qsf, scored, full, parsed_dl = parsed_dl)
 
   # --- loops ---
   lb  <- blocks[blocks$in_loop & !is.na(blocks$loop_max), ]
@@ -110,14 +111,8 @@ calculation_certainty <- function(qsf, weights = gfs_weights(), max_paths = 1000
 #' Exact-vs-approximation split of the display-logic gates, matching the
 #' component logic in [path_burden_profile()].
 #' @noRd
-dl_certainty <- function(qsf, scored, full, exact_cap = EXACT_CAP) {
-  sq  <- qsf_elements(qsf, "SQ")
-  raw <- stats::setNames(sq, vapply(sq, function(p) p$QuestionID %||% NA_character_, character(1)))
-  parsed <- list()
-  for (qid in scored$question_id[scored$has_display_logic]) {
-    dlx <- raw[[qid]]$DisplayLogic
-    if (!is.null(dlx)) parsed[[qid]] <- parse_display_logic(dlx)
-  }
+dl_certainty <- function(qsf, scored, full, exact_cap = EXACT_CAP, parsed_dl = NULL) {
+  parsed <- parsed_dl %||% parse_all_display_logic(qsf, scored)
   stype <- stats::setNames(scored$std_type, scored$question_id)
 
   cond <- unique(unlist(full$q_maybe))

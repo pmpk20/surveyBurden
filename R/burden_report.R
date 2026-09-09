@@ -120,16 +120,22 @@ burden_report <- function(x, weights = gfs_weights(), profile = TRUE,
   full   <- pb[!pb$terminates_early, ]
   no_complete <- nrow(full) == 0L
 
+  # parse each question's display-logic tree once; the engine and the certainty
+  # breakdown both need it.
+  need_engine <- !no_complete && (isTRUE(profile) || !is.null(routes))
+  parsed_dl <- if (need_engine || isTRUE(certainty))
+    parse_all_display_logic(qsf, scored) else NULL
+
   # the display-logic engine is the expensive step; build it once if either the
   # structural profile or a routes summary will need it.
-  engine <- if (!no_complete && (isTRUE(profile) || !is.null(routes)))
-    burden_engine(qsf, weights = weights,
-                  paths = paths, scored = scored, blocks = blocks) else NULL
+  engine <- if (need_engine)
+    burden_engine(qsf, weights = weights, paths = paths, scored = scored,
+                  blocks = blocks, parsed_dl = parsed_dl) else NULL
 
   step("Checking calculation certainty")
   cert   <- if (isTRUE(certainty))
-    calculation_certainty(qsf, weights = weights,
-                          paths = paths, scored = scored, blocks = blocks) else NULL
+    calculation_certainty(qsf, weights = weights, paths = paths, scored = scored,
+                          blocks = blocks, parsed_dl = parsed_dl) else NULL
 
   # ---- $instrument -------------------------------------------------------
   instrument <- tibble::tibble(

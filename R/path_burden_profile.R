@@ -46,8 +46,9 @@
 #'
 #' @export
 path_burden_profile <- function(qsf, weights = gfs_weights(), max_paths = 10000L,
-                                engine = NULL) {
-  e <- engine %||% burden_engine(qsf, weights = weights, max_paths = max_paths)
+                                engine = NULL, parsed_dl = NULL) {
+  e <- engine %||% burden_engine(qsf, weights = weights, max_paths = max_paths,
+                                 parsed_dl = parsed_dl)
 
   rows <- lapply(seq_len(nrow(e$paths)), function(i) {
     cp <- e$components[[i]]
@@ -69,11 +70,13 @@ path_burden_profile <- function(qsf, weights = gfs_weights(), max_paths = 10000L
 #' compute per-path burden components (base / loops / display distribution).
 #' Returns a list with `paths` and `components` (one `list(base, loops,
 #' display_dist)` per path), plus `blocks`, `scored` and `weights`.
-#' `paths`, `scored` and `blocks` may be passed in precomputed (internal reuse
-#' by [burden_report()]); each defaults to `NULL` and is then computed here.
+#' `paths`, `scored`, `blocks` and `parsed_dl` may be passed in precomputed
+#' (internal reuse by [burden_report()]); each defaults to `NULL` and is then
+#' computed here.
 #' @noRd
 burden_engine <- function(qsf, weights = gfs_weights(), max_paths = 10000L,
-                          paths = NULL, scored = NULL, blocks = NULL) {
+                          paths = NULL, scored = NULL, blocks = NULL,
+                          parsed_dl = NULL) {
   if (is.null(paths))  paths  <- resolve_paths(qsf, max_paths = max_paths)
   if (is.null(scored)) scored <- score_burden(parse_qsf(qsf), weights = weights)
   if (is.null(blocks)) blocks <- resolve_live_blocks(qsf)
@@ -82,13 +85,7 @@ burden_engine <- function(qsf, weights = gfs_weights(), max_paths = 10000L,
   stype  <- stats::setNames(scored$std_type,  scored$question_id)
   qblock <- stats::setNames(scored$block_id,  scored$question_id)
 
-  sq <- qsf_elements(qsf, "SQ")
-  raw <- stats::setNames(sq, vapply(sq, function(p) p$QuestionID %||% NA_character_, character(1)))
-  parsed <- list()
-  for (qid in scored$question_id[scored$has_display_logic]) {
-    dl <- raw[[qid]]$DisplayLogic
-    if (!is.null(dl)) parsed[[qid]] <- parse_display_logic(dl)
-  }
+  parsed <- parsed_dl %||% parse_all_display_logic(qsf, scored)
 
   loop_blocks <- stats::setNames(blocks$loop_max, blocks$block_id)
   loop_blocks <- loop_blocks[!is.na(loop_blocks)]
@@ -105,6 +102,21 @@ burden_engine <- function(qsf, weights = gfs_weights(), max_paths = 10000L,
 
   list(paths = paths, components = components,
        blocks = blocks, scored = scored, weights = weights)
+}
+
+#' Parse the `DisplayLogic` tree of every question that has one, keyed by
+#' QuestionID. Shared by `burden_engine()` and `dl_certainty()` so the survey's
+#' display-logic trees parse once per `burden_report()`, not twice.
+#' @noRd
+parse_all_display_logic <- function(qsf, scored) {
+  sq  <- qsf_elements(qsf, "SQ")
+  raw <- stats::setNames(sq, vapply(sq, function(p) p$QuestionID %||% NA_character_, character(1)))
+  parsed <- list()
+  for (qid in scored$question_id[scored$has_display_logic]) {
+    dl <- raw[[qid]]$DisplayLogic
+    if (!is.null(dl)) parsed[[qid]] <- parse_display_logic(dl)
+  }
+  parsed
 }
 
 #' Convolve a path's components into a burden distribution (loops uniform 1..max).

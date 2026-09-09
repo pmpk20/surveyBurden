@@ -8,6 +8,9 @@
 * **Breaking (internal API):** `classify_question()` now returns a named `list`
   rather than a one-row tibble. It is a building block for `parse_qsf()`, which
   is unchanged. `score_burden()`'s output is unchanged.
+* Each question's display-logic tree is parsed once per `burden_report()` and
+  shared between the burden engine and the certainty breakdown, instead of
+  being parsed independently by each.
 * A survey with several block randomisers now raises **one** combined
   "BlockRandomizer" warning that names the flow nodes, instead of one warning
   per randomiser.

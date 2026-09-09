@@ -10,7 +10,8 @@ calculation_certainty(
   max_paths = 10000L,
   paths = NULL,
   scored = NULL,
-  blocks = NULL
+  blocks = NULL,
+  parsed_dl = NULL
 )
 }
 \arguments{
@@ -20,10 +21,10 @@ calculation_certainty(
 
 \item{max_paths}{Passed to \code{\link[=resolve_paths]{resolve_paths()}}.}
 
-\item{paths, scored, blocks}{Optional precomputed \code{\link[=resolve_paths]{resolve_paths()}},
-\code{\link[=score_burden]{score_burden()}} and \code{\link[=resolve_live_blocks]{resolve_live_blocks()}} results for this \code{qsf}
-(internal reuse by \code{\link[=burden_report]{burden_report()}}; \code{NULL} computes them here, leaving
-the public behaviour unchanged).}
+\item{paths, scored, blocks, parsed_dl}{Optional precomputed \code{\link[=resolve_paths]{resolve_paths()}},
+\code{\link[=score_burden]{score_burden()}}, \code{\link[=resolve_live_blocks]{resolve_live_blocks()}} and parsed display-logic results
+for this \code{qsf} (internal reuse by \code{\link[=burden_report]{burden_report()}}; \code{NULL} computes them
+here, leaving the public behaviour unchanged).}
 }
 \value{
 An object of class \code{calculation_certainty} (list):

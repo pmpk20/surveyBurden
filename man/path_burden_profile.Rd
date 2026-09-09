@@ -22,6 +22,10 @@ path_burden_profile(
 \item{engine}{Optional precomputed \code{burden_engine()} result for this \code{qsf}
 (internal reuse; \code{NULL} builds it here, leaving the public behaviour
 unchanged).}
+
+\item{parsed_dl}{Optional precomputed map of parsed display-logic trees for
+this \code{qsf} (internal reuse by \code{\link[=burden_report]{burden_report()}}; ignored when \code{engine} is
+supplied, computed as needed when \code{NULL}).}
 }
 \value{
 A \link[tibble:tibble]{tibble}, one row per flow path:

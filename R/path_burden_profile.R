@@ -39,6 +39,9 @@
 #' @param engine Optional precomputed `burden_engine()` result for this `qsf`
 #'   (internal reuse; `NULL` builds it here, leaving the public behaviour
 #'   unchanged).
+#' @param parsed_dl Optional precomputed map of parsed display-logic trees for
+#'   this `qsf` (internal reuse by [burden_report()]; ignored when `engine` is
+#'   supplied, computed as needed when `NULL`).
 #'
 #' @return A [tibble][tibble::tibble], one row per flow path:
 #'   `path_id`, `terminates_early`, `n_gates`,

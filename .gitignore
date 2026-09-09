@@ -14,6 +14,11 @@
 /.superpowers/
 *.bundle
 
+# draft manuscript and planning notes: kept locally, not on the remote
+/paper.md
+/paper.bib
+/surveyBurden_roadmap.md
+
 # local data and paradata are never committed
 /*.csv
 *_Paradata*.csv

@@ -2,6 +2,13 @@
 
 `%||%` <- function(a, b) if (is.null(a)) b else a
 
+# Largest joint gate-state count a display-logic coupling component is
+# enumerated exactly for; above this it falls back to the primary-gate
+# approximation. Referenced by both component_dist() (which produces the burden
+# numbers) and dl_certainty() (which reports the exact/approx split), so the two
+# cannot silently disagree.
+EXACT_CAP <- 5000L
+
 #' Return the `Payload` of every `SurveyElements` entry with a given `Element` tag
 #' @noRd
 qsf_elements <- function(qsf, type) {

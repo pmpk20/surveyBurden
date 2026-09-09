@@ -110,7 +110,7 @@ calculation_certainty <- function(qsf, weights = gfs_weights(), max_paths = 1000
 #' Exact-vs-approximation split of the display-logic gates, matching the
 #' component logic in [path_burden_profile()].
 #' @noRd
-dl_certainty <- function(qsf, scored, full, exact_cap = 5000L) {
+dl_certainty <- function(qsf, scored, full, exact_cap = EXACT_CAP) {
   sq  <- qsf_elements(qsf, "SQ")
   raw <- stats::setNames(sq, vapply(sq, function(p) p$QuestionID %||% NA_character_, character(1)))
   parsed <- list()

@@ -32,6 +32,8 @@ classify_question <- function(payload) {
 
   spec <- classify_type(qt, sel, sub)
 
+  stem_plain <- strip_html(payload$QuestionText %||% "")   # strip once, reuse
+
   n_options <- length(payload$Choices %||% list())
   n_rows    <- if (identical(spec$std_type, "matrix")) length(payload$Choices %||% list()) else NA_integer_
   n_cols    <- if (identical(spec$std_type, "matrix")) length(payload$Answers %||% list()) else NA_integer_
@@ -67,11 +69,11 @@ classify_question <- function(payload) {
     n_options          = as.integer(n_options),
     n_rows             = as.integer(n_rows),
     n_cols             = as.integer(n_cols),
-    text_words         = count_words(payload$QuestionText %||% ""),
+    text_words         = word_count(stem_plain),
     max_label_words    = as.integer(max_label_words),
     label_text         = label_text,
     options_numeric    = options_numeric,
-    question_text      = clean_question_text(payload$QuestionText %||% ""),
+    question_text      = truncate_chars(stem_plain),
     is_hidden          = is_hidden_question(payload),
     has_display_logic  = !is.null(payload$DisplayLogic),
     display_logic_refs = list(refs),
@@ -125,13 +127,16 @@ classify_type <- function(qt, sel, sub) {
   sc("unknown", "unknown")
 }
 
-#' Count words in a question stem, HTML stripped
+#' Count words in an already HTML-stripped, whitespace-collapsed string
 #' @noRd
-count_words <- function(html) {
-  txt <- strip_html(html)
+word_count <- function(txt) {
   if (!nzchar(txt)) return(0L)
   length(strsplit(txt, " ", fixed = TRUE)[[1]])
 }
+
+#' Count words in a question stem, HTML stripped
+#' @noRd
+count_words <- function(html) word_count(strip_html(html))
 
 #' Plain-text label strings from a Choices / Answers list
 #' @noRd
@@ -151,12 +156,17 @@ strip_html <- function(html) {
   trimws(gsub("\\s+", " ", txt))
 }
 
+#' Truncate already-plain text to `max_chars`, adding an ellipsis if cut.
+#' @noRd
+truncate_chars <- function(txt, max_chars = 200L) {
+  if (nchar(txt) <= max_chars) return(txt)
+  paste0(substr(txt, 1, max_chars), "...")
+}
+
 #' A readable, truncated question stem for display in reports.
 #' @noRd
 clean_question_text <- function(html, max_chars = 200L) {
-  txt <- strip_html(html)
-  if (nchar(txt) <= max_chars) return(txt)
-  paste0(substr(txt, 1, max_chars), "...")
+  truncate_chars(strip_html(html), max_chars)
 }
 
 #' Prior question ids a DisplayLogic tree references

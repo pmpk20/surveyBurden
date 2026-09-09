@@ -42,6 +42,7 @@ resolve_flow <- function(qsf, max_paths = 10000L) {
 #' @noRd
 enumerate_paths <- function(nodes, max_paths = 10000L) {
   memo <- new.env(parent = emptyenv())
+  randomisers <- character(0)   # collected, warned about once (see below)
 
   key_of <- function(remaining) {
     paste(vapply(remaining, function(n) n$FlowID %||% n$Type %||% "?", character(1)),
@@ -86,7 +87,7 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
     } else if (type == "Group") {
       outcomes(c(node$Flow %||% list(), rest))
     } else if (type == "BlockRandomizer") {
-      cli::cli_warn("BlockRandomizer encountered; treating all sub-blocks as shown in order (not enumerating subsets).")
+      randomisers <<- c(randomisers, node$FlowID %||% node$ID %||% "BlockRandomizer")
       outcomes(c(node$Flow %||% list(), rest))
     } else {
       cli::cli_warn("Unhandled flow node type {.val {type}}; skipping.")
@@ -106,6 +107,15 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
   }
 
   paths <- dedupe(outcomes(nodes))
+
+  randomisers <- unique(randomisers)
+  if (length(randomisers)) {
+    cli::cli_warn(c(
+      paste("{length(randomisers)} BlockRandomizer{?s} in the flow; treating all",
+            "sub-blocks as shown, in survey order (randomised subsets not enumerated)."),
+      i = "Affected flow node{?s}: {.val {randomisers}}"
+    ))
+  }
 
   tibble::tibble(
     path_id          = seq_along(paths),

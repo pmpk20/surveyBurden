@@ -190,7 +190,7 @@ connected_components <- function(cond, parsed) {
 #' rest permissive -- restricted to just this component.
 #' @return data.frame(burden, weight)
 #' @noRd
-component_dist <- function(grp, gvars, parsed, gfs, stype, q_always, exact_cap = 5000L) {
+component_dist <- function(grp, gvars, parsed, gfs, stype, q_always, exact_cap = EXACT_CAP) {
   states <- lapply(gvars, function(v) gate_states(v, grp, parsed, stype))
   names(states) <- gvars
   total <- prod(vapply(states, length, integer(1)))

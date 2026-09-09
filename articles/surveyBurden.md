@@ -55,16 +55,16 @@ One call runs the whole pipeline.
 
 report <- burden_report(demo)
 #> ℹ Reading survey
-#> ✔ Reading survey [25ms]
+#> ✔ Reading survey [24ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [259ms]
+#> ✔ Scoring questions and resolving paths [245ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [34ms]
+#> ✔ Checking calculation certainty [33ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [29ms]
+#> ✔ Enumerating display-logic combinations [26ms]
 #> 
 report
 #> 
@@ -536,13 +536,13 @@ burden_report(demo, routes = routes)$population
 #> ✔ Reading survey [7ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [88ms]
+#> ✔ Scoring questions and resolving paths [79ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [22ms]
+#> ✔ Checking calculation certainty [21ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [59ms]
+#> ✔ Enumerating display-logic combinations [61ms]
 #> 
 #> # A tibble: 5 × 4
 #>   statistic points minutes  index
@@ -720,13 +720,13 @@ report <- burden_report(demo)
 #> ✔ Reading survey [7ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [87ms]
+#> ✔ Scoring questions and resolving paths [81ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [22ms]
+#> ✔ Checking calculation certainty [21ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [29ms]
+#> ✔ Enumerating display-logic combinations [28ms]
 #> 
 summary(report)
 #> 

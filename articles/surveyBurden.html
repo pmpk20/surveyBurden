@@ -141,6 +141,18 @@ stated-choice or discrete choice burden model.</p>
 <p>One call runs the whole pipeline.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">demo</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Reading survey</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Reading survey <span style="color: #B2B2B2;">[24ms]</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Scoring questions and resolving paths</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Scoring questions and resolving paths <span style="color: #B2B2B2;">[663ms]</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Checking calculation certainty</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[362ms]</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Enumerating display-logic combinations</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Enumerating display-logic combinations <span style="color: #B2B2B2;">[361ms]</span></span></span>
+<span><span class="co">#&gt; </span></span>
 <span><span class="va">report</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Burden Report: Neighbourhood Travel Survey (demo)</span> <span style="color: #00BBBB;">────────────────────</span></span></span>
@@ -584,6 +596,18 @@ small constructed set of 50 respondent routes:</p>
 <span>  loop_BL8 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">3</span>, <span class="fl">0.5</span><span class="op">)</span>    <span class="co"># "Vehicle details" loop, cap 3</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">demo</span>, routes <span class="op">=</span> <span class="va">routes</span><span class="op">)</span><span class="op">$</span><span class="va">population</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Reading survey</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Reading survey <span style="color: #B2B2B2;">[7ms]</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Scoring questions and resolving paths</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Scoring questions and resolving paths <span style="color: #B2B2B2;">[519ms]</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Checking calculation certainty</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[352ms]</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Enumerating display-logic combinations</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Enumerating display-logic combinations <span style="color: #B2B2B2;">[710ms]</span></span></span>
+<span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 4</span></span></span>
 <span><span class="co">#&gt;   statistic points minutes  index</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
@@ -744,6 +768,18 @@ outside the scope of this package.</li>
 with no private files.</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">demo</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Reading survey</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Reading survey <span style="color: #B2B2B2;">[7ms]</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Scoring questions and resolving paths</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Scoring questions and resolving paths <span style="color: #B2B2B2;">[524ms]</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Checking calculation certainty</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[347ms]</span></span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Enumerating display-logic combinations</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Enumerating display-logic combinations <span style="color: #B2B2B2;">[422ms]</span></span></span>
+<span><span class="co">#&gt; </span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">report</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Neighbourhood Travel Survey (demo)</span> <span style="color: #00BBBB;">──────────────────────────────────────────</span></span></span>

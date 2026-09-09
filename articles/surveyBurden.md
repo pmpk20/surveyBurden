@@ -54,6 +54,18 @@ One call runs the whole pipeline.
 ``` r
 
 report <- burden_report(demo)
+#> ℹ Reading survey
+#> ✔ Reading survey [24ms]
+#> 
+#> ℹ Scoring questions and resolving paths
+#> ✔ Scoring questions and resolving paths [663ms]
+#> 
+#> ℹ Checking calculation certainty
+#> ✔ Checking calculation certainty [362ms]
+#> 
+#> ℹ Enumerating display-logic combinations
+#> ✔ Enumerating display-logic combinations [361ms]
+#> 
 report
 #> 
 #> ── Survey Burden Report: Neighbourhood Travel Survey (demo) ────────────────────
@@ -520,6 +532,18 @@ routes <- data.frame(
   loop_BL8 = rbinom(50, 3, 0.5)    # "Vehicle details" loop, cap 3
 )
 burden_report(demo, routes = routes)$population
+#> ℹ Reading survey
+#> ✔ Reading survey [7ms]
+#> 
+#> ℹ Scoring questions and resolving paths
+#> ✔ Scoring questions and resolving paths [519ms]
+#> 
+#> ℹ Checking calculation certainty
+#> ✔ Checking calculation certainty [352ms]
+#> 
+#> ℹ Enumerating display-logic combinations
+#> ✔ Enumerating display-logic combinations [710ms]
+#> 
 #> # A tibble: 5 × 4
 #>   statistic points minutes  index
 #>   <fct>      <dbl>   <dbl>  <dbl>
@@ -692,6 +716,18 @@ with no private files.
 ``` r
 
 report <- burden_report(demo)
+#> ℹ Reading survey
+#> ✔ Reading survey [7ms]
+#> 
+#> ℹ Scoring questions and resolving paths
+#> ✔ Scoring questions and resolving paths [524ms]
+#> 
+#> ℹ Checking calculation certainty
+#> ✔ Checking calculation certainty [347ms]
+#> 
+#> ℹ Enumerating display-logic combinations
+#> ✔ Enumerating display-logic combinations [422ms]
+#> 
 summary(report)
 #> 
 #> ── Neighbourhood Travel Survey (demo) ──────────────────────────────────────────

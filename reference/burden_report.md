@@ -17,7 +17,8 @@ burden_report(
   stem_warning_threshold = 40L,
   label_warning_threshold = 10L,
   words_per_line = NULL,
-  certainty = TRUE
+  certainty = TRUE,
+  quiet = FALSE
 )
 
 # S3 method for class 'burden_report'
@@ -87,6 +88,12 @@ summary(object, ...)
   If `TRUE` (default), attach and print the
   [`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md)
   breakdown. `FALSE` skips it (a little faster).
+
+- quiet:
+
+  If `FALSE` (default), report progress through the pipeline stages with
+  [`cli::cli_progress_step()`](https://cli.r-lib.org/reference/cli_progress_step.html).
+  `TRUE` silences it.
 
 - object:
 

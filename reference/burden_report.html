@@ -55,7 +55,8 @@ summarises the burden across the instrument's structural path space.</p>
 <span>  stem_warning_threshold <span class="op">=</span> <span class="fl">40L</span>,</span>
 <span>  label_warning_threshold <span class="op">=</span> <span class="fl">10L</span>,</span>
 <span>  words_per_line <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  certainty <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  certainty <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  quiet <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'burden_report'</span></span>
@@ -120,6 +121,11 @@ one.</p></dd>
 <dt id="arg-certainty">certainty<a class="anchor" aria-label="anchor" href="#arg-certainty"></a></dt>
 <dd><p>If <code>TRUE</code> (default), attach and print the
 <code><a href="calculation_certainty.html">calculation_certainty()</a></code> breakdown. <code>FALSE</code> skips it (a little faster).</p></dd>
+
+
+<dt id="arg-quiet">quiet<a class="anchor" aria-label="anchor" href="#arg-quiet"></a></dt>
+<dd><p>If <code>FALSE</code> (default), report progress through the pipeline
+stages with <code><a href="https://cli.r-lib.org/reference/cli_progress_step.html" class="external-link">cli::cli_progress_step()</a></code>. <code>TRUE</code> silences it.</p></dd>
 
 
 <dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>

@@ -34,13 +34,21 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="surveyburden-development-version">surveyBurden (development version)<a class="anchor" aria-label="anchor" href="#surveyburden-development-version"></a></h2>
+<ul><li>
+<code><a href="../reference/burden_report.html">burden_report()</a></code> gains a <code>quiet</code> argument and, by default, reports progress through the pipeline stages with <code><a href="https://cli.r-lib.org/reference/cli_progress_step.html" class="external-link">cli::cli_progress_step()</a></code>.</li>
+<li>
+<code><a href="../reference/burden_report.html">burden_report()</a></code> no longer errors on a survey where every structural path screens out (an unconditional <code>EndSurvey</code> in the flow). It now returns a report with <code>NA</code> burden, <code>basis = "none"</code> and an explanatory warning; the per-path burdens are still in <code>$paths</code>.</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="surveyburden-010">surveyBurden 0.1.0<a class="anchor" aria-label="anchor" href="#surveyburden-010"></a></h2>
 <ul><li>First release.</li>
 <li>
 <code><a href="../reference/burden_report.html">burden_report()</a></code> scores a Qualtrics <code>.qsf</code> (or a live survey via the API) with the GfS / Axhausen burden weights, reconstructs the respondent paths the survey’s flow and display logic allow, and reports burden across those paths.</li>
 <li>Lower-level steps are exported: <code><a href="../reference/read_qsf.html">read_qsf()</a></code>, <code><a href="../reference/fetch_qsf.html">fetch_qsf()</a></code>, <code><a href="../reference/parse_qsf.html">parse_qsf()</a></code>, <code><a href="../reference/classify_question.html">classify_question()</a></code>, <code><a href="../reference/gfs_weights.html">gfs_weights()</a></code>, <code><a href="../reference/score_burden.html">score_burden()</a></code>, <code><a href="../reference/resolve_flow.html">resolve_flow()</a></code>, <code><a href="../reference/resolve_paths.html">resolve_paths()</a></code>, <code><a href="../reference/path_burden.html">path_burden()</a></code>, <code><a href="../reference/path_burden_profile.html">path_burden_profile()</a></code>, <code><a href="../reference/respondent_burden.html">respondent_burden()</a></code>, <code><a href="../reference/calculation_certainty.html">calculation_certainty()</a></code>, <code><a href="../reference/validate_times.html">validate_times()</a></code>.</li>
 </ul></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

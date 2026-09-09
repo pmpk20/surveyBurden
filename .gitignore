@@ -14,9 +14,7 @@
 /.superpowers/
 *.bundle
 
-# draft manuscript and planning notes: kept locally, not on the remote
-/paper.md
-/paper.bib
+# planning notes: kept locally, not on the remote
 /surveyBurden_roadmap.md
 
 # local data and paradata are never committed

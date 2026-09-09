@@ -1,3 +1,12 @@
+# surveyBurden (development version)
+
+* `burden_report()` gains a `quiet` argument and, by default, reports progress
+  through the pipeline stages with `cli::cli_progress_step()`.
+* `burden_report()` no longer errors on a survey where every structural path
+  screens out (an unconditional `EndSurvey` in the flow). It now returns a
+  report with `NA` burden, `basis = "none"` and an explanatory warning; the
+  per-path burdens are still in `$paths`.
+
 # surveyBurden 0.1.0
 
 * First release.

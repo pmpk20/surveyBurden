@@ -27,6 +27,8 @@
 #'   only.
 #' @param certainty If `TRUE` (default), attach and print the
 #'   [calculation_certainty()] breakdown. `FALSE` skips it (a little faster).
+#' @param quiet If `FALSE` (default), report progress through the pipeline
+#'   stages with [cli::cli_progress_step()]. `TRUE` silences it.
 #'
 #' @details
 #' **Why two ranges exist.** [path_burden()] (the fast, naive check) scores each
@@ -96,17 +98,24 @@ burden_report <- function(x, weights = gfs_weights(), profile = TRUE,
                           stem_warning_threshold = 40L,
                           label_warning_threshold = 10L,
                           words_per_line = NULL,
-                          certainty = TRUE) {
+                          certainty = TRUE,
+                          quiet = FALSE) {
+  step <- if (isTRUE(quiet)) function(...) invisible() else cli::cli_progress_step
+
+  step("Reading survey")
   qsf <- if (inherits(x, "qsf_raw")) x else read_qsf(x)
   if (!is.null(words_per_line)) weights$words_per_line <- words_per_line
 
+  step("Scoring questions and resolving paths")
   isum   <- instrument_summary(qsf)
   pb     <- path_burden(qsf, weights = weights)
   scored <- score_burden(parse_qsf(qsf), weights = weights)
   blocks <- resolve_live_blocks(qsf)
+  step("Checking calculation certainty")
   cert   <- if (isTRUE(certainty)) calculation_certainty(qsf, weights = weights) else NULL
   ppm    <- weights$points_per_minute
   full   <- pb[!pb$terminates_early, ]
+  no_complete <- nrow(full) == 0L
 
   # ---- $instrument -------------------------------------------------------
   instrument <- tibble::tibble(
@@ -155,7 +164,15 @@ burden_report <- function(x, weights = gfs_weights(), profile = TRUE,
 
   # ---- $burden --------------------------------------------------------
   probs <- c("min", "p25", "median", "p75", "max")
-  if (isTRUE(profile)) {
+  if (no_complete) {
+    # every structural path screens out: there is no completing path to
+    # summarise a burden spread over. Report NA and flag it (below); the
+    # per-path burdens are still in $paths.
+    pts        <- rep(NA_real_, 5L)
+    basis      <- "none"
+    gate_range <- c(NA_integer_, NA_integer_)
+  } else if (isTRUE(profile)) {
+    step("Enumerating display-logic combinations")
     pbp   <- path_burden_profile(qsf, weights = weights)
     m     <- match(paths_tbl$path_id, pbp$path_id)
     paths_tbl$burden_min    <- pbp$burden_min[m]
@@ -164,9 +181,11 @@ burden_report <- function(x, weights = gfs_weights(), profile = TRUE,
     pooled <- do.call(rbind, pbp$profile[!pbp$terminates_early])
     pts <- weighted_quantile(pooled$burden, pooled$weight, c(0, .25, .5, .75, 1))
     basis <- "structural"
+    gate_range <- range(full$n_gates)
   } else {
     pts <- c(min(full$gfs_floor), NA, NA, NA, max(full$gfs_ceiling))
     basis <- "naive"
+    gate_range <- range(full$n_gates)
   }
   burden_tbl <- tibble::tibble(
     statistic = factor(probs, levels = probs),
@@ -175,7 +194,6 @@ burden_report <- function(x, weights = gfs_weights(), profile = TRUE,
     index     = as.numeric(pts) / rare_threshold
   )
   attr(burden_tbl, "basis") <- basis
-  gate_range <- range(full$n_gates)
 
   # ---- $readability --------------------------------------------------
   answerable <- !scored$std_type %in% c("descriptive", "meta", "timing", "captcha")
@@ -229,7 +247,11 @@ burden_report <- function(x, weights = gfs_weights(), profile = TRUE,
       nrow(lg), if (nrow(lg) == 1) "" else "s", if (nrow(lg) == 1) "s" else "ve",
       paste(lg$question_id, collapse = ", ")))
   }
-  if (any(pb$terminates_early)) {
+  if (no_complete) {
+    warnings <- c(warnings, sprintf(
+      "This survey has no completing path: all %d structural paths screen out (the survey ends early on every one). No burden spread is reported; the per-path burden for each screen-out path is in `$paths`.",
+      nrow(pb)))
+  } else if (any(pb$terminates_early)) {
     warnings <- c(warnings, sprintf(
       "%d of %d structural paths are screen-outs (the survey ends early there) rather than complete responses.",
       sum(pb$terminates_early), nrow(pb)))
@@ -238,7 +260,7 @@ burden_report <- function(x, weights = gfs_weights(), profile = TRUE,
     warnings <- c(warnings, sprintf(
       "%d-%d display-logic combinations per full path were not checked (profile = FALSE); the range below is a fast estimate and its minimum may not actually be reachable.",
       gate_range[1], gate_range[2]))
-  } else {
+  } else if (identical(basis, "structural")) {
     if (burden_tbl$points[burden_tbl$statistic == "max"] > rare_threshold) {
       warnings <- c(warnings, sprintf(
         "The heaviest reachable burden (%.0f pts) is above %.0f points, the level Heimgartner & Axhausen (2024) found rare among the %d survey waves they scored with the same GfS method (their sample median: 399 pts).",
@@ -342,20 +364,26 @@ print_burden_report_body <- function(x) {
 
   cli::cli_h2("Paths")
   cli::cli_text("Structural paths: {ins$n_paths} ({ins$n_complete_paths} complete, {ins$n_screenout_paths} screen-out)")
-  cli::cli_text("Display-logic combinations checked: {gr[1]}-{gr[2]} per complete path")
+  if (ins$n_complete_paths > 0L) {
+    cli::cli_text("Display-logic combinations checked: {gr[1]}-{gr[2]} per complete path")
+  }
 
   cli::cli_h2("Burden ({ppm} GfS points ~ 1 minute; index = points / {rt})")
   b <- x$burden
   labs <- c(min = "Minimum", p25 = "25th percentile", median = "Median",
             p75 = "75th percentile", max = "Maximum")
-  if (identical(attr(b, "basis"), "naive")) b <- b[b$statistic %in% c("min", "max"), ]
-  cli::cli_verbatim(render_table(rbind(
-    c("Statistic", "Points", "~Min", "Index"),
-    cbind(labs[as.character(b$statistic)],
-          formatC(b$points,  format = "f", digits = 0),
-          formatC(b$minutes, format = "f", digits = 0),
-          formatC(b$index,   format = "f", digits = 2))
-  )))
+  if (identical(attr(b, "basis"), "none")) {
+    cli::cli_text("No completing path: every structural path screens out. Per-path burden is in {.code $paths}.")
+  } else {
+    if (identical(attr(b, "basis"), "naive")) b <- b[b$statistic %in% c("min", "max"), ]
+    cli::cli_verbatim(render_table(rbind(
+      c("Statistic", "Points", "~Min", "Index"),
+      cbind(labs[as.character(b$statistic)],
+            formatC(b$points,  format = "f", digits = 0),
+            formatC(b$minutes, format = "f", digits = 0),
+            formatC(b$index,   format = "f", digits = 2))
+    )))
+  }
   cli::cli_text("Benchmark: median {bm$median_points} points across {bm$n_waves} GfS-scored survey waves (Heimgartner & Axhausen 2024).")
 
   if (!is.null(x$population)) {
@@ -432,7 +460,9 @@ format.summary.burden_report <- function(x, ...) {
   cli::cli_fmt({
     cli::cli_h1("{ins$survey_name}")
     cli::cli_text("{ins$n_questions} questions, {ins$n_blocks} blocks, {ins$n_paths} structural paths ({ins$n_complete_paths} complete).")
-    if (identical(attr(b, "basis"), "naive")) {
+    if (identical(attr(b, "basis"), "none")) {
+      cli::cli_text("No completing path: every structural path screens out.")
+    } else if (identical(attr(b, "basis"), "naive")) {
       cli::cli_text("Burden: {sprintf('%.0f', g('min'))} / {sprintf('%.0f', g('max'))} points (min / max; naive band).")
     } else {
       cli::cli_text("Burden: {sprintf('%.0f', g('min'))} / {sprintf('%.0f', g('median'))} / {sprintf('%.0f', g('max'))} points (min / median / max; ~{sprintf('%.0f', g('min')/x$ppm)} / {sprintf('%.0f', g('median')/x$ppm)} / {sprintf('%.0f', g('max')/x$ppm)} min).")

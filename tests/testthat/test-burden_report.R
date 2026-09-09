@@ -189,3 +189,45 @@ test_that("summary(burden_report) returns a short headline object", {
   expect_output(res <- withVisible(print(s)))
   expect_identical(res$visible, FALSE)
 })
+
+# a survey whose flow starts with an unconditional EndSurvey: every enumerated
+# path terminates early, so there is no completing path to summarise a spread over
+no_complete_qsf <- function() {
+  q <- read_qsf(demo_qsf())
+  fl <- which(vapply(q$SurveyElements,
+                     function(e) identical(e$Element, "FL"), logical(1)))
+  q$SurveyElements[[fl]]$Payload$Flow <- c(
+    list(list(Type = "EndSurvey", FlowID = "F_kill")),
+    q$SurveyElements[[fl]]$Payload$Flow
+  )
+  q
+}
+
+test_that("burden_report degrades gracefully when no path completes", {
+  q <- no_complete_qsf()
+
+  expect_no_error(r <- burden_report(q, certainty = FALSE, quiet = TRUE))
+  expect_s3_class(r, "burden_report")
+  expect_equal(r$instrument$n_complete_paths, 0L)
+  expect_true(all(is.na(r$burden$points)))
+  expect_equal(attr(r$burden, "basis"), "none")
+  expect_match(paste(r$warnings, collapse = " "),
+               "no completing path", ignore.case = TRUE)
+  expect_no_error(format(r))
+  expect_no_error(capture.output(print(summary(r))))
+})
+
+test_that("the no-completing-path guard also holds under profile = FALSE", {
+  expect_no_error(
+    burden_report(no_complete_qsf(), profile = FALSE, certainty = FALSE, quiet = TRUE)
+  )
+})
+
+test_that("burden_report is silent under quiet = TRUE", {
+  expect_silent(burden_report(fx(), certainty = FALSE, quiet = TRUE))
+})
+
+test_that("burden_report reports progress under quiet = FALSE", {
+  withr::local_options(cli.progress_show_after = 0, cli.progress_clear = FALSE)
+  expect_message(burden_report(fx(), certainty = FALSE, quiet = FALSE))
+})

@@ -14,7 +14,8 @@ burden_report(
   stem_warning_threshold = 40L,
   label_warning_threshold = 10L,
   words_per_line = NULL,
-  certainty = TRUE
+  certainty = TRUE,
+  quiet = FALSE
 )
 
 \method{summary}{burden_report}(object, ...)
@@ -57,6 +58,9 @@ one.}
 
 \item{certainty}{If \code{TRUE} (default), attach and print the
 \code{\link[=calculation_certainty]{calculation_certainty()}} breakdown. \code{FALSE} skips it (a little faster).}
+
+\item{quiet}{If \code{FALSE} (default), report progress through the pipeline
+stages with \code{\link[cli:cli_progress_step]{cli::cli_progress_step()}}. \code{TRUE} silences it.}
 
 \item{object}{A \code{burden_report} from \code{\link[=burden_report]{burden_report()}}.}
 

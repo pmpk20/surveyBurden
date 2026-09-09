@@ -182,6 +182,14 @@ distribution link (`.../jfe/form/SV_...`), or the bare `SV_` id all work.
 survey-builder host. Check Account Settings, then Qualtrics IDs. Credentials are
 read from the environment and never appear in code.
 
+You can only score a survey you can access. `burden_report()` reads the survey
+**definition** through the `survey-definitions` API, which requires a token with
+the "Manage Survey" permission on that survey — normally a survey in your own
+Qualtrics account. A public participation link
+(`.../jfe/form/SV_...`) only lets a respondent *take* the survey; it does not
+expose the definition. To score someone else's survey you need either their
+`.qsf` export or an API token for the account that owns it.
+
 ## What surveyBurden does
 
 It takes a Qualtrics `.qsf` export (a JSON file), or a live survey through the

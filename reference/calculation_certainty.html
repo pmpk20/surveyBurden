@@ -64,7 +64,8 @@ to read as assumption-dependent.</p>
 <span>  max_paths <span class="op">=</span> <span class="fl">10000L</span>,</span>
 <span>  paths <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  scored <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  blocks <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  blocks <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  parsed_dl <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -84,11 +85,11 @@ to read as assumption-dependent.</p>
 <dd><p>Passed to <code><a href="resolve_paths.html">resolve_paths()</a></code>.</p></dd>
 
 
-<dt id="arg-paths-scored-blocks">paths, scored, blocks<a class="anchor" aria-label="anchor" href="#arg-paths-scored-blocks"></a></dt>
+<dt id="arg-paths-scored-blocks-parsed-dl">paths, scored, blocks, parsed_dl<a class="anchor" aria-label="anchor" href="#arg-paths-scored-blocks-parsed-dl"></a></dt>
 <dd><p>Optional precomputed <code><a href="resolve_paths.html">resolve_paths()</a></code>,
-<code><a href="score_burden.html">score_burden()</a></code> and <code><a href="resolve_live_blocks.html">resolve_live_blocks()</a></code> results for this <code>qsf</code>
-(internal reuse by <code><a href="burden_report.html">burden_report()</a></code>; <code>NULL</code> computes them here, leaving
-the public behaviour unchanged).</p></dd>
+<code><a href="score_burden.html">score_burden()</a></code>, <code><a href="resolve_live_blocks.html">resolve_live_blocks()</a></code> and parsed display-logic results
+for this <code>qsf</code> (internal reuse by <code><a href="burden_report.html">burden_report()</a></code>; <code>NULL</code> computes them
+here, leaving the public behaviour unchanged).</p></dd>
 
 </dl></div>
     <div class="section level2">

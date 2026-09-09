@@ -20,17 +20,19 @@ classify_question(payload)
 
 ## Value
 
-A one-row [tibble](https://tibble.tidyverse.org/reference/tibble.html)
-with columns `question_id`, `std_type`, `qualtrics_type`, `selector`,
-`subselector`, `n_options`, `n_rows`, `n_cols`, `text_words`,
-`max_label_words` (longest response option / matrix label, in words;
-`NA` if the question has no labels), `label_text` (all response/answer
-labels lowercased and joined with `" | "`, truncated; `NA` if none),
-`options_numeric` (`TRUE` if the question has \>= 3 response options and
-every one is a number), `question_text` (HTML-stripped, truncated to 200
-characters), `is_hidden` (`TRUE` if injected CSS/JS hides the question
-from the respondent), `has_display_logic`, `display_logic_refs` (list
-column), `has_validation` and `flag`.
+A named `list` with elements `question_id`, `std_type`,
+`qualtrics_type`, `selector`, `subselector`, `n_options`, `n_rows`,
+`n_cols`, `text_words`, `max_label_words` (longest response option /
+matrix label, in words; `NA` if the question has no labels),
+`label_text` (all response/answer labels lowercased and joined with
+`" | "`, truncated; `NA` if none), `options_numeric` (`TRUE` if the
+question has \>= 3 response options and every one is a number),
+`question_text` (HTML-stripped, truncated to 200 characters),
+`is_hidden` (`TRUE` if injected CSS/JS hides the question from the
+respondent), `has_display_logic`, `display_logic_refs` (character
+vector), `has_validation` and `flag`.
+[`parse_qsf()`](https://pmpk20.github.io/surveyBurden/reference/parse_qsf.md)
+assembles one tibble from these across every live question.
 
 ## Details
 

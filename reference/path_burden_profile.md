@@ -11,7 +11,8 @@ path_burden_profile(
   qsf,
   weights = gfs_weights(),
   max_paths = 10000L,
-  engine = NULL
+  engine = NULL,
+  parsed_dl = NULL
 )
 ```
 
@@ -62,18 +63,22 @@ contributes its referenced choices as mutually exclusive states; a
 multi-select or embedded field contributes binary states; a Loop & Merge
 block contributes iteration counts `1..max`. Conditional questions are
 grouped into coupling components (two questions couple if they share a
-gate, directly or through a chain of shared gates). **Small components
-are enumerated exactly** – every joint combination of their gates'
-states, respecting single-choice mutual exclusion and AND-across-gates
-conditions precisely. Components too large to enumerate (many questions
-sharing one popular trigger, such as employment status) fall back to a
-primary-gate approximation for just that component: each question is
-scored against its first gate with the rest held permissive. Components
-are independent of each other and their contributions convolved into the
-profile for the path.
+gate, directly or through a chain of shared gates). A component with at
+most 5000 joint gate-states is **enumerated exactly** – every joint
+combination of its gates' states, respecting single-choice mutual
+exclusion and AND-across-gates conditions precisely. A component above
+that (many questions sharing one popular trigger, such as employment
+status) falls back to a primary-gate approximation for just that
+component: each question is scored against its first gate with the rest
+held permissive. Components are independent of each other and their
+contributions convolved into the profile for the path.
 
 Remaining approximations: different components are treated as
 independent (the real coupling between, say, employment status and
-having a licence is weak, but not checked); large components use the
-primary-gate approximation above; loop iterations are scored at a flat
-per-iteration burden (within-loop display logic ignored).
+having a licence is weak, but not checked); components above the
+5000-state cap use the primary-gate approximation above; loop iterations
+are scored at a flat per-iteration burden (within-loop display logic
+ignored). Once a path's convolved profile exceeds 3000 distinct burden
+values it is re-binned to multiples of 5 GfS points, so on a very heavy
+survey the reported quantiles can move a few points from the
+fine-grained figure.

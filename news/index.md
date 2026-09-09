@@ -3,6 +3,43 @@
 ## surveyBurden (development version)
 
 - [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
+  is faster again:
+  [`parse_qsf()`](https://pmpk20.github.io/surveyBurden/reference/parse_qsf.md)
+  and
+  [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
+  now build their catalogue in one pass instead of constructing a
+  one-row tibble per question and row-binding hundreds of them (that
+  machinery was ~60% of the remaining runtime). INFUZE core survey: ~4s
+  to ~3s; the bundled demo ~1s to ~0.5s. Catalogue contents are
+  byte-identical.
+- **Breaking (internal API):**
+  [`classify_question()`](https://pmpk20.github.io/surveyBurden/reference/classify_question.md)
+  now returns a named `list` rather than a one-row tibble. It is a
+  building block for
+  [`parse_qsf()`](https://pmpk20.github.io/surveyBurden/reference/parse_qsf.md),
+  which is unchanged.
+  [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)’s
+  output is unchanged.
+- Each question’s display-logic tree is parsed once per
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
+  and shared between the burden engine and the certainty breakdown,
+  instead of being parsed independently by each.
+- The display-logic convolution builds its intermediate
+  `(burden, weight)` frames with a bare constructor instead of
+  [`data.frame()`](https://rdrr.io/r/base/data.frame.html) (called 1000+
+  times on a survey with heavy display logic). Numbers are unchanged.
+- The exact display-logic enumeration indexes its state grid column-wise
+  and hoists the per-question burden and predicate lookups out of the
+  row loop. Numbers are unchanged.
+- A survey with several block randomisers now raises **one** combined
+  “BlockRandomizer” warning that names the flow nodes, instead of one
+  warning per randomiser.
+- Internal cleanups with no change to any reported number: the
+  display-logic exact-enumeration cap is now a single shared constant
+  (was duplicated between the burden calc and the certainty breakdown,
+  so they could drift); question stems are HTML-stripped once per
+  question instead of twice.
+- [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
   is ~4x faster (INFUZE core survey: 17s to 4s). It now parses, scores
   and resolves the instrument once and threads the results through the
   pipeline instead of each step redoing that work.

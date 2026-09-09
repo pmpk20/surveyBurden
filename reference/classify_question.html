@@ -62,17 +62,17 @@ multiple choice is <code>single_choice</code> whether it means yes/no or somethi
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A one-row <a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a> with columns <code>question_id</code>,
-<code>std_type</code>, <code>qualtrics_type</code>, <code>selector</code>, <code>subselector</code>, <code>n_options</code>,
-<code>n_rows</code>, <code>n_cols</code>, <code>text_words</code>, <code>max_label_words</code> (longest response
-option / matrix label, in words; <code>NA</code> if the question has no labels),
-<code>label_text</code> (all response/answer labels lowercased and joined with
-<code>" | "</code>, truncated; <code>NA</code> if none), <code>options_numeric</code> (<code>TRUE</code> if the
-question has &gt;= 3 response options and every one is a number),
-<code>question_text</code> (HTML-stripped, truncated to 200 characters), <code>is_hidden</code>
-(<code>TRUE</code> if injected CSS/JS hides the question from the respondent),
-<code>has_display_logic</code>, <code>display_logic_refs</code> (list column), <code>has_validation</code>
-and <code>flag</code>.</p>
+    <p>A named <code>list</code> with elements <code>question_id</code>, <code>std_type</code>,
+<code>qualtrics_type</code>, <code>selector</code>, <code>subselector</code>, <code>n_options</code>, <code>n_rows</code>,
+<code>n_cols</code>, <code>text_words</code>, <code>max_label_words</code> (longest response option / matrix
+label, in words; <code>NA</code> if the question has no labels), <code>label_text</code> (all
+response/answer labels lowercased and joined with <code>" | "</code>, truncated; <code>NA</code>
+if none), <code>options_numeric</code> (<code>TRUE</code> if the question has &gt;= 3 response
+options and every one is a number), <code>question_text</code> (HTML-stripped,
+truncated to 200 characters), <code>is_hidden</code> (<code>TRUE</code> if injected CSS/JS hides
+the question from the respondent), <code>has_display_logic</code>,
+<code>display_logic_refs</code> (character vector), <code>has_validation</code> and <code>flag</code>.
+<code><a href="parse_qsf.html">parse_qsf()</a></code> assembles one tibble from these across every live question.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

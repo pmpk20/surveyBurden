@@ -200,6 +200,12 @@ respondent answers. <code><a href="path_burden_profile.html">path_burden_profile
 combinations and finds the burden values that are genuinely reachable, which
 is why its minimum is usually <em>higher</em> than the naive floor. <strong>This report
 uses the profile's range as the one range shown, whenever <code>profile = TRUE</code>.</strong></p>
+<p><strong>Path-space cap.</strong> The structural path space is enumerated up to
+<code>max_paths</code> (10000, set inside <code><a href="resolve_flow.html">resolve_flow()</a></code>). A flow that would produce
+more raises an error rather than a partial answer; a survey that hits it has
+genuinely intractable routing. Block randomisers are treated as "all
+sub-blocks shown, in survey order" – the randomised subsets are not
+enumerated.</p>
     </div>
 
     <div class="section level2">

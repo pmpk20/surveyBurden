@@ -18,7 +18,8 @@ calculation_certainty(
   max_paths = 10000L,
   paths = NULL,
   scored = NULL,
-  blocks = NULL
+  blocks = NULL,
+  parsed_dl = NULL
 )
 ```
 
@@ -40,14 +41,13 @@ calculation_certainty(
   Passed to
   [`resolve_paths()`](https://pmpk20.github.io/surveyBurden/reference/resolve_paths.md).
 
-- paths, scored, blocks:
+- paths, scored, blocks, parsed_dl:
 
   Optional precomputed
   [`resolve_paths()`](https://pmpk20.github.io/surveyBurden/reference/resolve_paths.md),
-  [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
-  and
+  [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md),
   [`resolve_live_blocks()`](https://pmpk20.github.io/surveyBurden/reference/resolve_live_blocks.md)
-  results for this `qsf` (internal reuse by
+  and parsed display-logic results for this `qsf` (internal reuse by
   [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md);
   `NULL` computes them here, leaving the public behaviour unchanged).
 

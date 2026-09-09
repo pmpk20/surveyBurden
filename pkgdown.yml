@@ -3,7 +3,7 @@ pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   surveyBurden: surveyBurden.html
-last_built: 2026-09-09T10:08Z
+last_built: 2026-09-09T13:14Z
 urls:
   reference: https://pmpk20.github.io/surveyBurden/reference
   article: https://pmpk20.github.io/surveyBurden/articles

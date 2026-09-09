@@ -4,7 +4,14 @@
 \alias{calculation_certainty}
 \title{Where the burden calculation is exact, and where it rests on assumptions}
 \usage{
-calculation_certainty(qsf, weights = gfs_weights(), max_paths = 10000L)
+calculation_certainty(
+  qsf,
+  weights = gfs_weights(),
+  max_paths = 10000L,
+  paths = NULL,
+  scored = NULL,
+  blocks = NULL
+)
 }
 \arguments{
 \item{qsf}{A path to a \code{.qsf}, or a \code{qsf_raw} object from \code{\link[=read_qsf]{read_qsf()}}.}
@@ -12,6 +19,11 @@ calculation_certainty(qsf, weights = gfs_weights(), max_paths = 10000L)
 \item{weights}{A \code{\link[=gfs_weights]{gfs_weights()}} list.}
 
 \item{max_paths}{Passed to \code{\link[=resolve_paths]{resolve_paths()}}.}
+
+\item{paths, scored, blocks}{Optional precomputed \code{\link[=resolve_paths]{resolve_paths()}},
+\code{\link[=score_burden]{score_burden()}} and \code{\link[=resolve_live_blocks]{resolve_live_blocks()}} results for this \code{qsf}
+(internal reuse by \code{\link[=burden_report]{burden_report()}}; \code{NULL} computes them here, leaving
+the public behaviour unchanged).}
 }
 \value{
 An object of class \code{calculation_certainty} (list):

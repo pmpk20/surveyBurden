@@ -107,15 +107,29 @@ burden_report <- function(x, weights = gfs_weights(), profile = TRUE,
   if (!is.null(words_per_line)) weights$words_per_line <- words_per_line
 
   step("Scoring questions and resolving paths")
-  isum   <- instrument_summary(qsf)
-  pb     <- path_burden(qsf, weights = weights)
-  scored <- score_burden(parse_qsf(qsf), weights = weights)
-  blocks <- resolve_live_blocks(qsf)
-  step("Checking calculation certainty")
-  cert   <- if (isTRUE(certainty)) calculation_certainty(qsf, weights = weights) else NULL
+  # Parse / score / resolve the instrument once here and thread the results
+  # through the pipeline; every function below accepts them precomputed and
+  # falls back to computing its own when called directly.
+  catalogue <- parse_qsf(qsf)
+  scored    <- score_burden(catalogue, weights = weights)
+  blocks    <- resolve_live_blocks(qsf)
+  paths     <- resolve_paths(qsf, catalogue = catalogue, blocks = blocks)
+  isum      <- instrument_summary(qsf, blocks = blocks)
+  pb        <- path_burden(qsf, weights = weights, paths = paths, scored = scored)
   ppm    <- weights$points_per_minute
   full   <- pb[!pb$terminates_early, ]
   no_complete <- nrow(full) == 0L
+
+  # the display-logic engine is the expensive step; build it once if either the
+  # structural profile or a routes summary will need it.
+  engine <- if (!no_complete && (isTRUE(profile) || !is.null(routes)))
+    burden_engine(qsf, weights = weights,
+                  paths = paths, scored = scored, blocks = blocks) else NULL
+
+  step("Checking calculation certainty")
+  cert   <- if (isTRUE(certainty))
+    calculation_certainty(qsf, weights = weights,
+                          paths = paths, scored = scored, blocks = blocks) else NULL
 
   # ---- $instrument -------------------------------------------------------
   instrument <- tibble::tibble(
@@ -173,7 +187,7 @@ burden_report <- function(x, weights = gfs_weights(), profile = TRUE,
     gate_range <- c(NA_integer_, NA_integer_)
   } else if (isTRUE(profile)) {
     step("Enumerating display-logic combinations")
-    pbp   <- path_burden_profile(qsf, weights = weights)
+    pbp   <- path_burden_profile(qsf, weights = weights, engine = engine)
     m     <- match(paths_tbl$path_id, pbp$path_id)
     paths_tbl$burden_min    <- pbp$burden_min[m]
     paths_tbl$burden_median <- pbp$burden_median[m]
@@ -277,7 +291,7 @@ burden_report <- function(x, weights = gfs_weights(), profile = TRUE,
   # ---- $population (optional) --------------------------------------
   population <- NULL
   if (!is.null(routes)) {
-    pr <- respondent_burden(qsf, routes = routes, weights = weights)
+    pr <- respondent_burden(qsf, routes = routes, weights = weights, engine = engine)
     qp <- stats::quantile(pr$pred_pts, c(0, .25, .5, .75, 1), na.rm = TRUE)
     population <- tibble::tibble(
       statistic = factor(probs, levels = probs),

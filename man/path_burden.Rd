@@ -4,7 +4,13 @@
 \alias{path_burden}
 \title{Burden per respondent path}
 \usage{
-path_burden(qsf, weights = gfs_weights(), max_paths = 10000L)
+path_burden(
+  qsf,
+  weights = gfs_weights(),
+  max_paths = 10000L,
+  paths = NULL,
+  scored = NULL
+)
 }
 \arguments{
 \item{qsf}{A \code{qsf_raw} object from \code{\link[=read_qsf]{read_qsf()}}.}
@@ -12,6 +18,10 @@ path_burden(qsf, weights = gfs_weights(), max_paths = 10000L)
 \item{weights}{A \code{\link[=gfs_weights]{gfs_weights()}} list.}
 
 \item{max_paths}{Passed to \code{\link[=resolve_paths]{resolve_paths()}}.}
+
+\item{paths, scored}{Optional precomputed \code{\link[=resolve_paths]{resolve_paths()}} and
+\code{\link[=score_burden]{score_burden()}} results for this \code{qsf} (internal reuse; \code{NULL} computes
+them here, leaving the public behaviour unchanged).}
 }
 \value{
 A \link[tibble:tibble]{tibble}, one row per flow path:

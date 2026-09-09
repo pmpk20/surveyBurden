@@ -4,10 +4,13 @@
 \alias{instrument_summary}
 \title{Structural summary of an instrument}
 \usage{
-instrument_summary(qsf)
+instrument_summary(qsf, blocks = NULL)
 }
 \arguments{
 \item{qsf}{A \code{qsf_raw} object from \code{\link[=read_qsf]{read_qsf()}}.}
+
+\item{blocks}{Optional precomputed \code{\link[=resolve_live_blocks]{resolve_live_blocks()}} result for this
+\code{qsf} (internal reuse; \code{NULL} computes it here).}
 }
 \value{
 A list: \code{survey_name}, \code{n_questions}, \code{n_blocks}, \code{n_branches},

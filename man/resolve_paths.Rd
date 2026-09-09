@@ -4,12 +4,18 @@
 \alias{resolve_paths}
 \title{Resolve respondent paths, flow \emph{and} display logic}
 \usage{
-resolve_paths(qsf, max_paths = 10000L)
+resolve_paths(qsf, max_paths = 10000L, catalogue = NULL, blocks = NULL)
 }
 \arguments{
 \item{qsf}{A \code{qsf_raw} object from \code{\link[=read_qsf]{read_qsf()}}.}
 
 \item{max_paths}{Passed to \code{\link[=resolve_flow]{resolve_flow()}}.}
+
+\item{catalogue, blocks}{Optional precomputed \code{\link[=parse_qsf]{parse_qsf()}} and
+\code{\link[=resolve_live_blocks]{resolve_live_blocks()}} results for this \code{qsf}. Internal: lets
+\code{\link[=burden_report]{burden_report()}} parse and resolve the instrument once and reuse it. When
+\code{NULL} (default) they are computed here, so the public behaviour is
+unchanged.}
 }
 \value{
 A \link[tibble:tibble]{tibble}, one row per flow path, with the

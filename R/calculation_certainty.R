@@ -11,6 +11,10 @@
 #' @param qsf A path to a `.qsf`, or a `qsf_raw` object from [read_qsf()].
 #' @param weights A [gfs_weights()] list.
 #' @param max_paths Passed to [resolve_paths()].
+#' @param paths,scored,blocks Optional precomputed [resolve_paths()],
+#'   [score_burden()] and [resolve_live_blocks()] results for this `qsf`
+#'   (internal reuse by [burden_report()]; `NULL` computes them here, leaving
+#'   the public behaviour unchanged).
 #'
 #' @return An object of class `calculation_certainty` (list):
 #'   \describe{
@@ -38,11 +42,12 @@
 #' calculation_certainty("survey.qsf")
 #' }
 #' @export
-calculation_certainty <- function(qsf, weights = gfs_weights(), max_paths = 10000L) {
+calculation_certainty <- function(qsf, weights = gfs_weights(), max_paths = 10000L,
+                                  paths = NULL, scored = NULL, blocks = NULL) {
   qsf    <- if (inherits(qsf, "qsf_raw")) qsf else read_qsf(qsf)
-  paths  <- resolve_paths(qsf, max_paths = max_paths)
-  scored <- score_burden(parse_qsf(qsf), weights = weights)
-  blocks <- resolve_live_blocks(qsf)
+  if (is.null(paths))  paths  <- resolve_paths(qsf, max_paths = max_paths)
+  if (is.null(scored)) scored <- score_burden(parse_qsf(qsf), weights = weights)
+  if (is.null(blocks)) blocks <- resolve_live_blocks(qsf)
   full   <- paths[!paths$terminates_early, ]
 
   # --- paths: exact vs carrying an unresolved display-logic condition ---

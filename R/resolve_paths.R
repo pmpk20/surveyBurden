@@ -14,6 +14,11 @@
 #'
 #' @param qsf A `qsf_raw` object from [read_qsf()].
 #' @param max_paths Passed to [resolve_flow()].
+#' @param catalogue,blocks Optional precomputed [parse_qsf()] and
+#'   [resolve_live_blocks()] results for this `qsf`. Internal: lets
+#'   [burden_report()] parse and resolve the instrument once and reuse it. When
+#'   `NULL` (default) they are computed here, so the public behaviour is
+#'   unchanged.
 #'
 #' @return A [tibble][tibble::tibble], one row per flow path, with the
 #'   [resolve_flow()] columns plus:
@@ -24,10 +29,10 @@
 #'   }
 #'
 #' @export
-resolve_paths <- function(qsf, max_paths = 10000L) {
+resolve_paths <- function(qsf, max_paths = 10000L, catalogue = NULL, blocks = NULL) {
   flow <- resolve_flow(qsf, max_paths = max_paths)
-  catalogue <- parse_qsf(qsf)
-  blocks <- resolve_live_blocks(qsf)
+  if (is.null(catalogue)) catalogue <- parse_qsf(qsf)
+  if (is.null(blocks))    blocks    <- resolve_live_blocks(qsf)
   block_q <- stats::setNames(blocks$question_ids, blocks$block_id)
 
   cond_ids <- catalogue$question_id[catalogue$has_display_logic]
@@ -79,11 +84,13 @@ classify_reachability <- function(catalogue, path_qids) {
 #' Structural summary of an instrument
 #'
 #' @param qsf A `qsf_raw` object from [read_qsf()].
+#' @param blocks Optional precomputed [resolve_live_blocks()] result for this
+#'   `qsf` (internal reuse; `NULL` computes it here).
 #' @return A list: `survey_name`, `n_questions`, `n_blocks`, `n_branches`,
 #'   `n_randomisers`, `n_loop_blocks`, `n_end_points`.
 #' @export
-instrument_summary <- function(qsf) {
-  blocks <- resolve_live_blocks(qsf)
+instrument_summary <- function(qsf, blocks = NULL) {
+  if (is.null(blocks)) blocks <- resolve_live_blocks(qsf)
   nodes  <- qsf_flow(qsf)$Flow
 
   counts <- c(Branch = 0L, BlockRandomizer = 0L, EndSurvey = 0L)

@@ -8,7 +8,8 @@ respondent_burden(
   qsf,
   routes = NULL,
   weights = gfs_weights(),
-  loop_typical = 2
+  loop_typical = 2,
+  engine = NULL
 )
 }
 \arguments{
@@ -31,6 +32,10 @@ Missing columns are treated as absent/zero.}
 
 \item{loop_typical}{Loop iterations to assume for the \code{typical_pts} column,
 and for a route whose loop count is not supplied.}
+
+\item{engine}{Optional precomputed \code{burden_engine()} result for this \code{qsf}
+(internal reuse by \code{\link[=burden_report]{burden_report()}}; \code{NULL} builds it here, leaving the
+public behaviour unchanged).}
 }
 \value{
 If \code{routes} is \code{NULL}: a \code{respondent_burden} tibble, one row per complete

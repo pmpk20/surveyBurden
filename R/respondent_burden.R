@@ -20,6 +20,9 @@
 #' @param weights A [gfs_weights()] list.
 #' @param loop_typical Loop iterations to assume for the `typical_pts` column,
 #'   and for a route whose loop count is not supplied.
+#' @param engine Optional precomputed `burden_engine()` result for this `qsf`
+#'   (internal reuse by [burden_report()]; `NULL` builds it here, leaving the
+#'   public behaviour unchanged).
 #'
 #' @return
 #'   If `routes` is `NULL`: a `respondent_burden` tibble, one row per complete
@@ -36,9 +39,9 @@
 #'
 #' @export
 respondent_burden <- function(qsf, routes = NULL, weights = gfs_weights(),
-                              loop_typical = 2) {
+                              loop_typical = 2, engine = NULL) {
   if (!inherits(qsf, "qsf_raw")) qsf <- read_qsf(qsf)
-  e   <- burden_engine(qsf, weights = weights)
+  e   <- engine %||% burden_engine(qsf, weights = weights)
   ppm <- weights$points_per_minute
   full_i <- which(!e$paths$terminates_early)
   if (length(full_i) == 0L) {

@@ -1,5 +1,11 @@
 # surveyBurden (development version)
 
+* `burden_report()` is ~4x faster (INFUZE core survey: 17s to 4s). It now
+  parses, scores and resolves the instrument once and threads the results
+  through the pipeline instead of each step redoing that work. `path_burden()`,
+  `path_burden_profile()`, `calculation_certainty()`, `respondent_burden()`,
+  `resolve_paths()` and `instrument_summary()` gain optional arguments for the
+  precomputed pieces; output is unchanged.
 * `burden_report()` gains a `quiet` argument and, by default, reports progress
   through the pipeline stages with `cli::cli_progress_step()`.
 * `burden_report()` no longer errors on a survey where every structural path

@@ -33,6 +33,9 @@
 #' @param qsf A `qsf_raw` object.
 #' @param weights A [gfs_weights()] list.
 #' @param max_paths Passed to [resolve_paths()].
+#' @param engine Optional precomputed `burden_engine()` result for this `qsf`
+#'   (internal reuse; `NULL` builds it here, leaving the public behaviour
+#'   unchanged).
 #'
 #' @return A [tibble][tibble::tibble], one row per flow path:
 #'   `path_id`, `terminates_early`, `n_gates`,
@@ -42,8 +45,9 @@
 #'   probability).
 #'
 #' @export
-path_burden_profile <- function(qsf, weights = gfs_weights(), max_paths = 10000L) {
-  e <- burden_engine(qsf, weights = weights, max_paths = max_paths)
+path_burden_profile <- function(qsf, weights = gfs_weights(), max_paths = 10000L,
+                                engine = NULL) {
+  e <- engine %||% burden_engine(qsf, weights = weights, max_paths = max_paths)
 
   rows <- lapply(seq_len(nrow(e$paths)), function(i) {
     cp <- e$components[[i]]
@@ -65,11 +69,14 @@ path_burden_profile <- function(qsf, weights = gfs_weights(), max_paths = 10000L
 #' compute per-path burden components (base / loops / display distribution).
 #' Returns a list with `paths` and `components` (one `list(base, loops,
 #' display_dist)` per path), plus `blocks`, `scored` and `weights`.
+#' `paths`, `scored` and `blocks` may be passed in precomputed (internal reuse
+#' by [burden_report()]); each defaults to `NULL` and is then computed here.
 #' @noRd
-burden_engine <- function(qsf, weights = gfs_weights(), max_paths = 10000L) {
-  paths  <- resolve_paths(qsf, max_paths = max_paths)
-  scored <- score_burden(parse_qsf(qsf), weights = weights)
-  blocks <- resolve_live_blocks(qsf)
+burden_engine <- function(qsf, weights = gfs_weights(), max_paths = 10000L,
+                          paths = NULL, scored = NULL, blocks = NULL) {
+  if (is.null(paths))  paths  <- resolve_paths(qsf, max_paths = max_paths)
+  if (is.null(scored)) scored <- score_burden(parse_qsf(qsf), weights = weights)
+  if (is.null(blocks)) blocks <- resolve_live_blocks(qsf)
 
   gfs    <- stats::setNames(scored$gfs_points, scored$question_id)
   stype  <- stats::setNames(scored$std_type,  scored$question_id)

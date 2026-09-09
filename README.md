@@ -174,6 +174,10 @@ Sys.setenv(
 burden_report("https://yourorg.qualtrics.com/survey-builder/SV_xxxxxxxxxxxxxxxx/edit")
 ```
 
+Only the survey ID (`SV_...`) is needed, so a survey-builder link, a
+distribution link (`.../jfe/form/SV_...`), or the bare `SV_` id all work.
+`burden_report()` fetches the survey **definition**, not its responses.
+
 `QUALTRICS_BASE_URL` is the API datacenter host, which can differ from your
 survey-builder host. Check Account Settings, then Qualtrics IDs. Credentials are
 read from the environment and never appear in code.

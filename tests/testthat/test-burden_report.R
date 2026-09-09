@@ -190,6 +190,24 @@ test_that("summary(burden_report) returns a short headline object", {
   expect_identical(res$visible, FALSE)
 })
 
+test_that("the summary counts line singularises for a one-question, one-path survey", {
+  fake <- structure(list(
+    instrument = tibble::tibble(
+      survey_name = "Tiny", n_questions = 1L, n_blocks = 1L,
+      n_paths = 1L, n_complete_paths = 1L),
+    burden = structure(
+      tibble::tibble(statistic = factor(c("min", "p25", "median", "p75", "max"),
+                                        levels = c("min", "p25", "median", "p75", "max")),
+                     points = rep(10, 5)),
+      basis = "structural"),
+    benchmark = list(median_points = 399, n_waves = 79L), ppm = 12
+  ), class = "summary.burden_report")
+  out <- paste(format(fake), collapse = " ")
+  expect_match(out, "1 question, 1 block, 1 structural path \\(")
+  expect_false(grepl("1 structural paths", out))
+  expect_false(grepl("1 questions", out))
+})
+
 # a survey whose flow starts with an unconditional EndSurvey: every enumerated
 # path terminates early, so there is no completing path to summarise a spread over
 no_complete_qsf <- function() {

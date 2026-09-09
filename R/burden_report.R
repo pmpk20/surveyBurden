@@ -528,7 +528,7 @@ format.summary.burden_report <- function(x, ...) {
   ins <- x$instrument
   cli::cli_fmt({
     cli::cli_h1("{ins$survey_name}")
-    cli::cli_text("{ins$n_questions} questions, {ins$n_blocks} blocks, {ins$n_paths} structural paths ({ins$n_complete_paths} complete).")
+    cli::cli_text("{ins$n_questions} question{?s}, {ins$n_blocks} block{?s}, {ins$n_paths} structural path{?s} ({ins$n_complete_paths} complete).")
     for (ln in burden_verdict_line(x$burden, x$ppm, x$benchmark$median_points,
                                    ins$n_complete_paths)) {
       cli::cli_text(ln)

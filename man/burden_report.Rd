@@ -117,6 +117,13 @@ respondent answers. \code{\link[=path_burden_profile]{path_burden_profile()}} en
 combinations and finds the burden values that are genuinely reachable, which
 is why its minimum is usually \emph{higher} than the naive floor. \strong{This report
 uses the profile's range as the one range shown, whenever \code{profile = TRUE}.}
+
+\strong{Path-space cap.} The structural path space is enumerated up to
+\code{max_paths} (10000, set inside \code{\link[=resolve_flow]{resolve_flow()}}). A flow that would produce
+more raises an error rather than a partial answer; a survey that hits it has
+genuinely intractable routing. Block randomisers are treated as "all
+sub-blocks shown, in survey order" -- the randomised subsets are not
+enumerated.
 }
 \examples{
 \dontrun{

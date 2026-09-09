@@ -42,6 +42,13 @@
 #' is why its minimum is usually *higher* than the naive floor. **This report
 #' uses the profile's range as the one range shown, whenever `profile = TRUE`.**
 #'
+#' **Path-space cap.** The structural path space is enumerated up to
+#' `max_paths` (10000, set inside [resolve_flow()]). A flow that would produce
+#' more raises an error rather than a partial answer; a survey that hits it has
+#' genuinely intractable routing. Block randomisers are treated as "all
+#' sub-blocks shown, in survey order" -- the randomised subsets are not
+#' enumerated.
+#'
 #' @return An object of class `burden_report`: a list of tibbles under stable
 #'   names. Print it for the formatted summary, or read its components:
 #'   \describe{

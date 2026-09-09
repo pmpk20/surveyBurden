@@ -2,6 +2,13 @@
 
 ## surveyBurden (development version)
 
+- [`print()`](https://rdrr.io/r/base/print.html) on a `burden_report`
+  now opens with a one-line verdict: the median completing-path burden
+  in points and minutes, its ratio to the 399-point GfS benchmark, and
+  the range across completing paths.
+  [`summary()`](https://rdrr.io/r/base/summary.html) states the same
+  verdict, so the two can no longer disagree. When `routes` are supplied
+  the verdict also reports the population-weighted median.
 - [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
   is faster again:
   [`parse_qsf()`](https://pmpk20.github.io/surveyBurden/reference/parse_qsf.md)

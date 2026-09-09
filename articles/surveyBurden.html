@@ -142,13 +142,13 @@ stated-choice or discrete choice burden model.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">demo</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Reading survey</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Reading survey <span style="color: #B2B2B2;">[24ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Reading survey <span style="color: #B2B2B2;">[21ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Scoring questions and resolving paths</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Scoring questions and resolving paths <span style="color: #B2B2B2;">[245ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Scoring questions and resolving paths <span style="color: #B2B2B2;">[239ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Checking calculation certainty</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[33ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[32ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Enumerating display-logic combinations</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Enumerating display-logic combinations <span style="color: #B2B2B2;">[26ms]</span></span></span>
@@ -156,6 +156,8 @@ stated-choice or discrete choice burden model.</p>
 <span><span class="va">report</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Burden Report: Neighbourhood Travel Survey (demo)</span> <span style="color: #00BBBB;">────────────────────</span></span></span>
+<span><span class="co">#&gt; Median completing path: 123 GfS points, ~10 min - 0.3x the benchmark median of</span></span>
+<span><span class="co">#&gt; 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Instrument</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -606,7 +608,7 @@ small constructed set of 50 respondent routes:</p>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[21ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Enumerating display-logic combinations</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Enumerating display-logic combinations <span style="color: #B2B2B2;">[61ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Enumerating display-logic combinations <span style="color: #B2B2B2;">[63ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 4</span></span></span>
 <span><span class="co">#&gt;   statistic points minutes  index</span></span>
@@ -772,10 +774,10 @@ with no private files.</p>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Reading survey <span style="color: #B2B2B2;">[7ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Scoring questions and resolving paths</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Scoring questions and resolving paths <span style="color: #B2B2B2;">[81ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Scoring questions and resolving paths <span style="color: #B2B2B2;">[78ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Checking calculation certainty</span></span>
-<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[21ms]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[22ms]</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Enumerating display-logic combinations</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">✔</span> Enumerating display-logic combinations <span style="color: #B2B2B2;">[28ms]</span></span></span>
@@ -784,7 +786,8 @@ with no private files.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Neighbourhood Travel Survey (demo)</span> <span style="color: #00BBBB;">──────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; 26 questions, 12 blocks, 4 structural paths (2 complete).</span></span>
-<span><span class="co">#&gt; Burden: 106 / 123 / 143 points (min / median / max; ~9 / 10 / 12 min).</span></span>
+<span><span class="co">#&gt; Median completing path: 123 GfS points, ~10 min - 0.3x the benchmark median of</span></span>
+<span><span class="co">#&gt; 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.</span></span>
 <span><span class="co">#&gt; Benchmark: median 399 points across 79 GfS-scored waves.</span></span></code></pre></div>
 <p>The headline: 26 questions across 12 blocks, 4 structural paths of
 which 2 are complete, and a structural burden spread of 106 / 123 / 143

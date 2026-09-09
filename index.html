@@ -78,6 +78,8 @@
 <span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">qsf</span><span class="op">)</span></span>
 <span><span class="va">report</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt; ── Survey Burden Report: Neighbourhood Travel Survey (demo) ────────────────────</span></span>
+<span><span class="co">#&gt; Median completing path: 123 GfS points, ~10 min - 0.3x the benchmark median of</span></span>
+<span><span class="co">#&gt; 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; ── Instrument ──</span></span>
 <span><span class="co">#&gt;</span></span>
@@ -154,12 +156,13 @@
 <span><span class="co">#&gt;   once; we have no data on how likely each one is for a given respondent, so</span></span>
 <span><span class="co">#&gt;   this is a structural range, not a probability -- it does NOT mean "there's a</span></span>
 <span><span class="co">#&gt;   50% chance a respondent sees the median burden".</span></span></code></pre>
-<p><code>summary(report)</code> prints a one-line headline:</p>
+<p><code>summary(report)</code> prints just the headline:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">report</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── Neighbourhood Travel Survey (demo) ──────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; 26 questions, 12 blocks, 4 structural paths (2 complete).</span></span>
-<span><span class="co">#&gt; Burden: 106 / 123 / 143 points (min / median / max; ~9 / 10 / 12 min).</span></span>
+<span><span class="co">#&gt; Median completing path: 123 GfS points, ~10 min - 0.3x the benchmark median of</span></span>
+<span><span class="co">#&gt; 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.</span></span>
 <span><span class="co">#&gt; Benchmark: median 399 points across 79 GfS-scored waves.</span></span></code></pre></div>
 </div>
 <div class="section level2">

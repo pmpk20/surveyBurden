@@ -1,0 +1,159 @@
+---
+title: "Paths and display logic"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Paths and display logic}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+This article covers how surveyBurden reconstructs the routes through a
+survey and turns them into a burden spread, and the difference between
+the structural profile and a population-weighted average. For per-question
+scoring see `vignette("gfs-scoring")`; for the printed output see
+`vignette("reading-the-report")`.
+
+```{r setup}
+library(surveyBurden)
+demo <- system.file("extdata", "demo_travel_survey.qsf", package = "surveyBurden")
+qsf <- read_qsf(demo)
+report <- burden_report(demo, quiet = TRUE)
+```
+
+## Survey flow
+
+Contemporary web surveys are not a fixed sequence. `resolve_flow()` walks
+the `SurveyFlow`, forking at every `Branch` into a condition-true and a
+condition-false continuation, and at every `EndSurvey` into a screen-out.
+Branch conditions are **not evaluated** -- they depend on embedded data
+or prior answers that are unknown before fielding -- so both outcomes are
+always kept. The result is every block sequence a respondent could
+encounter.
+
+```{r flow}
+resolve_flow(qsf)
+```
+
+```{r flow-counts}
+nrow(report$paths)
+sum(report$paths$status == "complete")
+sum(report$paths$status == "screen_out")
+```
+
+Block randomisers are treated as "all sub-blocks shown, in survey order"
+-- the randomised subsets are not enumerated. The path space is
+enumerated up to `max_paths` (10000); a flow that would produce more
+raises an error rather than a partial answer.
+
+## Display logic
+
+Within a path, `resolve_paths()` partitions the questions into three
+sets: **always shown**, **may be shown** (gated by a condition that
+cannot be evaluated before fielding), and **never shown on this path**
+(the gate's trigger question is not on the path).
+
+```{r paths}
+rp <- resolve_paths(qsf)
+data.frame(
+  path_id    = rp$path_id,
+  screen_out = rp$terminates_early,
+  n_always   = lengths(rp$q_always),
+  n_maybe    = lengths(rp$q_maybe),
+  n_gates    = rp$n_gates
+)
+```
+
+Qualtrics display logic is stored as `If` / `ElseIf` / `AndIf` groups.
+The package folds each group left to right: `ElseIf` clauses combined
+with OR, `AndIf` clauses with AND, a missing type falling back to AND.
+Flattening everything to AND would under-count the cases where a question
+appears if any one of several conditions holds.
+
+## Path enumeration
+
+`path_burden_profile()` goes inside the "may be shown" set and enumerates
+the feasible display-logic states.
+
+- Conditional questions are grouped into **coupling components**: two
+  questions couple if they share a gate, directly or through a chain of
+  shared gates.
+- A component with at most 5000 joint gate-states is enumerated
+  **exactly** -- every joint state of its gates, respecting single-choice
+  mutual exclusion and AND-across-gates conditions.
+- A larger component (dozens of questions keyed off one popular trigger
+  such as employment status) falls back to a **primary-gate
+  approximation**: each question is scored against its first gate, the
+  rest held permissive.
+- Separate components are convolved as independent.
+- Loop & Merge blocks are unrolled to the explicit `?v=N` cap, with the
+  iteration count treated as uniform over 1 to N in the structural
+  profile.
+
+```{r profile}
+pbp <- path_burden_profile(qsf)
+pbp[, c("path_id", "terminates_early", "burden_min",
+        "burden_median", "burden_max")]
+nrow(pbp$profile[[3]])   # feasible burden values on complete path 3
+```
+
+Each row of a `profile` table is one feasible burden value with a
+structural weight from the gate combinatorics and the uniform
+loop-iteration assumption. **That weight is not a respondent
+probability.**
+
+## Structural versus population-weighted burden
+
+This distinction is central and is easy to state wrongly.
+
+The default result is a **structural burden profile**. It lists every
+feasible combination of optional questions once. It carries no respondent
+probabilities. When the report says the median is
+`r report$burden$points[report$burden$statistic == "median"]` points, it
+means the median across those feasible combinations. It does **not** mean
+half of respondents face at least that much burden. Nobody has told the
+package how common each combination is.
+
+To get a real average over respondents you need observed routes. Give
+`burden_report()` a data frame of respondents and it adds a
+**population-weighted respondent burden**: the sum, over the observed
+routes, of each route's burden multiplied by how often that route
+occurred. Writing the observed frequency of route k as w_k and its
+burden as B_k:
+
+$$\bar{B} = \sum_k w_k \, B_k$$
+
+The structural profile is what you have without the w_k. The
+population-weighted result is what the w_k buy you.
+
+The recognised route columns are `loop_<id>` (the iteration count for a
+Loop & Merge block, keyed by its driving question id or block id) and
+`visit_<block_id>` (`TRUE` to include a branch-gated optional block). The
+demo has two loop blocks, `BL6` and `BL8`. A small constructed set of 50
+respondent routes:
+
+```{r population}
+set.seed(1)
+routes <- data.frame(
+  loop_BL6 = rbinom(50, 5, 0.4),   # "Other adults" loop, cap 5
+  loop_BL8 = rbinom(50, 3, 0.5)    # "Vehicle details" loop, cap 3
+)
+burden_report(demo, routes = routes, quiet = TRUE)$population
+```
+
+Real route data would come from a fielded response file, not from
+`rbinom()`. When `routes` are supplied the report's verdict line also
+gives the population-weighted median.
+
+Without routes, `respondent_burden()` still gives a per-path table and
+`summary_line()` turns it into a sentence:
+
+```{r respondent}
+summary_line(respondent_burden(demo))
+```

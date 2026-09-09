@@ -1,8 +1,8 @@
 ---
-title: "Assessing survey burden with surveyBurden"
+title: "Get started with surveyBurden"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Assessing survey burden with surveyBurden}
+  %\VignetteIndexEntry{Get started with surveyBurden}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options:
@@ -14,38 +14,73 @@ editor_options:
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
+`surveyBurden` estimates **ex-ante instrument burden**: the response
+effort a programmed Qualtrics survey demands, worked out before fielding
+from the instrument alone. It reads the survey, scores every question
+with the published GfS / Axhausen point scheme, reconstructs the routes
+the flow and display logic allow, and reports how burden varies across
+those routes.
+
+In the terms of Yan and Williams (2022) this is the *instrument* side of
+respondent burden -- length, difficulty, and the effort the design
+requires. It is not the *perceived* burden a particular respondent
+reports feeling, and it is not a completion-time predictor.
+
+This article gets you to a first report. The others go deeper:
+
+- `vignette("reading-the-report")` -- what each part of the printed
+  output means.
+- `vignette("gfs-scoring")` -- how a Qualtrics widget becomes points.
+- `vignette("paths-and-display-logic")` -- flow, skip logic, and the
+  structural-versus-population-weighted distinction.
+- `vignette("calibration")` -- the `words_per_line` and points-per-minute
+  assumptions, and the limitations.
+
+## Install
+
+```r
+# install.packages("pak")
+pak::pak("pmpk20/surveyBurden")
+```
+
+## One call
+
 ```{r setup}
 library(surveyBurden)
 demo <- system.file("extdata", "demo_travel_survey.qsf", package = "surveyBurden")
 ```
 
-This vignette is both a user guide and a short methodological
-specification. Every code chunk below runs against the small fictional
-"Neighbourhood Travel Survey" that ships with the package, so the numbers
-shown are the numbers the current package produces. To use your own
-survey, replace `demo` with a path to a `.qsf` file, a bare `SV_...`
-survey id, or a Qualtrics survey-builder URL.
+`burden_report()` runs the whole pipeline. Every code chunk in these
+articles runs against the small fictional "Neighbourhood Travel Survey"
+that ships with the package, so the numbers shown are the numbers the
+current package produces. To use your own survey, replace `demo` with a
+path to a `.qsf` file, a bare `SV_...` survey id, or a Qualtrics
+survey-builder URL (see `vignette("paths-and-display-logic")` for the API
+route).
 
-A few chunks show patterns the vignette cannot run here, such as a live
-API fetch or a calibration against your own completion times. Those are
-marked as illustrative and are not evaluated.
+```{r quick-start}
+report <- burden_report(demo, quiet = TRUE)
+report
+```
 
-## 1. Overview
+The printout opens with a one-line **verdict**: the median
+completing-path burden in points and minutes, its ratio to the 399-point
+GfS benchmark, and the range across completing paths. Below it:
 
-`surveyBurden` estimates **ex-ante instrument burden**: the response
-effort a programmed survey instrument demands, worked out before fielding
-from the instrument alone. In the terms of Yan and Williams (2022) this
-is the *instrument* side of respondent burden, that is length,
-difficulty, and the effort the design requires. It is not the *perceived*
-burden a particular respondent reports feeling, which also depends on
-topic salience, motivation, and context.
+- **Instrument** -- structural counts (questions, blocks, branch points,
+  loop blocks, early exits).
+- **Paths** -- how many distinct routes the flow allows, and how many
+  complete rather than screen out.
+- **Burden** -- the headline spread of path burden, in points, minutes
+  and a 0--1 index, with the published benchmark underneath.
+- **Burden by block**, **Highest-burden questions**, **Readability
+  diagnostics**, **Calculation certainty**, **QC warnings**.
 
-The package reads a Qualtrics survey, scores every question with the
-published GfS / Axhausen point scheme, reconstructs the routes the flow
-and display logic allow, and reports how burden varies across those
-routes.
+`vignette("reading-the-report")` walks each of these in turn.
 
-Six terms are used throughout, with fixed meanings:
+## Vocabulary
+
+Five terms are used throughout, with fixed meanings:
 
 | term | meaning |
 |---|---|
@@ -56,483 +91,44 @@ Six terms are used throughout, with fixed meanings:
 | **calculation certainty** | the split, for a given survey, between parts of the calculation that are exact and parts that rest on documented approximations |
 | **readability diagnostics** | counts of long question stems, long matrix labels, and long grids. Reading-load signals, reported separately, never folded into the GfS score. |
 
-**What the package is not.** It is not a new theory of respondent burden.
-It is not a measure of perceived burden. It is not a completion-time
-predictor: it converts points to minutes only through a published rule of
-thumb, described in section 12. It is not a stated-choice or discrete
-choice burden model.
+## The report object
 
-One call runs the whole pipeline.
+`report` is a structured object, not printed text. Pull out each part:
 
-```{r quick-start}
-report <- burden_report(demo)
-report
+```{r components}
+report$burden      # min / p25 / median / p75 / max, in points, minutes and index
+head(report$items[order(-report$items$gfs_points),
+                  c("question_id", "std_type", "gfs_points", "score_flag")])
 ```
 
-The bundled demo is deliberately small. On a fielded instrument these
-counts run to hundreds of questions and dozens of paths. The rest of this
-vignette explains each part of that output.
-
-## 2. Input and parsing
-
-`read_qsf()` accepts a path to a `.qsf` export, a bare `SV_...` survey
-id, or a survey-builder URL. A path is read locally. An id or URL is
-fetched through the Qualtrics API by `fetch_qsf()`, which needs
-`QUALTRICS_API_KEY` and `QUALTRICS_BASE_URL` in the environment. All
-three inputs normalise to one internal representation of class
-`qsf_raw`, so nothing downstream depends on where the survey came from.
-
-```{r read}
-qsf <- read_qsf(demo)
-class(qsf)
-```
-
-`parse_qsf()` turns that representation into a question catalogue: one
-row per live question, with the structural facts the scorer needs.
-
-```{r parse}
-catalogue <- parse_qsf(qsf)
-nrow(catalogue)
-names(catalogue)
-```
-
-The API-fetch pattern looks like this. It is not run here.
-
-```{r fetch, eval = FALSE}
-Sys.setenv(
-  QUALTRICS_API_KEY  = "your-api-key",
-  QUALTRICS_BASE_URL = "https://yourdatacenter.qualtrics.com"
-)
-report <- burden_report(
-  "https://yourorg.qualtrics.com/survey-builder/SV_xxxxxxxxxxxxxxxx/edit"
-)
-```
-
-`QUALTRICS_BASE_URL` is the API datacenter host, found under Account
-Settings then Qualtrics IDs. It can differ from your survey-builder
-host. The fetch is checked against live surveys to return the same
-result as the corresponding `.qsf` export.
-
-## 3. Question classification
-
-`classify_question()` maps each Qualtrics widget to a standard question
-type. The Qualtrics type alone is not enough: a single `MC` widget can be
-a yes/no item, a rating scale, a dropdown, or a multi-select, depending
-on its selector and options. Classification resolves that.
-
-```{r classify}
-table(catalogue$std_type)
-```
-
-For the demo this is
-`r sum(catalogue$std_type == "single_choice")` single-choice questions,
-`r sum(catalogue$std_type == "matrix")` matrix questions,
-`r sum(catalogue$std_type == "open_text")` open-text questions,
-`r sum(catalogue$std_type == "multi_choice")` multi-select, and
-`r sum(catalogue$std_type == "descriptive")` descriptive text block. The
-`std_type` column drives scoring in the next section.
-
-## 4. GfS scoring
-
-`gfs_weights()` holds the GfS / Axhausen point weights (Heimgartner and
-Axhausen 2024, Table 1) transcribed verbatim, one weight per response
-action, plus a points-per-minute conversion. No weights are invented.
-
-```{r weights}
-w <- gfs_weights()
-w$yes_no
-w$rating_small
-w$rating_large
-w$points_per_minute
-```
-
-`score_burden()` then works in **three layers**:
-
-1. what Qualtrics says the widget is (for example `MC` with a dropdown
-   selector);
-2. what response action that implies (for example choose one value from
-   an ordered list);
-3. which Table 1 category best represents that action (for example a
-   rating).
-
-Where step 3 is fixed by the structure, for example a two-option choice
-is a closed yes/no item whatever it asks, the mapping is deterministic
-and the score is marked `auto`. Where the `.qsf` does not carry what the
-scheme needs, the package applies an **explicit, documented inference
-rule** and marks the item `inferred`. Every scored question carries a
-`score_basis` string that records the rule applied.
-
-`score_flag` has four values:
-
-- `auto`: the GfS mapping is deterministic from the structure.
-- `inferred`: the structure is clear, but choosing the Table 1 category
-  involved an explicit judgement, for example a dropdown mapped to
-  "rating" as the closest category, a numeric-looking dropdown mapped to
-  "simple numerical answer", or a slider. The number is still
-  determinate.
-- `manual`: a human should check; the mapping is genuinely uncertain.
-- `unknown`: an unmapped type, left unscored as `NA`.
-
-```{r scored}
-scored <- score_burden(catalogue, weights = w)
-table(scored$score_flag)
-head(scored[order(-scored$gfs_points),
-            c("question_id", "std_type", "gfs_points", "score_flag", "score_basis")])
-```
-
-This is the distinction between **GfS-native** quantities, that is
-question type, response action, and number of alternatives, all
-specified by the scheme, and **package-derived** ones, that is estimated
-line counts and response-unit structure, inferred because the `.qsf`
-lacks them.
-
-### Documented inference rules where Table 1 is silent
-
-- Table 1 counts rendered "lines" of instruction text. A `.qsf` stores
-  words, not a rendered width, so lines are estimated as
-  words / `words_per_line` (default 12). This is a pragmatic conversion
-  heuristic, not a calibrated constant; override it with
-  `burden_report(words_per_line = ...)`. Section 11 states this
-  assumption in full.
-- Dropdowns (`MC` with a `DL` selector) have no Table 1 row. They are
-  scored as a rating (2.0 for up to 5 options, 3.0 for more), or as a
-  simple numerical answer (1.0) when the options are numbers and the
-  question asks for a quantity or a date.
-- Sliders are not in Table 1. They are scored as a numerical answer when
-  the axis label carries units, otherwise as a rating.
-- A question hidden from the respondent by injected CSS or JavaScript
-  scores 0.
-- Loop and Merge blocks are scored per iteration and multiplied by the
-  block's explicit iteration cap. Within-loop display logic is not
-  enumerated.
-
-### 4a. Question stems are not separately scored
-
-Table 1's "question or transition, up to 3 lines = 2.0" is applied to
-standalone instruction blocks only. It is not added on top of every
-question's response score. The GfS scheme may intend the reading cost of
-a question stem to be absorbed into the item weight; settling that needs
-the underlying GfS methodology, not Table 1 alone. A question with a long
-disambiguation stem is therefore scored conservatively, and its stem
-length is reported separately as a readability diagnostic (section 11).
-
-### 4b. Multi-answer matrices have no Table 1 rule
-
-A grid where each cell allows multiple answers, that is "tick all that
-apply" across two axes, is scored as `rows x cols x 0.5`. Each cell is
-one trivial closed yes/no decision, and GfS scores a closed yes/no at
-1.0, discounted here for the working-memory efficiency of answering in a
-grid. This proxy is **orientation-invariant**: it is symmetric in rows
-and columns, so unlike an earlier `rows x 4.0` proxy it does not change
-with how Qualtrics happened to store the grid. It is a documented
-inference, not GfS. The weight is `gfs_weights()$matrix_cell_multi`.
-
-## 5. Survey flow
-
-Contemporary web surveys are not a fixed sequence. `resolve_flow()`
-walks the `SurveyFlow`, forking at every `Branch` into a
-condition-true and a condition-false continuation, and at every
-`EndSurvey` into a screen-out. Branch conditions are **not evaluated**,
-so both outcomes are always kept. The result is every block sequence a
-respondent could encounter.
-
-```{r flow}
-resolve_flow(qsf)
-```
-
-The demo produces `r nrow(report$paths)` structural paths:
-`r sum(report$paths$status == "complete")` that reach a real submission
-("complete"), and `r sum(report$paths$status == "screen_out")` that hit
-an `EndSurvey` first ("screen-out"). A fielded instrument typically
-produces dozens.
-
-## 6. Display logic
-
-Within a path, `resolve_paths()` partitions the questions into three
-sets: **always shown**, **may be shown** (gated by a condition that
-cannot be evaluated before fielding), and **never shown on this path**
-(the gate's trigger question is not on the path).
-
-```{r paths}
-rp <- resolve_paths(qsf)
-data.frame(
-  path_id      = rp$path_id,
-  screen_out   = rp$terminates_early,
-  n_always     = lengths(rp$q_always),
-  n_maybe      = lengths(rp$q_maybe),
-  n_gates      = rp$n_gates
-)
-```
-
-Qualtrics display logic is stored as `If` / `ElseIf` / `AndIf` groups.
-The package folds each group left to right: `ElseIf` clauses are combined
-with OR, `AndIf` clauses with AND. A group with a missing type falls back
-to AND. This matters because flattening everything to AND would
-under-count the cases where a question appears if any one of several
-conditions holds.
-
-## 7. Path enumeration
-
-`path_burden_profile()` goes inside the "may be shown" set and
-enumerates the feasible display-logic states.
-
-- Conditional questions are grouped into **coupling components**. Two
-  questions couple if they share a gate, directly or through a chain of
-  gates.
-- Small components are enumerated **exactly**: every joint state of their
-  gates, respecting single-choice mutual exclusion and AND-across-gates
-  conditions.
-- Large components, for example dozens of questions keyed off one popular
-  trigger such as employment status, fall back to a **primary-gate
-  approximation** for that component: each question is scored against its
-  first gate, and the rest are held permissive.
-- Separate components are convolved as independent.
-- Loop and Merge blocks are unrolled to the explicit `?v=N` cap, with the
-  iteration count treated as uniform over 1 to N in the structural
-  profile.
-
-```{r profile}
-pbp <- path_burden_profile(qsf)
-pbp[, c("path_id", "terminates_early", "burden_min", "burden_median", "burden_max")]
-nrow(pbp$profile[[3]])  # feasible burden values on complete path 3
-nrow(pbp$profile[[4]])  # feasible burden values on complete path 4
-```
-
-Each row of a `profile` table is one feasible burden value with a
-structural weight from the gate combinatorics and the uniform
-loop-iteration assumption. That weight is not a respondent probability.
-Section 9 returns to this point.
-
-## 8. Burden aggregation
-
-`$burden` is built by pooling the per-path structural profiles for the
-complete paths and taking order statistics across the pooled values.
-
-```{r burden}
-report$burden
-attr(report$burden, "basis")
-```
-
-- `points` is the GfS point total. `minutes` is `points` divided by the
-  points-per-minute rate. `index` is `points / rare_threshold` (default
-  1500), a 0 to 1 rescaling where 0 is a blank instrument and 1.0 is the
-  level Heimgartner and Axhausen's sample found rare.
-- `attr(, "basis")` is `"structural"` when the display-logic profile was
-  enumerated (the default), and `"naive"` when `profile = FALSE`. The
-  naive band scores each optional question as independently hideable for
-  the minimum and independently shown for the maximum. That is faster,
-  but its minimum can fall below anything actually reachable, and it
-  reports no median. The structural basis is the one to quote.
-- The **benchmark** line under the printed table is the published GfS
-  reference point: a median of 399 points across the 79 scored survey
-  waves in Heimgartner and Axhausen (2024).
-
-The per-path detail sits in `$paths`.
-
-```{r paths-burden}
-report$paths[, c("path_id", "status", "burden_floor", "burden_ceiling",
-                 "burden_min", "burden_median", "burden_max")]
-```
-
-`burden_floor` and `burden_ceiling` are the naive per-path bounds.
-`burden_min` / `burden_median` / `burden_max` are the structural profile
-for that path, and are `NA` when `profile = FALSE`.
-
-## 9. Structural versus population-weighted burden
-
-This distinction is central and is easy to state wrongly.
-
-The default result is a **structural burden profile**. It lists every
-feasible combination of optional questions once. It carries no respondent
-probabilities. When the report says the median is
-`r report$burden$points[report$burden$statistic == "median"]` points, it
-means the median across those feasible combinations. It does **not** mean
-that half of respondents face at least that much burden. Nobody has told
-the package how common each combination is.
-
-To get a real average over respondents you need observed routes. Give
-`burden_report()` a data frame of respondents and it adds a
-**population-weighted respondent burden**. In words: the average burden
-is the sum, over the observed routes, of each route's burden multiplied
-by how often that route occurred. Writing the observed frequency of route
-k as w_k and its burden as B_k:
-
-$$\bar{B} = \sum_k w_k \, B_k$$
-
-The structural profile is what you have without the w_k. The
-population-weighted result is what the w_k buy you.
-
-The recognised route columns are `loop_<id>` (the iteration count for a
-Loop and Merge block, keyed by the driving question id or the block id)
-and `visit_<block_id>` (`TRUE` to include a branch-gated optional block).
-The demo has two loop blocks, `BL6` and `BL8`. Here is a small
-constructed set of 50 respondent routes:
-
-```{r population}
-set.seed(1)
-routes <- data.frame(
-  loop_BL6 = rbinom(50, 5, 0.4),   # "Other adults" loop, cap 5
-  loop_BL8 = rbinom(50, 3, 0.5)    # "Vehicle details" loop, cap 3
-)
-burden_report(demo, routes = routes)$population
-```
-
-These numbers are weighted by the route frequencies in `routes`. Real
-route data would come from a fielded response file, not from
-`rbinom()`.
-
-Without routes, `respondent_burden()` still gives a per-path table, and
-`summary_line()` turns it into a sentence.
-
-```{r respondent}
-summary_line(respondent_burden(demo))
-```
-
-## 10. Calculation certainty
-
-`calculation_certainty()`, printed as the "Calculation certainty" block
-of the report, states for your survey which parts of the calculation are
-exact and which rest on a documented approximation.
-
-```{r certainty}
-report$certainty$paths[c("n_full", "n_exact", "n_with_unresolved")]
-report$certainty$display_logic[c("n_conditional", "n_exact", "n_approx",
-                                 "n_components", "cross_component_independence")]
-report$certainty$loops[c("n_known", "n_unknown")]
-report$certainty$scores
-```
-
-For the demo: neither complete path resolves to a single burden value,
-because both carry an unresolved display-logic condition; all
-`r report$certainty$display_logic$n_conditional` conditional questions are
-enumerated exactly, none by the primary-gate approximation; both loop
-blocks have a known cap; and of the
-`r sum(unlist(report$certainty$scores))` item scores,
-`r report$certainty$scores$auto` are `auto` and
-`r report$certainty$scores$inferred` are `inferred`, with none needing
-manual review.
-
-The reader should take away one thing: a result can be fully
-reproducible without every underlying interpretation being certain. The
-certainty block makes the uncertain parts countable.
-
-## 11. Readability diagnostics
-
-`$readability` reports three counts: `long_stems` (question stems over
-`stem_threshold` words, default 40), `long_labels` (matrix row or option
-labels over `label_threshold` words, default 10), and `long_grids`
-(matrix questions with more than 6 rows).
-
-```{r readability}
-report$readability$stem_threshold
-report$readability$label_threshold
-nrow(report$readability$long_stems)
-nrow(report$readability$long_labels)
-report$readability$long_grids[, c("question_id", "block_name", "n_rows")]
-```
-
-These are reading-load signals. **None of them changes any GfS score.**
-They are reported separately so that a long grid or a wordy stem is
-visible without being silently priced into the burden total.
-
-The `words_per_line` assumption behind the descriptive-text score
-deserves a plain statement. GfS refers to rendered lines of text. A
-`.qsf` stores words, not the width the respondent's browser will render
-them at. The package therefore approximates lines as words divided by a
-configurable words-per-line figure (default 12). It is a practical proxy,
-not a calibration, and it is the reason the descriptive-text score for a
-long instruction block should be read as approximate.
-
-## 12. Limitations
-
-- The Qualtrics-to-GfS mapping is sometimes inferential. Where a widget
-  has no exact match in Table 1, the package applies a documented rule
-  and flags the question `inferred`.
-- The GfS scheme predates modern web survey interfaces. It was calibrated
-  on earlier survey practice.
-- Rendered text length cannot be recovered from a `.qsf`. The file stores
-  words, not an on-screen line count.
-- `words_per_line` is a configurable proxy for that missing line count,
-  not a measured constant.
-- Display-logic reconstruction depends on what the `.qsf` encodes.
-  Logic controlled outside Qualtrics, or unusual constructs, may need
-  manual interpretation.
-- Structural enumeration gives no respondent probabilities. Without route
-  data, every feasible combination is counted once, and "median" means
-  the median across combinations, not across respondents.
-- Loop and Merge can make the path space large. The package unrolls to
-  the explicit cap and treats the iteration count as uniform.
-- The points-to-minutes conversion is the published GfS rule of thumb,
-  roughly 12 points per minute. It is a scale, not a completion-time
-  prediction. Set a survey-specific figure with `validate_times()` on
-  your own completion-time data. This is not run here; it needs a
-  completion-time file the package does not ship:
-
-```{r validate, eval = FALSE}
-w <- gfs_weights()
-w$points_per_minute <- validate_times(demo, "times.csv")$implied_points_per_minute
-burden_report(demo, weights = w)
-```
-
-- Burden scores are not predictions of completion time, dropout, or
-  satisficing. Those are empirical questions about respondent behaviour,
-  outside the scope of this package.
-
-## 13. Reproducible worked example
-
-One end-to-end pass on the bundled demo. This runs on a clean install
-with no private files.
-
-```{r worked-report}
-report <- burden_report(demo)
+Other components: `report$instrument` (the structural counts),
+`report$paths` (one row per structural path), `report$blocks` (burden by
+block), `report$readability`, `report$certainty` and `report$warnings`.
+Scalars such as the points-per-minute rate live on attributes:
+`attr(report, "points_per_minute")`.
+
+`summary(report)` prints just the headline:
+
+```{r summary}
 summary(report)
 ```
 
-The headline: `r nrow(report$items)` questions across
-`r nrow(report$blocks)` blocks, `r nrow(report$paths)` structural paths of
-which `r sum(report$paths$status == "complete")` are complete, and a
-structural burden spread of
-`r report$burden$points[report$burden$statistic == "min"]` /
-`r report$burden$points[report$burden$statistic == "median"]` /
-`r report$burden$points[report$burden$statistic == "max"]` points,
-well below the 399-point GfS benchmark.
+## A short worked example
 
-```{r worked-burden}
-report$burden
-```
-
-The spread from minimum to maximum is the effect of the survey's
-optional questions and loop iterations, not measurement noise.
-
-```{r worked-paths}
+```{r worked}
 report$paths[, c("path_id", "status", "n_questions_floor",
                  "n_questions_ceiling", "burden_min", "burden_max")]
 ```
 
-Path 1 and path 2 are screen-outs worth
-`r paste(report$paths$burden_min[report$paths$status == "screen_out"], collapse = " and ")`
-points. The two complete paths differ mainly in one branch-gated block.
-
-```{r worked-items}
-report$items[order(-report$items$gfs_points),
-             c("question_id", "block_name", "std_type", "n_rows", "n_cols",
-               "n_options", "gfs_points", "score_flag")]
-```
-
-The heaviest questions are the attitude and frequency matrices. The
-`score_flag` column shows which scores are deterministic (`auto`) and
-which rest on a documented inference (`inferred`); `score_basis` in the
-same table records the exact rule for each.
+The two screen-out paths end early after the area check; the two complete
+paths differ mainly in one branch-gated block. The spread from minimum to
+maximum is the effect of the survey's optional questions and loop
+iterations, not measurement noise.
 
 ## References
 
 - Heimgartner, D. and Axhausen, K. W. (2024). Predicting response rates
   once again. *Findings*.
   <https://findingspress.org/article/125481-predicting-response-rates-once-again>
-- Schmid, B. and Axhausen, K. W. (2019). In-store or online grocery
-  shopping before and during the COVID-19 pandemic.
 - Yan, T. and Williams, D. (2022). Response burden: a review and
   conceptual framework. *Journal of Official Statistics*.
-- Yan, T. and Tourangeau, R. (2008). Fast times and easy questions: the
-  effects of age, experience, and question complexity on web survey
-  response times. *Applied Cognitive Psychology*.

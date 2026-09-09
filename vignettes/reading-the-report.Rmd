@@ -1,0 +1,184 @@
+---
+title: "Reading the burden report"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Reading the burden report}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+This article walks the printed `burden_report()` output section by
+section: what each shows, how to read it, and when it is telling you
+something is wrong. For how the underlying numbers are produced see
+`vignette("gfs-scoring")` and `vignette("paths-and-display-logic")`.
+
+```{r setup}
+library(surveyBurden)
+demo <- system.file("extdata", "demo_travel_survey.qsf", package = "surveyBurden")
+report <- burden_report(demo, quiet = TRUE)
+report
+```
+
+## The verdict line
+
+The first line under the title is a plain-language summary: the median
+completing-path burden in GfS points and in minutes, its ratio to the
+399-point GfS benchmark, and the point range across the survey's
+completing paths. When you supply `routes` it also reports the
+population-weighted median (see
+`vignette("paths-and-display-logic")`).
+
+`summary(report)` prints the same verdict with the structural counts and
+nothing else.
+
+## Instrument
+
+```{r instrument}
+report$instrument
+```
+
+Structural counts read straight off the survey definition: live
+questions, blocks, branch points, block randomisers, Loop & Merge
+blocks, and early-exit (`EndSurvey`) points. These describe the
+programmed instrument, not any respondent. A high branch or early-exit
+count means the survey routes people quite differently, so a single
+burden figure would describe few of them.
+
+## Paths
+
+```{r paths}
+report$paths[, c("path_id", "status", "n_blocks",
+                 "burden_floor", "burden_ceiling")]
+```
+
+Each **structural path** is one distinct block sequence a respondent
+could take. `status` is `complete` (reaches a real submission) or
+`screen_out` (hits an `EndSurvey` first). `burden_floor` and
+`burden_ceiling` are the naive per-path bounds -- only always-shown
+questions, loops run once, versus every reachable question with loops at
+their cap.
+
+The printed "Display-logic combinations checked" line is the number of
+feasible skip-logic states enumerated per complete path.
+
+## Burden
+
+```{r burden}
+report$burden
+attr(report$burden, "basis")
+```
+
+- `points` is the GfS point total; `minutes` is `points` divided by the
+  points-per-minute rate (default 12); `index` is `points / 1500`, a
+  0--1 rescaling where 1.0 is the level Heimgartner and Axhausen's sample
+  found rare.
+- `attr(, "basis")` is `"structural"` when the display-logic profile was
+  enumerated (the default), `"naive"` when `profile = FALSE`, and
+  `"none"` when no path completes. The naive band scores each optional
+  question as independently hideable for the minimum and independently
+  shown for the maximum; that is faster, but its minimum can fall below
+  anything actually reachable and it reports no median. **Quote the
+  structural basis.**
+- The **benchmark** line is the published GfS reference point: a median
+  of 399 points across the 79 scored survey waves in Heimgartner and
+  Axhausen (2024). The verdict line's ratio is the survey's median over
+  that 399.
+
+The median here is the middle value across the feasible skip-logic
+combinations, **not** the burden half of respondents exceed --
+`vignette("paths-and-display-logic")` returns to this.
+
+Per-path structural figures are in `$paths`:
+
+```{r paths-burden}
+report$paths[, c("path_id", "status", "burden_min",
+                 "burden_median", "burden_max")]
+```
+
+These columns are `NA` when `profile = FALSE`.
+
+## Burden by block
+
+```{r blocks}
+report$blocks[, c("block_name", "n_questions", "gfs_points", "share")]
+```
+
+Question burden totalled by block, in survey order, with each block's
+share of the all-questions-shown total. The printed bar chart is this
+`share` column. Use it to see which modules drive the length.
+
+## Highest-burden questions
+
+The printed table lists the six questions with the largest single
+`gfs_points`. The full per-question detail is `report$items`, including
+the `score_basis` string that records the rule used for each:
+
+```{r items}
+head(report$items[order(-report$items$gfs_points),
+                  c("question_id", "std_type", "gfs_points",
+                    "score_flag", "score_basis")], 3)
+```
+
+`score_flag` is `auto` (deterministic mapping), `inferred` (the mapping
+needed a documented judgement), `manual` or `unknown`. See
+`vignette("gfs-scoring")`.
+
+## Readability diagnostics
+
+```{r readability}
+report$readability$stem_threshold
+nrow(report$readability$long_stems)
+nrow(report$readability$long_labels)
+report$readability$long_grids[, c("question_id", "block_name", "n_rows")]
+```
+
+Three counts: question stems over `stem_threshold` words (default 40),
+matrix row/option labels over `label_threshold` words (default 10), and
+matrix questions with more than 6 rows. These are **reading-load
+signals** reported separately -- **none of them changes any GfS score**.
+A long grid or a wordy stem is flagged so it is visible without being
+silently priced into the burden total. Long grids in particular invite
+satisficing (answering the same way down every row).
+
+## Calculation certainty
+
+```{r certainty}
+report$certainty$paths[c("n_full", "n_exact", "n_with_unresolved")]
+report$certainty$display_logic[c("n_conditional", "n_exact", "n_approx")]
+report$certainty$loops[c("n_known", "n_unknown")]
+report$certainty$scores
+```
+
+For each survey this states which parts of the calculation are exact and
+which rest on a documented approximation: how many paths resolve to a
+single burden value, how many conditional questions were enumerated
+exactly versus approximated, whether every loop has a known cap, and the
+`auto` / `inferred` / `manual` / `unknown` split of the item scores. A
+result can be fully reproducible without every underlying interpretation
+being certain; this block makes the uncertain parts countable. Pass
+`certainty = FALSE` to skip it.
+
+## QC warnings
+
+The printed report ends with plain-language flags: unscored question
+types (the reported burden is then an under-count), long stems, long
+labels, long grids, a high screen-out share, and a reminder that the
+structural range is not a respondent probability. The full vector is
+`report$warnings`.
+
+```{r warnings}
+report$warnings[1]
+```
+
+## References
+
+- Heimgartner, D. and Axhausen, K. W. (2024). Predicting response rates
+  once again. *Findings*.
+  <https://findingspress.org/article/125481-predicting-response-rates-once-again>

@@ -139,7 +139,7 @@ summary(report)
 #> Benchmark: median 399 points across 79 GfS-scored waves.
 ```
 
-## Working with the report object
+## Reading the report
 
 `report` is a structured object, not printed text. Pull out each part:
 
@@ -163,6 +163,37 @@ report$blocks      # burden totalled by block, in survey order
 Scalar settings (the points-per-minute rate, the rare-value threshold) are
 stored as attributes: `attr(report, "points_per_minute")`,
 `attr(report, "rare_threshold")`.
+
+Each printed section is explained in `vignette("reading-the-report")`.
+
+## How it works
+
+```mermaid
+flowchart LR
+    src["Qualtrics survey<br>(.qsf file or API)"] --> read["read_qsf()"]
+    read --> score["parse_qsf() +<br>score_burden()"]
+    score --> paths["resolve_paths() +<br>path_burden_profile()"]
+    paths --> report["burden_report()"]
+    report --> out["verdict line +<br>8 report sections"]
+```
+
+`burden_report()` runs the whole pipeline. The lower-level functions expose each
+step for inspection or reuse; see the reference table below.
+
+surveyBurden scores every question with the published GfS / Axhausen burden
+scheme (Heimgartner & Axhausen 2024, Table 1), then follows the survey's flow and
+display logic to work out which questions can appear together and how burden
+varies across the feasible respondent paths. The score for one question is its
+**question burden**; the total along one route is a **path burden**. The default
+result is a **structural burden profile**: each feasible path and display-logic
+sub-state is counted once, so the reported "median" is the middle value across
+those combinations, not the burden half of respondents exceed. Given real
+respondent route data, the report instead reports a **population-weighted
+respondent burden**.
+
+The package describes the instrument, not the respondent: it does not claim that
+burden causes dropout, satisficing or slower responses. The methodology is set
+out in `vignette("gfs-scoring")` and `vignette("paths-and-display-logic")`.
 
 ## Fetching from Qualtrics
 
@@ -193,107 +224,6 @@ Qualtrics account. A public participation link
 expose the definition. To score someone else's survey you need either their
 `.qsf` export or an API token for the account that owns it.
 
-## What surveyBurden does
-
-It takes a Qualtrics `.qsf` export (a JSON file), or a live survey through the
-API, and scores every question with the published GfS / Axhausen burden scheme
-(Heimgartner & Axhausen 2024, Table 1). It then follows the survey's flow and
-display logic, works out which questions can appear together, and reports how
-burden varies across the possible respondent paths. The score for one question
-is its **question burden**; the total along one route through the survey is a
-**path burden**.
-
-A survey often contains many questions that not every respondent sees. Skip
-logic, branches and display rules send different people down different routes. A
-burden figure worked out by hand, or a single expected duration, describes one
-route that few respondents take. surveyBurden reconstructs the programmed routes
-and reports the resulting profile: the shortest route, the longest route, and
-the spread between them.
-
-The package describes the instrument, not the respondent. It does not claim that
-burden causes dropout, satisficing or slower responses — those are empirical
-questions that sit outside what this package does.
-
-### How it works
-
-1. **Read the Qualtrics survey.** Load the `.qsf`, or fetch it through the API,
-   and normalise to one internal form.
-2. **Identify and score the questions.** Classify each Qualtrics widget as a
-   standard question type, then assign its GfS point score.
-3. **Reconstruct which questions can appear together.** Walk the survey flow and
-   the display logic to find the feasible respondent paths.
-4. **Summarise burden across those paths.** Pool the per-path results into the
-   headline spread and the block breakdown.
-
-### GfS scoring
-
-surveyBurden implements the published GfS / Axhausen scheme; it does not invent
-a new burden scale. The point weights are transcribed from the published table
-into `gfs_weights()`.
-
-Some Qualtrics constructs do not map exactly onto the original scheme. A
-dropdown has no row in the table; a slider is not in the scheme; the table
-counts rendered lines of text, which a `.qsf` does not store. Where the mapping
-is uncertain, the package records that through a `score_flag` on the question
-(`auto`, `inferred`, `manual` or `unknown`) and a `score_basis` string naming
-the rule applied. It does not pretend the classification is exact.
-
-| response action | GfS points |
-|---|---|
-| yes / no question | 1 |
-| rating scale, up to 5 options | 2 |
-| rating scale, more than 5 options | 3 |
-| first answer to an open question | 6 |
-| two-alternative stated-choice task | 2 |
-
-The full table is in Heimgartner & Axhausen (2024),
-<https://findingspress.org/article/125481-predicting-response-rates-once-again>.
-It is not reproduced here.
-
-### Path-specific burden
-
-Suppose a survey asks whether the respondent owns a car; only car owners then
-see five follow-up questions about their vehicles. A single burden total mixes
-the two groups and describes neither. surveyBurden represents both routes. It
-handles flow branches, question-level display logic, optional (skippable)
-questions, Loop & Merge blocks that repeat once per selected item, complete
-paths, and screen-out paths where the survey ends early.
-
-The default result is a **structural burden profile**: each feasible path and
-each display-logic sub-state is counted once. It is not a probability
-distribution over respondents — the "median" is the middle value across the
-feasible combinations, not the burden half of respondents exceed.
-
-If you have real respondent route data, supply it and the report adds the
-**population-weighted respondent burden**:
-
-```r
-# routes: one row per respondent. Recognised columns are loop_<id> (the
-# iteration count for a Loop & Merge block, keyed by its driving question id or
-# block id) and visit_<block_id> (TRUE to include a branch-gated block).
-routes <- data.frame(
-  loop_BL6 = c(0, 2, 1, 3, 2),   # "Other adults" loop
-  loop_BL8 = c(1, 1, 0, 2, 1)    # "Vehicle details" loop
-)
-burden_report(qsf, routes = routes)
-```
-
-### Points and minutes
-
-The GfS framework uses roughly 12 points per minute as a rule of thumb, from the
-original framework. It is a rough scale, not a web-specific calibration, and not
-a prediction of completion time. Override it by setting `points_per_minute` on a
-weights object:
-
-```r
-w <- gfs_weights()
-w$points_per_minute <- 15
-burden_report(qsf, weights = w)
-```
-
-For a figure specific to your survey, run `validate_times()` on your own
-completion-time data and use the rate it returns.
-
 ## Pipeline and API reference
 
 `burden_report()` runs the whole pipeline. The lower-level functions expose each
@@ -319,7 +249,9 @@ step.
 | `validate_times(qsf, observed, weights, trim)` | a points-per-minute rate fitted to your completion-time data |
 
 Every function has a help page: `?burden_report`, `?score_burden`, and so on.
-The vignette walks through the whole workflow: `vignette("surveyBurden")`.
+The guides cover the workflow end to end — start with `vignette("surveyBurden")`,
+then `vignette("reading-the-report")`, `vignette("gfs-scoring")`,
+`vignette("paths-and-display-logic")` and `vignette("calibration")`.
 
 ## Limitations
 
@@ -334,7 +266,7 @@ The vignette walks through the whole workflow: `vignette("surveyBurden")`.
 - The points-to-minutes conversion is a rule of thumb, not a completion-time
   forecast.
 
-The vignette covers each of these in full.
+See `vignette("calibration")` for the detail.
 
 ## Contributing
 

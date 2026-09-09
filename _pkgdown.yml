@@ -3,34 +3,50 @@ url: https://pmpk20.github.io/surveyBurden/
 template:
   bootstrap: 5
 
+articles:
+  - title: Guides
+    navbar: ~
+    contents:
+      - surveyBurden
+      - reading-the-report
+      - gfs-scoring
+      - paths-and-display-logic
+      - calibration
+
 reference:
   - title: One-call pipeline
+    desc: Run the whole analysis and get the structured report.
     contents:
       - burden_report
       - summary_line
   - title: Read a Qualtrics survey
+    desc: Load a .qsf, or fetch a live survey, into one internal form.
     contents:
       - read_qsf
       - fetch_qsf
       - as_qsf_raw
       - parse_qsf
   - title: Score questions
+    desc: Classify each question and apply the GfS / Axhausen point weights.
     contents:
       - classify_question
       - gfs_weights
       - score_burden
   - title: Resolve paths
+    desc: Walk the flow and display logic to the feasible respondent paths.
     contents:
       - resolve_flow
       - resolve_live_blocks
       - resolve_paths
       - classify_reachability
   - title: Path burden
+    desc: Turn the resolved paths into per-path and population-weighted burden.
     contents:
       - path_burden
       - path_burden_profile
       - respondent_burden
   - title: Diagnostics
+    desc: Check where the calculation is exact and calibrate points to minutes.
     contents:
       - calculation_certainty
       - validate_times

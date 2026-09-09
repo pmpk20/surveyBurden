@@ -13,6 +13,9 @@
 * **Breaking (internal API):** `classify_question()` now returns a named `list`
   rather than a one-row tibble. It is a building block for `parse_qsf()`, which
   is unchanged. `score_burden()`'s output is unchanged.
+* The README is shorter and leads with a workflow diagram; the single long
+  vignette is split into focused guides ("Get started", "Reading the report",
+  "The GfS scoring method", "Paths and display logic", "Calibration and limits").
 * Each question's display-logic tree is parsed once per `burden_report()` and
   shared between the burden engine and the certainty breakdown, instead of
   being parsed independently by each.

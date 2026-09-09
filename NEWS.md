@@ -1,5 +1,10 @@
 # surveyBurden (development version)
 
+* `print()` on a `burden_report` now opens with a one-line verdict: the median
+  completing-path burden in points and minutes, its ratio to the 399-point GfS
+  benchmark, and the range across completing paths. `summary()` states the same
+  verdict, so the two can no longer disagree. When `routes` are supplied the
+  verdict also reports the population-weighted median.
 * `burden_report()` is faster again: `parse_qsf()` and `score_burden()` now
   build their catalogue in one pass instead of constructing a one-row tibble
   per question and row-binding hundreds of them (that machinery was ~60% of the

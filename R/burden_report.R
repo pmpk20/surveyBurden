@@ -368,6 +368,44 @@ render_table <- function(mat, right = NULL) {
     vapply(seq_len(nrow(mat))[-1], function(i) fmt_row(mat[i, ]), character(1)))
 }
 
+#' One- or two-line plain-language verdict for a burden report, shared by the
+#' full print method and [summary()][summary.burden_report] so the two cannot
+#' drift. `burden` is the `$burden` tibble -- its `attr(, "basis")` selects the
+#' wording. `population_median` is the population-weighted median burden in
+#' points, or `NULL` when no `routes` were supplied.
+#' @noRd
+burden_verdict_line <- function(burden, ppm, benchmark_median, n_complete,
+                                population_median = NULL) {
+  basis <- attr(burden, "basis")
+  pt    <- function(stat) burden$points[burden$statistic == stat]
+  pl    <- if (identical(n_complete, 1L)) "" else "s"
+
+  if (identical(basis, "none")) {
+    return("No completing path: every structural path screens out. Per-path burden is in {.code $paths}.")
+  }
+
+  mn   <- round(pt("min"));       mx   <- round(pt("max"))
+  mn_m <- round(pt("min") / ppm); mx_m <- round(pt("max") / ppm)
+
+  if (identical(basis, "naive")) {
+    return(sprintf(
+      "Path burden runs %d-%d points (~%d-%d min) across %d completing path%s (naive band; median not computed).",
+      mn, mx, mn_m, mx_m, n_complete, pl))
+  }
+
+  med   <- round(pt("median"))
+  med_m <- round(pt("median") / ppm)
+  ratio <- sprintf("%.1f", pt("median") / benchmark_median)
+  line1 <- sprintf(
+    "Median completing path: %d GfS points, ~%d min - %sx the benchmark median of %d. Path burden ranges %d-%d points (%d-%d min) across %d completing path%s.",
+    med, med_m, ratio, round(benchmark_median), mn, mx, mn_m, mx_m, n_complete, pl)
+
+  if (is.null(population_median)) return(line1)
+  c(line1, sprintf(
+    "Population-weighted median: %d points (~%d min) across the supplied routes.",
+    round(population_median), round(population_median / ppm)))
+}
+
 print_burden_report_body <- function(x) {
   ins <- x$instrument
   ppm <- attr(x, "points_per_minute")
@@ -377,6 +415,12 @@ print_burden_report_body <- function(x) {
   trunc_txt <- function(s, n) ifelse(nchar(s) > n, paste0(substr(s, 1, n - 3), "..."), s)
 
   cli::cli_h1("Survey Burden Report: {ins$survey_name}")
+
+  verdict <- burden_verdict_line(
+    x$burden, ppm, bm$median_points, ins$n_complete_paths,
+    population_median = if (!is.null(x$population))
+      x$population$points[x$population$statistic == "median"] else NULL)
+  for (ln in verdict) cli::cli_text(ln)
 
   cli::cli_h2("Instrument")
   cli::cli_verbatim(render_table(rbind(
@@ -482,17 +526,12 @@ summary.burden_report <- function(object, ...) {
 #' @export
 format.summary.burden_report <- function(x, ...) {
   ins <- x$instrument
-  b   <- x$burden
-  g   <- function(s) b$points[b$statistic == s]
   cli::cli_fmt({
     cli::cli_h1("{ins$survey_name}")
     cli::cli_text("{ins$n_questions} questions, {ins$n_blocks} blocks, {ins$n_paths} structural paths ({ins$n_complete_paths} complete).")
-    if (identical(attr(b, "basis"), "none")) {
-      cli::cli_text("No completing path: every structural path screens out.")
-    } else if (identical(attr(b, "basis"), "naive")) {
-      cli::cli_text("Burden: {sprintf('%.0f', g('min'))} / {sprintf('%.0f', g('max'))} points (min / max; naive band).")
-    } else {
-      cli::cli_text("Burden: {sprintf('%.0f', g('min'))} / {sprintf('%.0f', g('median'))} / {sprintf('%.0f', g('max'))} points (min / median / max; ~{sprintf('%.0f', g('min')/x$ppm)} / {sprintf('%.0f', g('median')/x$ppm)} / {sprintf('%.0f', g('max')/x$ppm)} min).")
+    for (ln in burden_verdict_line(x$burden, x$ppm, x$benchmark$median_points,
+                                   ins$n_complete_paths)) {
+      cli::cli_text(ln)
     }
     cli::cli_text("Benchmark: median {x$benchmark$median_points} points across {x$benchmark$n_waves} GfS-scored waves.")
   }, collapse = FALSE)

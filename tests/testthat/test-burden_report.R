@@ -227,6 +227,71 @@ test_that("burden_report is silent under quiet = TRUE", {
   expect_silent(burden_report(fx(), certainty = FALSE, quiet = TRUE))
 })
 
+# --- verdict line ----------------------------------------------------------
+
+test_that("print() opens with a verdict line before the Instrument section", {
+  out <- format(report_full())
+  verdict_i <- grep("Median completing path", out)
+  instr_i   <- grep("Instrument", out)[1]
+  expect_length(verdict_i, 1L)
+  expect_lt(verdict_i, instr_i)
+})
+
+test_that("the structural verdict states median, minutes, benchmark ratio and range", {
+  v <- paste(burden_verdict_line(
+    report_full()$burden, 12, 399, report_full()$instrument$n_complete_paths),
+    collapse = " ")
+  expect_match(v, "Median completing path: 123 GfS points, ~10 min")
+  expect_match(v, "0[.]3x the benchmark median of 399")
+  expect_match(v, "ranges 106-143 points [(]9-12 min[)] across 2 completing paths")
+})
+
+test_that("the verdict benchmark ratio is median / benchmark to one decimal", {
+  r <- report_full()
+  v <- paste(burden_verdict_line(r$burden, attr(r, "points_per_minute"),
+                                 attr(r, "benchmark")$median_points,
+                                 r$instrument$n_complete_paths), collapse = " ")
+  expect_match(v, sprintf("%.1fx the benchmark", bstat(r, "median") / 399), fixed = TRUE)
+})
+
+test_that("the naive verdict gives a range, no median, no benchmark ratio", {
+  r <- report_naive()
+  v <- paste(burden_verdict_line(r$burden, 12, 399, r$instrument$n_complete_paths),
+             collapse = " ")
+  expect_match(v, "Path burden runs 103-145 points")
+  expect_match(v, "naive band")
+  expect_false(grepl("benchmark", v))
+})
+
+test_that("the no-completing-path verdict says so", {
+  r <- burden_report(no_complete_qsf(), certainty = FALSE, quiet = TRUE)
+  v <- paste(burden_verdict_line(r$burden, 12, 399, 0L), collapse = " ")
+  expect_match(v, "No completing path")
+})
+
+test_that("summary() and print() state the same verdict", {
+  r <- report_full()
+  squish <- function(x) gsub("[[:space:]]+", " ", paste(x, collapse = " "))
+  verdict1 <- burden_verdict_line(r$burden, attr(r, "points_per_minute"),
+                                  attr(r, "benchmark")$median_points,
+                                  r$instrument$n_complete_paths)[1]
+  expect_true(grepl(verdict1, squish(format(r)), fixed = TRUE))
+  expect_true(grepl(verdict1, squish(format(summary(r))), fixed = TRUE))
+})
+
+test_that("the verdict names the population-weighted median when routes are given", {
+  set.seed(1)
+  routes <- data.frame(
+    source = "roots",
+    n_children = rbinom(60, 3, 0.3), n_cars = rbinom(60, 2, 0.6),
+    n_vans = 0, n_campers = 0,
+    loop_other_adults = rbinom(60, 3, 0.4),
+    loop_children = rbinom(60, 2, 0.4), loop_vehicles = rbinom(60, 2, 0.5)
+  )
+  r <- burden_report(fx(), routes = routes, certainty = FALSE, quiet = TRUE)
+  expect_true(any(grepl("Population-weighted median", format(r), fixed = TRUE)))
+})
+
 test_that("burden_report reports progress under quiet = FALSE", {
   withr::local_options(cli.progress_show_after = 0, cli.progress_clear = FALSE)
   expect_message(burden_report(fx(), certainty = FALSE, quiet = FALSE))

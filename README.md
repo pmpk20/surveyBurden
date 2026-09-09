@@ -48,6 +48,8 @@ report
 
 ```
 #> ── Survey Burden Report: Neighbourhood Travel Survey (demo) ────────────────────
+#> Median completing path: 123 GfS points, ~10 min - 0.3x the benchmark median of
+#> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.
 #>
 #> ── Instrument ──
 #>
@@ -126,13 +128,14 @@ report
 #>   50% chance a respondent sees the median burden".
 ```
 
-`summary(report)` prints a one-line headline:
+`summary(report)` prints just the headline:
 
 ```r
 summary(report)
 #> ── Neighbourhood Travel Survey (demo) ──────────────────────────────────────────
 #> 26 questions, 12 blocks, 4 structural paths (2 complete).
-#> Burden: 106 / 123 / 143 points (min / median / max; ~9 / 10 / 12 min).
+#> Median completing path: 123 GfS points, ~10 min - 0.3x the benchmark median of
+#> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.
 #> Benchmark: median 399 points across 79 GfS-scored waves.
 ```
 

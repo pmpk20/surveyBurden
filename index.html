@@ -196,6 +196,7 @@
 <span>  QUALTRICS_BASE_URL <span class="op">=</span> <span class="st">"https://yourdatacenter.qualtrics.com"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="st">"https://yourorg.qualtrics.com/survey-builder/SV_xxxxxxxxxxxxxxxx/edit"</span><span class="op">)</span></span></code></pre></div>
+<p>Only the survey ID (<code>SV_...</code>) is needed, so a survey-builder link, a distribution link (<code>.../jfe/form/SV_...</code>), or the bare <code>SV_</code> id all work. <code><a href="reference/burden_report.html">burden_report()</a></code> fetches the survey <strong>definition</strong>, not its responses.</p>
 <p><code>QUALTRICS_BASE_URL</code> is the API datacenter host, which can differ from your survey-builder host. Check Account Settings, then Qualtrics IDs. Credentials are read from the environment and never appear in code.</p>
 </div>
 <div class="section level2">

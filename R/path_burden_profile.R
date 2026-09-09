@@ -122,9 +122,9 @@ parse_all_display_logic <- function(qsf, scored) {
 #' Convolve a path's components into a burden distribution (loops uniform 1..max).
 #' @noRd
 assemble_path_distribution <- function(cp) {
-  d <- data.frame(burden = cp$base, weight = 1)
+  d <- bw_df(cp$base, 1)
   for (lp in cp$loops) {
-    d <- convolve_dist(d, data.frame(burden = lp$per_iter * seq_len(lp$n), weight = 1 / lp$n))
+    d <- convolve_dist(d, bw_df(lp$per_iter * seq_len(lp$n), 1 / lp$n))
   }
   d <- convolve_dist(d, cp$display_dist)
   tibble::tibble(burden = d$burden, weight = d$weight)
@@ -149,7 +149,7 @@ one_path_components <- function(q_always, q_maybe, block_ids,
     loops[[bid]] <- list(per_iter = sum(gfs[lq], na.rm = TRUE), n = loop_blocks[[bid]])
   }
 
-  display_dist <- data.frame(burden = 0, weight = 1)
+  display_dist <- bw_df(0, 1)
   cond <- q_maybe_main[q_maybe_main %in% names(parsed)]
   if (length(cond) > 0) {
     for (grp in connected_components(cond, parsed)) {
@@ -242,7 +242,7 @@ component_dist_exact <- function(grp, gvars, states, parsed, gfs, q_always) {
 component_dist_fallback <- function(grp, parsed, gfs, stype, q_always) {
   owner <- vapply(grp, function(q) parsed[[q]]$vars[1], character(1))
   by_gate <- split(grp, owner)
-  d <- data.frame(burden = 0, weight = 1)
+  d <- bw_df(0, 1)
   for (v in names(by_gate)) {
     dep <- sort(by_gate[[v]])
     d <- convolve_dist(d, gate_component(v, dep, parsed, gfs, stype, q_always))
@@ -258,9 +258,9 @@ one_path_distribution <- function(q_always, q_maybe, block_ids,
                                   memo = new.env(parent = emptyenv())) {
   cp <- one_path_components(q_always, q_maybe, block_ids,
                             parsed, gfs, stype, qblock, loop_blocks, memo)
-  d <- data.frame(burden = cp$base, weight = 1)
+  d <- bw_df(cp$base, 1)
   for (lp in cp$loops) {
-    d <- convolve_dist(d, data.frame(burden = lp$per_iter * seq_len(lp$n), weight = 1 / lp$n))
+    d <- convolve_dist(d, bw_df(lp$per_iter * seq_len(lp$n), 1 / lp$n))
   }
   d <- convolve_dist(d, cp$display_dist)
   tibble::tibble(burden = d$burden, weight = d$weight)
@@ -290,6 +290,18 @@ gate_component <- function(v, deps, parsed, gfs, stype, q_always) {
   d
 }
 
+#' A bare two-column (burden, weight) data frame, skipping the `data.frame()`
+#' constructor's name/row-name/coercion checks -- this is built ~1000+ times per
+#' `burden_report()` on a survey with display logic.
+#' @noRd
+bw_df <- function(burden, weight) {
+  n <- max(length(burden), length(weight))
+  if (length(burden) != n) burden <- rep(burden, length.out = n)
+  if (length(weight) != n) weight <- rep(weight, length.out = n)
+  structure(list(burden = burden, weight = weight),
+            class = "data.frame", row.names = .set_row_names(n))
+}
+
 #' Fast group-sum of weights by (rounded) burden value.
 #' @noRd
 group_sum <- function(burden, weight) {
@@ -297,7 +309,7 @@ group_sum <- function(burden, weight) {
   u <- sort.int(unique(k))
   idx <- match(k, u)
   w <- as.numeric(rowsum(weight, idx))   # reorder = TRUE: rows in idx (=u) order
-  data.frame(burden = u / 10, weight = w)
+  bw_df(u / 10, w)
 }
 
 #' Possible states of a gate variable.

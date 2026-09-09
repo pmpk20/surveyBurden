@@ -11,6 +11,9 @@
 * Each question's display-logic tree is parsed once per `burden_report()` and
   shared between the burden engine and the certainty breakdown, instead of
   being parsed independently by each.
+* The display-logic convolution builds its intermediate `(burden, weight)`
+  frames with a bare constructor instead of `data.frame()` (called 1000+ times
+  on a survey with heavy display logic). Numbers are unchanged.
 * A survey with several block randomisers now raises **one** combined
   "BlockRandomizer" warning that names the flow nodes, instead of one warning
   per randomiser.

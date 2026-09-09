@@ -50,7 +50,8 @@ Merge sections repeat, or ~Z on the shortest complete route".</p>
 <span>  <span class="va">qsf</span>,</span>
 <span>  routes <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  weights <span class="op">=</span> <span class="fu"><a href="gfs_weights.html">gfs_weights</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  loop_typical <span class="op">=</span> <span class="fl">2</span></span>
+<span>  loop_typical <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  engine <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -86,6 +87,12 @@ column falls back to <code>loop_typical</code>.</p></dd>
 <dt id="arg-loop-typical">loop_typical<a class="anchor" aria-label="anchor" href="#arg-loop-typical"></a></dt>
 <dd><p>Loop iterations to assume for the <code>typical_pts</code> column,
 and for a route whose loop count is not supplied.</p></dd>
+
+
+<dt id="arg-engine">engine<a class="anchor" aria-label="anchor" href="#arg-engine"></a></dt>
+<dd><p>Optional precomputed <code>burden_engine()</code> result for this <code>qsf</code>
+(internal reuse by <code><a href="burden_report.html">burden_report()</a></code>; <code>NULL</code> builds it here, leaving the
+public behaviour unchanged).</p></dd>
 
 </dl></div>
     <div class="section level2">

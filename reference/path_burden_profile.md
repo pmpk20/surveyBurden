@@ -7,7 +7,12 @@ the band and enumerates it.
 ## Usage
 
 ``` r
-path_burden_profile(qsf, weights = gfs_weights(), max_paths = 10000L)
+path_burden_profile(
+  qsf,
+  weights = gfs_weights(),
+  max_paths = 10000L,
+  engine = NULL
+)
 ```
 
 ## Arguments
@@ -26,6 +31,11 @@ path_burden_profile(qsf, weights = gfs_weights(), max_paths = 10000L)
 
   Passed to
   [`resolve_paths()`](https://pmpk20.github.io/surveyBurden/reference/resolve_paths.md).
+
+- engine:
+
+  Optional precomputed `burden_engine()` result for this `qsf` (internal
+  reuse; `NULL` builds it here, leaving the public behaviour unchanged).
 
 ## Value
 

@@ -43,7 +43,12 @@ inside the band and enumerates it.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">path_burden_profile</span><span class="op">(</span><span class="va">qsf</span>, weights <span class="op">=</span> <span class="fu"><a href="gfs_weights.html">gfs_weights</a></span><span class="op">(</span><span class="op">)</span>, max_paths <span class="op">=</span> <span class="fl">10000L</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">path_burden_profile</span><span class="op">(</span></span>
+<span>  <span class="va">qsf</span>,</span>
+<span>  weights <span class="op">=</span> <span class="fu"><a href="gfs_weights.html">gfs_weights</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  max_paths <span class="op">=</span> <span class="fl">10000L</span>,</span>
+<span>  engine <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -60,6 +65,12 @@ inside the band and enumerates it.</p>
 
 <dt id="arg-max-paths">max_paths<a class="anchor" aria-label="anchor" href="#arg-max-paths"></a></dt>
 <dd><p>Passed to <code><a href="resolve_paths.html">resolve_paths()</a></code>.</p></dd>
+
+
+<dt id="arg-engine">engine<a class="anchor" aria-label="anchor" href="#arg-engine"></a></dt>
+<dd><p>Optional precomputed <code>burden_engine()</code> result for this <code>qsf</code>
+(internal reuse; <code>NULL</code> builds it here, leaving the public behaviour
+unchanged).</p></dd>
 
 </dl></div>
     <div class="section level2">

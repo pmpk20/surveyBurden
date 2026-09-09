@@ -12,7 +12,14 @@ which to read as assumption-dependent.
 ## Usage
 
 ``` r
-calculation_certainty(qsf, weights = gfs_weights(), max_paths = 10000L)
+calculation_certainty(
+  qsf,
+  weights = gfs_weights(),
+  max_paths = 10000L,
+  paths = NULL,
+  scored = NULL,
+  blocks = NULL
+)
 ```
 
 ## Arguments
@@ -32,6 +39,17 @@ calculation_certainty(qsf, weights = gfs_weights(), max_paths = 10000L)
 
   Passed to
   [`resolve_paths()`](https://pmpk20.github.io/surveyBurden/reference/resolve_paths.md).
+
+- paths, scored, blocks:
+
+  Optional precomputed
+  [`resolve_paths()`](https://pmpk20.github.io/surveyBurden/reference/resolve_paths.md),
+  [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
+  and
+  [`resolve_live_blocks()`](https://pmpk20.github.io/surveyBurden/reference/resolve_live_blocks.md)
+  results for this `qsf` (internal reuse by
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md);
+  `NULL` computes them here, leaving the public behaviour unchanged).
 
 ## Value
 

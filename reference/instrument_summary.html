@@ -40,7 +40,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">instrument_summary</span><span class="op">(</span><span class="va">qsf</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">instrument_summary</span><span class="op">(</span><span class="va">qsf</span>, blocks <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -49,6 +49,11 @@
 
 <dl><dt id="arg-qsf">qsf<a class="anchor" aria-label="anchor" href="#arg-qsf"></a></dt>
 <dd><p>A <code>qsf_raw</code> object from <code><a href="read_qsf.html">read_qsf()</a></code>.</p></dd>
+
+
+<dt id="arg-blocks">blocks<a class="anchor" aria-label="anchor" href="#arg-blocks"></a></dt>
+<dd><p>Optional precomputed <code><a href="resolve_live_blocks.html">resolve_live_blocks()</a></code> result for this
+<code>qsf</code> (internal reuse; <code>NULL</code> computes it here).</p></dd>
 
 </dl></div>
     <div class="section level2">

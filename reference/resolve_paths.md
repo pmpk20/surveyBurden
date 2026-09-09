@@ -11,7 +11,7 @@ cannot evaluate ex ante), and those that can never be shown on that path
 ## Usage
 
 ``` r
-resolve_paths(qsf, max_paths = 10000L)
+resolve_paths(qsf, max_paths = 10000L, catalogue = NULL, blocks = NULL)
 ```
 
 ## Arguments
@@ -25,6 +25,18 @@ resolve_paths(qsf, max_paths = 10000L)
 
   Passed to
   [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md).
+
+- catalogue, blocks:
+
+  Optional precomputed
+  [`parse_qsf()`](https://pmpk20.github.io/surveyBurden/reference/parse_qsf.md)
+  and
+  [`resolve_live_blocks()`](https://pmpk20.github.io/surveyBurden/reference/resolve_live_blocks.md)
+  results for this `qsf`. Internal: lets
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
+  parse and resolve the instrument once and reuse it. When `NULL`
+  (default) they are computed here, so the public behaviour is
+  unchanged.
 
 ## Value
 

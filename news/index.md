@@ -3,6 +3,19 @@
 ## surveyBurden (development version)
 
 - [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
+  is ~4x faster (INFUZE core survey: 17s to 4s). It now parses, scores
+  and resolves the instrument once and threads the results through the
+  pipeline instead of each step redoing that work.
+  [`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md),
+  [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md),
+  [`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md),
+  [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md),
+  [`resolve_paths()`](https://pmpk20.github.io/surveyBurden/reference/resolve_paths.md)
+  and
+  [`instrument_summary()`](https://pmpk20.github.io/surveyBurden/reference/instrument_summary.md)
+  gain optional arguments for the precomputed pieces; output is
+  unchanged.
+- [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
   gains a `quiet` argument and, by default, reports progress through the
   pipeline stages with
   [`cli::cli_progress_step()`](https://cli.r-lib.org/reference/cli_progress_step.html).

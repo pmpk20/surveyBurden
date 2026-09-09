@@ -5,7 +5,7 @@ Structural summary of an instrument
 ## Usage
 
 ``` r
-instrument_summary(qsf)
+instrument_summary(qsf, blocks = NULL)
 ```
 
 ## Arguments
@@ -14,6 +14,12 @@ instrument_summary(qsf)
 
   A `qsf_raw` object from
   [`read_qsf()`](https://pmpk20.github.io/surveyBurden/reference/read_qsf.md).
+
+- blocks:
+
+  Optional precomputed
+  [`resolve_live_blocks()`](https://pmpk20.github.io/surveyBurden/reference/resolve_live_blocks.md)
+  result for this `qsf` (internal reuse; `NULL` computes it here).
 
 ## Value
 

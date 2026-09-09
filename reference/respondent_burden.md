@@ -11,7 +11,8 @@ respondent_burden(
   qsf,
   routes = NULL,
   weights = gfs_weights(),
-  loop_typical = 2
+  loop_typical = 2,
+  engine = NULL
 )
 ```
 
@@ -51,6 +52,13 @@ respondent_burden(
 
   Loop iterations to assume for the `typical_pts` column, and for a
   route whose loop count is not supplied.
+
+- engine:
+
+  Optional precomputed `burden_engine()` result for this `qsf` (internal
+  reuse by
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md);
+  `NULL` builds it here, leaving the public behaviour unchanged).
 
 ## Value
 

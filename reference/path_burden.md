@@ -12,7 +12,13 @@ of any actual respondent on that path lies between.
 ## Usage
 
 ``` r
-path_burden(qsf, weights = gfs_weights(), max_paths = 10000L)
+path_burden(
+  qsf,
+  weights = gfs_weights(),
+  max_paths = 10000L,
+  paths = NULL,
+  scored = NULL
+)
 ```
 
 ## Arguments
@@ -32,6 +38,15 @@ path_burden(qsf, weights = gfs_weights(), max_paths = 10000L)
 
   Passed to
   [`resolve_paths()`](https://pmpk20.github.io/surveyBurden/reference/resolve_paths.md).
+
+- paths, scored:
+
+  Optional precomputed
+  [`resolve_paths()`](https://pmpk20.github.io/surveyBurden/reference/resolve_paths.md)
+  and
+  [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
+  results for this `qsf` (internal reuse; `NULL` computes them here,
+  leaving the public behaviour unchanged).
 
 ## Value
 

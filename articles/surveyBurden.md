@@ -58,13 +58,13 @@ report <- burden_report(demo)
 #> ✔ Reading survey [24ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [663ms]
+#> ✔ Scoring questions and resolving paths [361ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [362ms]
+#> ✔ Checking calculation certainty [34ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [361ms]
+#> ✔ Enumerating display-logic combinations [30ms]
 #> 
 report
 #> 
@@ -536,13 +536,13 @@ burden_report(demo, routes = routes)$population
 #> ✔ Reading survey [7ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [519ms]
+#> ✔ Scoring questions and resolving paths [205ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [352ms]
+#> ✔ Checking calculation certainty [27ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [710ms]
+#> ✔ Enumerating display-logic combinations [43ms]
 #> 
 #> # A tibble: 5 × 4
 #>   statistic points minutes  index
@@ -720,13 +720,13 @@ report <- burden_report(demo)
 #> ✔ Reading survey [7ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [524ms]
+#> ✔ Scoring questions and resolving paths [208ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [347ms]
+#> ✔ Checking calculation certainty [24ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [422ms]
+#> ✔ Enumerating display-logic combinations [32ms]
 #> 
 summary(report)
 #> 

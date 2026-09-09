@@ -55,16 +55,16 @@ One call runs the whole pipeline.
 
 report <- burden_report(demo)
 #> ℹ Reading survey
-#> ✔ Reading survey [24ms]
+#> ✔ Reading survey [25ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [252ms]
+#> ✔ Scoring questions and resolving paths [259ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [33ms]
+#> ✔ Checking calculation certainty [34ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [27ms]
+#> ✔ Enumerating display-logic combinations [29ms]
 #> 
 report
 #> 
@@ -533,16 +533,16 @@ routes <- data.frame(
 )
 burden_report(demo, routes = routes)$population
 #> ℹ Reading survey
-#> ✔ Reading survey [8ms]
+#> ✔ Reading survey [7ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [87ms]
+#> ✔ Scoring questions and resolving paths [88ms]
 #> 
 #> ℹ Checking calculation certainty
 #> ✔ Checking calculation certainty [22ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [61ms]
+#> ✔ Enumerating display-logic combinations [59ms]
 #> 
 #> # A tibble: 5 × 4
 #>   statistic points minutes  index
@@ -717,16 +717,16 @@ with no private files.
 
 report <- burden_report(demo)
 #> ℹ Reading survey
-#> ✔ Reading survey [8ms]
+#> ✔ Reading survey [7ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [89ms]
+#> ✔ Scoring questions and resolving paths [87ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [23ms]
+#> ✔ Checking calculation certainty [22ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [31ms]
+#> ✔ Enumerating display-logic combinations [29ms]
 #> 
 summary(report)
 #> 

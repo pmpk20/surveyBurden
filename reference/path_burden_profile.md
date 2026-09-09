@@ -38,6 +38,13 @@ path_burden_profile(
   Optional precomputed `burden_engine()` result for this `qsf` (internal
   reuse; `NULL` builds it here, leaving the public behaviour unchanged).
 
+- parsed_dl:
+
+  Optional precomputed map of parsed display-logic trees for this `qsf`
+  (internal reuse by
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md);
+  ignored when `engine` is supplied, computed as needed when `NULL`).
+
 ## Value
 
 A [tibble](https://tibble.tidyverse.org/reference/tibble.html), one row

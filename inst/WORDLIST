@@ -1,5 +1,6 @@
 Axhausen
 Axhausen's
+BlockRandomizer
 CMD
 COVID
 Codecov
@@ -7,6 +8,7 @@ Dropdowns
 ETH
 GfS
 Heimgartner
+INFUZE
 JS
 Lifecycle
 ORCID
@@ -19,6 +21,8 @@ dropdown
 etc
 hideable
 qsf
+randomiser
+randomisers
 satisficing
 standalone
 survey's

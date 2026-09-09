@@ -20,10 +20,10 @@
 * A survey with several block randomisers now raises **one** combined
   "BlockRandomizer" warning that names the flow nodes, instead of one warning
   per randomiser.
-* Internal cleanups with no change to any reported number: the display-logic
+* Internal changes with no effect on any reported number: the display-logic
   exact-enumeration cap is now a single shared constant (was duplicated between
-  the burden calc and the certainty breakdown, so they could drift); question
-  stems are HTML-stripped once per question instead of twice.
+  the burden calculation and the certainty breakdown, so they could drift);
+  question stems are HTML-stripped once per question instead of twice.
 * `burden_report()` is ~4x faster (INFUZE core survey: 17s to 4s). It now
   parses, scores and resolves the instrument once and threads the results
   through the pipeline instead of each step redoing that work. `path_burden()`,

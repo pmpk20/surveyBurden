@@ -37,7 +37,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Summary</h1>
-      <small class="dont-index">Source: <a href="https://github.com/pmpk20/surveyBurden/blob/main/paper.md" class="external-link"><code>paper.md</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/pmpk20/surveyBurden/blob/v0.1.0/paper.md" class="external-link"><code>paper.md</code></a></small>
     </div>
 
 
@@ -61,16 +61,16 @@
 <li>
 <strong>Display-logic handling.</strong> <code><a href="reference/resolve_paths.html">resolve_paths()</a></code> partitions the questions on each path into always shown, possibly shown, and never shown, folding grouped If / ElseIf conditions into a single feasibility statement per question.</li>
 <li>
-<strong>Path enumeration.</strong> <code><a href="reference/path_burden_profile.html">path_burden_profile()</a></code> enumerates the feasible burden values within each path by resolving display-logic gates, exactly for small coupling components and with a documented approximation for large ones. The result is a profile of feasible burden values, each counted once. It is not a probability distribution over respondents! However, when observed respondent routes are supplied, <code><a href="reference/respondent_burden.html">respondent_burden()</a></code> weights each route by how often it occurs and returns a population-weighted average.</li>
+<strong>Path enumeration.</strong> <code><a href="reference/path_burden_profile.html">path_burden_profile()</a></code> enumerates the feasible burden values within each path by resolving display-logic gates, exactly for small coupling components and with a documented approximation for large ones. The result is a profile of feasible burden values, each counted once, and is not a probability distribution over respondents. When observed respondent routes are supplied, <code><a href="reference/respondent_burden.html">respondent_burden()</a></code> weights each route by how often it occurs and returns a population-weighted average.</li>
 <li>
 <strong>Structured report.</strong> <code><a href="reference/burden_report.html">burden_report()</a></code> returns an object whose components include the survey summary, the burden spread, the per-block and per-path breakdowns, the scored question catalogue, the calculation-certainty summary, and the readability diagnostics. Printing the object renders a formatted report; <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> gives a one-line headline.</li>
 <li>
-<strong>Diagnostics.</strong> The report keeps readability signals (long question stems, long response labels, long grids) separate from the GfS score, flags large screen-out shares, and states, for the given survey, which parts of the calculation are exact and which rest on documented approximations. We use the twelve points per minute (12pts/min) rule of thumb from [@schmid2019] to provide an estimated completion time, but users may reconfigure this if desired.</li>
+<strong>Diagnostics.</strong> The report keeps readability signals (long question stems, long response labels, long grids) separate from the GfS score, flags large screen-out shares, and states, for the given survey, which parts of the calculation are exact and which rest on documented approximations. The points-to-minutes conversion uses the GfS rule of thumb of roughly 12 points per minute and is user-configurable.</li>
 </ul><p>The package includes an automated test suite and passes <code>R CMD check</code> cleanly.</p>
 </div>
 <div class="section level1">
 <h1 id="validation">Validation<a class="anchor" aria-label="anchor" href="#validation"></a></h1>
-<p>The flow reconstruction has been checked against a fielded web survey, and every observed respondent’s routing corresponded to one of the enumerated structural paths.</p>
+<p>The flow reconstruction has been checked against a fielded web survey, and every observed respondent’s routing corresponded to one of the enumerated structural paths. A synthetic fixture exercises question types and flow structures beyond the worked example.</p>
 </div>
 <div class="section level1">
 <h1 id="acknowledgements">Acknowledgements<a class="anchor" aria-label="anchor" href="#acknowledgements"></a></h1>

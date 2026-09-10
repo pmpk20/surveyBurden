@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/pmpk20/surveyBurden/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/pmpk20/surveyBurden/blob/v0.1.0/inst/CITATION)
 
 King P (2026). *surveyBurden: Ex-Ante Path-Aware Survey Instrument
 Burden Assessment*. R package version 0.1.0,

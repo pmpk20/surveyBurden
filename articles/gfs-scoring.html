@@ -229,13 +229,13 @@ display logic is not enumerated.</li>
 <div class="section level3">
 <h3 id="question-stems-are-not-separately-scored">Question stems are not separately scored<a class="anchor" aria-label="anchor" href="#question-stems-are-not-separately-scored"></a>
 </h3>
-<p>Table 1’s “question or transition, up to 3 lines = 2.0” is applied to
-standalone instruction blocks only. It is not added on top of every
-question’s response score. The GfS scheme may intend the reading cost of
-a question stem to be absorbed into the item weight; settling that needs
-the underlying GfS methodology, not Table 1 alone. A question with a
-long disambiguation stem is therefore scored conservatively, and its
-stem length is reported separately as a readability diagnostic (see
+<p>The GfS Table 1’s “question or transition, up to 3 lines = 2.0” is
+applied to standalone instruction blocks only, not the question text
+itself! It is unclear whether the GfS scheme intended the reading cost
+of a question to be absorbed into the item weight or counted separately.
+A question with a long disambiguation stem is, therefore, scored
+conservatively, and its stem length is reported separately as a
+readability diagnostic (see
 <code><a href="../articles/reading-the-report.html">vignette("reading-the-report")</a></code>).</p>
 </div>
 <div class="section level3">
@@ -245,11 +245,9 @@ stem length is reported separately as a readability diagnostic (see
 apply” across two axes – is scored as <code>rows x cols x 0.5</code>.
 Each cell is one trivial closed yes/no decision; GfS scores a closed
 yes/no at 1.0, discounted here for the working-memory efficiency of
-answering in a grid. This proxy is
-<strong>orientation-invariant</strong>: symmetric in rows and columns,
-so unlike an earlier <code>rows x 4.0</code> proxy it does not change
-with how Qualtrics happened to store the grid. It is a documented
-inference, not GfS. The weight is
+answering in a grid. This proxy is symmetric in rows and columns so it
+does not change with how Qualtrics happened to store the grid. It is a
+documented inference, not GfS. The weight is
 <code>gfs_weights()$matrix_cell_multi</code>.</p>
 </div>
 </div>

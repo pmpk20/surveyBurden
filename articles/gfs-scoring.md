@@ -139,13 +139,13 @@ response-unit structure – inferred because the `.qsf` lacks them).
 
 ### Question stems are not separately scored
 
-Table 1’s “question or transition, up to 3 lines = 2.0” is applied to
-standalone instruction blocks only. It is not added on top of every
-question’s response score. The GfS scheme may intend the reading cost of
-a question stem to be absorbed into the item weight; settling that needs
-the underlying GfS methodology, not Table 1 alone. A question with a
-long disambiguation stem is therefore scored conservatively, and its
-stem length is reported separately as a readability diagnostic (see
+The GfS Table 1’s “question or transition, up to 3 lines = 2.0” is
+applied to standalone instruction blocks only, not the question text
+itself! It is unclear whether the GfS scheme intended the reading cost
+of a question to be absorbed into the item weight or counted separately.
+A question with a long disambiguation stem is, therefore, scored
+conservatively, and its stem length is reported separately as a
+readability diagnostic (see
 [`vignette("reading-the-report")`](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md)).
 
 ### Multi-answer matrices have no Table 1 rule
@@ -154,10 +154,9 @@ A grid where each cell allows multiple answers – “tick all that apply”
 across two axes – is scored as `rows x cols x 0.5`. Each cell is one
 trivial closed yes/no decision; GfS scores a closed yes/no at 1.0,
 discounted here for the working-memory efficiency of answering in a
-grid. This proxy is **orientation-invariant**: symmetric in rows and
-columns, so unlike an earlier `rows x 4.0` proxy it does not change with
-how Qualtrics happened to store the grid. It is a documented inference,
-not GfS. The weight is `gfs_weights()$matrix_cell_multi`.
+grid. This proxy is symmetric in rows and columns so it does not change
+with how Qualtrics happened to store the grid. It is a documented
+inference, not GfS. The weight is `gfs_weights()$matrix_cell_multi`.
 
 ## Overriding the weights
 

@@ -92,9 +92,9 @@ stage, and at anyone auditing a survey that has already been programmed.
   enumerates the feasible burden values within each path by resolving
   display-logic gates, exactly for small coupling components and with a
   documented approximation for large ones. The result is a profile of
-  feasible burden values, each counted once, and is not a probability
-  distribution over respondents. When observed respondent routes are
-  supplied,
+  feasible burden values, each counted once. It is not a probability
+  distribution over respondents! However, when observed respondent
+  routes are supplied,
   [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
   weights each route by how often it occurs and returns a
   population-weighted average.
@@ -110,8 +110,9 @@ stage, and at anyone auditing a survey that has already been programmed.
   stems, long response labels, long grids) separate from the GfS score,
   flags large screen-out shares, and states, for the given survey, which
   parts of the calculation are exact and which rest on documented
-  approximations. The points-to-minutes conversion uses the GfS rule of
-  thumb of roughly 12 points per minute and is user-configurable.
+  approximations. We use the twelve points per minute (12pts/min) rule
+  of thumb from \[@schmid2019\] to provide an estimated completion time,
+  but users may reconfigure this if desired.
 
 The package includes an automated test suite and passes `R CMD check`
 cleanly.
@@ -120,8 +121,7 @@ cleanly.
 
 The flow reconstruction has been checked against a fielded web survey,
 and every observed respondent’s routing corresponded to one of the
-enumerated structural paths. A synthetic fixture exercises question
-types and flow structures beyond the worked example.
+enumerated structural paths.
 
 # Acknowledgements
 

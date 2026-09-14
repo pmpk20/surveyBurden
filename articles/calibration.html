@@ -63,44 +63,44 @@
       <h1>Calibration and limitations</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/pmpk20/surveyBurden/blob/v0.1.0/vignettes/calibration.Rmd" class="external-link"><code>vignettes/calibration.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/pmpk20/surveyBurden/blob/main/vignettes/calibration.Rmd" class="external-link"><code>vignettes/calibration.Rmd</code></a></small>
       <div class="d-none name"><code>calibration.Rmd</code></div>
     </div>
 
     
     
-<p>This article covers the two conversion assumptions in the pipeline –
-words-to-lines and points-to-minutes – and the limitations of the
-approach as a whole. For the scoring rules see
-<code><a href="../articles/gfs-scoring.html">vignette("gfs-scoring")</a></code>.</p>
+<p>This vignette covers two assumptions in the pipeline – words-to-lines
+and points-to-minutes – and the limitations of the approach as a whole.
+For the scoring rules see <code><a href="../articles/gfs-scoring.html">vignette("gfs-scoring")</a></code>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/pmpk20/surveyBurden" class="external-link">surveyBurden</a></span><span class="op">)</span></span>
 <span><span class="va">demo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"demo_travel_survey.qsf"</span>, package <span class="op">=</span> <span class="st">"surveyBurden"</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="words_per_line">words_per_line<a class="anchor" aria-label="anchor" href="#words_per_line"></a>
 </h2>
-<p>GfS Table 1 scores instruction text in rendered lines. A
-<code>.qsf</code> stores words, not the width the respondent’s browser
-will render them at. The package approximates lines as words divided by
-<code>words_per_line</code> (default 12). It is a practical proxy, not a
-calibration, and it is the reason the descriptive-text score for a long
-instruction block should be read as approximate.</p>
-<p>Override it per report if your survey theme has a known typical line
-length:</p>
+<p>In the original GfS papers, they provide a score for each additional
+line of text in the survey. However, a <code>.qsf</code> does not
+provide the number of additional lines of text, as this may vary with
+the survey mode. Instead, it returns the words per question. The
+package, therefore, assumes that the number of words that make an
+additional line (<code>words_per_line</code> = default 12). This is a
+practical proxy, that you can set if you wish, and means that assigned
+GfS points per descriptive-text in your survey should be read as
+approximate. This assumption only affects descriptive / instruction-text
+scores and every other question type is unaffected.</p>
+<p>You can set the words per line in your survey with:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">demo</span>, words_per_line <span class="op">=</span> <span class="fl">8</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">$</span><span class="va">burden</span><span class="op">$</span><span class="va">points</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span></span>
 <span><span class="co">#&gt; [1] 112 123</span></span></code></pre></div>
-<p>Only descriptive / instruction-text scores depend on it; every other
-question type is unaffected.</p>
 </div>
 <div class="section level2">
 <h2 id="points_per_minute">points_per_minute<a class="anchor" aria-label="anchor" href="#points_per_minute"></a>
 </h2>
-<p>The GfS framework uses roughly 12 points per minute as a rule of
-thumb, from the original framework. It is a rough scale,
-<strong>not</strong> a web-specific calibration and <strong>not</strong>
-a prediction of completion time. Override it by setting
-<code>points_per_minute</code> on a weights object:</p>
+<p>To convert GfS points to minutes of survey time, they have a rule of
+thumb of 12 points per minute. As a rule of thumb, do not assume that it
+predicts the completion time, or applies to online surveys. You can
+either override it by setting <code>points_per_minute</code> on a
+weights object:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gfs_weights.html">gfs_weights</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">w</span><span class="op">$</span><span class="va">points_per_minute</span> <span class="op">&lt;-</span> <span class="fl">15</span></span>
@@ -113,10 +113,9 @@ a prediction of completion time. Override it by setting
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> median       8.2 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> p75          8.6 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> max          9.53</span></span></code></pre></div>
-<p>For a figure specific to your survey, fit one to your own
-completion-time data with <code><a href="../reference/validate_times.html">validate_times()</a></code> and use the rate
-it returns. This needs a completion-time file the package does not ship,
-so it is not run here:</p>
+<p>Alternatively, if you are calculating burden ex post then you can use
+the completion-time data of your survey to calculate
+<code><a href="../reference/validate_times.html">validate_times()</a></code> and use the rate it returns:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gfs_weights.html">gfs_weights</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">w</span><span class="op">$</span><span class="va">points_per_minute</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/validate_times.html">validate_times</a></span><span class="op">(</span><span class="va">demo</span>, <span class="st">"times.csv"</span><span class="op">)</span><span class="op">$</span><span class="va">implied_points_per_minute</span></span>
@@ -127,8 +126,8 @@ so it is not run here:</p>
 </h2>
 <ul>
 <li>The Qualtrics-to-GfS mapping is sometimes inferential. Where a
-widget has no exact match in Table 1, the package applies a documented
-rule and flags the question <code>inferred</code>.</li>
+question type has no exact match in Table 1, the package applies a
+documented rule and flags the question <code>inferred</code>.</li>
 <li>The GfS scheme predates modern web survey interfaces. It was
 calibrated on earlier survey practice.</li>
 <li>Rendered text length cannot be recovered from a <code>.qsf</code>.
@@ -138,14 +137,14 @@ count, not a measured constant.</li>
 <li>Display-logic reconstruction depends on what the <code>.qsf</code>
 encodes. Logic controlled outside Qualtrics, or unusual constructs, may
 need manual interpretation.</li>
-<li>Structural enumeration gives no respondent probabilities. Without
-route data every feasible combination is counted once, and “median”
-means the median across combinations, not across respondents.</li>
+<li>Ex ante structural enumeration of all the paths through your survey
+does not provide respondent probabilities. Without route data every
+feasible combination is counted once, and “median” means the median
+across combinations, not across respondents.</li>
 <li>Loop &amp; Merge can make the path space large. The package unrolls
 to the explicit cap and treats the iteration count as uniform.</li>
 <li>The points-to-minutes conversion is the published GfS rule of thumb,
-roughly 12 points per minute. It is a scale, not a completion-time
-prediction.</li>
+roughly 12 points per minute.</li>
 <li>Burden scores are not predictions of completion time, dropout, or
 satisficing. Those are empirical questions about respondent behaviour,
 outside the scope of this package.</li>

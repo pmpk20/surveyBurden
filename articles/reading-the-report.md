@@ -115,8 +115,8 @@ report$instrument
 #> #   n_complete_paths <int>, n_screenout_paths <int>
 ```
 
-Structural counts read straight off the survey definition: live
-questions, blocks, branch points, block randomisers, Loop & Merge
+Structural counts read straight from the survey (editing URL or QSF):
+live questions, blocks, branch points, block randomisers, Loop & Merge
 blocks, and early-exit (`EndSurvey`) points. These describe the
 programmed instrument, not any respondent. A high branch or early-exit
 count means the survey routes people quite differently, so a single
@@ -273,7 +273,7 @@ matrix row/option labels over `label_threshold` words (default 10), and
 matrix questions with more than 6 rows. These are **reading-load
 signals** reported separately – **none of them changes any GfS score**.
 A long grid or a wordy stem is flagged so it is visible without being
-silently priced into the burden total. Long grids in particular invite
+silently included in the burden total. Long grids in particular invite
 satisficing (answering the same way down every row).
 
 ## Calculation certainty

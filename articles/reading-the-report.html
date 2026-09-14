@@ -175,10 +175,10 @@ structural counts and nothing else.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Neighbourhood Tra…          26       12          3             0             2</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: n_end_points &lt;int&gt;, n_paths &lt;int&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   n_complete_paths &lt;int&gt;, n_screenout_paths &lt;int&gt;</span></span></span></code></pre></div>
-<p>Structural counts read straight off the survey definition: live
-questions, blocks, branch points, block randomisers, Loop &amp; Merge
-blocks, and early-exit (<code>EndSurvey</code>) points. These describe
-the programmed instrument, not any respondent. A high branch or
+<p>Structural counts read straight from the survey (editing URL or QSF):
+live questions, blocks, branch points, block randomisers, Loop &amp;
+Merge blocks, and early-exit (<code>EndSurvey</code>) points. These
+describe the programmed instrument, not any respondent. A high branch or
 early-exit count means the survey routes people quite differently, so a
 single burden figure would describe few of them.</p>
 </div>
@@ -325,8 +325,8 @@ that records the rule used for each:</p>
 words (default 10), and matrix questions with more than 6 rows. These
 are <strong>reading-load signals</strong> reported separately –
 <strong>none of them changes any GfS score</strong>. A long grid or a
-wordy stem is flagged so it is visible without being silently priced
-into the burden total. Long grids in particular invite satisficing
+wordy stem is flagged so it is visible without being silently included
+in the burden total. Long grids in particular invite satisficing
 (answering the same way down every row).</p>
 </div>
 <div class="section level2">

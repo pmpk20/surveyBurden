@@ -139,25 +139,43 @@ it means the median across those feasible combinations. It does **not**
 mean half of respondents face at least that much burden. Nobody has told
 the package how common each combination is.
 
-To get a real average over respondents you need observed routes. Give
+To move from the structural profile to respondent-level predictions,
+pass a data frame of respondent routes to
 [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
-a data frame of respondents and it adds a **population-weighted
-respondent burden**: the sum, over the observed routes, of each route’s
-burden multiplied by how often that route occurred. Writing the observed
-frequency of route k as w_k and its burden as B_k:
+via the `routes` argument. The package then:
 
-``` math
-\bar{B} = \sum_k w_k \, B_k
-```
+1.  **Matches** each respondent to a flow path, using their `visit_*`
+    columns (which branch-gated blocks they entered).
+2.  **Predicts** each respondent’s burden from their actual loop
+    iteration counts and the median display-logic burden on their
+    matched path.
+3.  **Summarises** by taking quantiles (min, p25, median, p75, max)
+    across the vector of per-respondent predictions. The result appears
+    as `$population` in the report.
 
-The structural profile is what you have without the w_k. The
-population-weighted result is what the w_k buy you.
+Routes taken by more respondents naturally dominate the quantiles, so
+the result reflects the empirical distribution of burden across your
+sample — but it is straight quantiles of individual predictions, not a
+route-frequency-weighted formula.
 
-The recognised route columns are `loop_<id>` (the iteration count for a
-Loop & Merge block, keyed by its driving question id or block id) and
-`visit_<block_id>` (`TRUE` to include a branch-gated optional block).
-The demo has two loop blocks, `BL6` and `BL8`. A small constructed set
-of 50 respondent routes:
+### Required columns
+
+The data frame has one row per respondent. Every column is optional;
+missing columns get defaults.
+
+| Column | Type | Meaning | Default |
+|----|----|----|----|
+| `loop_<QID>` or `loop_<BL>` | integer | Iteration count for a Loop & Merge block, keyed by its driving question id or block id | `loop_typical` (default 2) |
+| `visit_<block_id>` | logical | `TRUE` if the respondent entered this branch-gated optional block | `FALSE` (block skipped) |
+
+Any `loop_*` column that does not match a known question or block id is
+assigned to loop blocks in flow order — so a generic `loop_1`, `loop_2`
+also works if the survey has two loops in sequence.
+
+### Example
+
+The demo survey has two Loop & Merge blocks, `BL6` and `BL8`. A small
+constructed set of 50 respondent routes:
 
 ``` r
 
@@ -177,10 +195,10 @@ burden_report(demo, routes = routes, quiet = TRUE)$population
 #> 5 max         132    11    0.088
 ```
 
-Real route data would come from a fielded response file, not from
-[`rbinom()`](https://rdrr.io/r/stats/Binomial.html). When `routes` are
-supplied the report’s verdict line also gives the population-weighted
-median.
+Real route data would come from your fielded response file: count each
+respondent’s loop iterations and flag which optional blocks they
+entered. When `routes` are supplied the report’s verdict line also gives
+the population-weighted median.
 
 Without routes,
 [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)

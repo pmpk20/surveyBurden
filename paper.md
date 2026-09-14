@@ -34,10 +34,10 @@ make that inadequate. Conditional routing, branch logic and
 question-level display logic mean that different respondents complete
 materially different surveys: the questions asked, their number and
 their difficulty all vary with earlier answers. A burden assessment that
-treats the survey as a fixed sequence describes a path that few
-respondents take. The automation of response burden scoring across all
-questions and paths represents a significant step-change in the ability
-to understand how difficult a survey is.
+treats the survey as a fixed sequence describes a single path that few,
+if any, respondents actually take. The automation of response burden
+scoring across all questions and paths represents a significant
+step-change in the ability to understand how difficult a survey is.
 
 While tools exist to read Qualtrics surveys into R, neither they, nor
 Qualtrics, transparently calculate and report the respondent burden. The
@@ -49,7 +49,9 @@ burden scoring in a path-aware way, reconstructing the feasible
 respondent paths and reporting how burden is distributed across them.
 `surveyBurden` is aimed at survey methodologists and applied researchers
 who want a transparent, reproducible burden assessment at the design
-stage, and at anyone auditing a survey that has already been programmed.
+stage, before fieldwork begins and design changes are still cheap, and
+at anyone auditing an instrument that has already been programmed and
+fielded.
 
 # Functionality
 
@@ -96,8 +98,9 @@ stage, and at anyone auditing a survey that has already been programmed.
   distribution over respondents! However, when observed respondent
   routes are supplied,
   [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
-  weights each route by how often it occurs and returns a
-  population-weighted average.
+  predicts each respondent’s burden from their actual loop counts and
+  branch visits, and the report summarises those predictions as
+  quantiles.
 - **Structured report.**
   [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
   returns an object whose components include the survey summary, the

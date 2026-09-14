@@ -190,21 +190,77 @@ carries no respondent probabilities. When the report says the median is
 does <strong>not</strong> mean half of respondents face at least that
 much burden. Nobody has told the package how common each combination
 is.</p>
-<p>To get a real average over respondents you need observed routes. Give
-<code><a href="../reference/burden_report.html">burden_report()</a></code> a data frame of respondents and it adds a
-<strong>population-weighted respondent burden</strong>: the sum, over
-the observed routes, of each route’s burden multiplied by how often that
-route occurred. Writing the observed frequency of route k as w_k and its
-burden as B_k:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>B</mi><mo accent="true">‾</mo></mover><mo>=</mo><munder><mo>∑</mo><mi>k</mi></munder><msub><mi>w</mi><mi>k</mi></msub><mspace width="0.167em"></mspace><msub><mi>B</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">\bar{B} = \sum_k w_k \, B_k</annotation></semantics></math></p>
-<p>The structural profile is what you have without the w_k. The
-population-weighted result is what the w_k buy you.</p>
-<p>The recognised route columns are <code>loop_&lt;id&gt;</code> (the
-iteration count for a Loop &amp; Merge block, keyed by its driving
-question id or block id) and <code>visit_&lt;block_id&gt;</code>
-(<code>TRUE</code> to include a branch-gated optional block). The demo
-has two loop blocks, <code>BL6</code> and <code>BL8</code>. A small
-constructed set of 50 respondent routes:</p>
+<p>To move from the structural profile to respondent-level predictions,
+pass a data frame of respondent routes to <code><a href="../reference/burden_report.html">burden_report()</a></code>
+via the <code>routes</code> argument. The package then:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Matches</strong> each respondent to a flow path, using their
+<code>visit_*</code> columns (which branch-gated blocks they
+entered).</li>
+<li>
+<strong>Predicts</strong> each respondent’s burden from their actual
+loop iteration counts and the median display-logic burden on their
+matched path.</li>
+<li>
+<strong>Summarises</strong> by taking quantiles (min, p25, median,
+p75, max) across the vector of per-respondent predictions. The result
+appears as <code>$population</code> in the report.</li>
+</ol>
+<p>Routes taken by more respondents naturally dominate the quantiles, so
+the result reflects the empirical distribution of burden across your
+sample — but it is straight quantiles of individual predictions, not a
+route-frequency-weighted formula.</p>
+<div class="section level3">
+<h3 id="required-columns">Required columns<a class="anchor" aria-label="anchor" href="#required-columns"></a>
+</h3>
+<p>The data frame has one row per respondent. Every column is optional;
+missing columns get defaults.</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Column</th>
+<th>Type</th>
+<th>Meaning</th>
+<th>Default</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>
+<code>loop_&lt;QID&gt;</code> or <code>loop_&lt;BL&gt;</code>
+</td>
+<td>integer</td>
+<td>Iteration count for a Loop &amp; Merge block, keyed by its driving
+question id or block id</td>
+<td>
+<code>loop_typical</code> (default 2)</td>
+</tr>
+<tr class="even">
+<td><code>visit_&lt;block_id&gt;</code></td>
+<td>logical</td>
+<td>
+<code>TRUE</code> if the respondent entered this branch-gated
+optional block</td>
+<td>
+<code>FALSE</code> (block skipped)</td>
+</tr>
+</tbody>
+</table>
+<p>Any <code>loop_*</code> column that does not match a known question
+or block id is assigned to loop blocks in flow order — so a generic
+<code>loop_1</code>, <code>loop_2</code> also works if the survey has
+two loops in sequence.</p>
+</div>
+<div class="section level3">
+<h3 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
+</h3>
+<p>The demo survey has two Loop &amp; Merge blocks, <code>BL6</code> and
+<code>BL8</code>. A small constructed set of 50 respondent routes:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">routes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -220,15 +276,17 @@ constructed set of 50 respondent routes:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> median      116     9.67 0.077<span style="text-decoration: underline;">3</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> p75         122.   10.1  0.081<span style="text-decoration: underline;">2</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> max         132    11    0.088</span></span></code></pre></div>
-<p>Real route data would come from a fielded response file, not from
-<code><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom()</a></code>. When <code>routes</code> are supplied the
-report’s verdict line also gives the population-weighted median.</p>
+<p>Real route data would come from your fielded response file: count
+each respondent’s loop iterations and flag which optional blocks they
+entered. When <code>routes</code> are supplied the report’s verdict line
+also gives the population-weighted median.</p>
 <p>Without routes, <code><a href="../reference/respondent_burden.html">respondent_burden()</a></code> still gives a
 per-path table and <code><a href="../reference/summary_line.html">summary_line()</a></code> turns it into a
 sentence:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summary_line.html">summary_line</a></span><span class="op">(</span><span class="fu"><a href="../reference/respondent_burden.html">respondent_burden</a></span><span class="op">(</span><span class="va">demo</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Typical respondent burden is about 118 GfS points (~10 min). The lightest complete route is ~117 pts (~10 min); with the Loop &amp; Merge sections fully repeated it reaches ~143 pts (~12 min)."</span></span></code></pre></div>
+</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

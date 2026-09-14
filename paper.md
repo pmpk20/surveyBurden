@@ -4,22 +4,23 @@
 survey is. Specifically, it estimates the response burden of a survey
 programmed in Qualtrics, measured with the GfS item burden-scoring
 scheme \[@schmid2019; @heimgartner2024\]. The package works with either
-a `.qsf` export or a published survey pulled through the Qualtrics API.
-The package then calculates the response burden in three steps. Firstly,
-it enumerates every path through the survey that the flow and display
-logic allow. Secondly, it assigns the GfS points to every question on
-every path. Finally, it calculates how response burden is distributed
-across all the paths and reports the achievable minimum and maximum,
-quartiles, and the median burden in GfS points. For more insight, we
-also report the share of total response burden contributed by each block
-in the survey, and the highest-burden questions. Where the package
-infers a score, through an assumed line count for example, it explicitly
-labels the response. The entire pipeline can be run via a single call,
-`burden_report("survey.qsf")`, but lower-level functions to tackle each
-step, from parsing through question scoring, flow resolution and path
-enumeration, are provided for inspection or reuse. The result of
-`burden_report("survey.qsf")` is a structured object so that each
-component can be extracted and analysed on its own.
+a `.qsf` export or a live survey pulled through the Qualtrics API. The
+package then calculates the response burden in three steps. Firstly, it
+reconstructs every permutation of the paths through the survey that the
+flow and display logic allow. Secondly, it assigns the GfS points to
+every question on every path. Finally, it calculates how response burden
+is distributed across all the structural paths and reports the
+achievable minimum and maximum, quartiles, and the median burden in GfS
+points. For more insight, we also report the share of total response
+burden contributed by each block in the survey, and the highest-burden
+questions. Where the package infers a score, through an assumed line
+count for example, it explicitly labels the response. The entire
+pipeline can be run via a single call, `burden_report("survey.qsf")`,
+but lower-level functions to tackle each step, from parsing through
+question scoring, flow resolution and path enumeration, are provided for
+inspection or reuse. The result of `burden_report("survey.qsf")` is a
+structured object so that each component can be extracted and analysed
+on its own.
 
 # Statement of need
 
@@ -44,8 +45,8 @@ Qualtrics, transparently calculate and report the respondent burden. The
 responses, and the GfS framework provides published item weights
 \[@schmid2019; @heimgartner2024\]. However, we are not aware of an
 open-source tool that connects a machine-readable survey to established
-burden scoring in a path-aware way, enumerating the feasible respondent
-paths and reporting how burden is distributed across them.
+burden scoring in a path-aware way, reconstructing the feasible
+respondent paths and reporting how burden is distributed across them.
 `surveyBurden` is aimed at survey methodologists and applied researchers
 who want a transparent, reproducible burden assessment at the design
 stage, before fieldwork begins and design changes are still cheap, and
@@ -62,11 +63,10 @@ fielded.
   one internal representation, and
   [`parse_qsf()`](https://pmpk20.github.io/surveyBurden/reference/parse_qsf.md)
   produces a question catalogue. Fetching a live survey needs an API key
-  for the account that owns it. You cannot calculate the burden from the
-  preview or distributed link, however.
-- **GfS scoring.**
+  for the account that owns it.
+- **GfS scoring, with the inference made explicit.**
   [`gfs_weights()`](https://pmpk20.github.io/surveyBurden/reference/gfs_weights.md)
-  holds the GfS point weights in a scheme.
+  holds the GfS point weights.
   [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
   then works in three layers: what Qualtrics records the question as,
   what response action that implies, and which scheme category best

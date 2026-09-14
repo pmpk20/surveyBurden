@@ -14,7 +14,7 @@ editor_options:
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-This article covers the two conversion assumptions in the pipeline --
+This vignette covers two assumptions in the pipeline --
 words-to-lines and points-to-minutes -- and the limitations of the
 approach as a whole. For the scoring rules see `vignette("gfs-scoring")`.
 
@@ -25,29 +25,17 @@ demo <- system.file("extdata", "demo_travel_survey.qsf", package = "surveyBurden
 
 ## words_per_line
 
-GfS Table 1 scores instruction text in rendered lines. A `.qsf` stores
-words, not the width the respondent's browser will render them at. The
-package approximates lines as words divided by `words_per_line` (default
-12). It is a practical proxy, not a calibration, and it is the reason the
-descriptive-text score for a long instruction block should be read as
-approximate.
+In the original GfS papers, they provide a score for each additional line of text in the survey. However, a `.qsf` does not provide the number of additional lines of text, as this may vary with the survey mode. Instead, it returns the words per question. The package, therefore, assumes that the number of words that make an additional line (`words_per_line` = default 12). This is a practical proxy, that you can set if you wish, and means that assigned GfS points per descriptive-text in your survey should be read as approximate. This assumption only affects descriptive / instruction-text scores and every other question type is unaffected.
 
-Override it per report if your survey theme has a known typical line
-length:
+You can set the words per line in your survey with:
 
 ```{r wpl}
 burden_report(demo, words_per_line = 8, quiet = TRUE)$burden$points[1:2]
 ```
 
-Only descriptive / instruction-text scores depend on it; every other
-question type is unaffected.
-
 ## points_per_minute
 
-The GfS framework uses roughly 12 points per minute as a rule of thumb,
-from the original framework. It is a rough scale, **not** a web-specific
-calibration and **not** a prediction of completion time. Override it by
-setting `points_per_minute` on a weights object:
+To convert GfS points to minutes of survey time, they have a rule of thumb of 12 points per minute. As a rule of thumb, do not assume that it predicts the completion time, or applies to online surveys. You can either override it by setting `points_per_minute` on a weights object:
 
 ```{r ppm}
 w <- gfs_weights()
@@ -55,10 +43,8 @@ w$points_per_minute <- 15
 burden_report(demo, weights = w, quiet = TRUE)$burden[, c("statistic", "minutes")]
 ```
 
-For a figure specific to your survey, fit one to your own
-completion-time data with `validate_times()` and use the rate it
-returns. This needs a completion-time file the package does not ship, so
-it is not run here:
+Alternatively, if you are calculating burden ex post then you can use the completion-time data of your survey to calculate `validate_times()` and use the rate it
+returns:
 
 ```{r validate, eval = FALSE}
 w <- gfs_weights()
@@ -68,7 +54,7 @@ burden_report(demo, weights = w)
 
 ## Limitations
 
-- The Qualtrics-to-GfS mapping is sometimes inferential. Where a widget
+- The Qualtrics-to-GfS mapping is sometimes inferential. Where a question type
   has no exact match in Table 1, the package applies a documented rule
   and flags the question `inferred`.
 - The GfS scheme predates modern web survey interfaces. It was calibrated
@@ -79,14 +65,13 @@ burden_report(demo, weights = w)
 - Display-logic reconstruction depends on what the `.qsf` encodes. Logic
   controlled outside Qualtrics, or unusual constructs, may need manual
   interpretation.
-- Structural enumeration gives no respondent probabilities. Without route
+- Ex ante structural enumeration of all the paths through your survey does not provide respondent probabilities. Without route
   data every feasible combination is counted once, and "median" means the
   median across combinations, not across respondents.
 - Loop & Merge can make the path space large. The package unrolls to the
   explicit cap and treats the iteration count as uniform.
 - The points-to-minutes conversion is the published GfS rule of thumb,
-  roughly 12 points per minute. It is a scale, not a completion-time
-  prediction.
+  roughly 12 points per minute.
 - Burden scores are not predictions of completion time, dropout, or
   satisficing. Those are empirical questions about respondent behaviour,
   outside the scope of this package.

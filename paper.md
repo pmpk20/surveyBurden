@@ -15,6 +15,7 @@ affiliations:
     index: 1
 date: 10 September 2026
 bibliography: paper.bib
+software_repository_url: https://github.com/pmpk20/surveyBurden
 ---
 
 # Summary
@@ -25,7 +26,7 @@ The entire pipeline can be run via a single call, `burden_report("survey.qsf")`,
 
 # Statement of need
 Response burden is a central construct in survey methodology. It is associated with nonresponse and breakoff, and reducing it is a routine design goal
-[@yan2022; @yan2008]. Yet burden is still imprecisely understood, either through completion length or crudely summing the number of questions, which reduces response burden to a single length or duration figure for an "average" respondent. Contemporary web surveys make that inadequate. Conditional routing, branch logic and question-level display logic mean that different respondents complete materially different surveys: the questions asked, their number and their difficulty all vary with earlier answers. A burden assessment that treats the survey as a fixed sequence describes a path that few respondents take. The automation of response burden scoring across all questions and paths represents a significant step-change in the ability to understand how difficult a survey is.
+[@yan2022; @yan2008]. Yet burden is still imprecisely understood, either through completion length or crudely summing the number of questions, which reduces response burden to a single length or duration figure for an "average" respondent. Contemporary web surveys make that inadequate. Conditional routing, branch logic and question-level display logic mean that different respondents complete materially different surveys: the questions asked, their number and their difficulty all vary with earlier answers. A burden assessment that treats the survey as a fixed sequence describes a single path that few, if any, respondents actually take. The automation of response burden scoring across all questions and paths represents a significant step-change in the ability to understand how difficult a survey is.
 
 While tools exist to read Qualtrics surveys into R, neither they, nor Qualtrics, transparently calculate and report the respondent burden. The `qualtRics` package
 [@qualtRics] retrieves survey metadata and responses, and the GfS framework
@@ -35,8 +36,9 @@ survey to established burden scoring in a path-aware way,
 reconstructing the feasible respondent paths and reporting how burden is
 distributed across them. `surveyBurden` is aimed at survey methodologists and
 applied researchers who want a transparent, reproducible burden assessment at
-the design stage, and at anyone auditing a survey that has already been
-programmed.
+the design stage, before fieldwork begins and design changes are still cheap,
+and at anyone auditing an instrument that has already been programmed and
+fielded.
 
 # Functionality
 
@@ -66,8 +68,9 @@ programmed.
   coupling components and with a documented approximation for large ones. The
   result is a profile of feasible burden values, each counted once. It is not a
   probability distribution over respondents! However, when observed respondent routes are
-  supplied, `respondent_burden()` weights each route by how often it occurs and
-  returns a population-weighted average.
+  supplied, `respondent_burden()` predicts each respondent's burden from
+  their actual loop counts and branch visits, and the report summarises
+  those predictions as quantiles.
 - **Structured report.** `burden_report()` returns an object whose components
   include the survey summary, the burden spread, the per-block and per-path
   breakdowns, the scored question catalogue, the calculation-certainty summary,

@@ -1,5 +1,16 @@
 # Changelog
 
+## surveyBurden 0.1.1
+
+Patch: corrected the documentation of
+[`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
+(it predicts per-respondent burden from loop counts and branch visits,
+then takes quantiles — not a route-frequency-weighted average). Rewrote
+the population-weighted burden section of the paths-and-display-logic
+vignette to match. Added `software_repository_url` to the JOSS paper
+frontmatter and expanded the Statement of Need to meet the 250-word
+guideline.
+
 ## surveyBurden 0.1.0
 
 First release.

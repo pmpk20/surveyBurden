@@ -84,3 +84,14 @@ and, where available, the Loop & Merge count columns that
 [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
 recognises (`loop_<question id>`, `loop_<block id>`, or any `loop_*`
 column).
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+# Requires observed completion-time data
+vt <- validate_times("survey.qsf", "paradata.csv")
+vt$ratio
+vt$implied_points_per_minute
+} # }
+```

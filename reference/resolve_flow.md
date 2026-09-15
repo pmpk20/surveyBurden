@@ -53,3 +53,19 @@ per distinct path:
 Within-block display logic (whether an individual question is shown) is
 *not* resolved here; that is a separate step. Paths are at block
 granularity.
+
+## Examples
+
+``` r
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+flow <- resolve_flow(read_qsf(qsf_path))
+flow[, c("path_id", "terminates_early")]
+#> # A tibble: 4 × 2
+#>   path_id terminates_early
+#>     <int> <lgl>           
+#> 1       1 TRUE            
+#> 2       2 TRUE            
+#> 3       3 FALSE           
+#> 4       4 FALSE           
+```

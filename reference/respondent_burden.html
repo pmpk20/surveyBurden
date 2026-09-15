@@ -11,7 +11,7 @@ Merge sections repeat, or ~Z on the shortest complete route".'></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">surveyBurden</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,7 +41,7 @@ Merge sections repeat, or ~Z on the shortest complete route".'></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Expected burden by respondent route</h1>
-      <small class="dont-index">Source: <a href="https://github.com/pmpk20/surveyBurden/blob/v0.1.1/R/respondent_burden.R" class="external-link"><code>R/respondent_burden.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/pmpk20/surveyBurden/blob/main/R/respondent_burden.R" class="external-link"><code>R/respondent_burden.R</code></a></small>
       <div class="d-none name"><code>respondent_burden.Rd</code></div>
     </div>
 
@@ -116,6 +116,28 @@ a route-recovery diagnostic on the flow model itself), <code>pred_pts</code> and
 <code>pred_min</code> (predicted burden using each respondent's real loop counts).</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
+<span class="r-in"><span><span class="va">qsf_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"demo_travel_survey.qsf"</span>,</span></span>
+<span class="r-in"><span>                         package <span class="op">=</span> <span class="st">"surveyBurden"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">rb</span> <span class="op">&lt;-</span> <span class="fu">respondent_burden</span><span class="op">(</span><span class="fu"><a href="read_qsf.html">read_qsf</a></span><span class="op">(</span><span class="va">qsf_path</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">rb</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"path_id"</span>, <span class="st">"floor_pts"</span>, <span class="st">"typical_pts"</span>, <span class="st">"ceiling_pts"</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Typical respondent burden is about 118 GfS points (~10 min). The lightest</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> complete route is ~117 pts (~10 min); with the Loop &amp; Merge sections fully</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> repeated it reaches ~143 pts (~12 min).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   path_id floor_pts typical_pts ceiling_pts</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>       3       106         119         143</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>       4       106         117         139</span>
+<span class="r-in"><span><span class="fu"><a href="summary_line.html">summary_line</a></span><span class="op">(</span><span class="va">rb</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Typical respondent burden is about 118 GfS points (~10 min). The lightest complete route is ~117 pts (~10 min); with the Loop &amp; Merge sections fully repeated it reaches ~143 pts (~12 min)."</span>
+<span class="r-in"><span><span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

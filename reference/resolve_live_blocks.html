@@ -11,7 +11,7 @@ flow (typically the Qualtrics "Trash / Unused Questions" block) are excluded.'><
 
     <a class="navbar-brand me-2" href="../index.html">surveyBurden</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,7 +41,7 @@ flow (typically the Qualtrics "Trash / Unused Questions" block) are excluded.'><
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Resolve the survey blocks a respondent can actually reach</h1>
-      <small class="dont-index">Source: <a href="https://github.com/pmpk20/surveyBurden/blob/v0.1.1/R/resolve_live_blocks.R" class="external-link"><code>R/resolve_live_blocks.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/pmpk20/surveyBurden/blob/main/R/resolve_live_blocks.R" class="external-link"><code>R/resolve_live_blocks.R</code></a></small>
       <div class="d-none name"><code>resolve_live_blocks.Rd</code></div>
     </div>
 
@@ -90,6 +90,30 @@ flow (typically the Qualtrics "Trash / Unused Questions" block) are excluded.</p
 
 </dl></div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">qsf_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"demo_travel_survey.qsf"</span>,</span></span>
+<span class="r-in"><span>                         package <span class="op">=</span> <span class="st">"surveyBurden"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">blocks</span> <span class="op">&lt;-</span> <span class="fu">resolve_live_blocks</span><span class="op">(</span><span class="fu"><a href="read_qsf.html">read_qsf</a></span><span class="op">(</span><span class="va">qsf_path</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">blocks</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"block_id"</span>, <span class="st">"block_name"</span>, <span class="st">"flow_order"</span><span class="op">)</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 12 × 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    block_id block_name      flow_order</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> BL1      Welcome                  1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> BL2      Consent                  2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> BL3      Area check               3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> BL4      About you                4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> BL5      Household                5</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> BL6      Other adults             6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> BL7      Vehicles                 7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> BL8      Vehicle details          8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> BL9      Travel                   9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> BL10     Attitudes               10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> BL11     Commuting               11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> BL12     Closing                 12</span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

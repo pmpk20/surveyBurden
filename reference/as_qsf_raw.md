@@ -19,3 +19,14 @@ as_qsf_raw(def)
 ## Value
 
 A `qsf_raw` object.
+
+## Examples
+
+``` r
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+raw_list <- jsonlite::fromJSON(qsf_path, simplifyVector = FALSE)
+qsf <- as_qsf_raw(raw_list)
+class(qsf)
+#> [1] "qsf_raw"
+```

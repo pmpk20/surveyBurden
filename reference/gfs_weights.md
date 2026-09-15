@@ -1,9 +1,11 @@
-# GfS / Axhausen burden weights
+# GfS points burden weights (Heimgartner and Axhausen 2024)
 
 The default scoring backend. Values are transcribed from Table 1 of
-Heimgartner & Axhausen (2024), "Predicting Response Rates Once Again"
-(*Findings*), which prints the GfS / ETH Zurich scheme (GfS Zurich 2006,
-updated). Override any element and pass the result to
+Heimgartner and Axhausen (2024), "Predicting Response Rates Once Again"
+(*Findings*,
+[doi:10.32866/001c.121624](https://doi.org/10.32866/001c.121624) ),
+which prints the GfS / ETH Zurich scheme (GfS Zurich 2006, updated).
+Override any element and pass the result to
 [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md).
 
 ## Usage
@@ -78,3 +80,16 @@ contain the quantity the scheme needs:
   QSF has words, not a rendered width. Overridable, and exposed directly
   as `burden_report(words_per_line = ...)`. The single most sensitive
   assumption for `descriptive` items.
+
+## Examples
+
+``` r
+w <- gfs_weights()
+w$rating_small
+#> [1] 2
+w$points_per_minute
+#> [1] 12
+
+# Override a single weight
+w$points_per_minute <- 10
+```

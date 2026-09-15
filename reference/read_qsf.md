@@ -29,3 +29,15 @@ read_qsf(source)
 
 A list of class `qsf_raw` with components `SurveyEntry` and
 `SurveyElements`.
+
+## Examples
+
+``` r
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+qsf <- read_qsf(qsf_path)
+class(qsf)
+#> [1] "qsf_raw"
+names(qsf)
+#> [1] "SurveyEntry"    "SurveyElements"
+```

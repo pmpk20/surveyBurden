@@ -13,7 +13,7 @@ regression against observed completion times."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">surveyBurden</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,7 +43,7 @@ regression against observed completion times."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Validate predicted burden against observed completion times</h1>
-      <small class="dont-index">Source: <a href="https://github.com/pmpk20/surveyBurden/blob/v0.1.1/R/validate_times.R" class="external-link"><code>R/validate_times.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/pmpk20/surveyBurden/blob/main/R/validate_times.R" class="external-link"><code>R/validate_times.R</code></a></small>
       <div class="d-none name"><code>validate_times.Rd</code></div>
     </div>
 
@@ -120,6 +120,17 @@ where available, the Loop &amp; Merge count columns that <code><a href="responde
 recognises (<code>loop_&lt;question id&gt;</code>, <code>loop_&lt;block id&gt;</code>, or any <code>loop_*</code> column).</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="co"># Requires observed completion-time data</span></span></span>
+<span class="r-in"><span><span class="va">vt</span> <span class="op">&lt;-</span> <span class="fu">validate_times</span><span class="op">(</span><span class="st">"survey.qsf"</span>, <span class="st">"paradata.csv"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">vt</span><span class="op">$</span><span class="va">ratio</span></span></span>
+<span class="r-in"><span><span class="va">vt</span><span class="op">$</span><span class="va">implied_points_per_minute</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">surveyBurden</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,9 +37,18 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/pmpk20/surveyBurden/blob/v0.1.1/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/pmpk20/surveyBurden/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.0" id="surveyburden-020">surveyBurden 0.2.0<a class="anchor" aria-label="anchor" href="#surveyburden-020"></a></h2>
+<p>CRAN preparation release.</p>
+<ul><li>Added runnable <code>@examples</code> to all exported functions using the shipped demo fixture (<code>demo_travel_survey.qsf</code>).</li>
+<li>Switched <code><a href="../reference/burden_report.html">burden_report()</a></code> and <code><a href="../reference/calculation_certainty.html">calculation_certainty()</a></code> examples from <code>\dontrun{}</code> to <code>\donttest{}</code> with the demo fixture.</li>
+<li>Added the Heimgartner and Axhausen (2024) DOI to the DESCRIPTION and to the documentation of <code><a href="../reference/gfs_weights.html">gfs_weights()</a></code>, <code><a href="../reference/score_burden.html">score_burden()</a></code> and <code><a href="../reference/burden_report.html">burden_report()</a></code>.</li>
+<li>Updated <code>.Rbuildignore</code> to exclude manuscript and temporary files.</li>
+<li>Updated roxygen2 to 8.1.0.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.1" id="surveyburden-011">surveyBurden 0.1.1<a class="anchor" aria-label="anchor" href="#surveyburden-011"></a></h2>
 <p>Patch: corrected the documentation of <code><a href="../reference/respondent_burden.html">respondent_burden()</a></code> (it predicts per-respondent burden from loop counts and branch visits, then takes quantiles — not a route-frequency-weighted average). Rewrote the population-weighted burden section of the paths-and-display-logic vignette to match. Added <code>software_repository_url</code> to the JOSS paper frontmatter and expanded the Statement of Need to meet the 250-word guideline.</p>

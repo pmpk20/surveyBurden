@@ -22,3 +22,15 @@ classify_reachability(catalogue, path_qids)
 ## Value
 
 A list with character vectors `always`, `maybe`, `unreachable`.
+
+## Examples
+
+``` r
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+catalogue <- parse_qsf(qsf_path)
+reach <- classify_reachability(catalogue, catalogue$question_id)
+lengths(reach)
+#>      always       maybe unreachable 
+#>          20           6           0 
+```

@@ -13,7 +13,7 @@ multiple choice is single_choice whether it means yes/no or something else."></h
 
     <a class="navbar-brand me-2" href="../index.html">surveyBurden</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,7 +43,7 @@ multiple choice is single_choice whether it means yes/no or something else."></h
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Classify a single Qualtrics question payload</h1>
-      <small class="dont-index">Source: <a href="https://github.com/pmpk20/surveyBurden/blob/v0.1.1/R/classify_question.R" class="external-link"><code>R/classify_question.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/pmpk20/surveyBurden/blob/main/R/classify_question.R" class="external-link"><code>R/classify_question.R</code></a></small>
       <div class="d-none name"><code>classify_question.Rd</code></div>
     </div>
 
@@ -89,6 +89,21 @@ count, short text that might be a code field), <code>"manual"</code> (reserved f
 a human must check) or <code>"unknown"</code> (unmapped type).</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">qsf_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"demo_travel_survey.qsf"</span>,</span></span>
+<span class="r-in"><span>                         package <span class="op">=</span> <span class="st">"surveyBurden"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">qsf</span> <span class="op">&lt;-</span> <span class="fu"><a href="read_qsf.html">read_qsf</a></span><span class="op">(</span><span class="va">qsf_path</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">questions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/funprog.html" class="external-link">Filter</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">el</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">el</span><span class="op">$</span><span class="va">Element</span>, <span class="st">"SQ"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                    <span class="va">qsf</span><span class="op">$</span><span class="va">SurveyElements</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">cls</span> <span class="op">&lt;-</span> <span class="fu">classify_question</span><span class="op">(</span><span class="va">questions</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">Payload</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">cls</span><span class="op">$</span><span class="va">std_type</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "descriptive"</span>
+<span class="r-in"><span><span class="va">cls</span><span class="op">$</span><span class="va">n_options</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0</span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

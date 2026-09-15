@@ -1,5 +1,25 @@
 # Changelog
 
+## surveyBurden 0.2.0
+
+CRAN preparation release.
+
+- Added runnable `@examples` to all exported functions using the shipped
+  demo fixture (`demo_travel_survey.qsf`).
+- Switched
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
+  and
+  [`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md)
+  examples from `\dontrun{}` to `\donttest{}` with the demo fixture.
+- Added the Heimgartner and Axhausen (2024) DOI to the DESCRIPTION and
+  to the documentation of
+  [`gfs_weights()`](https://pmpk20.github.io/surveyBurden/reference/gfs_weights.md),
+  [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
+  and
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md).
+- Updated `.Rbuildignore` to exclude manuscript and temporary files.
+- Updated roxygen2 to 8.1.0.
+
 ## surveyBurden 0.1.1
 
 Patch: corrected the documentation of

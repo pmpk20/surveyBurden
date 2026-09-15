@@ -50,3 +50,27 @@ row per live block:
 - question_ids:
 
   List column: character vector of `QID`s in block order.
+
+## Examples
+
+``` r
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+blocks <- resolve_live_blocks(read_qsf(qsf_path))
+blocks[, c("block_id", "block_name", "flow_order")]
+#> # A tibble: 12 × 3
+#>    block_id block_name      flow_order
+#>    <chr>    <chr>                <int>
+#>  1 BL1      Welcome                  1
+#>  2 BL2      Consent                  2
+#>  3 BL3      Area check               3
+#>  4 BL4      About you                4
+#>  5 BL5      Household                5
+#>  6 BL6      Other adults             6
+#>  7 BL7      Vehicles                 7
+#>  8 BL8      Vehicle details          8
+#>  9 BL9      Travel                   9
+#> 10 BL10     Attitudes               10
+#> 11 BL11     Commuting               11
+#> 12 BL12     Closing                 12
+```

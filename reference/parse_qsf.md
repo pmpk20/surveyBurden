@@ -36,3 +36,26 @@ injected CSS/JS), `has_display_logic`, `display_logic_refs`,
 
 This function does not resolve respondent paths or compute burden. It
 reads and classifies questions.
+
+## Examples
+
+``` r
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+catalogue <- parse_qsf(qsf_path)
+catalogue[, c("question_id", "std_type", "n_options")]
+#> # A tibble: 26 × 3
+#>    question_id std_type      n_options
+#>    <chr>       <chr>             <int>
+#>  1 QID1        descriptive           0
+#>  2 QID2        single_choice         2
+#>  3 QID3        single_choice         3
+#>  4 QID4        single_choice        75
+#>  5 QID5        single_choice         4
+#>  6 QID6        single_choice         6
+#>  7 QID7        matrix               NA
+#>  8 QID8        open_text             0
+#>  9 QID9        single_choice         8
+#> 10 QID10       single_choice         4
+#> # ℹ 16 more rows
+```

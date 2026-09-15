@@ -40,3 +40,18 @@ assembles one tibble from these across every live question.
 (mapping needs an assumption, e.g. dropdown scored by option count,
 short text that might be a code field), `"manual"` (reserved for cases a
 human must check) or `"unknown"` (unmapped type).
+
+## Examples
+
+``` r
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+qsf <- read_qsf(qsf_path)
+questions <- Filter(function(el) identical(el$Element, "SQ"),
+                    qsf$SurveyElements)
+cls <- classify_question(questions[[1]]$Payload)
+cls$std_type
+#> [1] "descriptive"
+cls$n_options
+#> [1] 0
+```

@@ -54,3 +54,19 @@ A [tibble](https://tibble.tidyverse.org/reference/tibble.html), one row
 per flow path: `path_id`, `terminates_early`, `n_blocks`, `n_q_floor`,
 `n_q_ceiling`, `gfs_floor`, `gfs_ceiling`, `min_minutes`, `max_minutes`,
 `n_gates`.
+
+## Examples
+
+``` r
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+pb <- path_burden(read_qsf(qsf_path))
+pb[, c("path_id", "gfs_floor", "gfs_ceiling")]
+#> # A tibble: 4 × 3
+#>   path_id gfs_floor gfs_ceiling
+#>     <int>     <dbl>       <dbl>
+#> 1       1        12          12
+#> 2       2        14          14
+#> 3       3       103         145
+#> 4       4       103         139
+```

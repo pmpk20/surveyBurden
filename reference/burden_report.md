@@ -1,9 +1,10 @@
 # Ex-ante instrument burden report
 
 The user-facing entry point. Parses a Qualtrics `.qsf`, resolves its
-flow and display logic, scores every question with the GfS / Axhausen
-scheme, and summarises the burden across the instrument's structural
-path space.
+flow and display logic, scores every question with the GfS points scheme
+(Heimgartner and Axhausen 2024,
+[doi:10.32866/001c.121624](https://doi.org/10.32866/001c.121624) ), and
+summarises the burden across the instrument's structural path space.
 
 ## Usage
 
@@ -194,12 +195,132 @@ randomised subsets are not enumerated.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-br <- burden_report("survey.qsf")
-br                       # formatted summary
-summary(br)              # short headline
-br$burden                # the min/median/max table
-br$items[order(-br$items$gfs_points), ]   # questions by burden
-br$paths
-} # }
+# \donttest{
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+br <- burden_report(qsf_path)
+#> ℹ Reading survey
+#> ✔ Reading survey [9ms]
+#> 
+#> ℹ Scoring questions and resolving paths
+#> ✔ Scoring questions and resolving paths [81ms]
+#> 
+#> ℹ Checking calculation certainty
+#> ✔ Checking calculation certainty [46ms]
+#> 
+#> ℹ Enumerating display-logic combinations
+#> ✔ Enumerating display-logic combinations [27ms]
+#> 
+br
+#> 
+#> ── Survey Burden Report: Neighbourhood Travel Survey (demo) ────────────────────
+#> Median completing path: 123 GfS points, ~10 min - 0.3x the benchmark median of
+#> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.
+#> 
+#> ── Instrument ──
+#> 
+#> Questions (live)     26
+#> Blocks               12
+#> Branch points         3
+#> Randomisers           0
+#> Loop & Merge blocks   2
+#> Early-exit points     2
+#> 
+#> ── Paths ──
+#> 
+#> Structural paths: 4 (2 complete, 2 screen-out)
+#> Display-logic combinations checked: 3-4 per complete path
+#> 
+#> ── Burden (12 GfS points ~ 1 minute; index = points / 1500) ──
+#> 
+#> Statistic        Points  ~Min  Index
+#> ------------------------------------
+#> Minimum             106     9   0.07
+#> 25th percentile     117    10   0.08
+#> Median              123    10   0.08
+#> 75th percentile     129    11   0.09
+#> Maximum             143    12   0.10
+#> Benchmark: median 399 points across 79 GfS-scored survey waves (Heimgartner &
+#> Axhausen 2024).
+#> 
+#> ── Burden by block (survey order; share of all-question points) ──
+#> 
+#> Welcome                   10%  ###
+#> Consent                    1%  #
+#> Area check                 2%  #
+#> About you                 13%  ####
+#> Household                  3%  #
+#> Other adults               4%  #
+#> Vehicles                  12%  ###
+#> Vehicle details            5%  ##
+#> Travel                    23%  #######
+#> Attitudes                 16%  #####
+#> Commuting                  5%  ##
+#> Closing                    6%  ##
+#> 
+#> ── Highest-burden questions ──
+#> 
+#> QID21      18 pts  6x7      How much do you agree with each statement?
+#> QID19      14 pts  7x4      In the past month, how often did you use each of these?
+#> QID14      12 pts  6 opt    Which of these does your household own or have use of? ...
+#> QID20      12 pts  6x4      And for each of these reasons for travelling, how often...
+#> QID1       11 pts  0 opt    Welcome, and thank you for taking part in the Neighbour...
+#> QID7        8 pts  4x3      For each area, do you have a condition that makes trave...
+#> 
+#> ── Readability diagnostics (reading load; not part of the GfS score) ──
+#> 
+#> Long stems (> 40 words)          0
+#> Long matrix labels (> 10 words)  0
+#> Long grids (> 6 rows)            1
+#> 
+#> ── Calculation certainty ──
+#> 
+#> Paths: 0/2 resolve exactly; 2 carry an unresolved display-logic condition.
+#> Display logic: 6/6 conditional questions enumerated exactly, 0 approximated.
+#> Loops: 2 with a known cap, 0 unknown.  Item scores: 19 auto / 7 inferred / 0
+#> manual.
+#> 
+#> ── QC warnings (3) ──
+#> 
+#> ! 1 matrix/grid question has more than 6 rows. Long grids invite satisficing (respondents picking the same answer down the column instead of reading each row): QID19
+#> ! 2 of 4 structural paths are screen-outs (the survey ends early there) rather than complete responses.
+#> ! The point range above comes from checking every combination of optional questions this survey's skip logic could show. Each combination is counted once; we have no data on how likely each one is for a given respondent, so this is a structural range, not a probability -- it does NOT mean "there's a 50% chance a respondent sees the median burden".
+summary(br)
+#> 
+#> ── Neighbourhood Travel Survey (demo) ──────────────────────────────────────────
+#> 26 questions, 12 blocks, 4 structural paths (2 complete).
+#> Median completing path: 123 GfS points, ~10 min - 0.3x the benchmark median of
+#> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.
+#> Benchmark: median 399 points across 79 GfS-scored waves.
+br$burden
+#> # A tibble: 5 × 4
+#>   statistic points minutes  index
+#>   <fct>      <dbl>   <dbl>  <dbl>
+#> 1 min          106    8.83 0.0707
+#> 2 p25          117    9.75 0.078 
+#> 3 median       123   10.2  0.082 
+#> 4 p75          129   10.8  0.086 
+#> 5 max          143   11.9  0.0953
+br$items[order(-br$items$gfs_points), ]
+#> # A tibble: 26 × 27
+#>    question_id block_id block_name question_text std_type selector n_rows n_cols
+#>    <chr>       <chr>    <chr>      <chr>         <chr>    <chr>     <int>  <int>
+#>  1 QID21       BL10     Attitudes  How much do … matrix   Likert        6      7
+#>  2 QID19       BL9      Travel     In the past … matrix   Likert        7      4
+#>  3 QID14       BL7      Vehicles   Which of the… multi_c… MAVR         NA     NA
+#>  4 QID20       BL9      Travel     And for each… matrix   Likert        6      4
+#>  5 QID1        BL1      Welcome    Welcome, and… descrip… TB           NA     NA
+#>  6 QID7        BL4      About you  For each are… matrix   Likert        4      3
+#>  7 QID25       BL12     Closing    Is there any… open_te… ML           NA     NA
+#>  8 QID6        BL4      About you  Which best d… single_… SAVR         NA     NA
+#>  9 QID11       BL6      Other adu… What is this… single_… SAVR         NA     NA
+#> 10 QID16       BL8      Vehicle d… What type of… single_… SAVR         NA     NA
+#> # ℹ 16 more rows
+#> # ℹ 19 more variables: n_options <int>, gfs_points <dbl>, est_seconds <dbl>,
+#> #   score_flag <chr>, score_basis <chr>, text_words <int>,
+#> #   max_label_words <int>, has_display_logic <lgl>, loop_max <int>,
+#> #   flow_order <int>, qualtrics_type <chr>, subselector <chr>,
+#> #   label_text <chr>, options_numeric <lgl>, is_hidden <lgl>,
+#> #   display_logic_refs <list>, has_validation <lgl>, in_loop <lgl>, …
+# }
 ```

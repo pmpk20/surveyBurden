@@ -88,7 +88,39 @@ An object of class `calculation_certainty` (list):
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-calculation_certainty("survey.qsf")
-} # }
+# \donttest{
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+calculation_certainty(qsf_path)
+#> 
+#> ── Calculation certainty: Neighbourhood Travel Survey (demo) ───────────────────
+#> 
+#> ── Paths ──
+#> 
+#> 0 of 2 complete paths resolve exactly (no unresolved display-logic condition);
+#> 2 carry at least one.
+#> 3 flow branches; both outcomes of each are enumerated, but which one a given
+#> respondent takes is unknown ex ante:
+#> FL_b_consent: trigger QID2
+#> FL_b_area: trigger QID3
+#> FL_b_work: trigger QID6
+#> 
+#> ── Display logic ──
+#> 
+#> 6 conditional questions on some path: 6 scored by exact joint enumeration, 0
+#> with the primary-gate approximation.
+#> 4 coupling components (4 exact, 0 approximated).
+#> Separate components are convolved as independent (assumption).
+#> 
+#> ── Loops ──
+#> 
+#> 2 loop blocks with an explicit iteration cap; 0 with a dynamic/unknown bound.
+#> Other adults: 0-5 iterations
+#> Vehicle details: 0-3 iterations
+#> 
+#> ── Item scores ──
+#> 
+#> 19 scored with full confidence (auto); 7 by structural inference (inferred); 0
+#> need manual verification; 0 unmapped.
+# }
 ```

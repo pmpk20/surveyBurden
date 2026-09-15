@@ -2,6 +2,12 @@
 
 0 errors | 0 warnings | 1 note
 
+* checking for future file timestamps ... NOTE
+  unable to verify current time
+
+This NOTE is a local network issue (unable to reach the time server), not
+a package problem.
+
 ## Notes
 
 * This is a new submission.
@@ -11,5 +17,5 @@
 
 ## Test environments
 
-* local: Windows 11, R 4.5.0 -- 0 errors | 0 warnings | 0 notes
-* win-builder: R-devel
+* local: Windows 11, R 4.5.0 -- 0 errors | 0 warnings | 1 note (time-server only)
+* win-builder: R-devel -- pending

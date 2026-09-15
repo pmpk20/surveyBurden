@@ -34,3 +34,14 @@ multiple choice is \code{single_choice} whether it means yes/no or something els
 count, short text that might be a code field), \code{"manual"} (reserved for cases
 a human must check) or \code{"unknown"} (unmapped type).
 }
+\examples{
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+qsf <- read_qsf(qsf_path)
+questions <- Filter(function(el) identical(el$Element, "SQ"),
+                    qsf$SurveyElements)
+cls <- classify_question(questions[[1]]$Payload)
+cls$std_type
+cls$n_options
+
+}

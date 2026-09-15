@@ -40,3 +40,10 @@ choice-level mutual exclusivity, which needs a constraint solver. The honest
 output is the structural band per path (floor = always, ceiling = always +
 maybe); see \code{\link[=path_burden]{path_burden()}}.
 }
+\examples{
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+paths <- resolve_paths(read_qsf(qsf_path))
+paths[, c("path_id", "terminates_early", "n_gates")]
+
+}

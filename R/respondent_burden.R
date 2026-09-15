@@ -37,6 +37,15 @@
 #'   a route-recovery diagnostic on the flow model itself), `pred_pts` and
 #'   `pred_min` (predicted burden using each respondent's real loop counts).
 #'
+#' @examples
+#' \donttest{
+#' qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+#'                          package = "surveyBurden")
+#' rb <- respondent_burden(read_qsf(qsf_path))
+#' rb[, c("path_id", "floor_pts", "typical_pts", "ceiling_pts")]
+#' summary_line(rb)
+#' }
+#'
 #' @export
 respondent_burden <- function(qsf, routes = NULL, weights = gfs_weights(),
                               loop_typical = 2, engine = NULL) {

@@ -28,6 +28,12 @@
 #'     \item{n_gates}{Distinct root trigger questions active on this path.}
 #'   }
 #'
+#' @examples
+#' qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+#'                          package = "surveyBurden")
+#' paths <- resolve_paths(read_qsf(qsf_path))
+#' paths[, c("path_id", "terminates_early", "n_gates")]
+#'
 #' @export
 resolve_paths <- function(qsf, max_paths = 10000L, catalogue = NULL, blocks = NULL) {
   flow <- resolve_flow(qsf, max_paths = max_paths)
@@ -59,6 +65,14 @@ resolve_paths <- function(qsf, max_paths = 10000L, catalogue = NULL, blocks = NU
 #' @param path_qids Character vector of every question id on the path.
 #'
 #' @return A list with character vectors `always`, `maybe`, `unreachable`.
+#'
+#' @examples
+#' qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+#'                          package = "surveyBurden")
+#' catalogue <- parse_qsf(qsf_path)
+#' reach <- classify_reachability(catalogue, catalogue$question_id)
+#' lengths(reach)
+#'
 #' @export
 classify_reachability <- function(catalogue, path_qids) {
   always <- character(0)
@@ -88,6 +102,12 @@ classify_reachability <- function(catalogue, path_qids) {
 #'   `qsf` (internal reuse; `NULL` computes it here).
 #' @return A list: `survey_name`, `n_questions`, `n_blocks`, `n_branches`,
 #'   `n_randomisers`, `n_loop_blocks`, `n_end_points`.
+#'
+#' @examples
+#' qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+#'                          package = "surveyBurden")
+#' instrument_summary(read_qsf(qsf_path))
+#'
 #' @export
 instrument_summary <- function(qsf, blocks = NULL) {
   if (is.null(blocks)) blocks <- resolve_live_blocks(qsf)

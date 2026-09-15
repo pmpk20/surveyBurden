@@ -31,3 +31,10 @@ standardised type with the structural fields the burden scorer needs.
 This function does not resolve respondent paths or compute burden. It reads
 and classifies questions.
 }
+\examples{
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+catalogue <- parse_qsf(qsf_path)
+catalogue[, c("question_id", "std_type", "n_options")]
+
+}

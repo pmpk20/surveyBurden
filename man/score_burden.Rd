@@ -27,9 +27,10 @@ was reached.}
 }
 }
 \description{
-Applies the GfS / Axhausen scoring rules (\code{\link[=gfs_weights]{gfs_weights()}}) to a question
-catalogue from \code{\link[=parse_qsf]{parse_qsf()}}, adding GfS burden points, an estimated
-completion time, a confidence flag and a plain-language rationale per item.
+Applies the GfS points scoring rules (Heimgartner and Axhausen 2024,
+\doi{10.32866/001c.121624}) via \code{\link[=gfs_weights]{gfs_weights()}} to a question catalogue
+from \code{\link[=parse_qsf]{parse_qsf()}}, adding burden points, an estimated completion time,
+a confidence flag and a plain-language rationale per item.
 This is Layer 3 at the item level; propagation through respondent paths is a
 later step.
 }
@@ -40,4 +41,11 @@ the quantity GfS needs -- a dropdown has no Table 1 row, a slider is not in
 the scheme, "lines" of text are not in a QSF -- the package applies an
 explicit, documented inference rule. \code{score_flag} and \code{score_basis} say
 which case each item is.
+}
+\examples{
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+scored <- score_burden(parse_qsf(qsf_path))
+scored[, c("question_id", "std_type", "gfs_points", "score_flag")]
+
 }

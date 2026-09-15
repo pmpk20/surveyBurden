@@ -55,3 +55,13 @@ Turns the flow/display-logic model into a per-route expected burden, so you
 can say "a typical respondent faces ~X points, rising to ~Y once the Loop &
 Merge sections repeat, or ~Z on the shortest complete route".
 }
+\examples{
+\donttest{
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+rb <- respondent_burden(read_qsf(qsf_path))
+rb[, c("path_id", "floor_pts", "typical_pts", "ceiling_pts")]
+summary_line(rb)
+}
+
+}

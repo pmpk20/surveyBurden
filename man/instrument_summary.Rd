@@ -19,3 +19,9 @@ A list: \code{survey_name}, \code{n_questions}, \code{n_blocks}, \code{n_branche
 \description{
 Structural summary of an instrument
 }
+\examples{
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+instrument_summary(read_qsf(qsf_path))
+
+}

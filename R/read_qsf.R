@@ -14,6 +14,13 @@
 #' @return A list of class `qsf_raw` with components `SurveyEntry` and
 #'   `SurveyElements`.
 #'
+#' @examples
+#' qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+#'                          package = "surveyBurden")
+#' qsf <- read_qsf(qsf_path)
+#' class(qsf)
+#' names(qsf)
+#'
 #' @export
 read_qsf <- function(source) {
   if (length(source) == 1L && file.exists(source)) {

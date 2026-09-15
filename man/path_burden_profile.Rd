@@ -70,3 +70,12 @@ convolved profile exceeds 3000 distinct burden values it is re-binned to
 multiples of 5 GfS points, so on a very heavy survey the reported quantiles
 can move a few points from the fine-grained figure.
 }
+\examples{
+\donttest{
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+pbp <- path_burden_profile(read_qsf(qsf_path))
+pbp[, c("path_id", "burden_min", "burden_median", "burden_max")]
+}
+
+}

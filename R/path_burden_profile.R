@@ -50,6 +50,14 @@
 #'   (`tibble(burden, weight)` -- `weight` is a count of sub-states, not a
 #'   probability).
 #'
+#' @examples
+#' \donttest{
+#' qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+#'                          package = "surveyBurden")
+#' pbp <- path_burden_profile(read_qsf(qsf_path))
+#' pbp[, c("path_id", "burden_min", "burden_median", "burden_max")]
+#' }
+#'
 #' @export
 path_burden_profile <- function(qsf, weights = gfs_weights(), max_paths = 10000L,
                                 engine = NULL, parsed_dl = NULL) {

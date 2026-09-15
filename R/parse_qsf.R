@@ -21,6 +21,12 @@
 #'   `has_display_logic`, `display_logic_refs`, `has_validation`, `in_loop`,
 #'   `loop_max`, `flag`.
 #'
+#' @examples
+#' qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+#'                          package = "surveyBurden")
+#' catalogue <- parse_qsf(qsf_path)
+#' catalogue[, c("question_id", "std_type", "n_options")]
+#'
 #' @export
 parse_qsf <- function(x) {
   qsf <- if (inherits(x, "qsf_raw")) x else read_qsf(x)

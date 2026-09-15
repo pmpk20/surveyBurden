@@ -58,7 +58,9 @@ split so a reader can see which parts of the output to trust fully and which
 to read as assumption-dependent.
 }
 \examples{
-\dontrun{
-calculation_certainty("survey.qsf")
+\donttest{
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+calculation_certainty(qsf_path)
 }
 }

@@ -17,3 +17,11 @@ Accepts either the \code{.qsf} file shape (\code{SurveyEntry} + \code{SurveyElem
 or the Qualtrics API \code{survey-definitions} shape (\code{Questions}/\code{Blocks}/
 \code{SurveyFlow} objects) and returns the former.
 }
+\examples{
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+raw_list <- jsonlite::fromJSON(qsf_path, simplifyVector = FALSE)
+qsf <- as_qsf_raw(raw_list)
+class(qsf)
+
+}

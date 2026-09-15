@@ -33,6 +33,14 @@
 #'     \item{predicted_burden}{Per-respondent points.}
 #'   }
 #'
+#' @examples
+#' \dontrun{
+#' # Requires observed completion-time data
+#' vt <- validate_times("survey.qsf", "paradata.csv")
+#' vt$ratio
+#' vt$implied_points_per_minute
+#' }
+#'
 #' @export
 validate_times <- function(qsf, observed, weights = gfs_weights(), trim = c(3, 180)) {
   if (!inherits(qsf, "qsf_raw")) qsf <- read_qsf(qsf)

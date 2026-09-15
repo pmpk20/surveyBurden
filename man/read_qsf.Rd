@@ -23,3 +23,11 @@ A list of class \code{qsf_raw} with components \code{SurveyEntry} and
 Loads a survey definition without simplifying its JSON structure, so nested
 survey elements, flow nodes and logic objects are preserved as R lists.
 }
+\examples{
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+qsf <- read_qsf(qsf_path)
+class(qsf)
+names(qsf)
+
+}

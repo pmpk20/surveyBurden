@@ -18,3 +18,11 @@ A list with character vectors \code{always}, \code{maybe}, \code{unreachable}.
 \description{
 Partition a set of catalogue rows into always / maybe / unreachable
 }
+\examples{
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+catalogue <- parse_qsf(qsf_path)
+reach <- classify_reachability(catalogue, catalogue$question_id)
+lengths(reach)
+
+}

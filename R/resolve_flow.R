@@ -24,6 +24,12 @@
 #'       on a representative route to this path, `TRUE` = condition taken.}
 #'   }
 #'
+#' @examples
+#' qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+#'                          package = "surveyBurden")
+#' flow <- resolve_flow(read_qsf(qsf_path))
+#' flow[, c("path_id", "terminates_early")]
+#'
 #' @export
 resolve_flow <- function(qsf, max_paths = 10000L) {
   if (!inherits(qsf, "qsf_raw")) {

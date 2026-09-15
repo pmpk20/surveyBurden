@@ -1,8 +1,9 @@
 #' Score per-question ex-ante burden
 #'
-#' Applies the GfS / Axhausen scoring rules ([gfs_weights()]) to a question
-#' catalogue from [parse_qsf()], adding GfS burden points, an estimated
-#' completion time, a confidence flag and a plain-language rationale per item.
+#' Applies the GfS points scoring rules (Heimgartner and Axhausen 2024,
+#' \doi{10.32866/001c.121624}) via [gfs_weights()] to a question catalogue
+#' from [parse_qsf()], adding burden points, an estimated completion time,
+#' a confidence flag and a plain-language rationale per item.
 #' This is Layer 3 at the item level; propagation through respondent paths is a
 #' later step.
 #'
@@ -29,6 +30,12 @@
 #'     \item{`score_basis`}{A short human-readable statement of how the number
 #'       was reached.}
 #'   }
+#'
+#' @examples
+#' qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+#'                          package = "surveyBurden")
+#' scored <- score_burden(parse_qsf(qsf_path))
+#' scored[, c("question_id", "std_type", "gfs_points", "score_flag")]
 #'
 #' @export
 score_burden <- function(catalogue, weights = gfs_weights()) {

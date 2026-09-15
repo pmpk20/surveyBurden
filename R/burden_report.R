@@ -1,7 +1,8 @@
 #' Ex-ante instrument burden report
 #'
 #' The user-facing entry point. Parses a Qualtrics `.qsf`, resolves its flow and
-#' display logic, scores every question with the GfS / Axhausen scheme, and
+#' display logic, scores every question with the GfS points scheme
+#' (Heimgartner and Axhausen 2024, \doi{10.32866/001c.121624}), and
 #' summarises the burden across the instrument's structural path space.
 #'
 #' @param x A path to a `.qsf` file, or a `qsf_raw` object from [read_qsf()].
@@ -91,13 +92,14 @@
 #'   one.
 #'
 #' @examples
-#' \dontrun{
-#' br <- burden_report("survey.qsf")
-#' br                       # formatted summary
-#' summary(br)              # short headline
-#' br$burden                # the min/median/max table
-#' br$items[order(-br$items$gfs_points), ]   # questions by burden
-#' br$paths
+#' \donttest{
+#' qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+#'                          package = "surveyBurden")
+#' br <- burden_report(qsf_path)
+#' br
+#' summary(br)
+#' br$burden
+#' br$items[order(-br$items$gfs_points), ]
 #' }
 #' @export
 burden_report <- function(x, weights = gfs_weights(), profile = TRUE,

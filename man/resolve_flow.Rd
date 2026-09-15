@@ -35,3 +35,10 @@ probabilities.
 Within-block display logic (whether an individual question is shown) is \emph{not}
 resolved here; that is a separate step. Paths are at block granularity.
 }
+\examples{
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+flow <- resolve_flow(read_qsf(qsf_path))
+flow[, c("path_id", "terminates_early")]
+
+}

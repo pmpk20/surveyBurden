@@ -2,7 +2,7 @@
 % Please edit documentation in R/gfs_weights.R
 \name{gfs_weights}
 \alias{gfs_weights}
-\title{GfS / Axhausen burden weights}
+\title{GfS points burden weights (Heimgartner and Axhausen 2024)}
 \usage{
 gfs_weights()
 }
@@ -11,9 +11,10 @@ A named list of weights.
 }
 \description{
 The default scoring backend. Values are transcribed from Table 1 of
-Heimgartner & Axhausen (2024), "Predicting Response Rates Once Again"
-(\emph{Findings}), which prints the GfS / ETH Zurich scheme (GfS Zurich 2006,
-updated). Override any element and pass the result to \code{\link[=score_burden]{score_burden()}}.
+Heimgartner and Axhausen (2024), "Predicting Response Rates Once Again"
+(\emph{Findings}, \doi{10.32866/001c.121624}), which prints the GfS / ETH
+Zurich scheme (GfS Zurich 2006, updated). Override any element and pass
+the result to \code{\link[=score_burden]{score_burden()}}.
 }
 \details{
 Table 1 items and the names used here:
@@ -63,4 +64,13 @@ lines; a QSF has words, not a rendered width. Overridable, and exposed
 directly as \code{burden_report(words_per_line = ...)}. The single most
 sensitive assumption for \code{descriptive} items.}
 }
+}
+\examples{
+w <- gfs_weights()
+w$rating_small
+w$points_per_minute
+
+# Override a single weight
+w$points_per_minute <- 10
+
 }

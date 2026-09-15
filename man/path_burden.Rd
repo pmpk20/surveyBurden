@@ -34,3 +34,10 @@ a burden band: the \emph{floor} (only always-shown questions, loop blocks run on
 and the \emph{ceiling} (every reachable question, loop blocks run to their maximum).
 The true burden of any actual respondent on that path lies between.
 }
+\examples{
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+pb <- path_burden(read_qsf(qsf_path))
+pb[, c("path_id", "gfs_floor", "gfs_ceiling")]
+
+}

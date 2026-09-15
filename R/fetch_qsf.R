@@ -88,6 +88,14 @@ qualtrics_error_body <- function(resp) {
 #'
 #' @param def A parsed survey definition list.
 #' @return A `qsf_raw` object.
+#'
+#' @examples
+#' qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+#'                          package = "surveyBurden")
+#' raw_list <- jsonlite::fromJSON(qsf_path, simplifyVector = FALSE)
+#' qsf <- as_qsf_raw(raw_list)
+#' class(qsf)
+#'
 #' @export
 as_qsf_raw <- function(def) {
   if (!is.null(def$SurveyElements) && !is.null(def$SurveyEntry)) {

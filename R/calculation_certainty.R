@@ -38,8 +38,10 @@
 #'   }
 #'
 #' @examples
-#' \dontrun{
-#' calculation_certainty("survey.qsf")
+#' \donttest{
+#' qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+#'                          package = "surveyBurden")
+#' calculation_certainty(qsf_path)
 #' }
 #' @export
 calculation_certainty <- function(qsf, weights = gfs_weights(), max_paths = 10000L,

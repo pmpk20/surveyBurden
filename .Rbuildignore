@@ -19,3 +19,10 @@
 ^_pkgdown\.yml$
 ^pkgdown$
 ^CODE_OF_CONDUCT\.md$
+^JSS_Manuscript.*\.docx$
+^~\$.*\.docx$
+^paper_jss\.md$
+^paper_jss\.pdf$
+^\.claude$
+^outputs$
+^~WRL.*\.tmp$

@@ -1,9 +1,10 @@
-#' GfS / Axhausen burden weights
+#' GfS points burden weights (Heimgartner and Axhausen 2024)
 #'
 #' The default scoring backend. Values are transcribed from Table 1 of
-#' Heimgartner & Axhausen (2024), "Predicting Response Rates Once Again"
-#' (*Findings*), which prints the GfS / ETH Zurich scheme (GfS Zurich 2006,
-#' updated). Override any element and pass the result to [score_burden()].
+#' Heimgartner and Axhausen (2024), "Predicting Response Rates Once Again"
+#' (*Findings*, \doi{10.32866/001c.121624}), which prints the GfS / ETH
+#' Zurich scheme (GfS Zurich 2006, updated). Override any element and pass
+#' the result to [score_burden()].
 #'
 #' @return A named list of weights.
 #'
@@ -54,6 +55,14 @@
 #'     directly as `burden_report(words_per_line = ...)`. The single most
 #'     sensitive assumption for `descriptive` items.}
 #' }
+#'
+#' @examples
+#' w <- gfs_weights()
+#' w$rating_small
+#' w$points_per_minute
+#'
+#' # Override a single weight
+#' w$points_per_minute <- 10
 #'
 #' @export
 gfs_weights <- function() {

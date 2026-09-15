@@ -26,3 +26,10 @@ Walks the \code{SurveyFlow} and returns the blocks it references, in flow order,
 with their questions. Blocks that exist in the \code{.qsf} but are not shown by the
 flow (typically the Qualtrics "Trash / Unused Questions" block) are excluded.
 }
+\examples{
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+blocks <- resolve_live_blocks(read_qsf(qsf_path))
+blocks[, c("block_id", "block_name", "flow_order")]
+
+}

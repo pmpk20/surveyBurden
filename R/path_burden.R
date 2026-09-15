@@ -16,6 +16,12 @@
 #'   `path_id`, `terminates_early`, `n_blocks`, `n_q_floor`, `n_q_ceiling`,
 #'   `gfs_floor`, `gfs_ceiling`, `min_minutes`, `max_minutes`, `n_gates`.
 #'
+#' @examples
+#' qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+#'                          package = "surveyBurden")
+#' pb <- path_burden(read_qsf(qsf_path))
+#' pb[, c("path_id", "gfs_floor", "gfs_ceiling")]
+#'
 #' @export
 path_burden <- function(qsf, weights = gfs_weights(), max_paths = 10000L,
                         paths = NULL, scored = NULL) {

@@ -22,3 +22,10 @@
 *_Paradata*.csv
 *_ResponseMatrix*.csv
 *_RouteAndTiming*.csv
+
+# Word/Office temp files
+~$*.docx
+~WRL*.tmp
+
+# Built tarballs
+*.tar.gz

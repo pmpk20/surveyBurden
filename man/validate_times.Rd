@@ -45,3 +45,12 @@ The observed data frame needs \code{completion_seconds} or \code{completion_mins
 where available, the Loop & Merge count columns that \code{\link[=respondent_burden]{respondent_burden()}}
 recognises (\verb{loop_<question id>}, \verb{loop_<block id>}, or any \verb{loop_*} column).
 }
+\examples{
+\dontrun{
+# Requires observed completion-time data
+vt <- validate_times("survey.qsf", "paradata.csv")
+vt$ratio
+vt$implied_points_per_minute
+}
+
+}

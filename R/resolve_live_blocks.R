@@ -17,6 +17,12 @@
 #'     \item{question_ids}{List column: character vector of `QID`s in block order.}
 #'   }
 #'
+#' @examples
+#' qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+#'                          package = "surveyBurden")
+#' blocks <- resolve_live_blocks(read_qsf(qsf_path))
+#' blocks[, c("block_id", "block_name", "flow_order")]
+#'
 #' @export
 resolve_live_blocks <- function(qsf) {
   if (!inherits(qsf, "qsf_raw")) {

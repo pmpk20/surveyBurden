@@ -1,0 +1,2090 @@
+{
+  "SurveyEntry": {
+    "SurveyID": "SV_large01",
+    "SurveyName": "Large Branching Survey",
+    "SurveyDescription": null,
+    "SurveyLanguage": "EN",
+    "SurveyStatus": "Inactive",
+    "SurveyCreationDate": "2026-01-01 00:00:00"
+  },
+  "SurveyElements": [
+    {
+      "SurveyID": "SV_large01",
+      "Element": "BL",
+      "PrimaryAttribute": "Survey Blocks",
+      "SecondaryAttribute": "",
+      "Payload": {
+        "0": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Welcome",
+          "ID": "BL1",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID1"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID2"
+            }
+          ]
+        },
+        "1": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Demographics",
+          "ID": "BL2",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID3"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID4"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID5"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID6"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID7"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID8"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID9"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID10"
+            }
+          ]
+        },
+        "2": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Household members",
+          "ID": "BL3",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID11"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID12"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID13"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID14"
+            }
+          ],
+          "Options": {
+            "Looping": "Question",
+            "LoopingOptions": {
+              "QID": "QID10",
+              "Static": {
+                "1": [],
+                "2": [],
+                "3": [],
+                "4": []
+              },
+              "Randomization": "None"
+            }
+          }
+        },
+        "3": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Car ownership",
+          "ID": "BL4",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID15"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID16"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID17"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID18"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID19"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID20"
+            }
+          ]
+        },
+        "4": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Employment details",
+          "ID": "BL5",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID21"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID22"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID23"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID24"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID25"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID26"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID27"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID28"
+            }
+          ]
+        },
+        "5": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Transport frequency",
+          "ID": "BL6",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID29"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID30"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID31"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID32"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID33"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID34"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID35"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID36"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID37"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID38"
+            }
+          ]
+        },
+        "6": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Attitudes",
+          "ID": "BL7",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID39"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID40"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID41"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID42"
+            }
+          ]
+        },
+        "7": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Cycling detail",
+          "ID": "BL8",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID43"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID44"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID45"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID46"
+            }
+          ]
+        },
+        "8": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Vehicle details",
+          "ID": "BL9",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID47"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID48"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID49"
+            }
+          ],
+          "Options": {
+            "Looping": "Question",
+            "LoopingOptions": {
+              "QID": "QID16",
+              "Static": {
+                "1": [],
+                "2": [],
+                "3": []
+              },
+              "Randomization": "None"
+            }
+          }
+        },
+        "9": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Closing",
+          "ID": "BL10",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID50"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID51"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID52"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_large01",
+      "Element": "FL",
+      "PrimaryAttribute": "Survey Flow",
+      "SecondaryAttribute": "",
+      "Payload": {
+        "Type": "Root",
+        "FlowID": "FL_root",
+        "Flow": [
+          {
+            "Type": "Standard",
+            "ID": "BL1",
+            "FlowID": "FL_BL1"
+          },
+          {
+            "Type": "Branch",
+            "FlowID": "FL_b_consent",
+            "Description": "no consent",
+            "BranchLogic": {
+              "0": {
+                "0": {
+                  "LogicType": "Question",
+                  "QuestionID": "QID2",
+                  "Operator": "Selected",
+                  "LeftOperand": "q://QID2/SelectableChoice/2",
+                  "ChoiceLocator": "q://QID2/SelectableChoice/2",
+                  "Type": "Expression"
+                },
+                "Type": "If"
+              },
+              "Type": "BooleanExpression",
+              "inPage": false
+            },
+            "Flow": [
+              {
+                "Type": "EndSurvey",
+                "FlowID": "FL_end_consent"
+              }
+            ]
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL2",
+            "FlowID": "FL_BL2"
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL3",
+            "FlowID": "FL_BL3"
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL4",
+            "FlowID": "FL_BL4"
+          },
+          {
+            "Type": "Branch",
+            "FlowID": "FL_b_car",
+            "Description": "has car -> vehicle details",
+            "BranchLogic": {
+              "0": {
+                "0": {
+                  "LogicType": "Question",
+                  "QuestionID": "QID15",
+                  "Operator": "Selected",
+                  "LeftOperand": "q://QID15/SelectableChoice/1",
+                  "ChoiceLocator": "q://QID15/SelectableChoice/1",
+                  "Type": "Expression"
+                },
+                "Type": "If"
+              },
+              "Type": "BooleanExpression",
+              "inPage": false
+            },
+            "Flow": [
+              {
+                "Type": "Standard",
+                "ID": "BL9",
+                "FlowID": "FL_BL9"
+              }
+            ]
+          },
+          {
+            "Type": "Branch",
+            "FlowID": "FL_b_employed",
+            "Description": "employed -> work details",
+            "BranchLogic": {
+              "0": {
+                "0": {
+                  "LogicType": "Question",
+                  "QuestionID": "QID6",
+                  "Operator": "Selected",
+                  "LeftOperand": "q://QID6/SelectableChoice/1",
+                  "ChoiceLocator": "q://QID6/SelectableChoice/1",
+                  "Type": "Expression"
+                },
+                "Type": "If"
+              },
+              "Type": "BooleanExpression",
+              "inPage": false
+            },
+            "Flow": [
+              {
+                "Type": "Standard",
+                "ID": "BL5",
+                "FlowID": "FL_BL5"
+              }
+            ]
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL6",
+            "FlowID": "FL_BL6"
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL7",
+            "FlowID": "FL_BL7"
+          },
+          {
+            "Type": "Branch",
+            "FlowID": "FL_b_cycle",
+            "Description": "cyclist -> cycling details",
+            "BranchLogic": {
+              "0": {
+                "0": {
+                  "LogicType": "Question",
+                  "QuestionID": "QID35",
+                  "Operator": "Selected",
+                  "LeftOperand": "q://QID35/SelectableChoice/1",
+                  "ChoiceLocator": "q://QID35/SelectableChoice/1",
+                  "Type": "Expression"
+                },
+                "Type": "If"
+              },
+              "Type": "BooleanExpression",
+              "inPage": false
+            },
+            "Flow": [
+              {
+                "Type": "Standard",
+                "ID": "BL8",
+                "FlowID": "FL_BL8"
+              }
+            ]
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL10",
+            "FlowID": "FL_BL10"
+          }
+        ],
+        "Properties": {
+          "Count": 52
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID1",
+      "SecondaryAttribute": "Welcome to the Large Benchmark Survey.",
+      "Payload": {
+        "QuestionID": "QID1",
+        "QuestionType": "DB",
+        "Selector": "TB",
+        "SubSelector": "",
+        "QuestionText": "Welcome to the Large Benchmark Survey.",
+        "DataExportTag": "QID1",
+        "QuestionDescription": "Welcome to the Large Benchmark Survey."
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID2",
+      "SecondaryAttribute": "Do you consent?",
+      "Payload": {
+        "QuestionID": "QID2",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Do you consent?",
+        "DataExportTag": "QID2",
+        "QuestionDescription": "Do you consent?",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID3",
+      "SecondaryAttribute": "Gender?",
+      "Payload": {
+        "QuestionID": "QID3",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Gender?",
+        "DataExportTag": "QID3",
+        "QuestionDescription": "Gender?",
+        "Choices": {
+          "1": {
+            "Display": "Male"
+          },
+          "2": {
+            "Display": "Female"
+          },
+          "3": {
+            "Display": "Non-binary"
+          },
+          "4": {
+            "Display": "Prefer not to say"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID4",
+      "SecondaryAttribute": "Age group?",
+      "Payload": {
+        "QuestionID": "QID4",
+        "QuestionType": "MC",
+        "Selector": "DL",
+        "SubSelector": "",
+        "QuestionText": "Age group?",
+        "DataExportTag": "QID4",
+        "QuestionDescription": "Age group?",
+        "Choices": {
+          "1": {
+            "Display": "18-24"
+          },
+          "2": {
+            "Display": "25-34"
+          },
+          "3": {
+            "Display": "35-44"
+          },
+          "4": {
+            "Display": "45-54"
+          },
+          "5": {
+            "Display": "55-64"
+          },
+          "6": {
+            "Display": "65+"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID5",
+      "SecondaryAttribute": "Education?",
+      "Payload": {
+        "QuestionID": "QID5",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Education?",
+        "DataExportTag": "QID5",
+        "QuestionDescription": "Education?",
+        "Choices": {
+          "1": {
+            "Display": "Secondary"
+          },
+          "2": {
+            "Display": "A-levels"
+          },
+          "3": {
+            "Display": "Undergraduate"
+          },
+          "4": {
+            "Display": "Postgraduate"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID6",
+      "SecondaryAttribute": "Employment status?",
+      "Payload": {
+        "QuestionID": "QID6",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Employment status?",
+        "DataExportTag": "QID6",
+        "QuestionDescription": "Employment status?",
+        "Choices": {
+          "1": {
+            "Display": "Full-time"
+          },
+          "2": {
+            "Display": "Part-time"
+          },
+          "3": {
+            "Display": "Self-employed"
+          },
+          "4": {
+            "Display": "Unemployed"
+          },
+          "5": {
+            "Display": "Retired"
+          },
+          "6": {
+            "Display": "Student"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID7",
+      "SecondaryAttribute": "Marital status?",
+      "Payload": {
+        "QuestionID": "QID7",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Marital status?",
+        "DataExportTag": "QID7",
+        "QuestionDescription": "Marital status?",
+        "Choices": {
+          "1": {
+            "Display": "Single"
+          },
+          "2": {
+            "Display": "Married"
+          },
+          "3": {
+            "Display": "Divorced"
+          },
+          "4": {
+            "Display": "Widowed"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID8",
+      "SecondaryAttribute": "Postcode?",
+      "Payload": {
+        "QuestionID": "QID8",
+        "QuestionType": "TE",
+        "Selector": "SL",
+        "SubSelector": "",
+        "QuestionText": "Postcode?",
+        "DataExportTag": "QID8",
+        "QuestionDescription": "Postcode?"
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID9",
+      "SecondaryAttribute": "Household income band?",
+      "Payload": {
+        "QuestionID": "QID9",
+        "QuestionType": "MC",
+        "Selector": "DL",
+        "SubSelector": "",
+        "QuestionText": "Household income band?",
+        "DataExportTag": "QID9",
+        "QuestionDescription": "Household income band?",
+        "Choices": {
+          "1": {
+            "Display": "Under 20k"
+          },
+          "2": {
+            "Display": "20-40k"
+          },
+          "3": {
+            "Display": "40-60k"
+          },
+          "4": {
+            "Display": "60-80k"
+          },
+          "5": {
+            "Display": "Over 80k"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID10",
+      "SecondaryAttribute": "How many people in your household?",
+      "Payload": {
+        "QuestionID": "QID10",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "How many people in your household?",
+        "DataExportTag": "QID10",
+        "QuestionDescription": "How many people in your household?",
+        "Choices": {
+          "1": {
+            "Display": "1"
+          },
+          "2": {
+            "Display": "2"
+          },
+          "3": {
+            "Display": "3"
+          },
+          "4": {
+            "Display": "4"
+          },
+          "5": {
+            "Display": "5+"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID11",
+      "SecondaryAttribute": "Relationship to you?",
+      "Payload": {
+        "QuestionID": "QID11",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Relationship to you?",
+        "DataExportTag": "QID11",
+        "QuestionDescription": "Relationship to you?",
+        "Choices": {
+          "1": {
+            "Display": "Partner"
+          },
+          "2": {
+            "Display": "Child"
+          },
+          "3": {
+            "Display": "Parent"
+          },
+          "4": {
+            "Display": "Other"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID12",
+      "SecondaryAttribute": "Their age group?",
+      "Payload": {
+        "QuestionID": "QID12",
+        "QuestionType": "MC",
+        "Selector": "DL",
+        "SubSelector": "",
+        "QuestionText": "Their age group?",
+        "DataExportTag": "QID12",
+        "QuestionDescription": "Their age group?",
+        "Choices": {
+          "1": {
+            "Display": "Under 18"
+          },
+          "2": {
+            "Display": "18-34"
+          },
+          "3": {
+            "Display": "35-54"
+          },
+          "4": {
+            "Display": "55+"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID13",
+      "SecondaryAttribute": "Do they work?",
+      "Payload": {
+        "QuestionID": "QID13",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Do they work?",
+        "DataExportTag": "QID13",
+        "QuestionDescription": "Do they work?",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID14",
+      "SecondaryAttribute": "Their usual transport mode?",
+      "Payload": {
+        "QuestionID": "QID14",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Their usual transport mode?",
+        "DataExportTag": "QID14",
+        "QuestionDescription": "Their usual transport mode?",
+        "Choices": {
+          "1": {
+            "Display": "Car"
+          },
+          "2": {
+            "Display": "Bus"
+          },
+          "3": {
+            "Display": "Train"
+          },
+          "4": {
+            "Display": "Walk"
+          },
+          "5": {
+            "Display": "Cycle"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID15",
+      "SecondaryAttribute": "Do you own a car?",
+      "Payload": {
+        "QuestionID": "QID15",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Do you own a car?",
+        "DataExportTag": "QID15",
+        "QuestionDescription": "Do you own a car?",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID16",
+      "SecondaryAttribute": "How many cars?",
+      "Payload": {
+        "QuestionID": "QID16",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "How many cars?",
+        "DataExportTag": "QID16",
+        "QuestionDescription": "How many cars?",
+        "Choices": {
+          "1": {
+            "Display": "1"
+          },
+          "2": {
+            "Display": "2"
+          },
+          "3": {
+            "Display": "3+"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID15",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID15/SelectableChoice/1",
+              "ChoiceLocator": "q://QID15/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID17",
+      "SecondaryAttribute": "Primary car fuel type?",
+      "Payload": {
+        "QuestionID": "QID17",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Primary car fuel type?",
+        "DataExportTag": "QID17",
+        "QuestionDescription": "Primary car fuel type?",
+        "Choices": {
+          "1": {
+            "Display": "Petrol"
+          },
+          "2": {
+            "Display": "Diesel"
+          },
+          "3": {
+            "Display": "Hybrid"
+          },
+          "4": {
+            "Display": "Electric"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID15",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID15/SelectableChoice/1",
+              "ChoiceLocator": "q://QID15/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID18",
+      "SecondaryAttribute": "Weekly mileage?",
+      "Payload": {
+        "QuestionID": "QID18",
+        "QuestionType": "Slider",
+        "Selector": "HSLIDER",
+        "SubSelector": "",
+        "QuestionText": "Weekly mileage?",
+        "DataExportTag": "QID18",
+        "QuestionDescription": "Weekly mileage?",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText",
+          "CSSliderMin": 0,
+          "CSSliderMax": 100
+        },
+        "Labels": {
+          "1": {
+            "Display": "points"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID19",
+      "SecondaryAttribute": "Parking at home?",
+      "Payload": {
+        "QuestionID": "QID19",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Parking at home?",
+        "DataExportTag": "QID19",
+        "QuestionDescription": "Parking at home?",
+        "Choices": {
+          "1": {
+            "Display": "Driveway"
+          },
+          "2": {
+            "Display": "Garage"
+          },
+          "3": {
+            "Display": "Street"
+          },
+          "4": {
+            "Display": "None"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID15",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID15/SelectableChoice/1",
+              "ChoiceLocator": "q://QID15/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID20",
+      "SecondaryAttribute": "Would you consider EV?",
+      "Payload": {
+        "QuestionID": "QID20",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Would you consider EV?",
+        "DataExportTag": "QID20",
+        "QuestionDescription": "Would you consider EV?",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          },
+          "3": {
+            "Display": "Already have one"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID15",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID15/SelectableChoice/1",
+              "ChoiceLocator": "q://QID15/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID21",
+      "SecondaryAttribute": "Job title?",
+      "Payload": {
+        "QuestionID": "QID21",
+        "QuestionType": "TE",
+        "Selector": "SL",
+        "SubSelector": "",
+        "QuestionText": "Job title?",
+        "DataExportTag": "QID21",
+        "QuestionDescription": "Job title?"
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID22",
+      "SecondaryAttribute": "Commute mode?",
+      "Payload": {
+        "QuestionID": "QID22",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Commute mode?",
+        "DataExportTag": "QID22",
+        "QuestionDescription": "Commute mode?",
+        "Choices": {
+          "1": {
+            "Display": "Car"
+          },
+          "2": {
+            "Display": "Bus"
+          },
+          "3": {
+            "Display": "Train"
+          },
+          "4": {
+            "Display": "Cycle"
+          },
+          "5": {
+            "Display": "Walk"
+          },
+          "6": {
+            "Display": "WFH"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID23",
+      "SecondaryAttribute": "Commute time (min)?",
+      "Payload": {
+        "QuestionID": "QID23",
+        "QuestionType": "Slider",
+        "Selector": "HSLIDER",
+        "SubSelector": "",
+        "QuestionText": "Commute time (min)?",
+        "DataExportTag": "QID23",
+        "QuestionDescription": "Commute time (min)?",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText",
+          "CSSliderMin": 0,
+          "CSSliderMax": 100
+        },
+        "Labels": {
+          "1": {
+            "Display": "points"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID24",
+      "SecondaryAttribute": "Flexible hours?",
+      "Payload": {
+        "QuestionID": "QID24",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Flexible hours?",
+        "DataExportTag": "QID24",
+        "QuestionDescription": "Flexible hours?",
+        "Choices": {
+          "1": {
+            "Display": "Very"
+          },
+          "2": {
+            "Display": "Somewhat"
+          },
+          "3": {
+            "Display": "Fixed"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID25",
+      "SecondaryAttribute": "Free parking at work?",
+      "Payload": {
+        "QuestionID": "QID25",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Free parking at work?",
+        "DataExportTag": "QID25",
+        "QuestionDescription": "Free parking at work?",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID26",
+      "SecondaryAttribute": "Cycle-to-work scheme?",
+      "Payload": {
+        "QuestionID": "QID26",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Cycle-to-work scheme?",
+        "DataExportTag": "QID26",
+        "QuestionDescription": "Cycle-to-work scheme?",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          },
+          "3": {
+            "Display": "Don't know"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID27",
+      "SecondaryAttribute": "Monthly commute cost?",
+      "Payload": {
+        "QuestionID": "QID27",
+        "QuestionType": "TE",
+        "Selector": "SL",
+        "SubSelector": "",
+        "QuestionText": "Monthly commute cost?",
+        "DataExportTag": "QID27",
+        "QuestionDescription": "Monthly commute cost?"
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID28",
+      "SecondaryAttribute": "Would prefer different mode?",
+      "Payload": {
+        "QuestionID": "QID28",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Would prefer different mode?",
+        "DataExportTag": "QID28",
+        "QuestionDescription": "Would prefer different mode?",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          },
+          "3": {
+            "Display": "Maybe"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID29",
+      "SecondaryAttribute": "How often: Car driver?",
+      "Payload": {
+        "QuestionID": "QID29",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "How often: Car driver?",
+        "DataExportTag": "QID29",
+        "QuestionDescription": "How often: Car driver?",
+        "Choices": {
+          "1": {
+            "Display": "5+ days/week"
+          },
+          "2": {
+            "Display": "3-4 days"
+          },
+          "3": {
+            "Display": "1-2 days"
+          },
+          "4": {
+            "Display": "Monthly"
+          },
+          "5": {
+            "Display": "Rarely"
+          },
+          "6": {
+            "Display": "Never"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID30",
+      "SecondaryAttribute": "How often: Car passenger?",
+      "Payload": {
+        "QuestionID": "QID30",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "How often: Car passenger?",
+        "DataExportTag": "QID30",
+        "QuestionDescription": "How often: Car passenger?",
+        "Choices": {
+          "1": {
+            "Display": "5+ days/week"
+          },
+          "2": {
+            "Display": "3-4 days"
+          },
+          "3": {
+            "Display": "1-2 days"
+          },
+          "4": {
+            "Display": "Monthly"
+          },
+          "5": {
+            "Display": "Rarely"
+          },
+          "6": {
+            "Display": "Never"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID31",
+      "SecondaryAttribute": "How often: Bus?",
+      "Payload": {
+        "QuestionID": "QID31",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "How often: Bus?",
+        "DataExportTag": "QID31",
+        "QuestionDescription": "How often: Bus?",
+        "Choices": {
+          "1": {
+            "Display": "5+ days/week"
+          },
+          "2": {
+            "Display": "3-4 days"
+          },
+          "3": {
+            "Display": "1-2 days"
+          },
+          "4": {
+            "Display": "Monthly"
+          },
+          "5": {
+            "Display": "Rarely"
+          },
+          "6": {
+            "Display": "Never"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID32",
+      "SecondaryAttribute": "How often: Train?",
+      "Payload": {
+        "QuestionID": "QID32",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "How often: Train?",
+        "DataExportTag": "QID32",
+        "QuestionDescription": "How often: Train?",
+        "Choices": {
+          "1": {
+            "Display": "5+ days/week"
+          },
+          "2": {
+            "Display": "3-4 days"
+          },
+          "3": {
+            "Display": "1-2 days"
+          },
+          "4": {
+            "Display": "Monthly"
+          },
+          "5": {
+            "Display": "Rarely"
+          },
+          "6": {
+            "Display": "Never"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID33",
+      "SecondaryAttribute": "How often: Tram?",
+      "Payload": {
+        "QuestionID": "QID33",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "How often: Tram?",
+        "DataExportTag": "QID33",
+        "QuestionDescription": "How often: Tram?",
+        "Choices": {
+          "1": {
+            "Display": "5+ days/week"
+          },
+          "2": {
+            "Display": "3-4 days"
+          },
+          "3": {
+            "Display": "1-2 days"
+          },
+          "4": {
+            "Display": "Monthly"
+          },
+          "5": {
+            "Display": "Rarely"
+          },
+          "6": {
+            "Display": "Never"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID34",
+      "SecondaryAttribute": "How often: Taxi?",
+      "Payload": {
+        "QuestionID": "QID34",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "How often: Taxi?",
+        "DataExportTag": "QID34",
+        "QuestionDescription": "How often: Taxi?",
+        "Choices": {
+          "1": {
+            "Display": "5+ days/week"
+          },
+          "2": {
+            "Display": "3-4 days"
+          },
+          "3": {
+            "Display": "1-2 days"
+          },
+          "4": {
+            "Display": "Monthly"
+          },
+          "5": {
+            "Display": "Rarely"
+          },
+          "6": {
+            "Display": "Never"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID35",
+      "SecondaryAttribute": "How often: Bicycle?",
+      "Payload": {
+        "QuestionID": "QID35",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "How often: Bicycle?",
+        "DataExportTag": "QID35",
+        "QuestionDescription": "How often: Bicycle?",
+        "Choices": {
+          "1": {
+            "Display": "5+ days/week"
+          },
+          "2": {
+            "Display": "3-4 days"
+          },
+          "3": {
+            "Display": "1-2 days"
+          },
+          "4": {
+            "Display": "Monthly"
+          },
+          "5": {
+            "Display": "Rarely"
+          },
+          "6": {
+            "Display": "Never"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID36",
+      "SecondaryAttribute": "How often: E-scooter?",
+      "Payload": {
+        "QuestionID": "QID36",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "How often: E-scooter?",
+        "DataExportTag": "QID36",
+        "QuestionDescription": "How often: E-scooter?",
+        "Choices": {
+          "1": {
+            "Display": "5+ days/week"
+          },
+          "2": {
+            "Display": "3-4 days"
+          },
+          "3": {
+            "Display": "1-2 days"
+          },
+          "4": {
+            "Display": "Monthly"
+          },
+          "5": {
+            "Display": "Rarely"
+          },
+          "6": {
+            "Display": "Never"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID37",
+      "SecondaryAttribute": "How often: Walking?",
+      "Payload": {
+        "QuestionID": "QID37",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "How often: Walking?",
+        "DataExportTag": "QID37",
+        "QuestionDescription": "How often: Walking?",
+        "Choices": {
+          "1": {
+            "Display": "5+ days/week"
+          },
+          "2": {
+            "Display": "3-4 days"
+          },
+          "3": {
+            "Display": "1-2 days"
+          },
+          "4": {
+            "Display": "Monthly"
+          },
+          "5": {
+            "Display": "Rarely"
+          },
+          "6": {
+            "Display": "Never"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID38",
+      "SecondaryAttribute": "How often: Motorcycle?",
+      "Payload": {
+        "QuestionID": "QID38",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "How often: Motorcycle?",
+        "DataExportTag": "QID38",
+        "QuestionDescription": "How often: Motorcycle?",
+        "Choices": {
+          "1": {
+            "Display": "5+ days/week"
+          },
+          "2": {
+            "Display": "3-4 days"
+          },
+          "3": {
+            "Display": "1-2 days"
+          },
+          "4": {
+            "Display": "Monthly"
+          },
+          "5": {
+            "Display": "Rarely"
+          },
+          "6": {
+            "Display": "Never"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID39",
+      "SecondaryAttribute": "Rate local transport quality:",
+      "Payload": {
+        "QuestionID": "QID39",
+        "QuestionType": "Matrix",
+        "Selector": "Likert",
+        "SubSelector": "SingleAnswer",
+        "QuestionText": "Rate local transport quality:",
+        "DataExportTag": "QID39",
+        "QuestionDescription": "Rate local transport quality:",
+        "Choices": {
+          "1": {
+            "Display": "Bus frequency"
+          },
+          "2": {
+            "Display": "Bus reliability"
+          },
+          "3": {
+            "Display": "Train frequency"
+          },
+          "4": {
+            "Display": "Train reliability"
+          },
+          "5": {
+            "Display": "Road surface"
+          },
+          "6": {
+            "Display": "Cycle lanes"
+          },
+          "7": {
+            "Display": "Pavement condition"
+          }
+        },
+        "Answers": {
+          "1": {
+            "Display": "Very poor"
+          },
+          "2": {
+            "Display": "Poor"
+          },
+          "3": {
+            "Display": "OK"
+          },
+          "4": {
+            "Display": "Good"
+          },
+          "5": {
+            "Display": "Excellent"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID40",
+      "SecondaryAttribute": "Environmental attitudes:",
+      "Payload": {
+        "QuestionID": "QID40",
+        "QuestionType": "Matrix",
+        "Selector": "Likert",
+        "SubSelector": "SingleAnswer",
+        "QuestionText": "Environmental attitudes:",
+        "DataExportTag": "QID40",
+        "QuestionDescription": "Environmental attitudes:",
+        "Choices": {
+          "1": {
+            "Display": "Climate change is serious"
+          },
+          "2": {
+            "Display": "Cars cause pollution"
+          },
+          "3": {
+            "Display": "I should drive less"
+          },
+          "4": {
+            "Display": "EVs are the solution"
+          },
+          "5": {
+            "Display": "Public transport should be free"
+          },
+          "6": {
+            "Display": "I would pay congestion charge"
+          }
+        },
+        "Answers": {
+          "1": {
+            "Display": "Strongly disagree"
+          },
+          "2": {
+            "Display": "Disagree"
+          },
+          "3": {
+            "Display": "Neutral"
+          },
+          "4": {
+            "Display": "Agree"
+          },
+          "5": {
+            "Display": "Strongly agree"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID41",
+      "SecondaryAttribute": "Safety perceptions:",
+      "Payload": {
+        "QuestionID": "QID41",
+        "QuestionType": "Matrix",
+        "Selector": "Likert",
+        "SubSelector": "SingleAnswer",
+        "QuestionText": "Safety perceptions:",
+        "DataExportTag": "QID41",
+        "QuestionDescription": "Safety perceptions:",
+        "Choices": {
+          "1": {
+            "Display": "Walking at night"
+          },
+          "2": {
+            "Display": "Cycling on roads"
+          },
+          "3": {
+            "Display": "Using buses"
+          },
+          "4": {
+            "Display": "Using trains"
+          },
+          "5": {
+            "Display": "Driving on motorways"
+          }
+        },
+        "Answers": {
+          "1": {
+            "Display": "Very unsafe"
+          },
+          "2": {
+            "Display": "Unsafe"
+          },
+          "3": {
+            "Display": "Neutral"
+          },
+          "4": {
+            "Display": "Safe"
+          },
+          "5": {
+            "Display": "Very safe"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID42",
+      "SecondaryAttribute": "Technology adoption:",
+      "Payload": {
+        "QuestionID": "QID42",
+        "QuestionType": "Matrix",
+        "Selector": "Likert",
+        "SubSelector": "SingleAnswer",
+        "QuestionText": "Technology adoption:",
+        "DataExportTag": "QID42",
+        "QuestionDescription": "Technology adoption:",
+        "Choices": {
+          "1": {
+            "Display": "Ride-hailing apps"
+          },
+          "2": {
+            "Display": "E-scooter rental"
+          },
+          "3": {
+            "Display": "Car-sharing"
+          },
+          "4": {
+            "Display": "MaaS apps"
+          }
+        },
+        "Answers": {
+          "1": {
+            "Display": "Never heard of"
+          },
+          "2": {
+            "Display": "Heard of"
+          },
+          "3": {
+            "Display": "Tried once"
+          },
+          "4": {
+            "Display": "Use regularly"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID43",
+      "SecondaryAttribute": "Cycling purpose?",
+      "Payload": {
+        "QuestionID": "QID43",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Cycling purpose?",
+        "DataExportTag": "QID43",
+        "QuestionDescription": "Cycling purpose?",
+        "Choices": {
+          "1": {
+            "Display": "Commute"
+          },
+          "2": {
+            "Display": "Leisure"
+          },
+          "3": {
+            "Display": "Shopping"
+          },
+          "4": {
+            "Display": "All"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID44",
+      "SecondaryAttribute": "Bike type?",
+      "Payload": {
+        "QuestionID": "QID44",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Bike type?",
+        "DataExportTag": "QID44",
+        "QuestionDescription": "Bike type?",
+        "Choices": {
+          "1": {
+            "Display": "Road"
+          },
+          "2": {
+            "Display": "Mountain"
+          },
+          "3": {
+            "Display": "Hybrid"
+          },
+          "4": {
+            "Display": "E-bike"
+          },
+          "5": {
+            "Display": "Folding"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID45",
+      "SecondaryAttribute": "Average cycling distance (km)?",
+      "Payload": {
+        "QuestionID": "QID45",
+        "QuestionType": "Slider",
+        "Selector": "HSLIDER",
+        "SubSelector": "",
+        "QuestionText": "Average cycling distance (km)?",
+        "DataExportTag": "QID45",
+        "QuestionDescription": "Average cycling distance (km)?",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText",
+          "CSSliderMin": 0,
+          "CSSliderMax": 100
+        },
+        "Labels": {
+          "1": {
+            "Display": "points"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID46",
+      "SecondaryAttribute": "Wear a helmet?",
+      "Payload": {
+        "QuestionID": "QID46",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Wear a helmet?",
+        "DataExportTag": "QID46",
+        "QuestionDescription": "Wear a helmet?",
+        "Choices": {
+          "1": {
+            "Display": "Always"
+          },
+          "2": {
+            "Display": "Sometimes"
+          },
+          "3": {
+            "Display": "Never"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID47",
+      "SecondaryAttribute": "Vehicle type?",
+      "Payload": {
+        "QuestionID": "QID47",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Vehicle type?",
+        "DataExportTag": "QID47",
+        "QuestionDescription": "Vehicle type?",
+        "Choices": {
+          "1": {
+            "Display": "Car"
+          },
+          "2": {
+            "Display": "Van"
+          },
+          "3": {
+            "Display": "Motorcycle"
+          },
+          "4": {
+            "Display": "Other"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID48",
+      "SecondaryAttribute": "Vehicle age?",
+      "Payload": {
+        "QuestionID": "QID48",
+        "QuestionType": "MC",
+        "Selector": "DL",
+        "SubSelector": "",
+        "QuestionText": "Vehicle age?",
+        "DataExportTag": "QID48",
+        "QuestionDescription": "Vehicle age?",
+        "Choices": {
+          "1": {
+            "Display": "<2yr"
+          },
+          "2": {
+            "Display": "2-5yr"
+          },
+          "3": {
+            "Display": "5-10yr"
+          },
+          "4": {
+            "Display": ">10yr"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID49",
+      "SecondaryAttribute": "Annual mileage?",
+      "Payload": {
+        "QuestionID": "QID49",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Annual mileage?",
+        "DataExportTag": "QID49",
+        "QuestionDescription": "Annual mileage?",
+        "Choices": {
+          "1": {
+            "Display": "<5k"
+          },
+          "2": {
+            "Display": "5-10k"
+          },
+          "3": {
+            "Display": "10-20k"
+          },
+          "4": {
+            "Display": ">20k"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID50",
+      "SecondaryAttribute": "Any other comments?",
+      "Payload": {
+        "QuestionID": "QID50",
+        "QuestionType": "TE",
+        "Selector": "SL",
+        "SubSelector": "",
+        "QuestionText": "Any other comments?",
+        "DataExportTag": "QID50",
+        "QuestionDescription": "Any other comments?"
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID51",
+      "SecondaryAttribute": "Would you do a follow-up survey?",
+      "Payload": {
+        "QuestionID": "QID51",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Would you do a follow-up survey?",
+        "DataExportTag": "QID51",
+        "QuestionDescription": "Would you do a follow-up survey?",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          },
+          "3": {
+            "Display": "Maybe"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID52",
+      "SecondaryAttribute": "Thank you for completing this survey.",
+      "Payload": {
+        "QuestionID": "QID52",
+        "QuestionType": "DB",
+        "Selector": "TB",
+        "SubSelector": "",
+        "QuestionText": "Thank you for completing this survey.",
+        "DataExportTag": "QID52",
+        "QuestionDescription": "Thank you for completing this survey."
+      }
+    }
+  ]
+}

@@ -18,4 +18,4 @@ a package problem.
 ## Test environments
 
 * local: Windows 11, R 4.5.0 -- 0 errors | 0 warnings | 1 note (time-server only)
-* win-builder: R-devel -- pending
+* win-builder: R-devel (2026-09-14 r90539 ucrt) -- 0 errors | 0 warnings | 1 note (time-server only)

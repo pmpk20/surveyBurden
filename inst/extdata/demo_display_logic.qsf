@@ -1,0 +1,1315 @@
+{
+  "SurveyEntry": {
+    "SurveyID": "SV_displogic01",
+    "SurveyName": "Display Logic Survey",
+    "SurveyDescription": null,
+    "SurveyLanguage": "EN",
+    "SurveyStatus": "Inactive",
+    "SurveyCreationDate": "2026-01-01 00:00:00"
+  },
+  "SurveyElements": [
+    {
+      "SurveyID": "SV_displogic01",
+      "Element": "BL",
+      "PrimaryAttribute": "Survey Blocks",
+      "SecondaryAttribute": "",
+      "Payload": {
+        "0": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Screening",
+          "ID": "BL1",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID1"
+            }
+          ]
+        },
+        "1": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Demographics",
+          "ID": "BL2",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID2"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID3"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID4"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID5"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID6"
+            }
+          ]
+        },
+        "2": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Employment & Car details",
+          "ID": "BL3",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID7"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID8"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID9"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID10"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID11"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID12"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID13"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID14"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID15"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID16"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID17"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID18"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID19"
+            }
+          ]
+        },
+        "3": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Transport attitudes",
+          "ID": "BL4",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID20"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID21"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID22"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID23"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID24"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID25"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID26"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID27"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID28"
+            }
+          ]
+        },
+        "4": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Closing",
+          "ID": "BL5",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID29"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID30"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_displogic01",
+      "Element": "FL",
+      "PrimaryAttribute": "Survey Flow",
+      "SecondaryAttribute": "",
+      "Payload": {
+        "Type": "Root",
+        "FlowID": "FL_root",
+        "Flow": [
+          {
+            "Type": "Standard",
+            "ID": "BL1",
+            "FlowID": "FL_BL1"
+          },
+          {
+            "Type": "Branch",
+            "FlowID": "FL_b1",
+            "Description": "no consent",
+            "BranchLogic": {
+              "0": {
+                "0": {
+                  "LogicType": "Question",
+                  "QuestionID": "QID1",
+                  "Operator": "Selected",
+                  "LeftOperand": "q://QID1/SelectableChoice/2",
+                  "ChoiceLocator": "q://QID1/SelectableChoice/2",
+                  "Type": "Expression"
+                },
+                "Type": "If"
+              },
+              "Type": "BooleanExpression",
+              "inPage": false
+            },
+            "Flow": [
+              {
+                "Type": "EndSurvey",
+                "FlowID": "FL_end1"
+              }
+            ]
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL2",
+            "FlowID": "FL_BL2"
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL3",
+            "FlowID": "FL_BL3"
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL4",
+            "FlowID": "FL_BL4"
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL5",
+            "FlowID": "FL_BL5"
+          }
+        ],
+        "Properties": {
+          "Count": 30
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID1",
+      "SecondaryAttribute": "Do you consent to participate?",
+      "Payload": {
+        "QuestionID": "QID1",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Do you consent to participate?",
+        "DataExportTag": "QID1",
+        "QuestionDescription": "Do you consent to participate?",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID2",
+      "SecondaryAttribute": "What is your employment status?",
+      "Payload": {
+        "QuestionID": "QID2",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "What is your employment status?",
+        "DataExportTag": "QID2",
+        "QuestionDescription": "What is your employment status?",
+        "Choices": {
+          "1": {
+            "Display": "Full-time employed"
+          },
+          "2": {
+            "Display": "Part-time employed"
+          },
+          "3": {
+            "Display": "Self-employed"
+          },
+          "4": {
+            "Display": "Unemployed"
+          },
+          "5": {
+            "Display": "Retired"
+          },
+          "6": {
+            "Display": "Student"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID3",
+      "SecondaryAttribute": "Do you own or have regular access to a c",
+      "Payload": {
+        "QuestionID": "QID3",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Do you own or have regular access to a car?",
+        "DataExportTag": "QID3",
+        "QuestionDescription": "Do you own or have regular access to a c",
+        "Choices": {
+          "1": {
+            "Display": "Yes, I own a car"
+          },
+          "2": {
+            "Display": "No, but I have access"
+          },
+          "3": {
+            "Display": "No access"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID4",
+      "SecondaryAttribute": "What is your age group?",
+      "Payload": {
+        "QuestionID": "QID4",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "What is your age group?",
+        "DataExportTag": "QID4",
+        "QuestionDescription": "What is your age group?",
+        "Choices": {
+          "1": {
+            "Display": "18-24"
+          },
+          "2": {
+            "Display": "25-34"
+          },
+          "3": {
+            "Display": "35-44"
+          },
+          "4": {
+            "Display": "45-54"
+          },
+          "5": {
+            "Display": "55-64"
+          },
+          "6": {
+            "Display": "65+"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID5",
+      "SecondaryAttribute": "What is your gender?",
+      "Payload": {
+        "QuestionID": "QID5",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "What is your gender?",
+        "DataExportTag": "QID5",
+        "QuestionDescription": "What is your gender?",
+        "Choices": {
+          "1": {
+            "Display": "Male"
+          },
+          "2": {
+            "Display": "Female"
+          },
+          "3": {
+            "Display": "Non-binary"
+          },
+          "4": {
+            "Display": "Prefer not to say"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID6",
+      "SecondaryAttribute": "What is your home postcode?",
+      "Payload": {
+        "QuestionID": "QID6",
+        "QuestionType": "TE",
+        "Selector": "SL",
+        "SubSelector": "",
+        "QuestionText": "What is your home postcode?",
+        "DataExportTag": "QID6",
+        "QuestionDescription": "What is your home postcode?"
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID7",
+      "SecondaryAttribute": "What is your job title?",
+      "Payload": {
+        "QuestionID": "QID7",
+        "QuestionType": "TE",
+        "Selector": "SL",
+        "SubSelector": "",
+        "QuestionText": "What is your job title?",
+        "DataExportTag": "QID7",
+        "QuestionDescription": "What is your job title?",
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID2",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID2/SelectableChoice/1",
+              "ChoiceLocator": "q://QID2/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID8",
+      "SecondaryAttribute": "How do you usually commute to work?",
+      "Payload": {
+        "QuestionID": "QID8",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "How do you usually commute to work?",
+        "DataExportTag": "QID8",
+        "QuestionDescription": "How do you usually commute to work?",
+        "Choices": {
+          "1": {
+            "Display": "Car"
+          },
+          "2": {
+            "Display": "Bus"
+          },
+          "3": {
+            "Display": "Train"
+          },
+          "4": {
+            "Display": "Cycle"
+          },
+          "5": {
+            "Display": "Walk"
+          },
+          "6": {
+            "Display": "Work from home"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID2",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID2/SelectableChoice/1",
+              "ChoiceLocator": "q://QID2/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID9",
+      "SecondaryAttribute": "How long is your typical commute (minute",
+      "Payload": {
+        "QuestionID": "QID9",
+        "QuestionType": "Slider",
+        "Selector": "HSLIDER",
+        "SubSelector": "",
+        "QuestionText": "How long is your typical commute (minutes)?",
+        "DataExportTag": "QID9",
+        "QuestionDescription": "How long is your typical commute (minute",
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID2",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID2/SelectableChoice/1",
+              "ChoiceLocator": "q://QID2/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        },
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText",
+          "CSSliderMin": 0,
+          "CSSliderMax": 100
+        },
+        "Labels": {
+          "1": {
+            "Display": "points"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID10",
+      "SecondaryAttribute": "How flexible are your working hours?",
+      "Payload": {
+        "QuestionID": "QID10",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "How flexible are your working hours?",
+        "DataExportTag": "QID10",
+        "QuestionDescription": "How flexible are your working hours?",
+        "Choices": {
+          "1": {
+            "Display": "Very flexible"
+          },
+          "2": {
+            "Display": "Somewhat flexible"
+          },
+          "3": {
+            "Display": "Fixed"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID2",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID2/SelectableChoice/1",
+              "ChoiceLocator": "q://QID2/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID11",
+      "SecondaryAttribute": "Do you have free parking at work?",
+      "Payload": {
+        "QuestionID": "QID11",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Do you have free parking at work?",
+        "DataExportTag": "QID11",
+        "QuestionDescription": "Do you have free parking at work?",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID2",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID2/SelectableChoice/1",
+              "ChoiceLocator": "q://QID2/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID12",
+      "SecondaryAttribute": "Is your workplace accessible by public t",
+      "Payload": {
+        "QuestionID": "QID12",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Is your workplace accessible by public transport?",
+        "DataExportTag": "QID12",
+        "QuestionDescription": "Is your workplace accessible by public t",
+        "Choices": {
+          "1": {
+            "Display": "Yes, easily"
+          },
+          "2": {
+            "Display": "Yes, with difficulty"
+          },
+          "3": {
+            "Display": "No"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID2",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID2/SelectableChoice/1",
+              "ChoiceLocator": "q://QID2/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID13",
+      "SecondaryAttribute": "How much do you spend on commuting per m",
+      "Payload": {
+        "QuestionID": "QID13",
+        "QuestionType": "TE",
+        "Selector": "SL",
+        "SubSelector": "",
+        "QuestionText": "How much do you spend on commuting per month?",
+        "DataExportTag": "QID13",
+        "QuestionDescription": "How much do you spend on commuting per m",
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID2",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID2/SelectableChoice/1",
+              "ChoiceLocator": "q://QID2/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID14",
+      "SecondaryAttribute": "Would you commute by a different mode if",
+      "Payload": {
+        "QuestionID": "QID14",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Would you commute by a different mode if you could?",
+        "DataExportTag": "QID14",
+        "QuestionDescription": "Would you commute by a different mode if",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          },
+          "3": {
+            "Display": "Maybe"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID2",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID2/SelectableChoice/1",
+              "ChoiceLocator": "q://QID2/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID15",
+      "SecondaryAttribute": "What type of car do you drive?",
+      "Payload": {
+        "QuestionID": "QID15",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "What type of car do you drive?",
+        "DataExportTag": "QID15",
+        "QuestionDescription": "What type of car do you drive?",
+        "Choices": {
+          "1": {
+            "Display": "Petrol"
+          },
+          "2": {
+            "Display": "Diesel"
+          },
+          "3": {
+            "Display": "Hybrid"
+          },
+          "4": {
+            "Display": "Electric"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID3",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID3/SelectableChoice/1",
+              "ChoiceLocator": "q://QID3/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID16",
+      "SecondaryAttribute": "How old is your car?",
+      "Payload": {
+        "QuestionID": "QID16",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "How old is your car?",
+        "DataExportTag": "QID16",
+        "QuestionDescription": "How old is your car?",
+        "Choices": {
+          "1": {
+            "Display": "Less than 2 years"
+          },
+          "2": {
+            "Display": "2-5 years"
+          },
+          "3": {
+            "Display": "5-10 years"
+          },
+          "4": {
+            "Display": "Over 10 years"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID3",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID3/SelectableChoice/1",
+              "ChoiceLocator": "q://QID3/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID17",
+      "SecondaryAttribute": "How many miles do you drive per week?",
+      "Payload": {
+        "QuestionID": "QID17",
+        "QuestionType": "Slider",
+        "Selector": "HSLIDER",
+        "SubSelector": "",
+        "QuestionText": "How many miles do you drive per week?",
+        "DataExportTag": "QID17",
+        "QuestionDescription": "How many miles do you drive per week?",
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID3",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID3/SelectableChoice/1",
+              "ChoiceLocator": "q://QID3/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        },
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText",
+          "CSSliderMin": 0,
+          "CSSliderMax": 100
+        },
+        "Labels": {
+          "1": {
+            "Display": "points"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID18",
+      "SecondaryAttribute": "Where do you usually park at home?",
+      "Payload": {
+        "QuestionID": "QID18",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Where do you usually park at home?",
+        "DataExportTag": "QID18",
+        "QuestionDescription": "Where do you usually park at home?",
+        "Choices": {
+          "1": {
+            "Display": "Driveway"
+          },
+          "2": {
+            "Display": "Garage"
+          },
+          "3": {
+            "Display": "On-street"
+          },
+          "4": {
+            "Display": "Car park"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID3",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID3/SelectableChoice/1",
+              "ChoiceLocator": "q://QID3/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID19",
+      "SecondaryAttribute": "Would you consider switching to an elect",
+      "Payload": {
+        "QuestionID": "QID19",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Would you consider switching to an electric vehicle?",
+        "DataExportTag": "QID19",
+        "QuestionDescription": "Would you consider switching to an elect",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          },
+          "3": {
+            "Display": "Already drive electric"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID3",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID3/SelectableChoice/1",
+              "ChoiceLocator": "q://QID3/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID20",
+      "SecondaryAttribute": "Rate your satisfaction with local transp",
+      "Payload": {
+        "QuestionID": "QID20",
+        "QuestionType": "Matrix",
+        "Selector": "Likert",
+        "SubSelector": "SingleAnswer",
+        "QuestionText": "Rate your satisfaction with local transport:",
+        "DataExportTag": "QID20",
+        "QuestionDescription": "Rate your satisfaction with local transp",
+        "Choices": {
+          "1": {
+            "Display": "Bus service"
+          },
+          "2": {
+            "Display": "Train service"
+          },
+          "3": {
+            "Display": "Road condition"
+          },
+          "4": {
+            "Display": "Cycle infrastructure"
+          },
+          "5": {
+            "Display": "Pavements"
+          }
+        },
+        "Answers": {
+          "1": {
+            "Display": "Very poor"
+          },
+          "2": {
+            "Display": "Poor"
+          },
+          "3": {
+            "Display": "Adequate"
+          },
+          "4": {
+            "Display": "Good"
+          },
+          "5": {
+            "Display": "Excellent"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID21",
+      "SecondaryAttribute": "How often do you use public transport?",
+      "Payload": {
+        "QuestionID": "QID21",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "How often do you use public transport?",
+        "DataExportTag": "QID21",
+        "QuestionDescription": "How often do you use public transport?",
+        "Choices": {
+          "1": {
+            "Display": "Daily"
+          },
+          "2": {
+            "Display": "Weekly"
+          },
+          "3": {
+            "Display": "Monthly"
+          },
+          "4": {
+            "Display": "Rarely"
+          },
+          "5": {
+            "Display": "Never"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID22",
+      "SecondaryAttribute": "How concerned are you about traffic in y",
+      "Payload": {
+        "QuestionID": "QID22",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "How concerned are you about traffic in your area?",
+        "DataExportTag": "QID22",
+        "QuestionDescription": "How concerned are you about traffic in y",
+        "Choices": {
+          "1": {
+            "Display": "Very concerned"
+          },
+          "2": {
+            "Display": "Somewhat"
+          },
+          "3": {
+            "Display": "Not at all"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID23",
+      "SecondaryAttribute": "Rate these statements:",
+      "Payload": {
+        "QuestionID": "QID23",
+        "QuestionType": "Matrix",
+        "Selector": "Likert",
+        "SubSelector": "SingleAnswer",
+        "QuestionText": "Rate these statements:",
+        "DataExportTag": "QID23",
+        "QuestionDescription": "Rate these statements:",
+        "Choices": {
+          "1": {
+            "Display": "Traffic is getting worse"
+          },
+          "2": {
+            "Display": "Air quality is poor"
+          },
+          "3": {
+            "Display": "I feel safe cycling"
+          },
+          "4": {
+            "Display": "Public transport is reliable"
+          }
+        },
+        "Answers": {
+          "1": {
+            "Display": "Strongly disagree"
+          },
+          "2": {
+            "Display": "Disagree"
+          },
+          "3": {
+            "Display": "Neutral"
+          },
+          "4": {
+            "Display": "Agree"
+          },
+          "5": {
+            "Display": "Strongly agree"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID24",
+      "SecondaryAttribute": "What is your main transport concern?",
+      "Payload": {
+        "QuestionID": "QID24",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "What is your main transport concern?",
+        "DataExportTag": "QID24",
+        "QuestionDescription": "What is your main transport concern?",
+        "Choices": {
+          "1": {
+            "Display": "Cost"
+          },
+          "2": {
+            "Display": "Time"
+          },
+          "3": {
+            "Display": "Safety"
+          },
+          "4": {
+            "Display": "Environment"
+          },
+          "5": {
+            "Display": "Reliability"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID25",
+      "SecondaryAttribute": "Do you drive to work?",
+      "Payload": {
+        "QuestionID": "QID25",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Do you drive to work?",
+        "DataExportTag": "QID25",
+        "QuestionDescription": "Do you drive to work?",
+        "Choices": {
+          "1": {
+            "Display": "Always"
+          },
+          "2": {
+            "Display": "Sometimes"
+          },
+          "3": {
+            "Display": "Never"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID2",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID2/SelectableChoice/1",
+              "ChoiceLocator": "q://QID2/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID26",
+      "SecondaryAttribute": "Does your employer offer cycle-to-work s",
+      "Payload": {
+        "QuestionID": "QID26",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Does your employer offer cycle-to-work schemes?",
+        "DataExportTag": "QID26",
+        "QuestionDescription": "Does your employer offer cycle-to-work s",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          },
+          "3": {
+            "Display": "Don't know"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID2",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID2/SelectableChoice/1",
+              "ChoiceLocator": "q://QID2/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID27",
+      "SecondaryAttribute": "How much do you spend on fuel per month?",
+      "Payload": {
+        "QuestionID": "QID27",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "How much do you spend on fuel per month?",
+        "DataExportTag": "QID27",
+        "QuestionDescription": "How much do you spend on fuel per month?",
+        "Choices": {
+          "1": {
+            "Display": "Under 50"
+          },
+          "2": {
+            "Display": "50-100"
+          },
+          "3": {
+            "Display": "100-200"
+          },
+          "4": {
+            "Display": "Over 200"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID3",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID3/SelectableChoice/1",
+              "ChoiceLocator": "q://QID3/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID28",
+      "SecondaryAttribute": "Do you share your car with other househo",
+      "Payload": {
+        "QuestionID": "QID28",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Do you share your car with other household members?",
+        "DataExportTag": "QID28",
+        "QuestionDescription": "Do you share your car with other househo",
+        "Choices": {
+          "1": {
+            "Display": "Yes, regularly"
+          },
+          "2": {
+            "Display": "Occasionally"
+          },
+          "3": {
+            "Display": "No"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID3",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID3/SelectableChoice/1",
+              "ChoiceLocator": "q://QID3/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID29",
+      "SecondaryAttribute": "Any other comments about transport in yo",
+      "Payload": {
+        "QuestionID": "QID29",
+        "QuestionType": "TE",
+        "Selector": "SL",
+        "SubSelector": "",
+        "QuestionText": "Any other comments about transport in your area?",
+        "DataExportTag": "QID29",
+        "QuestionDescription": "Any other comments about transport in yo"
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID30",
+      "SecondaryAttribute": "Thank you for completing this survey.",
+      "Payload": {
+        "QuestionID": "QID30",
+        "QuestionType": "DB",
+        "Selector": "TB",
+        "SubSelector": "",
+        "QuestionText": "Thank you for completing this survey.",
+        "DataExportTag": "QID30",
+        "QuestionDescription": "Thank you for completing this survey."
+      }
+    }
+  ]
+}

@@ -1,0 +1,512 @@
+{
+  "SurveyEntry": {
+    "SurveyID": "SV_simple01",
+    "SurveyName": "Simple Linear Survey",
+    "SurveyDescription": null,
+    "SurveyLanguage": "EN",
+    "SurveyStatus": "Inactive",
+    "SurveyCreationDate": "2026-01-01 00:00:00"
+  },
+  "SurveyElements": [
+    {
+      "SurveyID": "SV_simple01",
+      "Element": "BL",
+      "PrimaryAttribute": "Survey Blocks",
+      "SecondaryAttribute": "",
+      "Payload": {
+        "0": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Demographics",
+          "ID": "BL1",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID1"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID2"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID3"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID4"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID5"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID6"
+            }
+          ]
+        },
+        "1": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Transport & Attitudes",
+          "ID": "BL2",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID7"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID8"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID9"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID10"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID11"
+            }
+          ]
+        },
+        "2": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Closing",
+          "ID": "BL3",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID12"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID13"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID14"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID15"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_simple01",
+      "Element": "FL",
+      "PrimaryAttribute": "Survey Flow",
+      "SecondaryAttribute": "",
+      "Payload": {
+        "Type": "Root",
+        "FlowID": "FL_root",
+        "Flow": [
+          {
+            "Type": "Standard",
+            "ID": "BL1",
+            "FlowID": "FL_BL1"
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL2",
+            "FlowID": "FL_BL2"
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL3",
+            "FlowID": "FL_BL3"
+          }
+        ],
+        "Properties": {
+          "Count": 15
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID1",
+      "SecondaryAttribute": "Welcome to this short survey about your ",
+      "Payload": {
+        "QuestionID": "QID1",
+        "QuestionType": "DB",
+        "Selector": "TB",
+        "SubSelector": "",
+        "QuestionText": "Welcome to this short survey about your neighbourhood.",
+        "DataExportTag": "QID1",
+        "QuestionDescription": "Welcome to this short survey about your "
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID2",
+      "SecondaryAttribute": "What is your gender?",
+      "Payload": {
+        "QuestionID": "QID2",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "What is your gender?",
+        "DataExportTag": "QID2",
+        "QuestionDescription": "What is your gender?",
+        "Choices": {
+          "1": {
+            "Display": "Male"
+          },
+          "2": {
+            "Display": "Female"
+          },
+          "3": {
+            "Display": "Non-binary"
+          },
+          "4": {
+            "Display": "Prefer not to say"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID3",
+      "SecondaryAttribute": "How old are you?",
+      "Payload": {
+        "QuestionID": "QID3",
+        "QuestionType": "MC",
+        "Selector": "DL",
+        "SubSelector": "",
+        "QuestionText": "How old are you?",
+        "DataExportTag": "QID3",
+        "QuestionDescription": "How old are you?",
+        "Choices": {
+          "1": {
+            "Display": "18-24"
+          },
+          "2": {
+            "Display": "25-34"
+          },
+          "3": {
+            "Display": "35-44"
+          },
+          "4": {
+            "Display": "45-54"
+          },
+          "5": {
+            "Display": "55-64"
+          },
+          "6": {
+            "Display": "65+"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID4",
+      "SecondaryAttribute": "What is your highest education?",
+      "Payload": {
+        "QuestionID": "QID4",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "What is your highest education?",
+        "DataExportTag": "QID4",
+        "QuestionDescription": "What is your highest education?",
+        "Choices": {
+          "1": {
+            "Display": "Secondary"
+          },
+          "2": {
+            "Display": "A-levels"
+          },
+          "3": {
+            "Display": "Undergraduate"
+          },
+          "4": {
+            "Display": "Postgraduate"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID5",
+      "SecondaryAttribute": "What is your postcode?",
+      "Payload": {
+        "QuestionID": "QID5",
+        "QuestionType": "TE",
+        "Selector": "SL",
+        "SubSelector": "",
+        "QuestionText": "What is your postcode?",
+        "DataExportTag": "QID5",
+        "QuestionDescription": "What is your postcode?"
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID6",
+      "SecondaryAttribute": "How would you describe the area you live",
+      "Payload": {
+        "QuestionID": "QID6",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "How would you describe the area you live in?",
+        "DataExportTag": "QID6",
+        "QuestionDescription": "How would you describe the area you live",
+        "Choices": {
+          "1": {
+            "Display": "Urban"
+          },
+          "2": {
+            "Display": "Suburban"
+          },
+          "3": {
+            "Display": "Rural"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID7",
+      "SecondaryAttribute": "How often do you use these modes?",
+      "Payload": {
+        "QuestionID": "QID7",
+        "QuestionType": "Matrix",
+        "Selector": "Likert",
+        "SubSelector": "SingleAnswer",
+        "QuestionText": "How often do you use these modes?",
+        "DataExportTag": "QID7",
+        "QuestionDescription": "How often do you use these modes?",
+        "Choices": {
+          "1": {
+            "Display": "Car"
+          },
+          "2": {
+            "Display": "Bus"
+          },
+          "3": {
+            "Display": "Train"
+          },
+          "4": {
+            "Display": "Bicycle"
+          },
+          "5": {
+            "Display": "Walking"
+          }
+        },
+        "Answers": {
+          "1": {
+            "Display": "Daily"
+          },
+          "2": {
+            "Display": "Weekly"
+          },
+          "3": {
+            "Display": "Monthly"
+          },
+          "4": {
+            "Display": "Rarely"
+          },
+          "5": {
+            "Display": "Never"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID8",
+      "SecondaryAttribute": "How satisfied are you with public transp",
+      "Payload": {
+        "QuestionID": "QID8",
+        "QuestionType": "Slider",
+        "Selector": "HSLIDER",
+        "SubSelector": "",
+        "QuestionText": "How satisfied are you with public transport in your area?",
+        "DataExportTag": "QID8",
+        "QuestionDescription": "How satisfied are you with public transp",
+        "Configuration": {
+          "QuestionDescriptionOption": "UseText",
+          "CSSliderMin": 0,
+          "CSSliderMax": 100
+        },
+        "Labels": {
+          "1": {
+            "Display": "points"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID9",
+      "SecondaryAttribute": "Do you own or have access to a car?",
+      "Payload": {
+        "QuestionID": "QID9",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Do you own or have access to a car?",
+        "DataExportTag": "QID9",
+        "QuestionDescription": "Do you own or have access to a car?",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID10",
+      "SecondaryAttribute": "How many minutes does your typical commu",
+      "Payload": {
+        "QuestionID": "QID10",
+        "QuestionType": "TE",
+        "Selector": "SL",
+        "SubSelector": "",
+        "QuestionText": "How many minutes does your typical commute take?",
+        "DataExportTag": "QID10",
+        "QuestionDescription": "How many minutes does your typical commu"
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID11",
+      "SecondaryAttribute": "Rate each statement about your neighbour",
+      "Payload": {
+        "QuestionID": "QID11",
+        "QuestionType": "Matrix",
+        "Selector": "Likert",
+        "SubSelector": "SingleAnswer",
+        "QuestionText": "Rate each statement about your neighbourhood:",
+        "DataExportTag": "QID11",
+        "QuestionDescription": "Rate each statement about your neighbour",
+        "Choices": {
+          "1": {
+            "Display": "It is safe"
+          },
+          "2": {
+            "Display": "It is clean"
+          },
+          "3": {
+            "Display": "It is well-connected"
+          },
+          "4": {
+            "Display": "I enjoy living here"
+          }
+        },
+        "Answers": {
+          "1": {
+            "Display": "Strongly disagree"
+          },
+          "2": {
+            "Display": "Disagree"
+          },
+          "3": {
+            "Display": "Neutral"
+          },
+          "4": {
+            "Display": "Agree"
+          },
+          "5": {
+            "Display": "Strongly agree"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID12",
+      "SecondaryAttribute": "Would you recommend your area to a frien",
+      "Payload": {
+        "QuestionID": "QID12",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "",
+        "QuestionText": "Would you recommend your area to a friend?",
+        "DataExportTag": "QID12",
+        "QuestionDescription": "Would you recommend your area to a frien",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          },
+          "3": {
+            "Display": "Maybe"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID13",
+      "SecondaryAttribute": "What is the best thing about your neighb",
+      "Payload": {
+        "QuestionID": "QID13",
+        "QuestionType": "TE",
+        "Selector": "SL",
+        "SubSelector": "",
+        "QuestionText": "What is the best thing about your neighbourhood?",
+        "DataExportTag": "QID13",
+        "QuestionDescription": "What is the best thing about your neighb"
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID14",
+      "SecondaryAttribute": "What would you most like to improve?",
+      "Payload": {
+        "QuestionID": "QID14",
+        "QuestionType": "TE",
+        "Selector": "SL",
+        "SubSelector": "",
+        "QuestionText": "What would you most like to improve?",
+        "DataExportTag": "QID14",
+        "QuestionDescription": "What would you most like to improve?"
+      }
+    },
+    {
+      "SurveyID": "SV_fixture",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID15",
+      "SecondaryAttribute": "Thank you for completing this survey.",
+      "Payload": {
+        "QuestionID": "QID15",
+        "QuestionType": "DB",
+        "Selector": "TB",
+        "SubSelector": "",
+        "QuestionText": "Thank you for completing this survey.",
+        "DataExportTag": "QID15",
+        "QuestionDescription": "Thank you for completing this survey."
+      }
+    }
+  ]
+}

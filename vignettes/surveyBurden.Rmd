@@ -35,6 +35,8 @@ This article gets you to a first report. The others go deeper:
   structural-versus-population-weighted distinction.
 - `vignette("calibration")` -- the `words_per_line` and points-per-minute
   assumptions, and the limitations.
+- `vignette("realised-burden")` -- scoring the questions each respondent
+  actually answered from response data.
 
 ## Install
 

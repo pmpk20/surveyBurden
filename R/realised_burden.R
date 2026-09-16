@@ -199,6 +199,9 @@ build_col_map <- function(qsf, responses, all_qids) {
   )
   export_tags <- export_tags[!is.na(names(export_tags)) & !is.na(export_tags)]
   tag_to_qid <- stats::setNames(names(export_tags), export_tags)
+  # case-insensitive fallback (first tag wins for each lowered form)
+  tag_to_qid_lower <- tag_to_qid[!duplicated(tolower(names(tag_to_qid)))]
+  names(tag_to_qid_lower) <- tolower(names(tag_to_qid_lower))
 
   # check for user-supplied col_map attribute
   user_map <- attr(responses, "col_map")
@@ -233,9 +236,12 @@ build_col_map <- function(qsf, responses, all_qids) {
       mapping <- parse_qid_column(col, all_qids)
     }
 
-    # strategy 3: ExportTag-based column name
+    # strategy 3: ExportTag-based column name (exact then case-insensitive)
     if (is.null(mapping)) {
       mapping <- parse_tag_column(col, tag_to_qid, all_qids)
+    }
+    if (is.null(mapping)) {
+      mapping <- parse_tag_column(tolower(col), tag_to_qid_lower, all_qids)
     }
 
     if (!is.null(mapping)) {

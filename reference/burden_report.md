@@ -203,13 +203,13 @@ br <- burden_report(qsf_path)
 #> ✔ Reading survey [9ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [89ms]
+#> ✔ Scoring questions and resolving paths [120ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [45ms]
+#> ✔ Checking calculation certainty [34ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [29ms]
+#> ✔ Enumerating display-logic combinations [28ms]
 #> 
 br
 #> 

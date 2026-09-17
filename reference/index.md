@@ -70,6 +70,13 @@ Turn the resolved paths into per-path and population-weighted burden.
 - [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
   : Expected burden by respondent route
 
+## Realised burden
+
+Score each respondent’s actual burden from their response data.
+
+- [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
+  : Realised response burden from observed responses
+
 ## Diagnostics
 
 Check where the calculation is exact and calibrate points to minutes.

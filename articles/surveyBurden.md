@@ -24,6 +24,9 @@ This article gets you to a first report. The others go deeper:
 - [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md)
   – the `words_per_line` and points-per-minute assumptions, and the
   limitations.
+- [`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md)
+  – scoring the questions each respondent actually answered from
+  response data.
 
 ## Install
 

@@ -4,6 +4,8 @@
 
 - [Get started with
   surveyBurden](https://pmpk20.github.io/surveyBurden/articles/surveyBurden.md):
+- [Realised burden from response
+  data](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md):
 - [Reading the burden
   report](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md):
 - [The GfS scoring

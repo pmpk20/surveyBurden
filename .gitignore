@@ -27,5 +27,9 @@
 ~$*.docx
 ~WRL*.tmp
 
+# Built vignettes (rebuild from Rmd on install)
+vignettes/*.html
+inst/doc/
+
 # Built tarballs
 *.tar.gz

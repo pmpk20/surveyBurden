@@ -8,6 +8,7 @@ articles:
     navbar: ~
     contents:
       - surveyBurden
+      - realised-burden
       - reading-the-report
       - gfs-scoring
       - paths-and-display-logic
@@ -45,6 +46,10 @@ reference:
       - path_burden
       - path_burden_profile
       - respondent_burden
+  - title: Realised burden
+    desc: Score each respondent's actual burden from their response data.
+    contents:
+      - realised_burden
   - title: Diagnostics
     desc: Check where the calculation is exact and calibrate points to minutes.
     contents:

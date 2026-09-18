@@ -21,12 +21,14 @@ classify_question(payload)
 ## Value
 
 A named `list` with elements `question_id`, `std_type`,
-`qualtrics_type`, `selector`, `subselector`, `n_options`, `n_rows`,
-`n_cols`, `text_words`, `max_label_words` (longest response option /
-matrix label, in words; `NA` if the question has no labels),
-`label_text` (all response/answer labels lowercased and joined with
-`" | "`, truncated; `NA` if none), `options_numeric` (`TRUE` if the
-question has \>= 3 response options and every one is a number),
+`qualtrics_type`, `selector`, `subselector`, `is_dropdown` (`TRUE` for
+single-choice dropdowns), `is_multiline` (`TRUE` for multi-line open
+text), `is_multi_answer` (`TRUE` for checkbox-per-cell matrices),
+`n_options`, `n_rows`, `n_cols`, `text_words`, `max_label_words`
+(longest response option / matrix label, in words; `NA` if the question
+has no labels), `label_text` (all response/answer labels lowercased and
+joined with `" | "`, truncated; `NA` if none), `options_numeric` (`TRUE`
+if the question has \>= 3 response options and every one is a number),
 `question_text` (HTML-stripped, truncated to 200 characters),
 `is_hidden` (`TRUE` if injected CSS/JS hides the question from the
 respondent), `has_display_logic`, `display_logic_refs` (character

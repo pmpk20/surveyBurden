@@ -27,6 +27,9 @@ This article gets you to a first report. The others go deeper:
 - [`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md)
   – scoring the questions each respondent actually answered from
   response data.
+- [`vignette("extensibility")`](https://pmpk20.github.io/surveyBurden/articles/extensibility.md)
+  – the intermediate representation and how to extend the package to
+  other survey platforms.
 
 ## Install
 

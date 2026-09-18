@@ -37,6 +37,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/realised-burden.html">Realised burden from response data</a></li>
+    <li><a class="dropdown-item" href="articles/extensibility.html">Extending surveyBurden to other survey platforms</a></li>
     <li><a class="dropdown-item" href="articles/reading-the-report.html">Reading the burden report</a></li>
     <li><a class="dropdown-item" href="articles/gfs-scoring.html">The GfS scoring method</a></li>
     <li><a class="dropdown-item" href="articles/paths-and-display-logic.html">Paths and display logic</a></li>
@@ -303,12 +304,27 @@
 <td>the structured report object</td>
 </tr>
 <tr>
+<td><code>realised_burden(qsf, responses)</code></td>
+<td>per-respondent ex-post burden from response data</td>
+</tr>
+<tr>
+<td><code>validate_catalogue(catalogue)</code></td>
+<td>check and coerce a hand-built question catalogue</td>
+</tr>
+<tr>
 <td><code>validate_times(qsf, observed, weights, trim)</code></td>
 <td>a points-per-minute rate fitted to your completion-time data</td>
 </tr>
 </tbody>
 </table>
-<p>Every function has a help page: <code><a href="reference/burden_report.html">?burden_report</a></code>, <code><a href="reference/score_burden.html">?score_burden</a></code>, and so on. The guides cover the workflow end to end — start with <code><a href="articles/surveyBurden.html">vignette("surveyBurden")</a></code>, then <code><a href="articles/reading-the-report.html">vignette("reading-the-report")</a></code>, <code><a href="articles/gfs-scoring.html">vignette("gfs-scoring")</a></code>, <code><a href="articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code> and <code><a href="articles/calibration.html">vignette("calibration")</a></code>.</p>
+<p>Every function has a help page: <code><a href="reference/burden_report.html">?burden_report</a></code>, <code><a href="reference/score_burden.html">?score_burden</a></code>, and so on. The guides cover the workflow end to end — start with <code><a href="articles/surveyBurden.html">vignette("surveyBurden")</a></code>, then <code><a href="articles/reading-the-report.html">vignette("reading-the-report")</a></code>, <code><a href="articles/gfs-scoring.html">vignette("gfs-scoring")</a></code>, <code><a href="articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code>, <code><a href="articles/calibration.html">vignette("calibration")</a></code>, <code><a href="articles/realised-burden.html">vignette("realised-burden")</a></code> and <code><a href="articles/extensibility.html">vignette("extensibility")</a></code>.</p>
+</div>
+<div class="section level2">
+<h2 id="extensibility">Extensibility<a class="anchor" aria-label="anchor" href="#extensibility"></a>
+</h2>
+<p>surveyBurden is Qualtrics-first, but its architecture separates the platform-specific parser (Layer 1) from the platform-agnostic scorer and reporter (Layer 3). The intermediate representation — a standardised question catalogue — is a documented data-frame schema that any parser can produce.</p>
+<p><code><a href="reference/validate_catalogue.html">validate_catalogue()</a></code> checks a hand-built catalogue against the schema, fills missing columns with safe defaults, and feeds it straight to <code><a href="reference/score_burden.html">score_burden()</a></code>. A worked example that scores a five-question survey without any QSF file is in <code><a href="articles/extensibility.html">vignette("extensibility")</a></code>, along with the full catalogue schema and a map of which functions are platform-specific and which are reusable.</p>
+<p>Adding support for a new platform (LimeSurvey, SurveyMonkey, REDCap, etc.) means writing a parser that produces the catalogue; the scoring rules, path enumeration, and reporting logic are reusable unchanged.</p>
 </div>
 <div class="section level2">
 <h2 id="limitations">Limitations<a class="anchor" aria-label="anchor" href="#limitations"></a>

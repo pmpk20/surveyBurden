@@ -203,13 +203,13 @@ br <- burden_report(qsf_path)
 #> ✔ Reading survey [9ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [120ms]
+#> ✔ Scoring questions and resolving paths [107ms]
 #> 
 #> ℹ Checking calculation certainty
 #> ✔ Checking calculation certainty [34ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [28ms]
+#> ✔ Enumerating display-logic combinations [30ms]
 #> 
 br
 #> 
@@ -302,7 +302,7 @@ br$burden
 #> 4 p75          129   10.8  0.086 
 #> 5 max          143   11.9  0.0953
 br$items[order(-br$items$gfs_points), ]
-#> # A tibble: 26 × 27
+#> # A tibble: 26 × 30
 #>    question_id block_id block_name question_text std_type selector n_rows n_cols
 #>    <chr>       <chr>    <chr>      <chr>         <chr>    <chr>     <int>  <int>
 #>  1 QID21       BL10     Attitudes  How much do … matrix   Likert        6      7
@@ -316,11 +316,11 @@ br$items[order(-br$items$gfs_points), ]
 #>  9 QID11       BL6      Other adu… What is this… single_… SAVR         NA     NA
 #> 10 QID16       BL8      Vehicle d… What type of… single_… SAVR         NA     NA
 #> # ℹ 16 more rows
-#> # ℹ 19 more variables: n_options <int>, gfs_points <dbl>, est_seconds <dbl>,
+#> # ℹ 22 more variables: n_options <int>, gfs_points <dbl>, est_seconds <dbl>,
 #> #   score_flag <chr>, score_basis <chr>, text_words <int>,
 #> #   max_label_words <int>, has_display_logic <lgl>, loop_max <int>,
 #> #   flow_order <int>, qualtrics_type <chr>, subselector <chr>,
-#> #   label_text <chr>, options_numeric <lgl>, is_hidden <lgl>,
-#> #   display_logic_refs <list>, has_validation <lgl>, in_loop <lgl>, …
+#> #   is_dropdown <lgl>, is_multiline <lgl>, is_multi_answer <lgl>,
+#> #   label_text <chr>, options_numeric <lgl>, is_hidden <lgl>, …
 # }
 ```

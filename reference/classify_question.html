@@ -26,6 +26,7 @@ multiple choice is single_choice whether it means yes/no or something else."></h
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/realised-burden.html">Realised burden from response data</a></li>
+    <li><a class="dropdown-item" href="../articles/extensibility.html">Extending surveyBurden to other survey platforms</a></li>
     <li><a class="dropdown-item" href="../articles/reading-the-report.html">Reading the burden report</a></li>
     <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS scoring method</a></li>
     <li><a class="dropdown-item" href="../articles/paths-and-display-logic.html">Paths and display logic</a></li>
@@ -71,7 +72,11 @@ multiple choice is <code>single_choice</code> whether it means yes/no or somethi
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A named <code>list</code> with elements <code>question_id</code>, <code>std_type</code>,
-<code>qualtrics_type</code>, <code>selector</code>, <code>subselector</code>, <code>n_options</code>, <code>n_rows</code>,
+<code>qualtrics_type</code>, <code>selector</code>, <code>subselector</code>,
+<code>is_dropdown</code> (<code>TRUE</code> for single-choice dropdowns),
+<code>is_multiline</code> (<code>TRUE</code> for multi-line open text),
+<code>is_multi_answer</code> (<code>TRUE</code> for checkbox-per-cell matrices),
+<code>n_options</code>, <code>n_rows</code>,
 <code>n_cols</code>, <code>text_words</code>, <code>max_label_words</code> (longest response option / matrix
 label, in words; <code>NA</code> if the question has no labels), <code>label_text</code> (all
 response/answer labels lowercased and joined with <code>" | "</code>, truncated; <code>NA</code>

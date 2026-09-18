@@ -36,6 +36,8 @@ Classify each question and apply the GfS / Axhausen point weights.
 
 - [`classify_question()`](https://pmpk20.github.io/surveyBurden/reference/classify_question.md)
   : Classify a single Qualtrics question payload
+- [`validate_catalogue()`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md)
+  : Validate (and coerce) a question catalogue
 - [`gfs_weights()`](https://pmpk20.github.io/surveyBurden/reference/gfs_weights.md)
   : GfS points burden weights (Heimgartner and Axhausen 2024)
 - [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)

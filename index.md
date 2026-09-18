@@ -256,6 +256,8 @@ runs the whole pipeline. The lower-level functions expose each step.
 | `summary_line(x, ...)` | a one-sentence burden summary |
 | `calculation_certainty(qsf, weights, max_paths)` | which parts of the calculation are exact and which are approximated |
 | `burden_report(x, weights, profile, routes, rare_threshold, ...)` | the structured report object |
+| `realised_burden(qsf, responses)` | per-respondent ex-post burden from response data |
+| `validate_catalogue(catalogue)` | check and coerce a hand-built question catalogue |
 | `validate_times(qsf, observed, weights, trim)` | a points-per-minute rate fitted to your completion-time data |
 
 Every function has a help page:
@@ -266,9 +268,33 @@ and so on. The guides cover the workflow end to end — start with
 then
 [`vignette("reading-the-report")`](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md),
 [`vignette("gfs-scoring")`](https://pmpk20.github.io/surveyBurden/articles/gfs-scoring.md),
-[`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md)
+[`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md),
+[`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md),
+[`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md)
 and
-[`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md).
+[`vignette("extensibility")`](https://pmpk20.github.io/surveyBurden/articles/extensibility.md).
+
+## Extensibility
+
+surveyBurden is Qualtrics-first, but its architecture separates the
+platform-specific parser (Layer 1) from the platform-agnostic scorer and
+reporter (Layer 3). The intermediate representation — a standardised
+question catalogue — is a documented data-frame schema that any parser
+can produce.
+
+[`validate_catalogue()`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md)
+checks a hand-built catalogue against the schema, fills missing columns
+with safe defaults, and feeds it straight to
+[`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md).
+A worked example that scores a five-question survey without any QSF file
+is in
+[`vignette("extensibility")`](https://pmpk20.github.io/surveyBurden/articles/extensibility.md),
+along with the full catalogue schema and a map of which functions are
+platform-specific and which are reusable.
+
+Adding support for a new platform (LimeSurvey, SurveyMonkey, REDCap,
+etc.) means writing a parser that produces the catalogue; the scoring
+rules, path enumeration, and reporting logic are reusable unchanged.
 
 ## Limitations
 

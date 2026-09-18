@@ -23,7 +23,10 @@ parse_qsf(x)
 A [tibble](https://tibble.tidyverse.org/reference/tibble.html), one row
 per live question, ordered by flow position then within-block position.
 Columns: `question_id`, `flow_order`, `block_id`, `block_name`,
-`std_type`, `qualtrics_type`, `selector`, `subselector`, `n_options`,
+`std_type`, `qualtrics_type`, `selector`, `subselector`, `is_dropdown`
+(`TRUE` if the question is a single-choice dropdown), `is_multiline`
+(`TRUE` if open text with a multi-line entry area), `is_multi_answer`
+(`TRUE` if a matrix where each cell is a checkbox), `n_options`,
 `n_rows`, `n_cols`, `text_words`, `max_label_words`, `label_text`
 (response/answer option labels, lowercased and joined; `NA` if none),
 `options_numeric` (`TRUE` if every response option label is a number),

@@ -24,6 +24,7 @@ standardised type with the structural fields the burden scorer needs."></head><b
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/realised-burden.html">Realised burden from response data</a></li>
+    <li><a class="dropdown-item" href="../articles/extensibility.html">Extending surveyBurden to other survey platforms</a></li>
     <li><a class="dropdown-item" href="../articles/reading-the-report.html">Reading the burden report</a></li>
     <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS scoring method</a></li>
     <li><a class="dropdown-item" href="../articles/paths-and-display-logic.html">Paths and display logic</a></li>
@@ -70,7 +71,11 @@ standardised type with the structural fields the burden scorer needs.</p>
     <p>A <a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a>, one row per live question, ordered by flow
 position then within-block position. Columns:
 <code>question_id</code>, <code>flow_order</code>, <code>block_id</code>, <code>block_name</code>, <code>std_type</code>,
-<code>qualtrics_type</code>, <code>selector</code>, <code>subselector</code>, <code>n_options</code>, <code>n_rows</code>,
+<code>qualtrics_type</code>, <code>selector</code>, <code>subselector</code>,
+<code>is_dropdown</code> (<code>TRUE</code> if the question is a single-choice dropdown),
+<code>is_multiline</code> (<code>TRUE</code> if open text with a multi-line entry area),
+<code>is_multi_answer</code> (<code>TRUE</code> if a matrix where each cell is a checkbox),
+<code>n_options</code>, <code>n_rows</code>,
 <code>n_cols</code>, <code>text_words</code>, <code>max_label_words</code>, <code>label_text</code> (response/answer
 option labels, lowercased and joined; <code>NA</code> if none), <code>options_numeric</code>
 (<code>TRUE</code> if every response option label is a number), <code>question_text</code>

@@ -432,23 +432,26 @@ through <code><a href="../reference/score_burden.html">score_burden()</a></code>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Q3          matrix                 8 auto       matrix, 4 rows x GfS rating &lt;…</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Q4          open_text              6 auto       multi-line text -&gt; GfS first …</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Q5          descriptive            2 auto       transition/instruction text: …</span></span></code></pre></div>
-<p>The scorer operates entirely on the catalogue. It does not know or
-care that these questions came from a hand-built data frame rather than
-a Qualtrics <code>.qsf</code>.</p>
+<p>The function score_burden operates entirely on the question catalogue
+so that it does not know or care that these questions came from a
+hand-built data frame rather than a Qualtrics <code>.qsf</code>.</p>
 <div class="section level3">
 <h3 id="survey-level-burden">Survey-level burden<a class="anchor" aria-label="anchor" href="#survey-level-burden"></a>
 </h3>
-<p>Sum the per-question scores for the survey-level total:</p>
+<p>If using the validate_catalogue approach to calculate the burden of a
+non-Qualtrics survey, you could sum the per-question scores for the
+survey-level total:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">total_points</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">scored</span><span class="op">$</span><span class="va">gfs_points</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">total_minutes</span> <span class="op">&lt;-</span> <span class="va">total_points</span> <span class="op">/</span> <span class="fu"><a href="../reference/gfs_weights.html">gfs_weights</a></span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">points_per_minute</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Total: %.0f GfS points, ~%.0f minutes\n"</span>,</span>
 <span>            <span class="va">total_points</span>, <span class="va">total_minutes</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Total: 43 GfS points, ~4 minutes</span></span></code></pre></div>
-<p>This is a single-path total: every question is counted once. It is
-the right summary for a linear survey (no branching, no skip logic). For
-a survey with conditional questions, it is an upper bound – the burden a
-respondent would face if every question were shown.</p>
+<p>This provides a headline estimate of the burden across one single
+path through the survey i.e., every question is counted once. For a
+survey with conditional questions, it is an upper bound – the burden a
+respondent would face if every question were shown. Future work will add
+support for display logic.</p>
 </div>
 <div class="section level3">
 <h3 id="what-this-gives-you-and-what-it-does-not">What this gives you and what it does not<a class="anchor" aria-label="anchor" href="#what-this-gives-you-and-what-it-does-not"></a>
@@ -500,17 +503,18 @@ types (<code>Standard</code>, <code>Branch</code>,
 <code>Group</code>, <code>EmbeddedData</code>). The function returns a
 tibble of
 <code>(path_id, block_ids, terminates_early, decisions)</code>.</p>
-<p>A new platform has two options:</p>
+<p>There are two options for extending surveyBurden to a new
+platform:</p>
 <ul>
 <li>
-<strong>Adapter approach</strong>: translate the platform’s routing
-model into the same node-list format <code>enumerate_paths()</code>
-consumes. This requires mapping the platform’s branching constructs to
+<strong>1) Adoption</strong>: translate the platform’s routing model
+into the same node-list format <code>enumerate_paths()</code> consumes.
+This requires mapping the platform’s branching constructs to
 <code>Branch</code> nodes, its randomisation to
 <code>BlockRandomizer</code>, etc.</li>
 <li>
-<strong>Replacement approach</strong>: write a platform-specific
-path enumerator that returns the same output schema (a tibble with
+<strong>2) Replacement</strong>: write a platform-specific path
+enumerator that returns the same output schema (a tibble with
 <code>path_id</code>, <code>block_ids</code>,
 <code>terminates_early</code>, <code>decisions</code> columns).</li>
 </ul>

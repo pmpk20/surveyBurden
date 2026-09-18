@@ -18,11 +18,10 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(surveyBurden)
 ```
 
-surveyBurden currently reads Qualtrics `.qsf` files. Its internal
-architecture, however, separates the platform-specific parser from the
-platform-agnostic scoring and analysis layers. This vignette documents
+surveyBurden reads Qualtrics `.qsf` files. However, Qualtrics is closed-source and not universal. Instead, a better scenario would be for surveyBurden to separate the platform-specific parser from the
+platform-agnostic scoring and analysis layers. In this vignette, we document
 that boundary so that someone who wanted to add support for another
-platform (LimeSurvey, SurveyMonkey, REDCap, etc.) could write a new
+platform (LimeSurvey, SurveyEngine, REDCap, etc.) could write a new
 parser without touching the scoring or path-analysis code.
 
 ## Three-layer architecture
@@ -42,7 +41,7 @@ Layer 3:  Scorer + reporter (platform-agnostic)
           score_burden() → path_burden() → burden_report()
 ```
 
-**Layer 1** reads a Qualtrics survey definition and produces a
+**Layer 1** reads a Qualtrics survey and produces a
 standardised *question catalogue*: a tibble with one row per live
 question, in flow order, with the structural fields the scorer needs.
 This is the intermediate representation.
@@ -50,15 +49,15 @@ This is the intermediate representation.
 **Layer 2** resolves the survey's routing logic (branches, block
 randomisers, early exits) and display logic (conditional questions) into
 a set of feasible respondent paths. This layer currently reads the QSF's
-`SurveyFlow` element directly and is therefore partially
-platform-specific. A new platform would need to provide an equivalent
+`SurveyFlow` element directly and is, therefore, partially
+platform-specific. Non-Qualtrics platforms would need to provide an equivalent
 flow structure or an adapter (see *What a new parser must provide*
 below).
 
-**Layer 3** applies the GfS scoring rules to the catalogue, computes
+**Layer 3** applies the GfS points to the catalogue, computes
 per-path burden bands, and assembles the report. This layer operates
 entirely on the question catalogue and the resolved path structure. It
-never touches the QSF.
+never touches the QSF, so it is feasibly platform-agnostic.
 
 ## The question catalogue
 
@@ -258,11 +257,8 @@ Qualtrics-specific.
 
 ## Design rationale
 
-The package does not claim to be platform-agnostic. It is a
-Qualtrics-first tool whose architecture *supports extension* to other
-platforms. The three-layer design means that adding a new platform does
-not require touching the scoring rules, the path enumeration algebra, or
-the reporting logic. What it does require is:
+For now, this a Qualtrics-first tool that does not claim to be platform-agnostic. However, the three-layer design means that adding a new platform does
+not require touching the scoring rules, the path enumeration algebra, or the reporting logic. What it does require is:
 
 1. A parser that produces the question catalogue (the main work).
 2. A flow enumerator if the platform has conditional routing.

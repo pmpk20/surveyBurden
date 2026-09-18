@@ -272,7 +272,7 @@ then
 [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md),
 [`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md)
 and
-[`vignette("extensibility")`](https://pmpk20.github.io/surveyBurden/articles/extensibility.md).
+[`vignette("extensions")`](https://pmpk20.github.io/surveyBurden/articles/extensions.md).
 
 ## Extensibility
 
@@ -288,7 +288,7 @@ with safe defaults, and feeds it straight to
 [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md).
 A worked example that scores a five-question survey without any QSF file
 is in
-[`vignette("extensibility")`](https://pmpk20.github.io/surveyBurden/articles/extensibility.md),
+[`vignette("extensions")`](https://pmpk20.github.io/surveyBurden/articles/extensions.md),
 along with the full catalogue schema and a map of which functions are
 platform-specific and which are reusable.
 

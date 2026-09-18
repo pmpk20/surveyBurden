@@ -183,13 +183,13 @@ scored[, c("question_id", "std_type", "gfs_points",
            "score_flag", "score_basis")]
 ```
 
-The scorer operates entirely on the catalogue. It does not know or care
+The function score_burden operates entirely on the question catalogue so that it does not know or care
 that these questions came from a hand-built data frame rather than a
 Qualtrics `.qsf`.
 
 ### Survey-level burden
 
-Sum the per-question scores for the survey-level total:
+If using the validate_catalogue approach to calculate the burden of a non-Qualtrics survey, you could sum the per-question scores for the survey-level total:
 
 ```{r}
 total_points <- sum(scored$gfs_points, na.rm = TRUE)
@@ -198,10 +198,9 @@ cat(sprintf("Total: %.0f GfS points, ~%.0f minutes\n",
             total_points, total_minutes))
 ```
 
-This is a single-path total: every question is counted once. It is the
-right summary for a linear survey (no branching, no skip logic). For a
+This provides a headline estimate of the burden across one single path through the survey i.e., every question is counted once. For a
 survey with conditional questions, it is an upper bound -- the burden a
-respondent would face if every question were shown.
+respondent would face if every question were shown. Future work will add support for display logic.
 
 ### What this gives you and what it does not
 
@@ -245,13 +244,13 @@ which uses Qualtrics-specific node types (`Standard`, `Branch`,
 `EndSurvey`, `BlockRandomizer`, `Group`, `EmbeddedData`). The function
 returns a tibble of `(path_id, block_ids, terminates_early, decisions)`.
 
-A new platform has two options:
+There are two options for extending surveyBurden to a new platform:
 
-- **Adapter approach**: translate the platform's routing model into
+- **1) Adoption**: translate the platform's routing model into
   the same node-list format `enumerate_paths()` consumes. This
   requires mapping the platform's branching constructs to `Branch`
   nodes, its randomisation to `BlockRandomizer`, etc.
-- **Replacement approach**: write a platform-specific path enumerator
+- **2) Replacement**: write a platform-specific path enumerator
   that returns the same output schema (a tibble with `path_id`,
   `block_ids`, `terminates_early`, `decisions` columns).
 

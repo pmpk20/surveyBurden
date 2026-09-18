@@ -27,6 +27,9 @@
 ~$*.docx
 ~WRL*.tmp
 
+# Local working files (data, manuscripts, test exports)
+/misc/
+
 # Built vignettes (rebuild from Rmd on install)
 vignettes/*.html
 inst/doc/

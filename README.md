@@ -254,7 +254,7 @@ Every function has a help page: `?burden_report`, `?score_burden`, and so on.
 The guides cover the workflow end to end — start with `vignette("surveyBurden")`,
 then `vignette("reading-the-report")`, `vignette("gfs-scoring")`,
 `vignette("paths-and-display-logic")`, `vignette("calibration")`,
-`vignette("realised-burden")` and `vignette("extensibility")`.
+`vignette("realised-burden")` and `vignette("extensions")`.
 
 ## Extensibility
 
@@ -266,7 +266,7 @@ catalogue — is a documented data-frame schema that any parser can produce.
 `validate_catalogue()` checks a hand-built catalogue against the schema,
 fills missing columns with safe defaults, and feeds it straight to
 `score_burden()`. A worked example that scores a five-question survey without
-any QSF file is in `vignette("extensibility")`, along with the full catalogue
+any QSF file is in `vignette("extensions")`, along with the full catalogue
 schema and a map of which functions are platform-specific and which are
 reusable.
 

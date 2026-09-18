@@ -1,8 +1,8 @@
 ---
-title: "Extending surveyBurden to other survey platforms"
+title: "Extensions: scoring surveys without a QSF"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Extending surveyBurden to other survey platforms}
+  %\VignetteIndexEntry{Extensions: scoring surveys without a QSF}
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown}
 editor_options:
@@ -186,6 +186,47 @@ scored[, c("question_id", "std_type", "gfs_points",
 The scorer operates entirely on the catalogue. It does not know or care
 that these questions came from a hand-built data frame rather than a
 Qualtrics `.qsf`.
+
+### Survey-level burden
+
+Sum the per-question scores for the survey-level total:
+
+```{r}
+total_points <- sum(scored$gfs_points, na.rm = TRUE)
+total_minutes <- total_points / gfs_weights()$points_per_minute
+cat(sprintf("Total: %.0f GfS points, ~%.0f minutes\n",
+            total_points, total_minutes))
+```
+
+This is a single-path total: every question is counted once. It is the
+right summary for a linear survey (no branching, no skip logic). For a
+survey with conditional questions, it is an upper bound -- the burden a
+respondent would face if every question were shown.
+
+### What this gives you and what it does not
+
+A hand-built catalogue scored with `score_burden()` gives you:
+
+-   Per-question GfS burden points, using the same scoring rules as
+    `burden_report()`.
+-   A survey-level total (the `sum()` above).
+-   A per-question confidence flag (`score_flag`) saying how the score
+    was reached.
+
+It does **not** give you:
+
+-   A burden *range* across branching paths -- that requires flow
+    resolution, which needs a QSF or an equivalent flow structure.
+-   A display-logic profile -- the structural min/median/max within a
+    path. That requires the parsed display-logic predicates.
+-   A population-weighted burden -- that requires response data
+    (`realised_burden()`).
+
+The total from a hand-built catalogue is a defensible measure of
+instrument burden for any survey that can be expressed as a list of
+questions with their types and option counts. It applies the same
+published GfS point weights (Heimgartner and Axhausen, 2024) as the
+full Qualtrics pipeline.
 
 ## What a new parser must provide
 

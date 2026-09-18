@@ -73,11 +73,12 @@
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/pmpk20/surveyBurden" class="external-link">surveyBurden</a></span><span class="op">)</span></span></code></pre></div>
-<p>surveyBurden currently reads Qualtrics <code>.qsf</code> files. Its
-internal architecture, however, separates the platform-specific parser
-from the platform-agnostic scoring and analysis layers. This vignette
-documents that boundary so that someone who wanted to add support for
-another platform (LimeSurvey, SurveyMonkey, REDCap, etc.) could write a
+<p>surveyBurden reads Qualtrics <code>.qsf</code> files. However,
+Qualtrics is closed-source and not universal. Instead, a better scenario
+would be for surveyBurden to separate the platform-specific parser from
+the platform-agnostic scoring and analysis layers. In this vignette, we
+document that boundary so that someone who wanted to add support for
+another platform (LimeSurvey, SurveyEngine, REDCap, etc.) could write a
 new parser without touching the scoring or path-analysis code.</p>
 <div class="section level2">
 <h2 id="three-layer-architecture">Three-layer architecture<a class="anchor" aria-label="anchor" href="#three-layer-architecture"></a>
@@ -93,21 +94,22 @@ Layer 2:  Path resolver     (partially platform-specific)
                                   ↓
 Layer 3:  Scorer + reporter (platform-agnostic)
           score_burden() → path_burden() → burden_report()</code></pre>
-<p><strong>Layer 1</strong> reads a Qualtrics survey definition and
-produces a standardised <em>question catalogue</em>: a tibble with one
-row per live question, in flow order, with the structural fields the
-scorer needs. This is the intermediate representation.</p>
+<p><strong>Layer 1</strong> reads a Qualtrics survey and produces a
+standardised <em>question catalogue</em>: a tibble with one row per live
+question, in flow order, with the structural fields the scorer needs.
+This is the intermediate representation.</p>
 <p><strong>Layer 2</strong> resolves the survey’s routing logic
 (branches, block randomisers, early exits) and display logic
 (conditional questions) into a set of feasible respondent paths. This
 layer currently reads the QSF’s <code>SurveyFlow</code> element directly
-and is therefore partially platform-specific. A new platform would need
-to provide an equivalent flow structure or an adapter (see <em>What a
-new parser must provide</em> below).</p>
-<p><strong>Layer 3</strong> applies the GfS scoring rules to the
-catalogue, computes per-path burden bands, and assembles the report.
-This layer operates entirely on the question catalogue and the resolved
-path structure. It never touches the QSF.</p>
+and is, therefore, partially platform-specific. Non-Qualtrics platforms
+would need to provide an equivalent flow structure or an adapter (see
+<em>What a new parser must provide</em> below).</p>
+<p><strong>Layer 3</strong> applies the GfS points to the catalogue,
+computes per-path burden bands, and assembles the report. This layer
+operates entirely on the question catalogue and the resolved path
+structure. It never touches the QSF, so it is feasibly
+platform-agnostic.</p>
 </div>
 <div class="section level2">
 <h2 id="the-question-catalogue">The question catalogue<a class="anchor" aria-label="anchor" href="#the-question-catalogue"></a>
@@ -585,11 +587,11 @@ flow/display-logic resolvers) is Qualtrics-specific.</p>
 <div class="section level2">
 <h2 id="design-rationale">Design rationale<a class="anchor" aria-label="anchor" href="#design-rationale"></a>
 </h2>
-<p>The package does not claim to be platform-agnostic. It is a
-Qualtrics-first tool whose architecture <em>supports extension</em> to
-other platforms. The three-layer design means that adding a new platform
-does not require touching the scoring rules, the path enumeration
-algebra, or the reporting logic. What it does require is:</p>
+<p>For now, this a Qualtrics-first tool that does not claim to be
+platform-agnostic. However, the three-layer design means that adding a
+new platform does not require touching the scoring rules, the path
+enumeration algebra, or the reporting logic. What it does require
+is:</p>
 <ol style="list-style-type: decimal">
 <li>A parser that produces the question catalogue (the main work).</li>
 <li>A flow enumerator if the platform has conditional routing.</li>

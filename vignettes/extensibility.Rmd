@@ -1,0 +1,273 @@
+---
+title: "Extending surveyBurden to other survey platforms"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Extending surveyBurden to other survey platforms}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+```{r setup}
+library(surveyBurden)
+```
+
+surveyBurden currently reads Qualtrics `.qsf` files. Its internal
+architecture, however, separates the platform-specific parser from the
+platform-agnostic scoring and analysis layers. This vignette documents
+that boundary so that someone who wanted to add support for another
+platform (LimeSurvey, SurveyMonkey, REDCap, etc.) could write a new
+parser without touching the scoring or path-analysis code.
+
+## Three-layer architecture
+
+The package has three layers:
+
+```
+Layer 1:  Parser          (platform-specific)
+          read_qsf() / fetch_qsf() → parse_qsf()
+                                  ↓
+          Question catalogue  ← the intermediate representation
+                                  ↓
+Layer 2:  Path resolver     (partially platform-specific)
+          resolve_flow() → resolve_paths()
+                                  ↓
+Layer 3:  Scorer + reporter (platform-agnostic)
+          score_burden() → path_burden() → burden_report()
+```
+
+**Layer 1** reads a Qualtrics survey definition and produces a
+standardised *question catalogue*: a tibble with one row per live
+question, in flow order, with the structural fields the scorer needs.
+This is the intermediate representation.
+
+**Layer 2** resolves the survey's routing logic (branches, block
+randomisers, early exits) and display logic (conditional questions) into
+a set of feasible respondent paths. This layer currently reads the QSF's
+`SurveyFlow` element directly and is therefore partially
+platform-specific. A new platform would need to provide an equivalent
+flow structure or an adapter (see *What a new parser must provide*
+below).
+
+**Layer 3** applies the GfS scoring rules to the catalogue, computes
+per-path burden bands, and assembles the report. This layer operates
+entirely on the question catalogue and the resolved path structure. It
+never touches the QSF.
+
+## The question catalogue
+
+The catalogue is a tibble produced by `parse_qsf()`, one row per live
+question. Any parser that produces this schema can use `score_burden()`
+and downstream functions unchanged.
+
+### Required columns
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `question_id` | character | Unique identifier for each question |
+| `std_type` | character | Standardised question type (see below) |
+
+### Structural columns (used by the scorer)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `n_options` | integer | Number of response options (`NA` if unknown) |
+| `n_rows` | integer | Number of matrix rows (`NA` for non-matrix) |
+| `n_cols` | integer | Number of matrix columns (`NA` for non-matrix) |
+| `text_words` | integer | Word count of the question stem |
+| `is_dropdown` | logical | Single-choice rendered as a dropdown |
+| `is_multiline` | logical | Open-text field with multi-line entry |
+| `is_multi_answer` | logical | Matrix where each cell is a checkbox |
+| `is_hidden` | logical | Hidden from the respondent |
+| `options_numeric` | logical | All option labels are numbers |
+| `label_text` | character | Lowercased, joined response labels |
+| `question_text` | character | Plain-text question stem (for cue detection) |
+| `has_display_logic` | logical | Whether the question is conditionally shown |
+| `has_validation` | logical | Whether a response is forced |
+| `in_loop` | logical | Whether the question is inside a loop block |
+| `loop_max` | integer | Maximum loop iterations (`NA` if not in loop) |
+| `flag` | character | Confidence: `"auto"`, `"inferred"`, `"manual"`, `"unknown"` |
+
+### Provenance columns (not used by the scorer)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `qualtrics_type` | character | Original platform question type |
+| `selector` | character | Platform-specific rendering selector |
+| `subselector` | character | Platform-specific sub-selector |
+| `flow_order` | integer | Position in the survey flow |
+| `block_id` | character | Block identifier |
+| `block_name` | character | Block description |
+
+The `qualtrics_type`, `selector`, and `subselector` columns are carried
+for debugging and provenance. The scorer does not read them; it uses
+`std_type` and the boolean columns (`is_dropdown`, `is_multiline`,
+`is_multi_answer`) instead.
+
+### Standardised question types
+
+The `std_type` column uses the following vocabulary:
+
+| `std_type` | Description | GfS scoring |
+|------------|-------------|-------------|
+| `single_choice` | One answer from a list (radio, dropdown, NPS) | By option count |
+| `multi_choice` | Multiple answers from a list (checkboxes) | By option count |
+| `matrix` | Grid/table: rows x columns | Per row, by column count |
+| `open_text` | Free text (single-line or essay) | Short vs essay |
+| `slider` | Continuous input (visual analogue) | By label cues |
+| `ranking` | Drag-and-drop or number ranking | Fixed |
+| `constant_sum` | Allocate a total across categories | As numeric answer |
+| `descriptive` | Instruction or transition text (no input) | By word count |
+| `timing` | Page-timing metadata (not shown) | 0 points |
+| `meta` | Browser/metadata capture (not shown) | 0 points |
+| `captcha` | Bot-detection challenge | Fixed |
+
+A new parser maps its platform's question types into this vocabulary.
+The mapping need not be one-to-one: several Qualtrics types map to
+`single_choice`, for example.
+
+## Validating a hand-built catalogue
+
+`validate_catalogue()` checks that a data frame has the columns the
+scorer needs, fills missing optional columns with safe defaults, and
+coerces the result to a tibble:
+
+```{r}
+cat <- data.frame(
+  question_id = c("Q1", "Q2", "Q3", "Q4", "Q5"),
+  std_type    = c("single_choice", "multi_choice", "matrix",
+                  "open_text", "descriptive"),
+  n_options   = c(5L, 8L, NA, NA, NA),
+  n_rows      = c(NA, NA, 4L, NA, NA),
+  n_cols      = c(NA, NA, 5L, NA, NA),
+  text_words  = c(8L, 12L, 6L, 10L, 25L),
+  is_multiline = c(FALSE, FALSE, FALSE, TRUE, FALSE),
+  stringsAsFactors = FALSE
+)
+validated <- validate_catalogue(cat)
+names(validated)
+```
+
+## Worked example: scoring without a QSF
+
+This example constructs a five-question catalogue by hand and runs it
+through `score_burden()`. No QSF file is involved.
+
+```{r}
+catalogue <- validate_catalogue(data.frame(
+  question_id = c("Q1", "Q2", "Q3", "Q4", "Q5"),
+  std_type    = c("single_choice", "multi_choice", "matrix",
+                  "open_text", "descriptive"),
+  n_options   = c(5L, 8L, NA, NA, NA),
+  n_rows      = c(NA, NA, 4L, NA, NA),
+  n_cols      = c(NA, NA, 5L, NA, NA),
+  text_words  = c(8L, 12L, 6L, 10L, 25L),
+  is_multiline = c(FALSE, FALSE, FALSE, TRUE, FALSE),
+  question_text = c(
+    "How often do you cycle?",
+    "Which of these apply?",
+    "Rate each mode (1-5)",
+    "Describe your typical commute",
+    "The next section asks about your household"
+  ),
+  stringsAsFactors = FALSE
+))
+
+scored <- score_burden(catalogue)
+scored[, c("question_id", "std_type", "gfs_points",
+           "score_flag", "score_basis")]
+```
+
+The scorer operates entirely on the catalogue. It does not know or care
+that these questions came from a hand-built data frame rather than a
+Qualtrics `.qsf`.
+
+## What a new parser must provide
+
+To support a new survey platform, you need to provide:
+
+### 1. A question catalogue (required)
+
+A data frame matching the schema above, passed through
+`validate_catalogue()`. This is sufficient for `score_burden()` --
+per-question burden scoring works immediately.
+
+### 2. A flow structure (for path analysis)
+
+`resolve_flow()` currently walks the QSF's `SurveyFlow` node tree,
+which uses Qualtrics-specific node types (`Standard`, `Branch`,
+`EndSurvey`, `BlockRandomizer`, `Group`, `EmbeddedData`). The function
+returns a tibble of `(path_id, block_ids, terminates_early, decisions)`.
+
+A new platform has two options:
+
+- **Adapter approach**: translate the platform's routing model into
+  the same node-list format `enumerate_paths()` consumes. This
+  requires mapping the platform's branching constructs to `Branch`
+  nodes, its randomisation to `BlockRandomizer`, etc.
+- **Replacement approach**: write a platform-specific path enumerator
+  that returns the same output schema (a tibble with `path_id`,
+  `block_ids`, `terminates_early`, `decisions` columns).
+
+Either way, `path_burden()` and `path_burden_profile()` work unchanged
+once they receive the resolved paths.
+
+### 3. Display logic (for the burden profile)
+
+`parse_display_logic()` reads the QSF's `DisplayLogic` tree format. The
+display-logic layer is the most tightly coupled to Qualtrics. A new
+platform would need to produce an equivalent parsed structure: for each
+conditional question, the set of gate variables it reads and a predicate
+function that evaluates the logic against an assignment of those
+variables. See `?classify_reachability` for how the downstream code
+consumes display-logic information.
+
+For a first implementation, setting `has_display_logic = FALSE` for all
+questions is a valid starting point. The scorer and per-path burden
+still work; only the within-path display-logic profile
+(`path_burden_profile()`) is skipped.
+
+## Where platform-specific code lives
+
+| Function | Layer | Platform-specific? |
+|----------|-------|--------------------|
+| `read_qsf()` / `fetch_qsf()` | 1 | Yes -- reads QSF format |
+| `classify_question()` | 1 | Yes -- maps Qualtrics type codes |
+| `parse_qsf()` | 1 | Yes -- orchestrates QSF parsing |
+| `resolve_live_blocks()` | 1-2 | Yes -- reads QSF block definitions |
+| `resolve_flow()` | 2 | Yes -- walks QSF `SurveyFlow` nodes |
+| `parse_display_logic()` | 2 | Yes -- reads QSF `DisplayLogic` trees |
+| `validate_catalogue()` | boundary | No -- validates the intermediate representation |
+| `score_burden()` | 3 | No -- operates on the catalogue |
+| `gfs_weights()` | 3 | No -- scoring parameters |
+| `classify_reachability()` | 3 | No -- operates on catalogue fields |
+| `path_burden()` | 3 | No -- operates on scored catalogue + paths |
+| `path_burden_profile()` | 3 | No -- operates on the burden engine |
+| `burden_report()` | 3 | Orchestrator -- takes `qsf_raw` but threads it through Layers 1-2 |
+
+The boundary between platform-specific and platform-agnostic code sits
+at the question catalogue. Everything below `score_burden()` is
+reusable; everything above it (and the flow/display-logic resolvers) is
+Qualtrics-specific.
+
+## Design rationale
+
+The package does not claim to be platform-agnostic. It is a
+Qualtrics-first tool whose architecture *supports extension* to other
+platforms. The three-layer design means that adding a new platform does
+not require touching the scoring rules, the path enumeration algebra, or
+the reporting logic. What it does require is:
+
+1. A parser that produces the question catalogue (the main work).
+2. A flow enumerator if the platform has conditional routing.
+3. A display-logic parser if the platform has per-question visibility
+   conditions.
+
+For platforms with simpler routing than Qualtrics (no branching, no
+block randomisers), steps 2 and 3 may be trivial or unnecessary.

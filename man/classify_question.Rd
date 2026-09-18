@@ -11,7 +11,11 @@ classify_question(payload)
 }
 \value{
 A named \code{list} with elements \code{question_id}, \code{std_type},
-\code{qualtrics_type}, \code{selector}, \code{subselector}, \code{n_options}, \code{n_rows},
+\code{qualtrics_type}, \code{selector}, \code{subselector},
+\code{is_dropdown} (\code{TRUE} for single-choice dropdowns),
+\code{is_multiline} (\code{TRUE} for multi-line open text),
+\code{is_multi_answer} (\code{TRUE} for checkbox-per-cell matrices),
+\code{n_options}, \code{n_rows},
 \code{n_cols}, \code{text_words}, \code{max_label_words} (longest response option / matrix
 label, in words; \code{NA} if the question has no labels), \code{label_text} (all
 response/answer labels lowercased and joined with \code{" | "}, truncated; \code{NA}

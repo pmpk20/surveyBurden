@@ -8,6 +8,7 @@ test_that("parse_qsf returns a one-row-per-live-question catalogue with the expe
   expect_setequal(names(cat), c(
     "question_id", "flow_order", "block_id", "block_name",
     "std_type", "qualtrics_type", "selector", "subselector",
+    "is_dropdown", "is_multiline", "is_multi_answer",
     "n_options", "n_rows", "n_cols", "text_words", "max_label_words",
     "label_text", "options_numeric", "question_text", "is_hidden",
     "has_display_logic", "display_logic_refs", "has_validation",

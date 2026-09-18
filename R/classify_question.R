@@ -8,7 +8,11 @@
 #' @param payload The `Payload` list of one `SQ` survey element.
 #'
 #' @return A named `list` with elements `question_id`, `std_type`,
-#'   `qualtrics_type`, `selector`, `subselector`, `n_options`, `n_rows`,
+#'   `qualtrics_type`, `selector`, `subselector`,
+#'   `is_dropdown` (`TRUE` for single-choice dropdowns),
+#'   `is_multiline` (`TRUE` for multi-line open text),
+#'   `is_multi_answer` (`TRUE` for checkbox-per-cell matrices),
+#'   `n_options`, `n_rows`,
 #'   `n_cols`, `text_words`, `max_label_words` (longest response option / matrix
 #'   label, in words; `NA` if the question has no labels), `label_text` (all
 #'   response/answer labels lowercased and joined with `" | "`, truncated; `NA`
@@ -76,6 +80,9 @@ classify_question <- function(payload) {
     qualtrics_type     = qt,
     selector           = sel,
     subselector        = sub,
+    is_dropdown        = identical(spec$std_type, "single_choice") && identical(sel, "DL"),
+    is_multiline       = identical(spec$std_type, "open_text") && sel %in% c("ML", "ESTB", "FORM"),
+    is_multi_answer    = identical(spec$std_type, "matrix") && identical(sub, "MultipleAnswer"),
     n_options          = as.integer(n_options),
     n_rows             = as.integer(n_rows),
     n_cols             = as.integer(n_cols),

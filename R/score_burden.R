@@ -39,9 +39,7 @@
 #'
 #' @export
 score_burden <- function(catalogue, weights = gfs_weights()) {
-  if (!tibble::is_tibble(catalogue) || !"std_type" %in% names(catalogue)) {
-    cli::cli_abort("{.arg catalogue} must be a tibble from {.fn parse_qsf}.")
-  }
+  catalogue <- validate_catalogue(catalogue)
 
   cols <- as.list(catalogue)
   rows <- lapply(seq_len(nrow(catalogue)),
@@ -73,12 +71,14 @@ quantity_cue_pattern <- function() {
 score_item <- function(r, w) {
   fld <- function(nm, default = NULL) if (nm %in% names(r)) r[[nm]] else default
   st   <- r$std_type
-  sel  <- r$selector %||% NA_character_
   no   <- r$n_options
   flag <- r$flag %||% "auto"
   ltext <- tolower(fld("label_text") %||% "")
   qtext <- tolower(fld("question_text") %||% "")
   is_hidden <- isTRUE(fld("is_hidden", FALSE))
+  is_dropdown <- isTRUE(fld("is_dropdown", FALSE))
+  is_multiline <- isTRUE(fld("is_multiline", FALSE))
+  is_multi_answer <- isTRUE(fld("is_multi_answer", FALSE))
   options_numeric <- isTRUE(fld("options_numeric", FALSE))
   cue <- quantity_cue_pattern()
 
@@ -93,7 +93,7 @@ score_item <- function(r, w) {
   }
 
   if (identical(st, "single_choice")) {
-    if (identical(sel, "DL")) {
+    if (is_dropdown) {
       # No Table 1 row for a dropdown. Map to the closest category: a rating.
       quantity <- grepl(cue, qtext, perl = TRUE) || grepl(cue, ltext, perl = TRUE)
       if (options_numeric && (quantity || (!is.na(no) && no >= 10))) {
@@ -135,7 +135,7 @@ score_item <- function(r, w) {
 
   if (identical(st, "matrix")) {
     rows <- if (is.na(r$n_rows)) 1L else r$n_rows
-    if (identical(r$subselector, "MultipleAnswer")) {
+    if (is_multi_answer) {
       # No Table 1 rule. Each of the rows x cols cells is one trivial yes/no
       # decision, discounted for grid efficiency. Symmetric in (rows, cols) so
       # the score does not depend on the QSF's storage orientation.
@@ -153,7 +153,7 @@ score_item <- function(r, w) {
   }
 
   if (identical(st, "open_text")) {
-    essay <- isTRUE(sel %in% c("ML", "ESTB", "FORM"))
+    essay <- is_multiline
     if (essay) return(out(w$open_essay, "multi-line text -> GfS first answer to an open question"))
     return(out(w$open_short, "single-line text -> GfS answer to a sub-question (<=5 words)"))
   }

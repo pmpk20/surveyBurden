@@ -31,7 +31,7 @@ prediction for comparison.
 ## When to use each function
 
 | Function              | Input               | Output                   | Timing    |
-|------------------|-----------------|---------------------|----------------|
+|-----------------------|---------------------|--------------------------|-----------|
 | `respondent_burden()` | QSF only            | Predicted burden by path | *ex ante* |
 | `realised_burden()`   | QSF + response data | Per-respondent burden    | *ex post* |
 
@@ -253,6 +253,6 @@ legend("topright", fill = c("#2166ac", "#b2182b"),
        legend = c("Complete", "Dropout"), bty = "n", cex = 0.8)
 ```
 
-With a fielded survey with thousands of respondents, this gives the
-full empirical distribution of burden -- useful for reporting in papers
-and for calibrating future survey designs.
+With a fielded survey with thousands of respondents, this gives the full
+empirical distribution of burden -- useful for reporting in papers and
+for calibrating future survey designs.

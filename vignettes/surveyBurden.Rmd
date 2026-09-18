@@ -37,6 +37,8 @@ This article gets you to a first report. The others go deeper:
   assumptions, and the limitations.
 - `vignette("realised-burden")` -- scoring the questions each respondent
   actually answered from response data.
+- `vignette("extensibility")` -- the intermediate representation and how
+  to extend the package to other survey platforms.
 
 ## Install
 

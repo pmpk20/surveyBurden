@@ -246,12 +246,33 @@ step.
 | `summary_line(x, ...)` | a one-sentence burden summary |
 | `calculation_certainty(qsf, weights, max_paths)` | which parts of the calculation are exact and which are approximated |
 | `burden_report(x, weights, profile, routes, rare_threshold, ...)` | the structured report object |
+| `realised_burden(qsf, responses)` | per-respondent ex-post burden from response data |
+| `validate_catalogue(catalogue)` | check and coerce a hand-built question catalogue |
 | `validate_times(qsf, observed, weights, trim)` | a points-per-minute rate fitted to your completion-time data |
 
 Every function has a help page: `?burden_report`, `?score_burden`, and so on.
 The guides cover the workflow end to end — start with `vignette("surveyBurden")`,
 then `vignette("reading-the-report")`, `vignette("gfs-scoring")`,
-`vignette("paths-and-display-logic")` and `vignette("calibration")`.
+`vignette("paths-and-display-logic")`, `vignette("calibration")`,
+`vignette("realised-burden")` and `vignette("extensibility")`.
+
+## Extensibility
+
+surveyBurden is Qualtrics-first, but its architecture separates the
+platform-specific parser (Layer 1) from the platform-agnostic scorer and
+reporter (Layer 3). The intermediate representation — a standardised question
+catalogue — is a documented data-frame schema that any parser can produce.
+
+`validate_catalogue()` checks a hand-built catalogue against the schema,
+fills missing columns with safe defaults, and feeds it straight to
+`score_burden()`. A worked example that scores a five-question survey without
+any QSF file is in `vignette("extensibility")`, along with the full catalogue
+schema and a map of which functions are platform-specific and which are
+reusable.
+
+Adding support for a new platform (LimeSurvey, SurveyMonkey, REDCap, etc.)
+means writing a parser that produces the catalogue; the scoring rules, path
+enumeration, and reporting logic are reusable unchanged.
 
 ## Limitations
 

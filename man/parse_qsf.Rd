@@ -13,7 +13,11 @@ parse_qsf(x)
 A \link[tibble:tibble]{tibble}, one row per live question, ordered by flow
 position then within-block position. Columns:
 \code{question_id}, \code{flow_order}, \code{block_id}, \code{block_name}, \code{std_type},
-\code{qualtrics_type}, \code{selector}, \code{subselector}, \code{n_options}, \code{n_rows},
+\code{qualtrics_type}, \code{selector}, \code{subselector},
+\code{is_dropdown} (\code{TRUE} if the question is a single-choice dropdown),
+\code{is_multiline} (\code{TRUE} if open text with a multi-line entry area),
+\code{is_multi_answer} (\code{TRUE} if a matrix where each cell is a checkbox),
+\code{n_options}, \code{n_rows},
 \code{n_cols}, \code{text_words}, \code{max_label_words}, \code{label_text} (response/answer
 option labels, lowercased and joined; \code{NA} if none), \code{options_numeric}
 (\code{TRUE} if every response option label is a number), \code{question_text}

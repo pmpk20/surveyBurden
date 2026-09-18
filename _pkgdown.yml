@@ -9,6 +9,7 @@ articles:
     contents:
       - surveyBurden
       - realised-burden
+      - extensibility
       - reading-the-report
       - gfs-scoring
       - paths-and-display-logic
@@ -31,6 +32,7 @@ reference:
     desc: Classify each question and apply the GfS / Axhausen point weights.
     contents:
       - classify_question
+      - validate_catalogue
       - gfs_weights
       - score_burden
   - title: Resolve paths

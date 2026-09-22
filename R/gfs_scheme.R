@@ -1,4 +1,4 @@
-#' GfS points burden weights (Heimgartner and Axhausen 2024)
+#' GfS burden-scoring scheme (Heimgartner and Axhausen 2024)
 #'
 #' The default scoring backend. Values are transcribed from Table 1 of
 #' Heimgartner and Axhausen (2024), "Predicting Response Rates Once Again"
@@ -6,11 +6,11 @@
 #' Zurich scheme (GfS Zurich 2006, updated). Override any element and pass
 #' the result to [score_burden()].
 #'
-#' @return A named list of weights.
+#' @return A named list of point values and conversion parameters.
 #'
 #' @details Table 1 items and the names used here:
 #' \tabular{lll}{
-#'   GfS item \tab points \tab weight name \cr
+#'   GfS item \tab points \tab name \cr
 #'   Question or transition (up to 3 lines) \tab 2.0 \tab `descriptive_base` \cr
 #'   Each additional line \tab 1.0 \tab `descriptive_per_extra_line` \cr
 #'   Closed yes/no answers \tab 1.0 \tab `yes_no` \cr
@@ -47,7 +47,7 @@
 #'     considered.}
 #'   \item{`points_per_minute`}{12 -- the published GfS rule of thumb ("twelve
 #'     points roughly correspond to a one-minute response time", Heimgartner &
-#'     Axhausen 2024). Overridable: set `w$points_per_minute` on the returned
+#'     Axhausen 2024). Overridable: set `s$points_per_minute` on the returned
 #'     list, or feed a survey-specific figure from [validate_times()].}
 #'   \item{`words_per_line`}{12 -- a **pragmatic conversion heuristic**, not an
 #'     empirically calibrated constant. GfS scores instruction text in rendered
@@ -57,15 +57,15 @@
 #' }
 #'
 #' @examples
-#' w <- gfs_weights()
-#' w$rating_small
-#' w$points_per_minute
+#' s <- gfs_scheme()
+#' s$rating_small
+#' s$points_per_minute
 #'
-#' # Override a single weight
-#' w$points_per_minute <- 10
+#' # Override a single value
+#' s$points_per_minute <- 10
 #'
 #' @export
-gfs_weights <- function() {
+gfs_scheme <- function() {
   list(
     # --- Table 1 ---
     descriptive_base           = 2.0,

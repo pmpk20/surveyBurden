@@ -6,7 +6,7 @@
 #' The true burden of any actual respondent on that path lies between.
 #'
 #' @param qsf A `qsf_raw` object from [read_qsf()].
-#' @param weights A [gfs_weights()] list.
+#' @param scheme A [gfs_scheme()] list.
 #' @param max_paths Passed to [resolve_paths()].
 #' @param paths,scored Optional precomputed [resolve_paths()] and
 #'   [score_burden()] results for this `qsf` (internal reuse; `NULL` computes
@@ -23,14 +23,14 @@
 #' pb[, c("path_id", "gfs_floor", "gfs_ceiling")]
 #'
 #' @export
-path_burden <- function(qsf, weights = gfs_weights(), max_paths = 10000L,
+path_burden <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
                         paths = NULL, scored = NULL) {
   if (is.null(paths))  paths  <- resolve_paths(qsf, max_paths = max_paths)
-  if (is.null(scored)) scored <- score_burden(parse_qsf(qsf), weights = weights)
+  if (is.null(scored)) scored <- score_burden(parse_qsf(qsf), scheme = scheme)
 
   pts  <- stats::setNames(scored$gfs_points, scored$question_id)
   lmax <- stats::setNames(scored$loop_max, scored$question_id)
-  ppm  <- weights$points_per_minute
+  ppm  <- scheme$points_per_minute
 
   band <- function(q_always, q_maybe) {
     floor_q   <- q_always

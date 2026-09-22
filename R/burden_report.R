@@ -1,12 +1,12 @@
 #' Ex-ante instrument burden report
 #'
 #' The user-facing entry point. Parses a Qualtrics `.qsf`, resolves its flow and
-#' display logic, scores every question with the GfS points scheme
+#' display logic, scores every question with the GfS burden-point scheme
 #' (Heimgartner and Axhausen 2024, \doi{10.32866/001c.121624}), and
 #' summarises the burden across the instrument's structural path space.
 #'
 #' @param x A path to a `.qsf` file, or a `qsf_raw` object from [read_qsf()].
-#' @param weights A [gfs_weights()] list.
+#' @param scheme A [gfs_scheme()] list.
 #' @param profile If `TRUE` (default), enumerate the display-logic structural
 #'   burden profile ([path_burden_profile()]) to get the *achievable* min/median/
 #'   max burden for this survey -- a few seconds of extra work. `FALSE` skips
@@ -59,7 +59,7 @@
 #'       `n_screenout_paths`.}
 #'     \item{burden}{Five-row tibble, one row per statistic (`min`, `p25`,
 #'       `median`, `p75`, `max`), with `points`, `minutes` (points per minute
-#'       from [gfs_weights()]) and `index` (`points / rare_threshold`).
+#'       from [gfs_scheme()]) and `index` (`points / rare_threshold`).
 #'       `attr(, "basis")` is `"structural"` when `profile = TRUE`, else
 #'       `"naive"` and only `min` / `max` are populated.}
 #'     \item{blocks}{One row per block, in survey order: `block_id`,
@@ -85,7 +85,7 @@
 #'   (`list(median_points, n_waves)`) and `profile_used`.
 #'
 #' @param words_per_line Optional override for the descriptive-text "lines"
-#'   conversion (default 12, from [gfs_weights()]). This is a pragmatic
+#'   conversion (default 12, from [gfs_scheme()]). This is a pragmatic
 #'   conversion heuristic -- GfS scores instruction text in rendered lines, and
 #'   a QSF has words, not a rendered width -- not an empirically calibrated
 #'   constant. Set it to your survey theme's typical line length if you have
@@ -102,7 +102,7 @@
 #' br$items[order(-br$items$gfs_points), ]
 #' }
 #' @export
-burden_report <- function(x, weights = gfs_weights(), profile = TRUE,
+burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
                           routes = NULL, rare_threshold = 1500,
                           stem_warning_threshold = 40L,
                           label_warning_threshold = 10L,
@@ -113,19 +113,19 @@ burden_report <- function(x, weights = gfs_weights(), profile = TRUE,
 
   step("Reading survey")
   qsf <- if (inherits(x, "qsf_raw")) x else read_qsf(x)
-  if (!is.null(words_per_line)) weights$words_per_line <- words_per_line
+  if (!is.null(words_per_line)) scheme$words_per_line <- words_per_line
 
   step("Scoring questions and resolving paths")
   # Parse / score / resolve the instrument once here and thread the results
   # through the pipeline; every function below accepts them precomputed and
   # falls back to computing its own when called directly.
   catalogue <- parse_qsf(qsf)
-  scored    <- score_burden(catalogue, weights = weights)
+  scored    <- score_burden(catalogue, scheme = scheme)
   blocks    <- resolve_live_blocks(qsf)
   paths     <- resolve_paths(qsf, catalogue = catalogue, blocks = blocks)
   isum      <- instrument_summary(qsf, blocks = blocks)
-  pb        <- path_burden(qsf, weights = weights, paths = paths, scored = scored)
-  ppm    <- weights$points_per_minute
+  pb        <- path_burden(qsf, scheme = scheme, paths = paths, scored = scored)
+  ppm    <- scheme$points_per_minute
   full   <- pb[!pb$terminates_early, ]
   no_complete <- nrow(full) == 0L
 
@@ -138,12 +138,12 @@ burden_report <- function(x, weights = gfs_weights(), profile = TRUE,
   # the display-logic engine is the expensive step; build it once if either the
   # structural profile or a routes summary will need it.
   engine <- if (need_engine)
-    burden_engine(qsf, weights = weights, paths = paths, scored = scored,
+    burden_engine(qsf, scheme = scheme, paths = paths, scored = scored,
                   blocks = blocks, parsed_dl = parsed_dl) else NULL
 
   step("Checking calculation certainty")
   cert   <- if (isTRUE(certainty))
-    calculation_certainty(qsf, weights = weights, paths = paths, scored = scored,
+    calculation_certainty(qsf, scheme = scheme, paths = paths, scored = scored,
                           blocks = blocks, parsed_dl = parsed_dl) else NULL
 
   # ---- $instrument -------------------------------------------------------
@@ -202,7 +202,7 @@ burden_report <- function(x, weights = gfs_weights(), profile = TRUE,
     gate_range <- c(NA_integer_, NA_integer_)
   } else if (isTRUE(profile)) {
     step("Enumerating display-logic combinations")
-    pbp   <- path_burden_profile(qsf, weights = weights, engine = engine)
+    pbp   <- path_burden_profile(qsf, scheme = scheme, engine = engine)
     m     <- match(paths_tbl$path_id, pbp$path_id)
     paths_tbl$burden_min    <- pbp$burden_min[m]
     paths_tbl$burden_median <- pbp$burden_median[m]
@@ -306,7 +306,7 @@ burden_report <- function(x, weights = gfs_weights(), profile = TRUE,
   # ---- $population (optional) --------------------------------------
   population <- NULL
   if (!is.null(routes)) {
-    pr <- respondent_burden(qsf, routes = routes, weights = weights, engine = engine)
+    pr <- respondent_burden(qsf, routes = routes, scheme = scheme, engine = engine)
     qp <- stats::quantile(pr$pred_pts, c(0, .25, .5, .75, 1), na.rm = TRUE)
     population <- tibble::tibble(
       statistic = factor(probs, levels = probs),

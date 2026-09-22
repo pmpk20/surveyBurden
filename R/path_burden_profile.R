@@ -34,7 +34,7 @@
 #' can move a few points from the fine-grained figure.
 #'
 #' @param qsf A `qsf_raw` object.
-#' @param weights A [gfs_weights()] list.
+#' @param scheme A [gfs_scheme()] list.
 #' @param max_paths Passed to [resolve_paths()].
 #' @param engine Optional precomputed `burden_engine()` result for this `qsf`
 #'   (internal reuse; `NULL` builds it here, leaving the public behaviour
@@ -59,9 +59,9 @@
 #' }
 #'
 #' @export
-path_burden_profile <- function(qsf, weights = gfs_weights(), max_paths = 10000L,
+path_burden_profile <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
                                 engine = NULL, parsed_dl = NULL) {
-  e <- engine %||% burden_engine(qsf, weights = weights, max_paths = max_paths,
+  e <- engine %||% burden_engine(qsf, scheme = scheme, max_paths = max_paths,
                                  parsed_dl = parsed_dl)
 
   rows <- lapply(seq_len(nrow(e$paths)), function(i) {
@@ -83,16 +83,16 @@ path_burden_profile <- function(qsf, weights = gfs_weights(), max_paths = 10000L
 #' Shared setup for the path-burden family: parse, score, resolve paths, and
 #' compute per-path burden components (base / loops / display distribution).
 #' Returns a list with `paths` and `components` (one `list(base, loops,
-#' display_dist)` per path), plus `blocks`, `scored` and `weights`.
+#' display_dist)` per path), plus `blocks`, `scored` and `scheme`.
 #' `paths`, `scored`, `blocks` and `parsed_dl` may be passed in precomputed
 #' (internal reuse by [burden_report()]); each defaults to `NULL` and is then
 #' computed here.
 #' @noRd
-burden_engine <- function(qsf, weights = gfs_weights(), max_paths = 10000L,
+burden_engine <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
                           paths = NULL, scored = NULL, blocks = NULL,
                           parsed_dl = NULL) {
   if (is.null(paths))  paths  <- resolve_paths(qsf, max_paths = max_paths)
-  if (is.null(scored)) scored <- score_burden(parse_qsf(qsf), weights = weights)
+  if (is.null(scored)) scored <- score_burden(parse_qsf(qsf), scheme = scheme)
   if (is.null(blocks)) blocks <- resolve_live_blocks(qsf)
 
   gfs    <- stats::setNames(scored$gfs_points, scored$question_id)
@@ -115,7 +115,7 @@ burden_engine <- function(qsf, weights = gfs_weights(), max_paths = 10000L,
   })
 
   list(paths = paths, components = components,
-       blocks = blocks, scored = scored, weights = weights)
+       blocks = blocks, scored = scored, scheme = scheme)
 }
 
 #' Parse the `DisplayLogic` tree of every question that has one, keyed by

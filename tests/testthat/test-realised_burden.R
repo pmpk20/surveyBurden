@@ -43,7 +43,7 @@ test_that("realised_burden() returns the right structure", {
   expect_true(all(c("response_id", "finished", "furthest_block",
                     "n_questions_answered", "realised_points",
                     "realised_minutes", "predicted_points",
-                    "predicted_minutes") %in% names(rb)))
+                    "predicted_minutes", "words_per_line") %in% names(rb)))
 })
 
 
@@ -135,10 +135,75 @@ test_that("custom id_col works", {
 })
 
 
-test_that("realised_minutes uses the weights points_per_minute", {
+test_that("realised_minutes uses the scheme points_per_minute", {
   resp <- make_responses()
-  w <- gfs_weights()
-  rb <- realised_burden(qsf_fx(), resp, weights = w)
+  w <- gfs_scheme()
+  rb <- realised_burden(qsf_fx(), resp, scheme = w)
 
   expect_equal(rb$realised_minutes, rb$realised_points / w$points_per_minute)
+})
+
+
+# ---------- per-respondent words_per_line ------------------------------------
+
+test_that("words_per_line = NULL uses default from weights (backward compat)", {
+  resp <- make_responses()
+  rb_default <- realised_burden(qsf_fx(), resp)
+  rb_null    <- realised_burden(qsf_fx(), resp, words_per_line = NULL)
+
+  expect_equal(rb_default$realised_points, rb_null$realised_points)
+})
+
+
+test_that("scalar words_per_line overrides default for all respondents", {
+  resp <- make_responses()
+  rb_12 <- realised_burden(qsf_fx(), resp, words_per_line = 12)
+  rb_6  <- realised_burden(qsf_fx(), resp, words_per_line = 6)
+
+  # QID1 is descriptive (139 words). At wpl=6 it scores 23; at wpl=12 it scores
+
+  # 11. Respondents who answered QID1 should have 12 more points at wpl=6.
+  # Respondent 1 answered QID1 (non-NA), respondent 4 answered nothing.
+  expect_gt(rb_6$realised_points[1], rb_12$realised_points[1])
+  expect_equal(rb_6$realised_points[4], rb_12$realised_points[4])  # both 0
+})
+
+
+test_that("per-respondent words_per_line vector gives different scores", {
+  resp <- make_responses()
+  n <- nrow(resp)
+  # respondent 1 gets wpl=6 (phone), rest get wpl=12 (desktop)
+  wpl <- c(6, 12, 12, 12)
+
+  rb_vec    <- realised_burden(qsf_fx(), resp, words_per_line = wpl)
+  rb_scalar <- realised_burden(qsf_fx(), resp, words_per_line = 12)
+
+  # respondent 1 answered QID1 (descriptive) so should differ
+  expect_gt(rb_vec$realised_points[1], rb_scalar$realised_points[1])
+  # respondent 2 has wpl=12 in both, so should match
+  expect_equal(rb_vec$realised_points[2], rb_scalar$realised_points[2])
+  # respondent 4 answered nothing, so 0 regardless
+  expect_equal(rb_vec$realised_points[4], 0)
+})
+
+
+test_that("predicted_points ignores per-respondent words_per_line", {
+  resp <- make_responses()
+  wpl <- c(6, 6, 12, 12)
+
+  rb_vec    <- realised_burden(qsf_fx(), resp, words_per_line = wpl)
+  rb_default <- realised_burden(qsf_fx(), resp)
+
+  # predicted_points is structural — should use default wpl for all
+
+  expect_equal(rb_vec$predicted_points, rb_default$predicted_points)
+})
+
+
+test_that("words_per_line of wrong length errors", {
+  resp <- make_responses()
+  expect_error(
+    realised_burden(qsf_fx(), resp, words_per_line = c(6, 12)),
+    "words_per_line"
+  )
 })

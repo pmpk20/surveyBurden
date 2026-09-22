@@ -19,17 +19,17 @@ test_that("instrument_summary output is identical with a precomputed blocks tabl
 })
 
 test_that("path_burden output is identical with precomputed paths + scored", {
-  q <- q_fx(); w <- gfs_weights()
-  a <- path_burden(q, weights = w)
-  b <- path_burden(q, weights = w,
+  q <- q_fx(); w <- gfs_scheme()
+  a <- path_burden(q, scheme = w)
+  b <- path_burden(q, scheme = w,
                    paths = resolve_paths(q), scored = score_burden(parse_qsf(q), w))
   expect_identical(a, b)
 })
 
 test_that("burden_engine output is identical with precomputed paths + scored + blocks", {
-  q <- q_fx(); w <- gfs_weights()
-  a <- burden_engine(q, weights = w)
-  b <- burden_engine(q, weights = w,
+  q <- q_fx(); w <- gfs_scheme()
+  a <- burden_engine(q, scheme = w)
+  b <- burden_engine(q, scheme = w,
                      paths  = resolve_paths(q),
                      scored = score_burden(parse_qsf(q), w),
                      blocks = resolve_live_blocks(q))
@@ -37,32 +37,32 @@ test_that("burden_engine output is identical with precomputed paths + scored + b
 })
 
 test_that("burden_engine output is identical with a precomputed parsed_dl map", {
-  q <- q_fx(); w <- gfs_weights()
+  q <- q_fx(); w <- gfs_scheme()
   sc <- score_burden(parse_qsf(q), w)
-  a <- burden_engine(q, weights = w)
-  b <- burden_engine(q, weights = w, parsed_dl = parse_all_display_logic(q, sc))
+  a <- burden_engine(q, scheme = w)
+  b <- burden_engine(q, scheme = w, parsed_dl = parse_all_display_logic(q, sc))
   expect_identical(a, b)
 })
 
 test_that("calculation_certainty output is identical with a precomputed parsed_dl map", {
-  q <- q_fx(); w <- gfs_weights()
+  q <- q_fx(); w <- gfs_scheme()
   sc <- score_burden(parse_qsf(q), w)
-  a <- calculation_certainty(q, weights = w)
-  b <- calculation_certainty(q, weights = w, parsed_dl = parse_all_display_logic(q, sc))
+  a <- calculation_certainty(q, scheme = w)
+  b <- calculation_certainty(q, scheme = w, parsed_dl = parse_all_display_logic(q, sc))
   expect_identical(a, b)
 })
 
 test_that("path_burden_profile output is identical when handed a prebuilt engine", {
-  q <- q_fx(); w <- gfs_weights()
-  a <- path_burden_profile(q, weights = w)
-  b <- path_burden_profile(q, weights = w, engine = burden_engine(q, weights = w))
+  q <- q_fx(); w <- gfs_scheme()
+  a <- path_burden_profile(q, scheme = w)
+  b <- path_burden_profile(q, scheme = w, engine = burden_engine(q, scheme = w))
   expect_identical(a, b)
 })
 
 test_that("calculation_certainty output is identical with precomputed paths + scored + blocks", {
-  q <- q_fx(); w <- gfs_weights()
-  a <- calculation_certainty(q, weights = w)
-  b <- calculation_certainty(q, weights = w,
+  q <- q_fx(); w <- gfs_scheme()
+  a <- calculation_certainty(q, scheme = w)
+  b <- calculation_certainty(q, scheme = w,
                              paths  = resolve_paths(q),
                              scored = score_burden(parse_qsf(q), w),
                              blocks = resolve_live_blocks(q))

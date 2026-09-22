@@ -4,7 +4,13 @@
 \alias{realised_burden}
 \title{Realised response burden from observed responses}
 \usage{
-realised_burden(qsf, responses, weights = gfs_weights(), id_col = NULL)
+realised_burden(
+  qsf,
+  responses,
+  scheme = gfs_scheme(),
+  words_per_line = NULL,
+  id_col = NULL
+)
 }
 \arguments{
 \item{qsf}{A \code{qsf_raw} object, a path to a \code{.qsf} file, or a survey id
@@ -24,7 +30,15 @@ ImportId row).
 The recommended way to obtain this data frame is
 \code{qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE, add_column_map = FALSE)}.}
 
-\item{weights}{A \code{\link[=gfs_weights]{gfs_weights()}} list.}
+\item{scheme}{A \code{\link[=gfs_scheme]{gfs_scheme()}} list.}
+
+\item{words_per_line}{How many words fit on one rendered line, used only when
+scoring descriptive-text questions. \code{NULL} (default) uses
+\code{scheme$words_per_line} (12). A single number applies to all respondents.
+A numeric vector of length \code{nrow(responses)} gives per-respondent values,
+allowing the user to reflect device differences (e.g., phone vs desktop).
+The user is responsible for mapping device metadata to appropriate values;
+the package does not assume any device-to-value mapping.}
 
 \item{id_col}{Name of the respondent-id column. Auto-detected from
 \code{"ResponseId"}, \code{"response_id"}, or the first column whose values are all
@@ -46,6 +60,8 @@ questions scored once per answered iteration.}
 \code{\link[=respondent_burden]{respondent_burden()}} logic, using inferred loop counts and visit
 flags).}
 \item{\code{predicted_minutes}}{\code{predicted_points / points_per_minute}.}
+\item{\code{words_per_line}}{The words-per-line value used for each
+respondent's descriptive-text scoring.}
 \item{\code{n_unmapped_cols}}{Number of response columns that could not be
 mapped to any question in the QSF.}
 }

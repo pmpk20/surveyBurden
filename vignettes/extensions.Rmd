@@ -193,7 +193,7 @@ If using the validate_catalogue approach to calculate the burden of a non-Qualtr
 
 ```{r}
 total_points <- sum(scored$gfs_points, na.rm = TRUE)
-total_minutes <- total_points / gfs_weights()$points_per_minute
+total_minutes <- total_points / gfs_scheme()$points_per_minute
 cat(sprintf("Total: %.0f GfS points, ~%.0f minutes\n",
             total_points, total_minutes))
 ```
@@ -284,7 +284,7 @@ still work; only the within-path display-logic profile
 | `parse_display_logic()` | 2 | Yes -- reads QSF `DisplayLogic` trees |
 | `validate_catalogue()` | boundary | No -- validates the intermediate representation |
 | `score_burden()` | 3 | No -- operates on the catalogue |
-| `gfs_weights()` | 3 | No -- scoring parameters |
+| `gfs_scheme()` | 3 | No -- scoring parameters |
 | `classify_reachability()` | 3 | No -- operates on catalogue fields |
 | `path_burden()` | 3 | No -- operates on scored catalogue + paths |
 | `path_burden_profile()` | 3 | No -- operates on the burden engine |

@@ -4,12 +4,12 @@
 \alias{score_burden}
 \title{Score per-question ex-ante burden}
 \usage{
-score_burden(catalogue, weights = gfs_weights())
+score_burden(catalogue, scheme = gfs_scheme())
 }
 \arguments{
 \item{catalogue}{A tibble from \code{\link[=parse_qsf]{parse_qsf()}}.}
 
-\item{weights}{A named list of weights; defaults to \code{\link[=gfs_weights]{gfs_weights()}}.}
+\item{scheme}{A named list of scheme; defaults to \code{\link[=gfs_scheme]{gfs_scheme()}}.}
 }
 \value{
 \code{catalogue} with four columns added:
@@ -28,14 +28,14 @@ was reached.}
 }
 \description{
 Applies the GfS points scoring rules (Heimgartner and Axhausen 2024,
-\doi{10.32866/001c.121624}) via \code{\link[=gfs_weights]{gfs_weights()}} to a question catalogue
+\doi{10.32866/001c.121624}) via \code{\link[=gfs_scheme]{gfs_scheme()}} to a question catalogue
 from \code{\link[=parse_qsf]{parse_qsf()}}, adding burden points, an estimated completion time,
 a confidence flag and a plain-language rationale per item.
 This is Layer 3 at the item level; propagation through respondent paths is a
 later step.
 }
 \details{
-The published GfS Table 1 point weights are applied directly where the
+The published GfS Table 1 point values are applied directly where the
 required structure can be read from the QSF. Where the QSF does not contain
 the quantity GfS needs -- a dropdown has no Table 1 row, a slider is not in
 the scheme, "lines" of text are not in a QSF -- the package applies an

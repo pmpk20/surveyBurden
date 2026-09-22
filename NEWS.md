@@ -7,7 +7,7 @@ CRAN preparation release.
 * Switched `burden_report()` and `calculation_certainty()` examples from
   `\dontrun{}` to `\donttest{}` with the demo fixture.
 * Added the Heimgartner and Axhausen (2024) DOI to the DESCRIPTION and to
-  the documentation of `gfs_weights()`, `score_burden()` and
+  the documentation of `gfs_scheme()`, `score_burden()` and
   `burden_report()`.
 * Updated `.Rbuildignore` to exclude manuscript and temporary files.
 * Updated roxygen2 to 8.1.0.
@@ -41,7 +41,7 @@ First release.
   in the flow) returns a report with `NA` burden and an explanatory warning
   rather than erroring; the per-path burdens are still in `$paths`.
 * Lower-level steps are exported for inspection or reuse: `read_qsf()`,
-  `fetch_qsf()`, `parse_qsf()`, `classify_question()`, `gfs_weights()`,
+  `fetch_qsf()`, `parse_qsf()`, `classify_question()`, `gfs_scheme()`,
   `score_burden()`, `resolve_flow()`, `resolve_paths()`, `path_burden()`,
   `path_burden_profile()`, `respondent_burden()`, `calculation_certainty()`,
   `validate_times()`.

@@ -40,10 +40,10 @@ test_that("burden numbers are in a believable range for the demo survey", {
   expect_lt(max(full$gfs_ceiling), 1000)
 })
 
-test_that("weights flow through to path_burden", {
-  w <- gfs_weights()
+test_that("scheme values flow through to path_burden", {
+  w <- gfs_scheme()
   w$rating_small <- w$rating_small * 10
   base <- path_burden(qsf_fx())
-  bumped <- path_burden(qsf_fx(), weights = w)
+  bumped <- path_burden(qsf_fx(), scheme = w)
   expect_gt(sum(bumped$gfs_ceiling), sum(base$gfs_ceiling))
 })

@@ -71,7 +71,7 @@ test_that("every exotic type gets a positive, finite GfS score", {
 
 test_that("a long descriptive block scores above the descriptive base", {
   sc <- score_x()
-  w <- gfs_weights()
+  w <- gfs_scheme()
   expect_gt(sc$gfs_points[sc$question_id == "QID_longdb"], w$descriptive_base)
 })
 

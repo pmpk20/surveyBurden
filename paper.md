@@ -46,7 +46,7 @@ fielded.
   or a survey-builder URL. `fetch_qsf()` pulls a live survey through the
   Qualtrics API. Both are normalised to one internal representation, and
   `parse_qsf()` produces a question catalogue. Fetching a live survey needs an API key for the account that owns it. You cannot calculate the burden from the preview or distributed link, however.
-- **GfS scoring.** `gfs_weights()` holds the
+- **GfS scoring.** `gfs_scheme()` holds the
   GfS point weights in a scheme. `score_burden()` then works in three layers:
   what Qualtrics records the question as, what response action that implies, and
   which scheme category best represents that action. Where the structure fixes

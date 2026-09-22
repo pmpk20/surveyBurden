@@ -33,7 +33,7 @@ reference:
     contents:
       - classify_question
       - validate_catalogue
-      - gfs_weights
+      - gfs_scheme
       - score_burden
   - title: Resolve paths
     desc: Walk the flow and display logic to the feasible respondent paths.

@@ -7,7 +7,7 @@
 \usage{
 burden_report(
   x,
-  weights = gfs_weights(),
+  scheme = gfs_scheme(),
   profile = TRUE,
   routes = NULL,
   rare_threshold = 1500,
@@ -23,7 +23,7 @@ burden_report(
 \arguments{
 \item{x}{A path to a \code{.qsf} file, or a \code{qsf_raw} object from \code{\link[=read_qsf]{read_qsf()}}.}
 
-\item{weights}{A \code{\link[=gfs_weights]{gfs_weights()}} list.}
+\item{scheme}{A \code{\link[=gfs_scheme]{gfs_scheme()}} list.}
 
 \item{profile}{If \code{TRUE} (default), enumerate the display-logic structural
 burden profile (\code{\link[=path_burden_profile]{path_burden_profile()}}) to get the \emph{achievable} min/median/
@@ -50,7 +50,7 @@ row labels longer than this many words are flagged (default 10). Diagnostic
 only.}
 
 \item{words_per_line}{Optional override for the descriptive-text "lines"
-conversion (default 12, from \code{\link[=gfs_weights]{gfs_weights()}}). This is a pragmatic
+conversion (default 12, from \code{\link[=gfs_scheme]{gfs_scheme()}}). This is a pragmatic
 conversion heuristic -- GfS scores instruction text in rendered lines, and
 a QSF has words, not a rendered width -- not an empirically calibrated
 constant. Set it to your survey theme's typical line length if you have
@@ -76,7 +76,7 @@ names. Print it for the formatted summary, or read its components:
 \code{n_screenout_paths}.}
 \item{burden}{Five-row tibble, one row per statistic (\code{min}, \code{p25},
 \code{median}, \code{p75}, \code{max}), with \code{points}, \code{minutes} (points per minute
-from \code{\link[=gfs_weights]{gfs_weights()}}) and \code{index} (\code{points / rare_threshold}).
+from \code{\link[=gfs_scheme]{gfs_scheme()}}) and \code{index} (\code{points / rare_threshold}).
 \code{attr(, "basis")} is \code{"structural"} when \code{profile = TRUE}, else
 \code{"naive"} and only \code{min} / \code{max} are populated.}
 \item{blocks}{One row per block, in survey order: \code{block_id},
@@ -103,7 +103,7 @@ Scalars are attributes: \code{points_per_minute}, \code{rare_threshold}, \code{b
 }
 \description{
 The user-facing entry point. Parses a Qualtrics \code{.qsf}, resolves its flow and
-display logic, scores every question with the GfS points scheme
+display logic, scores every question with the GfS burden-point scheme
 (Heimgartner and Axhausen 2024, \doi{10.32866/001c.121624}), and
 summarises the burden across the instrument's structural path space.
 }

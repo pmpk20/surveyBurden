@@ -17,7 +17,7 @@
 #'       (e.g. `visit_BL11`). Absent or `FALSE` excludes it.}
 #'   }
 #'   Missing columns are treated as absent/zero.
-#' @param weights A [gfs_weights()] list.
+#' @param scheme A [gfs_scheme()] list.
 #' @param loop_typical Loop iterations to assume for the `typical_pts` column,
 #'   and for a route whose loop count is not supplied.
 #' @param engine Optional precomputed `burden_engine()` result for this `qsf`
@@ -47,11 +47,11 @@
 #' }
 #'
 #' @export
-respondent_burden <- function(qsf, routes = NULL, weights = gfs_weights(),
+respondent_burden <- function(qsf, routes = NULL, scheme = gfs_scheme(),
                               loop_typical = 2, engine = NULL) {
   if (!inherits(qsf, "qsf_raw")) qsf <- read_qsf(qsf)
-  e   <- engine %||% burden_engine(qsf, weights = weights)
-  ppm <- weights$points_per_minute
+  e   <- engine %||% burden_engine(qsf, scheme = scheme)
+  ppm <- scheme$points_per_minute
   full_i <- which(!e$paths$terminates_early)
   if (length(full_i) == 0L) {
     cli::cli_abort("No complete flow paths: every enumerated path terminates early.")

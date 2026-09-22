@@ -7,7 +7,7 @@
 respondent_burden(
   qsf,
   routes = NULL,
-  weights = gfs_weights(),
+  scheme = gfs_scheme(),
   loop_typical = 2,
   engine = NULL
 )
@@ -28,7 +28,7 @@ column falls back to \code{loop_typical}.}
 }
 Missing columns are treated as absent/zero.}
 
-\item{weights}{A \code{\link[=gfs_weights]{gfs_weights()}} list.}
+\item{scheme}{A \code{\link[=gfs_scheme]{gfs_scheme()}} list.}
 
 \item{loop_typical}{Loop iterations to assume for the \code{typical_pts} column,
 and for a route whose loop count is not supplied.}

@@ -28,10 +28,10 @@ catalogue <- parse_qsf(qsf)
 
 surveyBurden implements the published GfS / Axhausen scheme (Heimgartner
 and Axhausen 2024, Table 1); it does not invent a new burden scale. The
-point weights are transcribed verbatim into `gfs_weights()`.
+point weights are transcribed verbatim into `gfs_scheme()`.
 
 ```{r weights}
-w <- gfs_weights()
+w <- gfs_scheme()
 w$yes_no
 w$rating_small
 w$rating_large
@@ -138,14 +138,14 @@ trivial closed yes/no decision; GfS scores a closed yes/no at 1.0,
 discounted here for the working-memory efficiency of answering in a grid.
 This proxy is symmetric in rows and columns so it does not change with how
 Qualtrics happened to store the grid. It is a documented inference, not
-GfS. The weight is `gfs_weights()$matrix_cell_multi`.
+GfS. The weight is `gfs_scheme()$matrix_cell_multi`.
 
 ## Overriding the weights
 
-Every weight in `gfs_weights()` can be changed and passed back in:
+Every weight in `gfs_scheme()` can be changed and passed back in:
 
 ```{r override}
-w2 <- gfs_weights()
+w2 <- gfs_scheme()
 w2$rating_small <- 2.5
 score_burden(catalogue, weights = w2)$gfs_points[1:5]
 ```

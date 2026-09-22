@@ -6,7 +6,7 @@
 \usage{
 calculation_certainty(
   qsf,
-  weights = gfs_weights(),
+  scheme = gfs_scheme(),
   max_paths = 10000L,
   paths = NULL,
   scored = NULL,
@@ -17,7 +17,7 @@ calculation_certainty(
 \arguments{
 \item{qsf}{A path to a \code{.qsf}, or a \code{qsf_raw} object from \code{\link[=read_qsf]{read_qsf()}}.}
 
-\item{weights}{A \code{\link[=gfs_weights]{gfs_weights()}} list.}
+\item{scheme}{A \code{\link[=gfs_scheme]{gfs_scheme()}} list.}
 
 \item{max_paths}{Passed to \code{\link[=resolve_paths]{resolve_paths()}}.}
 

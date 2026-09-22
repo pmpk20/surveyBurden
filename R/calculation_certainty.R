@@ -9,7 +9,7 @@
 #' to read as assumption-dependent.
 #'
 #' @param qsf A path to a `.qsf`, or a `qsf_raw` object from [read_qsf()].
-#' @param weights A [gfs_weights()] list.
+#' @param scheme A [gfs_scheme()] list.
 #' @param max_paths Passed to [resolve_paths()].
 #' @param paths,scored,blocks,parsed_dl Optional precomputed [resolve_paths()],
 #'   [score_burden()], [resolve_live_blocks()] and parsed display-logic results
@@ -44,12 +44,12 @@
 #' calculation_certainty(qsf_path)
 #' }
 #' @export
-calculation_certainty <- function(qsf, weights = gfs_weights(), max_paths = 10000L,
+calculation_certainty <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
                                   paths = NULL, scored = NULL, blocks = NULL,
                                   parsed_dl = NULL) {
   qsf    <- if (inherits(qsf, "qsf_raw")) qsf else read_qsf(qsf)
   if (is.null(paths))  paths  <- resolve_paths(qsf, max_paths = max_paths)
-  if (is.null(scored)) scored <- score_burden(parse_qsf(qsf), weights = weights)
+  if (is.null(scored)) scored <- score_burden(parse_qsf(qsf), scheme = scheme)
   if (is.null(blocks)) blocks <- resolve_live_blocks(qsf)
   full   <- paths[!paths$terminates_early, ]
 

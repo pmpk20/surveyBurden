@@ -94,7 +94,7 @@ test_that("matrix scores per row by column count", {
 
 test_that("multiple-answer matrix scores every cell as a trivial yes/no decision", {
   # each of the n_rows x n_cols cells is one binary decision, discounted for
-  # grid working-memory efficiency (0.5). See gfs_weights()$matrix_cell_multi.
+  # grid working-memory efficiency (0.5). See gfs_scheme()$matrix_cell_multi.
   r <- score1("matrix", n_rows = 12, n_cols = 3, subselector = "MultipleAnswer", flag = "inferred")
   expect_equal(r$gfs_points, 12 * 3 * 0.5)
   expect_equal(r$score_flag, "inferred")
@@ -136,10 +136,10 @@ test_that("estimated time uses 12 GfS points per minute", {
   expect_equal(r$est_seconds, 8.0 / 12 * 60)
 })
 
-test_that("weights are overridable", {
-  w <- gfs_weights()
+test_that("scheme values are overridable", {
+  w <- gfs_scheme()
   w$rating_small <- 5.0
-  r <- score_burden(cat_row("single_choice", selector = "SAVR", n_options = 4), weights = w)
+  r <- score_burden(cat_row("single_choice", selector = "SAVR", n_options = 4), scheme = w)
   expect_equal(r$gfs_points, 5.0)
 })
 

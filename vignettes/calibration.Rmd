@@ -38,7 +38,7 @@ burden_report(demo, words_per_line = 8, quiet = TRUE)$burden$points[1:2]
 To convert GfS points to minutes of survey time, they have a rule of thumb of 12 points per minute. As a rule of thumb, do not assume that it predicts the completion time, or applies to online surveys. You can either override it by setting `points_per_minute` on a weights object:
 
 ```{r ppm}
-w <- gfs_weights()
+w <- gfs_scheme()
 w$points_per_minute <- 15
 burden_report(demo, weights = w, quiet = TRUE)$burden[, c("statistic", "minutes")]
 ```
@@ -47,7 +47,7 @@ Alternatively, if you are calculating burden ex post then you can use the comple
 returns:
 
 ```{r validate, eval = FALSE}
-w <- gfs_weights()
+w <- gfs_scheme()
 w$points_per_minute <- validate_times(demo, "times.csv")$implied_points_per_minute
 burden_report(demo, weights = w)
 ```

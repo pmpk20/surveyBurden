@@ -6,7 +6,7 @@
 \usage{
 path_burden_profile(
   qsf,
-  weights = gfs_weights(),
+  scheme = gfs_scheme(),
   max_paths = 10000L,
   engine = NULL,
   parsed_dl = NULL
@@ -15,7 +15,7 @@ path_burden_profile(
 \arguments{
 \item{qsf}{A \code{qsf_raw} object.}
 
-\item{weights}{A \code{\link[=gfs_weights]{gfs_weights()}} list.}
+\item{scheme}{A \code{\link[=gfs_scheme]{gfs_scheme()}} list.}
 
 \item{max_paths}{Passed to \code{\link[=resolve_paths]{resolve_paths()}}.}
 

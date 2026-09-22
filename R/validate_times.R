@@ -11,7 +11,7 @@
 #'
 #' @param qsf A `qsf_raw` object or path.
 #' @param observed A data frame, or a path to a CSV.
-#' @param weights A [gfs_weights()] list.
+#' @param scheme A [gfs_scheme()] list.
 #' @param trim Completion-minute range to keep (drops non-finishers and stalls).
 #'
 #' @return A list:
@@ -42,7 +42,7 @@
 #' }
 #'
 #' @export
-validate_times <- function(qsf, observed, weights = gfs_weights(), trim = c(3, 180)) {
+validate_times <- function(qsf, observed, scheme = gfs_scheme(), trim = c(3, 180)) {
   if (!inherits(qsf, "qsf_raw")) qsf <- read_qsf(qsf)
   if (is.character(observed)) observed <- utils::read.csv(observed)
 
@@ -53,9 +53,9 @@ validate_times <- function(qsf, observed, weights = gfs_weights(), trim = c(3, 1
                   observed$completion_mins >= trim[1] &
                   observed$completion_mins <= trim[2], , drop = FALSE]
 
-  ppm <- weights$points_per_minute
+  ppm <- scheme$points_per_minute
 
-  pr <- respondent_burden(qsf, routes = o, weights = weights)
+  pr <- respondent_burden(qsf, routes = o, scheme = scheme)
   o$pred_pts <- pr$pred_pts
   o$pred_min <- pr$pred_min
 

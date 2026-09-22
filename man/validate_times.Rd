@@ -4,14 +4,14 @@
 \alias{validate_times}
 \title{Validate predicted burden against observed completion times}
 \usage{
-validate_times(qsf, observed, weights = gfs_weights(), trim = c(3, 180))
+validate_times(qsf, observed, scheme = gfs_scheme(), trim = c(3, 180))
 }
 \arguments{
 \item{qsf}{A \code{qsf_raw} object or path.}
 
 \item{observed}{A data frame, or a path to a CSV.}
 
-\item{weights}{A \code{\link[=gfs_weights]{gfs_weights()}} list.}
+\item{scheme}{A \code{\link[=gfs_scheme]{gfs_scheme()}} list.}
 
 \item{trim}{Completion-minute range to keep (drops non-finishers and stalls).}
 }

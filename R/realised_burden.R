@@ -20,7 +20,14 @@
 #'   The recommended way to obtain this data frame is
 #'   `qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE,
 #'   add_column_map = FALSE)`.
-#' @param weights A [gfs_weights()] list.
+#' @param scheme A [gfs_scheme()] list.
+#' @param words_per_line How many words fit on one rendered line, used only when
+#'   scoring descriptive-text questions. `NULL` (default) uses
+#'   `scheme$words_per_line` (12). A single number applies to all respondents.
+#'   A numeric vector of length `nrow(responses)` gives per-respondent values,
+#'   allowing the user to reflect device differences (e.g., phone vs desktop).
+#'   The user is responsible for mapping device metadata to appropriate values;
+#'   the package does not assume any device-to-value mapping.
 #' @param id_col Name of the respondent-id column. Auto-detected from
 #'   `"ResponseId"`, `"response_id"`, or the first column whose values are all
 #'   unique. Pass explicitly to override.
@@ -40,6 +47,8 @@
 #'       [respondent_burden()] logic, using inferred loop counts and visit
 #'       flags).}
 #'     \item{`predicted_minutes`}{`predicted_points / points_per_minute`.}
+#'     \item{`words_per_line`}{The words-per-line value used for each
+#'       respondent's descriptive-text scoring.}
 #'     \item{`n_unmapped_cols`}{Number of response columns that could not be
 #'       mapped to any question in the QSF.}
 #'   }
@@ -80,16 +89,42 @@
 #' }
 #'
 #' @export
-realised_burden <- function(qsf, responses, weights = gfs_weights(),
-                            id_col = NULL) {
+realised_burden <- function(qsf, responses, scheme = gfs_scheme(),
+                            words_per_line = NULL, id_col = NULL) {
   if (!inherits(qsf, "qsf_raw")) qsf <- read_qsf(qsf)
 
-  catalogue <- parse_qsf(qsf)
-  scored    <- score_burden(catalogue, weights)
-  blocks    <- resolve_live_blocks(qsf)
-  ppm       <- weights$points_per_minute
+  n_resp <- nrow(responses)
 
-  gfs_pts     <- stats::setNames(scored$gfs_points, scored$question_id)
+  # ---- resolve words_per_line ------------------------------------------------
+  if (is.null(words_per_line)) {
+    wpl_vec <- rep(scheme$words_per_line, n_resp)
+  } else if (length(words_per_line) == 1L) {
+    wpl_vec <- rep(words_per_line, n_resp)
+  } else if (length(words_per_line) == n_resp) {
+    wpl_vec <- words_per_line
+  } else {
+    cli::cli_abort(
+      "{.arg words_per_line} must be {.code NULL}, a single number, or a vector of length {n_resp} (one per respondent)."
+    )
+  }
+
+  catalogue <- parse_qsf(qsf)
+  blocks    <- resolve_live_blocks(qsf)
+  ppm       <- scheme$points_per_minute
+
+  # Score once per unique wpl value
+  unique_wpl <- sort(unique(wpl_vec))
+  scored_by_wpl <- list()
+  for (wv in unique_wpl) {
+    w_tmp <- scheme
+    w_tmp$words_per_line <- wv
+    sc <- score_burden(catalogue, w_tmp)
+    scored_by_wpl[[as.character(wv)]] <- stats::setNames(sc$gfs_points, sc$question_id)
+  }
+  resp_wpl_key <- as.character(wpl_vec)
+
+  # Use the default-wpl scoring for structural metadata
+  scored <- score_burden(catalogue, scheme)
   q_block_id  <- stats::setNames(scored$block_id, scored$question_id)
   q_block_ord <- stats::setNames(
     blocks$flow_order[match(scored$block_id, blocks$block_id)],
@@ -108,7 +143,6 @@ realised_burden <- function(qsf, responses, weights = gfs_weights(),
   fin     <- detect_finished(responses)
 
   # ---- per-respondent: which QIDs answered, loop iteration counts ------------
-  n_resp <- nrow(responses)
   realised <- numeric(n_resp)
   n_answered <- integer(n_resp)
   farthest   <- integer(n_resp)
@@ -126,13 +160,10 @@ realised_burden <- function(qsf, responses, weights = gfs_weights(),
   qid_cols <- split(mapped_cols, vapply(mapped_cols, function(c) col_map[[c]]$qid, character(1)))
 
   for (qid in names(qid_cols)) {
-    pts <- gfs_pts[[qid]]
-    if (is.na(pts) || pts == 0) next
     cols <- qid_cols[[qid]]
     ord  <- q_block_ord[[qid]]
 
     if (isTRUE(q_in_loop[[qid]])) {
-      # group by iteration
       iters <- vapply(cols, function(c) col_map[[c]]$iteration, integer(1))
       iter_groups <- split(cols, iters)
       for (ig in iter_groups) {
@@ -141,7 +172,10 @@ realised_burden <- function(qsf, responses, weights = gfs_weights(),
         } else {
           ans <- rowSums(nb[, ig, drop = FALSE]) > 0
         }
-        realised   <- realised + pts * ans
+        for (wv in unique_wpl) {
+          mask <- ans & (resp_wpl_key == as.character(wv))
+          realised[mask] <- realised[mask] + scored_by_wpl[[as.character(wv)]][[qid]]
+        }
         n_answered <- n_answered + as.integer(ans)
         farthest   <- ifelse(ans & !is.na(ord) & ord > farthest, ord, farthest)
       }
@@ -151,14 +185,17 @@ realised_burden <- function(qsf, responses, weights = gfs_weights(),
       } else {
         ans <- rowSums(nb[, cols, drop = FALSE]) > 0
       }
-      realised   <- realised + pts * ans
+      for (wv in unique_wpl) {
+        mask <- ans & (resp_wpl_key == as.character(wv))
+        realised[mask] <- realised[mask] + scored_by_wpl[[as.character(wv)]][[qid]]
+      }
       n_answered <- n_answered + as.integer(ans)
       farthest   <- ifelse(ans & !is.na(ord) & ord > farthest, ord, farthest)
     }
   }
 
   # ---- predicted burden (structural, for comparison) -------------------------
-  pred <- predict_from_responses(qsf, responses, col_map, blocks, weights)
+  pred <- predict_from_responses(qsf, responses, col_map, blocks, scheme)
 
   tibble::tibble(
     response_id          = resp_id,
@@ -169,6 +206,7 @@ realised_burden <- function(qsf, responses, weights = gfs_weights(),
     realised_minutes     = realised / ppm,
     predicted_points     = pred$points,
     predicted_minutes    = pred$points / ppm,
+    words_per_line       = wpl_vec,
     n_unmapped_cols      = rep(n_unmapped, n_resp)
   )
 }
@@ -399,9 +437,9 @@ detect_finished <- function(responses) {
 
 #' Infer loop counts and visit flags from responses, then run respondent_burden
 #' @noRd
-predict_from_responses <- function(qsf, responses, col_map, blocks, weights) {
+predict_from_responses <- function(qsf, responses, col_map, blocks, scheme) {
   n_resp <- nrow(responses)
-  engine <- burden_engine(qsf, weights = weights)
+  engine <- burden_engine(qsf, scheme = scheme)
 
   # infer loop iteration counts per loop block
   loop_blocks <- blocks[blocks$in_loop, ]
@@ -469,7 +507,7 @@ predict_from_responses <- function(qsf, responses, col_map, blocks, weights) {
   }
 
   pred <- tryCatch(
-    respondent_burden(qsf, routes = routes, weights = weights, engine = engine),
+    respondent_burden(qsf, routes = routes, scheme = scheme, engine = engine),
     error = function(e) NULL
   )
 

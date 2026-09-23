@@ -80,7 +80,7 @@ marks the item `inferred`. Every scored question carries a `score_basis`
 string recording the rule applied.
 
 ```{r scored}
-scored <- score_burden(catalogue, weights = w)
+scored <- score_burden(catalogue, scheme = w)
 table(scored$score_flag)
 head(scored[order(-scored$gfs_points),
             c("question_id", "std_type", "gfs_points", "score_flag", "score_basis")])
@@ -147,7 +147,7 @@ Every weight in `gfs_scheme()` can be changed and passed back in:
 ```{r override}
 w2 <- gfs_scheme()
 w2$rating_small <- 2.5
-score_burden(catalogue, weights = w2)$gfs_points[1:5]
+score_burden(catalogue, scheme = w2)$gfs_points[1:5]
 ```
 
 ## References

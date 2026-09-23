@@ -40,7 +40,7 @@ To convert GfS points to minutes of survey time, they have a rule of thumb of 12
 ```{r ppm}
 w <- gfs_scheme()
 w$points_per_minute <- 15
-burden_report(demo, weights = w, quiet = TRUE)$burden[, c("statistic", "minutes")]
+burden_report(demo, scheme = w, quiet = TRUE)$burden[, c("statistic", "minutes")]
 ```
 
 Alternatively, if you are calculating burden ex post then you can use the completion-time data of your survey to calculate `validate_times()` and use the rate it
@@ -49,7 +49,7 @@ returns:
 ```{r validate, eval = FALSE}
 w <- gfs_scheme()
 w$points_per_minute <- validate_times(demo, "times.csv")$implied_points_per_minute
-burden_report(demo, weights = w)
+burden_report(demo, scheme = w)
 ```
 
 ## Limitations

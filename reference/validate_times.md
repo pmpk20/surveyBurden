@@ -10,7 +10,7 @@ completion times.
 ## Usage
 
 ``` r
-validate_times(qsf, observed, weights = gfs_weights(), trim = c(3, 180))
+validate_times(qsf, observed, scheme = gfs_scheme(), trim = c(3, 180))
 ```
 
 ## Arguments
@@ -23,10 +23,10 @@ validate_times(qsf, observed, weights = gfs_weights(), trim = c(3, 180))
 
   A data frame, or a path to a CSV.
 
-- weights:
+- scheme:
 
   A
-  [`gfs_weights()`](https://pmpk20.github.io/surveyBurden/reference/gfs_weights.md)
+  [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)
   list.
 
 - trim:

@@ -41,9 +41,9 @@ either override it by setting `points_per_minute` on a weights object:
 
 ``` r
 
-w <- gfs_weights()
+w <- gfs_scheme()
 w$points_per_minute <- 15
-burden_report(demo, weights = w, quiet = TRUE)$burden[, c("statistic", "minutes")]
+burden_report(demo, scheme = w, quiet = TRUE)$burden[, c("statistic", "minutes")]
 #> # A tibble: 5 × 2
 #>   statistic minutes
 #>   <fct>       <dbl>
@@ -61,9 +61,9 @@ and use the rate it returns:
 
 ``` r
 
-w <- gfs_weights()
+w <- gfs_scheme()
 w$points_per_minute <- validate_times(demo, "times.csv")$implied_points_per_minute
-burden_report(demo, weights = w)
+burden_report(demo, scheme = w)
 ```
 
 ## Limitations

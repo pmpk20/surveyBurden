@@ -2,7 +2,7 @@
 
 Applies the GfS points scoring rules (Heimgartner and Axhausen 2024,
 [doi:10.32866/001c.121624](https://doi.org/10.32866/001c.121624) ) via
-[`gfs_weights()`](https://pmpk20.github.io/surveyBurden/reference/gfs_weights.md)
+[`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)
 to a question catalogue from
 [`parse_qsf()`](https://pmpk20.github.io/surveyBurden/reference/parse_qsf.md),
 adding burden points, an estimated completion time, a confidence flag
@@ -12,7 +12,7 @@ level; propagation through respondent paths is a later step.
 ## Usage
 
 ``` r
-score_burden(catalogue, weights = gfs_weights())
+score_burden(catalogue, scheme = gfs_scheme())
 ```
 
 ## Arguments
@@ -22,10 +22,10 @@ score_burden(catalogue, weights = gfs_weights())
   A tibble from
   [`parse_qsf()`](https://pmpk20.github.io/surveyBurden/reference/parse_qsf.md).
 
-- weights:
+- scheme:
 
-  A named list of weights; defaults to
-  [`gfs_weights()`](https://pmpk20.github.io/surveyBurden/reference/gfs_weights.md).
+  A named list of scheme; defaults to
+  [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md).
 
 ## Value
 
@@ -54,7 +54,7 @@ score_burden(catalogue, weights = gfs_weights())
 
 ## Details
 
-The published GfS Table 1 point weights are applied directly where the
+The published GfS Table 1 point values are applied directly where the
 required structure can be read from the QSF. Where the QSF does not
 contain the quantity GfS needs – a dropdown has no Table 1 row, a slider
 is not in the scheme, "lines" of text are not in a QSF – the package

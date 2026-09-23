@@ -1,8 +1,8 @@
 # Ex-ante instrument burden report
 
 The user-facing entry point. Parses a Qualtrics `.qsf`, resolves its
-flow and display logic, scores every question with the GfS points scheme
-(Heimgartner and Axhausen 2024,
+flow and display logic, scores every question with the GfS burden-point
+scheme (Heimgartner and Axhausen 2024,
 [doi:10.32866/001c.121624](https://doi.org/10.32866/001c.121624) ), and
 summarises the burden across the instrument's structural path space.
 
@@ -11,7 +11,7 @@ summarises the burden across the instrument's structural path space.
 ``` r
 burden_report(
   x,
-  weights = gfs_weights(),
+  scheme = gfs_scheme(),
   profile = TRUE,
   routes = NULL,
   rare_threshold = 1500,
@@ -33,10 +33,10 @@ summary(object, ...)
   A path to a `.qsf` file, or a `qsf_raw` object from
   [`read_qsf()`](https://pmpk20.github.io/surveyBurden/reference/read_qsf.md).
 
-- weights:
+- scheme:
 
   A
-  [`gfs_weights()`](https://pmpk20.github.io/surveyBurden/reference/gfs_weights.md)
+  [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)
   list.
 
 - profile:
@@ -78,7 +78,7 @@ summary(object, ...)
 
   Optional override for the descriptive-text "lines" conversion (default
   12, from
-  [`gfs_weights()`](https://pmpk20.github.io/surveyBurden/reference/gfs_weights.md)).
+  [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)).
   This is a pragmatic conversion heuristic – GfS scores instruction text
   in rendered lines, and a QSF has words, not a rendered width – not an
   empirically calibrated constant. Set it to your survey theme's typical
@@ -119,7 +119,7 @@ names. Print it for the formatted summary, or read its components:
 
   Five-row tibble, one row per statistic (`min`, `p25`, `median`, `p75`,
   `max`), with `points`, `minutes` (points per minute from
-  [`gfs_weights()`](https://pmpk20.github.io/surveyBurden/reference/gfs_weights.md))
+  [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md))
   and `index` (`points / rare_threshold`). `attr(, "basis")` is
   `"structural"` when `profile = TRUE`, else `"naive"` and only `min` /
   `max` are populated.
@@ -200,16 +200,16 @@ qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
                          package = "surveyBurden")
 br <- burden_report(qsf_path)
 #> ℹ Reading survey
-#> ✔ Reading survey [5ms]
+#> ✔ Reading survey [8ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [57ms]
+#> ✔ Scoring questions and resolving paths [87ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [17ms]
+#> ✔ Checking calculation certainty [28ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [14ms]
+#> ✔ Enumerating display-logic combinations [25ms]
 #> 
 br
 #> 

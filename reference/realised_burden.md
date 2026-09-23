@@ -10,7 +10,13 @@ route through the survey.
 ## Usage
 
 ``` r
-realised_burden(qsf, responses, weights = gfs_weights(), id_col = NULL)
+realised_burden(
+  qsf,
+  responses,
+  scheme = gfs_scheme(),
+  words_per_line = NULL,
+  id_col = NULL
+)
 ```
 
 ## Arguments
@@ -38,11 +44,22 @@ realised_burden(qsf, responses, weights = gfs_weights(), id_col = NULL)
   The recommended way to obtain this data frame is
   `qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE, add_column_map = FALSE)`.
 
-- weights:
+- scheme:
 
   A
-  [`gfs_weights()`](https://pmpk20.github.io/surveyBurden/reference/gfs_weights.md)
+  [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)
   list.
+
+- words_per_line:
+
+  How many words fit on one rendered line, used only when scoring
+  descriptive-text questions. `NULL` (default) uses
+  `scheme$words_per_line` (12). A single number applies to all
+  respondents. A numeric vector of length `nrow(responses)` gives
+  per-respondent values, allowing the user to reflect device differences
+  (e.g., phone vs desktop). The user is responsible for mapping device
+  metadata to appropriate values; the package does not assume any
+  device-to-value mapping.
 
 - id_col:
 
@@ -91,6 +108,11 @@ row per respondent:
 - `predicted_minutes`:
 
   `predicted_points / points_per_minute`.
+
+- `words_per_line`:
+
+  The words-per-line value used for each respondent's descriptive-text
+  scoring.
 
 - `n_unmapped_cols`:
 

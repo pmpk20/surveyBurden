@@ -14,7 +14,7 @@ of any actual respondent on that path lies between.
 ``` r
 path_burden(
   qsf,
-  weights = gfs_weights(),
+  scheme = gfs_scheme(),
   max_paths = 10000L,
   paths = NULL,
   scored = NULL
@@ -28,10 +28,10 @@ path_burden(
   A `qsf_raw` object from
   [`read_qsf()`](https://pmpk20.github.io/surveyBurden/reference/read_qsf.md).
 
-- weights:
+- scheme:
 
   A
-  [`gfs_weights()`](https://pmpk20.github.io/surveyBurden/reference/gfs_weights.md)
+  [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)
   list.
 
 - max_paths:

@@ -58,7 +58,7 @@ Merge sections repeat, or ~Z on the shortest complete route".</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">respondent_burden</span><span class="op">(</span></span>
 <span>  <span class="va">qsf</span>,</span>
 <span>  routes <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  weights <span class="op">=</span> <span class="fu"><a href="gfs_weights.html">gfs_weights</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  scheme <span class="op">=</span> <span class="fu"><a href="gfs_scheme.html">gfs_scheme</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  loop_typical <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  engine <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -89,8 +89,8 @@ column falls back to <code>loop_typical</code>.</p></dd>
 </dl><p>Missing columns are treated as absent/zero.</p></dd>
 
 
-<dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
-<dd><p>A <code><a href="gfs_weights.html">gfs_weights()</a></code> list.</p></dd>
+<dt id="arg-scheme">scheme<a class="anchor" aria-label="anchor" href="#arg-scheme"></a></dt>
+<dd><p>A <code><a href="gfs_scheme.html">gfs_scheme()</a></code> list.</p></dd>
 
 
 <dt id="arg-loop-typical">loop_typical<a class="anchor" aria-label="anchor" href="#arg-loop-typical"></a></dt>

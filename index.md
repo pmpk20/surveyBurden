@@ -245,7 +245,7 @@ runs the whole pipeline. The lower-level functions expose each step.
 | `fetch_qsf(survey, api_key, base_url)` | the same object, fetched through the API |
 | `parse_qsf(x)` | question catalogue, one row per live question |
 | `classify_question(payload)` | standard question type for one question |
-| [`gfs_weights()`](https://pmpk20.github.io/surveyBurden/reference/gfs_weights.md) | the GfS Table 1 point weights and the time conversion |
+| [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md) | the GfS Table 1 point weights and the time conversion |
 | `score_burden(catalogue, weights)` | catalogue plus `gfs_points`, `score_flag`, `score_basis` |
 | `resolve_flow(qsf, max_paths)` | the distinct block sequences (structural paths) |
 | `resolve_paths(qsf, max_paths)` | per path: questions always shown, may be shown, never shown |

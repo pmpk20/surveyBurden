@@ -104,9 +104,9 @@ predicts the completion time, or applies to online surveys. You can
 either override it by setting <code>points_per_minute</code> on a
 weights object:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gfs_weights.html">gfs_weights</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gfs_scheme.html">gfs_scheme</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">w</span><span class="op">$</span><span class="va">points_per_minute</span> <span class="op">&lt;-</span> <span class="fl">15</span></span>
-<span><span class="fu"><a href="../reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">demo</span>, weights <span class="op">=</span> <span class="va">w</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">$</span><span class="va">burden</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"statistic"</span>, <span class="st">"minutes"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="fu"><a href="../reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">demo</span>, scheme <span class="op">=</span> <span class="va">w</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">$</span><span class="va">burden</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"statistic"</span>, <span class="st">"minutes"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 2</span></span></span>
 <span><span class="co">#&gt;   statistic minutes</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
@@ -119,9 +119,9 @@ weights object:</p>
 the completion-time data of your survey to calculate
 <code><a href="../reference/validate_times.html">validate_times()</a></code> and use the rate it returns:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gfs_weights.html">gfs_weights</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gfs_scheme.html">gfs_scheme</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">w</span><span class="op">$</span><span class="va">points_per_minute</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/validate_times.html">validate_times</a></span><span class="op">(</span><span class="va">demo</span>, <span class="st">"times.csv"</span><span class="op">)</span><span class="op">$</span><span class="va">implied_points_per_minute</span></span>
-<span><span class="fu"><a href="../reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">demo</span>, weights <span class="op">=</span> <span class="va">w</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">demo</span>, scheme <span class="op">=</span> <span class="va">w</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="limitations">Limitations<a class="anchor" aria-label="anchor" href="#limitations"></a>

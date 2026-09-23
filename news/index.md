@@ -13,7 +13,7 @@ CRAN preparation release.
   examples from `\dontrun{}` to `\donttest{}` with the demo fixture.
 - Added the Heimgartner and Axhausen (2024) DOI to the DESCRIPTION and
   to the documentation of
-  [`gfs_weights()`](https://pmpk20.github.io/surveyBurden/reference/gfs_weights.md),
+  [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md),
   [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
   and
   [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md).
@@ -60,7 +60,7 @@ First release.
   [`fetch_qsf()`](https://pmpk20.github.io/surveyBurden/reference/fetch_qsf.md),
   [`parse_qsf()`](https://pmpk20.github.io/surveyBurden/reference/parse_qsf.md),
   [`classify_question()`](https://pmpk20.github.io/surveyBurden/reference/classify_question.md),
-  [`gfs_weights()`](https://pmpk20.github.io/surveyBurden/reference/gfs_weights.md),
+  [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md),
   [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md),
   [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md),
   [`resolve_paths()`](https://pmpk20.github.io/surveyBurden/reference/resolve_paths.md),

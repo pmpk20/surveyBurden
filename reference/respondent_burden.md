@@ -10,7 +10,7 @@ Loop & Merge sections repeat, or ~Z on the shortest complete route".
 respondent_burden(
   qsf,
   routes = NULL,
-  weights = gfs_weights(),
+  scheme = gfs_scheme(),
   loop_typical = 2,
   engine = NULL
 )
@@ -42,10 +42,10 @@ respondent_burden(
 
   Missing columns are treated as absent/zero.
 
-- weights:
+- scheme:
 
   A
-  [`gfs_weights()`](https://pmpk20.github.io/surveyBurden/reference/gfs_weights.md)
+  [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)
   list.
 
 - loop_typical:

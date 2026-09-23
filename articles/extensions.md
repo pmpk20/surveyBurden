@@ -206,7 +206,7 @@ survey-level total:
 ``` r
 
 total_points <- sum(scored$gfs_points, na.rm = TRUE)
-total_minutes <- total_points / gfs_weights()$points_per_minute
+total_minutes <- total_points / gfs_scheme()$points_per_minute
 cat(sprintf("Total: %.0f GfS points, ~%.0f minutes\n",
             total_points, total_minutes))
 #> Total: 43 GfS points, ~4 minutes
@@ -311,7 +311,7 @@ is skipped.
 | `parse_display_logic()` | 2 | Yes – reads QSF `DisplayLogic` trees |
 | [`validate_catalogue()`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md) | boundary | No – validates the intermediate representation |
 | [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md) | 3 | No – operates on the catalogue |
-| [`gfs_weights()`](https://pmpk20.github.io/surveyBurden/reference/gfs_weights.md) | 3 | No – scoring parameters |
+| [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md) | 3 | No – scoring parameters |
 | [`classify_reachability()`](https://pmpk20.github.io/surveyBurden/reference/classify_reachability.md) | 3 | No – operates on catalogue fields |
 | [`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md) | 3 | No – operates on scored catalogue + paths |
 | [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md) | 3 | No – operates on the burden engine |

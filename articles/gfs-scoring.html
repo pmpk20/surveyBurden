@@ -83,9 +83,9 @@ finished report see <code><a href="../articles/reading-the-report.html">vignette
 <p>surveyBurden implements the published GfS / Axhausen scheme
 (Heimgartner and Axhausen 2024, Table 1); it does not invent a new
 burden scale. The point weights are transcribed verbatim into
-<code><a href="../reference/gfs_weights.html">gfs_weights()</a></code>.</p>
+<code><a href="../reference/gfs_scheme.html">gfs_scheme()</a></code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gfs_weights.html">gfs_weights</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gfs_scheme.html">gfs_scheme</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">w</span><span class="op">$</span><span class="va">yes_no</span></span>
 <span><span class="co">#&gt; [1] 1</span></span>
 <span><span class="va">w</span><span class="op">$</span><span class="va">rating_small</span></span>
@@ -157,7 +157,7 @@ not carry what the scheme needs, the package applies an
 <code>inferred</code>. Every scored question carries a
 <code>score_basis</code> string recording the rule applied.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">scored</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/score_burden.html">score_burden</a></span><span class="op">(</span><span class="va">catalogue</span>, weights <span class="op">=</span> <span class="va">w</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">scored</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/score_burden.html">score_burden</a></span><span class="op">(</span><span class="va">catalogue</span>, scheme <span class="op">=</span> <span class="va">w</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">scored</span><span class="op">$</span><span class="va">score_flag</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     auto inferred </span></span>
@@ -250,18 +250,18 @@ yes/no at 1.0, discounted here for the working-memory efficiency of
 answering in a grid. This proxy is symmetric in rows and columns so it
 does not change with how Qualtrics happened to store the grid. It is a
 documented inference, not GfS. The weight is
-<code>gfs_weights()$matrix_cell_multi</code>.</p>
+<code>gfs_scheme()$matrix_cell_multi</code>.</p>
 </div>
 </div>
 <div class="section level2">
 <h2 id="overriding-the-weights">Overriding the weights<a class="anchor" aria-label="anchor" href="#overriding-the-weights"></a>
 </h2>
-<p>Every weight in <code><a href="../reference/gfs_weights.html">gfs_weights()</a></code> can be changed and passed
+<p>Every weight in <code><a href="../reference/gfs_scheme.html">gfs_scheme()</a></code> can be changed and passed
 back in:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">w2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gfs_weights.html">gfs_weights</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">w2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gfs_scheme.html">gfs_scheme</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">w2</span><span class="op">$</span><span class="va">rating_small</span> <span class="op">&lt;-</span> <span class="fl">2.5</span></span>
-<span><span class="fu"><a href="../reference/score_burden.html">score_burden</a></span><span class="op">(</span><span class="va">catalogue</span>, weights <span class="op">=</span> <span class="va">w2</span><span class="op">)</span><span class="op">$</span><span class="va">gfs_points</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span>
+<span><span class="fu"><a href="../reference/score_burden.html">score_burden</a></span><span class="op">(</span><span class="va">catalogue</span>, scheme <span class="op">=</span> <span class="va">w2</span><span class="op">)</span><span class="op">$</span><span class="va">gfs_points</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span>
 <span><span class="co">#&gt; [1] 11.0  1.0  2.5  1.0  2.5</span></span></code></pre></div>
 </div>
 <div class="section level2">

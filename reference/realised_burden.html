@@ -61,7 +61,13 @@ through the survey.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">realised_burden</span><span class="op">(</span><span class="va">qsf</span>, <span class="va">responses</span>, weights <span class="op">=</span> <span class="fu"><a href="gfs_weights.html">gfs_weights</a></span><span class="op">(</span><span class="op">)</span>, id_col <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">realised_burden</span><span class="op">(</span></span>
+<span>  <span class="va">qsf</span>,</span>
+<span>  <span class="va">responses</span>,</span>
+<span>  scheme <span class="op">=</span> <span class="fu"><a href="gfs_scheme.html">gfs_scheme</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  words_per_line <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  id_col <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -85,8 +91,18 @@ ImportId row).</p></li>
 <code>qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE, add_column_map = FALSE)</code>.</p></dd>
 
 
-<dt id="arg-weights">weights<a class="anchor" aria-label="anchor" href="#arg-weights"></a></dt>
-<dd><p>A <code><a href="gfs_weights.html">gfs_weights()</a></code> list.</p></dd>
+<dt id="arg-scheme">scheme<a class="anchor" aria-label="anchor" href="#arg-scheme"></a></dt>
+<dd><p>A <code><a href="gfs_scheme.html">gfs_scheme()</a></code> list.</p></dd>
+
+
+<dt id="arg-words-per-line">words_per_line<a class="anchor" aria-label="anchor" href="#arg-words-per-line"></a></dt>
+<dd><p>How many words fit on one rendered line, used only when
+scoring descriptive-text questions. <code>NULL</code> (default) uses
+<code>scheme$words_per_line</code> (12). A single number applies to all respondents.
+A numeric vector of length <code>nrow(responses)</code> gives per-respondent values,
+allowing the user to reflect device differences (e.g., phone vs desktop).
+The user is responsible for mapping device metadata to appropriate values;
+the package does not assume any device-to-value mapping.</p></dd>
 
 
 <dt id="arg-id-col">id_col<a class="anchor" aria-label="anchor" href="#arg-id-col"></a></dt>
@@ -125,6 +141,10 @@ flags).</p></dd>
 
 <dt><code>predicted_minutes</code></dt>
 <dd><p><code>predicted_points / points_per_minute</code>.</p></dd>
+
+<dt><code>words_per_line</code></dt>
+<dd><p>The words-per-line value used for each
+respondent's descriptive-text scoring.</p></dd>
 
 <dt><code>n_unmapped_cols</code></dt>
 <dd><p>Number of response columns that could not be

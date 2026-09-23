@@ -9,7 +9,7 @@ the band and enumerates it.
 ``` r
 path_burden_profile(
   qsf,
-  weights = gfs_weights(),
+  scheme = gfs_scheme(),
   max_paths = 10000L,
   engine = NULL,
   parsed_dl = NULL
@@ -22,10 +22,10 @@ path_burden_profile(
 
   A `qsf_raw` object.
 
-- weights:
+- scheme:
 
   A
-  [`gfs_weights()`](https://pmpk20.github.io/surveyBurden/reference/gfs_weights.md)
+  [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)
   list.
 
 - max_paths:

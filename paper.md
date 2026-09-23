@@ -65,7 +65,7 @@ fielded.
   for the account that owns it. You cannot calculate the burden from the
   preview or distributed link, however.
 - **GfS scoring.**
-  [`gfs_weights()`](https://pmpk20.github.io/surveyBurden/reference/gfs_weights.md)
+  [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)
   holds the GfS point weights in a scheme.
   [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
   then works in three layers: what Qualtrics records the question as,

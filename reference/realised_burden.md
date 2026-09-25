@@ -1,7 +1,7 @@
 # Realised response burden from observed responses
 
-Scores the questions each respondent actually answered, using the GfS
-point scheme and the survey's structure from the QSF. Unlike
+Scores the questions each respondent actually answered, using the GfS+
+scheme and the survey's structure from the QSF. Unlike
 [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md),
 which predicts burden from structural paths, this function measures it
 from data: every respondent gets a unique score reflecting their actual

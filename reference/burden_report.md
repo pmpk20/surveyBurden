@@ -1,8 +1,8 @@
 # Ex-ante instrument burden report
 
 The user-facing entry point. Parses a Qualtrics `.qsf`, resolves its
-flow and display logic, scores every question with the GfS burden-point
-scheme (Heimgartner and Axhausen 2024,
+flow and display logic, scores every question with the GfS+ burden-point
+scheme (extending Heimgartner and Axhausen 2024,
 [doi:10.32866/001c.121624](https://doi.org/10.32866/001c.121624) ), and
 summarises the burden across the instrument's structural path space.
 
@@ -59,7 +59,7 @@ summary(object, ...)
 
 - rare_threshold:
 
-  GfS points above which Heimgartner & Axhausen (2024) found surveys to
+  GfS+ points above which Heimgartner & Axhausen (2024) found surveys to
   be rare (their sample: median 399, n = 79 waves). Used for the "rare
   burden" warning and to scale the `index` column of `$burden` to 0-1.
 
@@ -67,7 +67,7 @@ summary(object, ...)
 
   Question stems longer than this many words are flagged in the
   readability diagnostics (default 40). Diagnostic only – this does
-  **not** change any GfS score.
+  **not** change any GfS+ score.
 
 - label_warning_threshold:
 
@@ -146,7 +146,7 @@ names. Print it for the formatted summary, or read its components:
 
 - readability:
 
-  Diagnostic, not part of the GfS score: `stem_threshold`,
+  Diagnostic, not part of the GfS+ score: `stem_threshold`,
   `label_threshold`, and the tibbles `long_stems`, `long_labels` and
   `long_grids`.
 
@@ -161,8 +161,14 @@ names. Print it for the formatted summary, or read its components:
 
 - population:
 
-  Present only when `routes` is supplied: a tibble the same shape as
-  `burden`, weighted by observed respondent routes.
+  Present only when `routes` is supplied: an eight-row tibble with the
+  same columns as `burden`, summarising per-respondent predictions as
+  `min`, `p10`, `p25`, `median`, `mean`, `p75`, `p90`, `max`. Each
+  respondent has equal weight. Quantiles use
+  [`stats::quantile()`](https://rdrr.io/r/stats/quantile.html) with its
+  default `type = 7`; `mean` is the arithmetic mean. Missing predictions
+  are excluded; all statistics are `NA` when no non-missing predictions
+  are available.
 
 Scalars are attributes: `points_per_minute`, `rare_threshold`,
 `benchmark` (`list(median_points, n_waves)`) and `profile_used`.
@@ -200,21 +206,21 @@ qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
                          package = "surveyBurden")
 br <- burden_report(qsf_path)
 #> ℹ Reading survey
-#> ✔ Reading survey [8ms]
+#> ✔ Reading survey [9ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [87ms]
+#> ✔ Scoring questions and resolving paths [107ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [28ms]
+#> ✔ Checking calculation certainty [34ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [25ms]
+#> ✔ Enumerating display-logic combinations [30ms]
 #> 
 br
 #> 
 #> ── Survey Burden Report: Neighbourhood Travel Survey (demo) ────────────────────
-#> Median completing path: 123 GfS points, ~10 min - 0.3x the benchmark median of
+#> Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of
 #> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.
 #> 
 #> ── Instrument ──
@@ -231,7 +237,7 @@ br
 #> Structural paths: 4 (2 complete, 2 screen-out)
 #> Display-logic combinations checked: 3-4 per complete path
 #> 
-#> ── Burden (12 GfS points ~ 1 minute; index = points / 1500) ──
+#> ── Burden (12 GfS+ points ~ 1 minute; index = points / 1500) ──
 #> 
 #> Statistic        Points  ~Min  Index
 #> ------------------------------------
@@ -240,8 +246,8 @@ br
 #> Median              123    10   0.08
 #> 75th percentile     129    11   0.09
 #> Maximum             143    12   0.10
-#> Benchmark: median 399 points across 79 GfS-scored survey waves (Heimgartner &
-#> Axhausen 2024).
+#> Benchmark: median 399 points across 79 GfS-scored waves (Heimgartner & Axhausen
+#> 2024).
 #> 
 #> ── Burden by block (survey order; share of all-question points) ──
 #> 
@@ -267,7 +273,7 @@ br
 #> QID1       11 pts  0 opt    Welcome, and thank you for taking part in the Neighbour...
 #> QID7        8 pts  4x3      For each area, do you have a condition that makes trave...
 #> 
-#> ── Readability diagnostics (reading load; not part of the GfS score) ──
+#> ── Readability diagnostics (reading load; not part of the GfS+ score) ──
 #> 
 #> Long stems (> 40 words)          0
 #> Long matrix labels (> 10 words)  0
@@ -289,7 +295,7 @@ summary(br)
 #> 
 #> ── Neighbourhood Travel Survey (demo) ──────────────────────────────────────────
 #> 26 questions, 12 blocks, 4 structural paths (2 complete).
-#> Median completing path: 123 GfS points, ~10 min - 0.3x the benchmark median of
+#> Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of
 #> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.
 #> Benchmark: median 399 points across 79 GfS-scored waves.
 br$burden

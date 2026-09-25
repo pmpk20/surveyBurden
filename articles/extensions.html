@@ -37,7 +37,7 @@
 <li><a class="dropdown-item" href="../articles/realised-burden.html">Realised burden from response data</a></li>
     <li><a class="dropdown-item" href="../articles/extensions.html">Extensions: scoring surveys without a QSF</a></li>
     <li><a class="dropdown-item" href="../articles/reading-the-report.html">Reading the burden report</a></li>
-    <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS scoring method</a></li>
+    <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS+ scoring method</a></li>
     <li><a class="dropdown-item" href="../articles/paths-and-display-logic.html">Paths and display logic</a></li>
     <li><a class="dropdown-item" href="../articles/calibration.html">Calibration and limitations</a></li>
   </ul>
@@ -105,7 +105,7 @@ layer currently reads the QSF’s <code>SurveyFlow</code> element directly
 and is, therefore, partially platform-specific. Non-Qualtrics platforms
 would need to provide an equivalent flow structure or an adapter (see
 <em>What a new parser must provide</em> below).</p>
-<p><strong>Layer 3</strong> applies the GfS points to the catalogue,
+<p><strong>Layer 3</strong> applies the GfS+ points to the catalogue,
 computes per-path burden bands, and assembles the report. This layer
 operates entirely on the question catalogue and the resolved path
 structure. It never touches the QSF, so it is feasibly
@@ -301,7 +301,7 @@ and the boolean columns (<code>is_dropdown</code>,
 <thead><tr class="header">
 <th><code>std_type</code></th>
 <th>Description</th>
-<th>GfS scoring</th>
+<th>GfS+ scoring</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
@@ -444,9 +444,9 @@ survey-level total:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">total_points</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">scored</span><span class="op">$</span><span class="va">gfs_points</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">total_minutes</span> <span class="op">&lt;-</span> <span class="va">total_points</span> <span class="op">/</span> <span class="fu"><a href="../reference/gfs_scheme.html">gfs_scheme</a></span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">points_per_minute</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Total: %.0f GfS points, ~%.0f minutes\n"</span>,</span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Total: %.0f GfS+ points, ~%.0f minutes\n"</span>,</span>
 <span>            <span class="va">total_points</span>, <span class="va">total_minutes</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Total: 43 GfS points, ~4 minutes</span></span></code></pre></div>
+<span><span class="co">#&gt; Total: 43 GfS+ points, ~4 minutes</span></span></code></pre></div>
 <p>This provides a headline estimate of the burden across one single
 path through the survey i.e., every question is counted once. For a
 survey with conditional questions, it is an upper bound – the burden a
@@ -459,7 +459,7 @@ support for display logic.</p>
 <p>A hand-built catalogue scored with <code><a href="../reference/score_burden.html">score_burden()</a></code> gives
 you:</p>
 <ul>
-<li>Per-question GfS burden points, using the same scoring rules as
+<li>Per-question GfS+ burden points, using the same scoring rules as
 <code><a href="../reference/burden_report.html">burden_report()</a></code>.</li>
 <li>A survey-level total (the <code><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum()</a></code> above).</li>
 <li>A per-question confidence flag (<code>score_flag</code>) saying how
@@ -477,7 +477,7 @@ path. That requires the parsed display-logic predicates.</li>
 <p>The total from a hand-built catalogue is a defensible measure of
 instrument burden for any survey that can be expressed as a list of
 questions with their types and option counts. It applies the same
-published GfS point weights (Heimgartner and Axhausen, 2024) as the full
+published GfS+ point scheme (Heimgartner and Axhausen, 2024) as the full
 Qualtrics pipeline.</p>
 </div>
 </div>

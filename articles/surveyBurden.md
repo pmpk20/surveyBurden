@@ -3,9 +3,9 @@
 `surveyBurden` estimates **ex-ante instrument burden**: the response
 effort a programmed Qualtrics survey demands, worked out before fielding
 from the instrument alone. It reads the survey, scores every question
-with the published GfS / Axhausen point scheme, reconstructs the routes
-the flow and display logic allow, and reports how burden varies across
-those routes.
+with the GfS+ point scheme (extending Heimgartner and Axhausen 2024),
+reconstructs the routes the flow and display logic allow, and reports
+how burden varies across those routes.
 
 In the terms of Yan and Williams (2022) this is the *instrument* side of
 respondent burden – length, difficulty, and the effort the design
@@ -62,7 +62,7 @@ report <- burden_report(demo, quiet = TRUE)
 report
 #> 
 #> ── Survey Burden Report: Neighbourhood Travel Survey (demo) ────────────────────
-#> Median completing path: 123 GfS points, ~10 min - 0.3x the benchmark median of
+#> Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of
 #> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.
 #> 
 #> ── Instrument ──
@@ -79,7 +79,7 @@ report
 #> Structural paths: 4 (2 complete, 2 screen-out)
 #> Display-logic combinations checked: 3-4 per complete path
 #> 
-#> ── Burden (12 GfS points ~ 1 minute; index = points / 1500) ──
+#> ── Burden (12 GfS+ points ~ 1 minute; index = points / 1500) ──
 #> 
 #> Statistic        Points  ~Min  Index
 #> ------------------------------------
@@ -88,8 +88,8 @@ report
 #> Median              123    10   0.08
 #> 75th percentile     129    11   0.09
 #> Maximum             143    12   0.10
-#> Benchmark: median 399 points across 79 GfS-scored survey waves (Heimgartner &
-#> Axhausen 2024).
+#> Benchmark: median 399 points across 79 GfS-scored waves (Heimgartner & Axhausen
+#> 2024).
 #> 
 #> ── Burden by block (survey order; share of all-question points) ──
 #> 
@@ -115,7 +115,7 @@ report
 #> QID1       11 pts  0 opt    Welcome, and thank you for taking part in the Neighbour...
 #> QID7        8 pts  4x3      For each area, do you have a condition that makes trave...
 #> 
-#> ── Readability diagnostics (reading load; not part of the GfS score) ──
+#> ── Readability diagnostics (reading load; not part of the GfS+ score) ──
 #> 
 #> Long stems (> 40 words)          0
 #> Long matrix labels (> 10 words)  0
@@ -157,12 +157,12 @@ Five terms are used throughout, with fixed meanings:
 
 | term | meaning |
 |----|----|
-| **question burden** | the GfS point score for one question, from its type and structure |
+| **question burden** | the GfS+ point score for one question, from its type and structure |
 | **path burden** | the total question burden along one structural path through the survey flow |
 | **structural burden profile** | the set of feasible burden values across a path’s display-logic sub-states, each counted once. Not a probability distribution. |
 | **population-weighted respondent burden** | burden averaged over real respondent routes, where route frequencies stand in for the sub-state probabilities. Produced only when `routes` are supplied. |
 | **calculation certainty** | the split, for a given survey, between parts of the calculation that are exact and parts that rest on documented approximations |
-| **readability diagnostics** | counts of long question stems, long matrix labels, and long grids. Reading-load signals, reported separately, never folded into the GfS score. |
+| **readability diagnostics** | counts of long question stems, long matrix labels, and long grids. Reading-load signals, reported separately, never folded into the GfS+ score. |
 
 ## The report object
 
@@ -206,7 +206,7 @@ summary(report)
 #> 
 #> ── Neighbourhood Travel Survey (demo) ──────────────────────────────────────────
 #> 26 questions, 12 blocks, 4 structural paths (2 complete).
-#> Median completing path: 123 GfS points, ~10 min - 0.3x the benchmark median of
+#> Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of
 #> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.
 #> Benchmark: median 399 points across 79 GfS-scored waves.
 ```

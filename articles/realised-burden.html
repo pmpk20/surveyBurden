@@ -37,7 +37,7 @@
 <li><a class="dropdown-item" href="../articles/realised-burden.html">Realised burden from response data</a></li>
     <li><a class="dropdown-item" href="../articles/extensions.html">Extensions: scoring surveys without a QSF</a></li>
     <li><a class="dropdown-item" href="../articles/reading-the-report.html">Reading the burden report</a></li>
-    <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS scoring method</a></li>
+    <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS+ scoring method</a></li>
     <li><a class="dropdown-item" href="../articles/paths-and-display-logic.html">Paths and display logic</a></li>
     <li><a class="dropdown-item" href="../articles/calibration.html">Calibration and limitations</a></li>
   </ul>
@@ -76,9 +76,9 @@
 <p>The function <code><a href="../reference/respondent_burden.html">respondent_burden()</a></code> can estimate burden
 <strong>ex ante</strong> from the survey alone. Once responses are
 collected, however, you can also compute the <strong>realised
-burden</strong>: the GfS points each respondent actually incurred, given
-the questions they answered, the display-logic branches they took and
-the loop iterations they completed.</p>
+burden</strong>: the GfS+ points each respondent actually incurred,
+given the questions they answered, the display-logic branches they took
+and the loop iterations they completed.</p>
 <p><code><a href="../reference/realised_burden.html">realised_burden()</a></code> takes the same QSF and the response
 data and returns one row per respondent with both the realised score and
 the structural prediction for comparison.</p>
@@ -238,7 +238,7 @@ question.</li>
 distinct questions with at least one non-blank response.</li>
 <li>
 <strong><code>realised_points</code></strong> /
-<strong><code>realised_minutes</code></strong> – the actual GfS burden
+<strong><code>realised_minutes</code></strong> – the actual GfS+ burden
 from questions the respondent answered.</li>
 <li>
 <strong><code>predicted_points</code></strong> /
@@ -317,7 +317,7 @@ iterations than the median will sometimes have a negative gap (realised
 <span><span class="va">at</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along</a></span><span class="op">(</span><span class="va">ids</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="cn">NA</span>, xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">rp</span>, <span class="va">pp</span><span class="op">)</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1.1</span><span class="op">)</span>,</span>
 <span>     ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">at</span><span class="op">)</span> <span class="op">+</span> <span class="fl">0.5</span>, <span class="fl">0.5</span><span class="op">)</span>,</span>
-<span>     xlab <span class="op">=</span> <span class="st">"GfS points"</span>, ylab <span class="op">=</span> <span class="st">""</span>, yaxt <span class="op">=</span> <span class="st">"n"</span>,</span>
+<span>     xlab <span class="op">=</span> <span class="st">"GfS+ points"</span>, ylab <span class="op">=</span> <span class="st">""</span>, yaxt <span class="op">=</span> <span class="st">"n"</span>,</span>
 <span>     main <span class="op">=</span> <span class="st">"Predicted vs realised burden"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/axis.html" class="external-link">axis</a></span><span class="op">(</span><span class="fl">2</span>, at <span class="op">=</span> <span class="va">at</span>, labels <span class="op">=</span> <span class="va">ids</span>, las <span class="op">=</span> <span class="fl">1</span>, cex.axis <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/segments.html" class="external-link">segments</a></span><span class="op">(</span><span class="va">rp</span>, <span class="va">at</span>, <span class="va">pp</span>, <span class="va">at</span>, col <span class="op">=</span> <span class="st">"grey70"</span><span class="op">)</span></span>
@@ -354,7 +354,7 @@ iterations than the median will sometimes have a negative gap (realised
 <span><span class="va">cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">rb</span><span class="op">$</span><span class="va">finished</span><span class="op">[</span><span class="va">ord</span><span class="op">]</span>, <span class="st">"#2166ac"</span>, <span class="st">"#b2182b"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/barplot.html" class="external-link">barplot</a></span><span class="op">(</span><span class="va">rb</span><span class="op">$</span><span class="va">realised_points</span><span class="op">[</span><span class="va">ord</span><span class="op">]</span>, names.arg <span class="op">=</span> <span class="va">rb</span><span class="op">$</span><span class="va">response_id</span><span class="op">[</span><span class="va">ord</span><span class="op">]</span>,</span>
 <span>        col <span class="op">=</span> <span class="va">cols</span>, border <span class="op">=</span> <span class="cn">NA</span>, las <span class="op">=</span> <span class="fl">2</span>, cex.names <span class="op">=</span> <span class="fl">0.8</span>,</span>
-<span>        ylab <span class="op">=</span> <span class="st">"Realised burden (GfS points)"</span>,</span>
+<span>        ylab <span class="op">=</span> <span class="st">"Realised burden (GfS+ points)"</span>,</span>
 <span>        main <span class="op">=</span> <span class="st">"Per-respondent realised burden"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topright"</span>, fill <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#2166ac"</span>, <span class="st">"#b2182b"</span><span class="op">)</span>,</span>
 <span>       legend <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Complete"</span>, <span class="st">"Dropout"</span><span class="op">)</span>, bty <span class="op">=</span> <span class="st">"n"</span>, cex <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>

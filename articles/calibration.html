@@ -37,7 +37,7 @@
 <li><a class="dropdown-item" href="../articles/realised-burden.html">Realised burden from response data</a></li>
     <li><a class="dropdown-item" href="../articles/extensions.html">Extensions: scoring surveys without a QSF</a></li>
     <li><a class="dropdown-item" href="../articles/reading-the-report.html">Reading the burden report</a></li>
-    <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS scoring method</a></li>
+    <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS+ scoring method</a></li>
     <li><a class="dropdown-item" href="../articles/paths-and-display-logic.html">Paths and display logic</a></li>
     <li><a class="dropdown-item" href="../articles/calibration.html">Calibration and limitations</a></li>
   </ul>
@@ -80,14 +80,14 @@ For the scoring rules see <code><a href="../articles/gfs-scoring.html">vignette(
 <div class="section level2">
 <h2 id="words_per_line">words_per_line<a class="anchor" aria-label="anchor" href="#words_per_line"></a>
 </h2>
-<p>In the original GfS papers, they provide a score for each additional
+<p>In the original GfS scheme, a score is provided for each additional
 line of text in the survey. However, a <code>.qsf</code> does not
 provide the number of additional lines of text, as this may vary with
 the survey mode. Instead, it returns the words per question. The
 package, therefore, assumes that the number of words that make an
 additional line (<code>words_per_line</code> = default 12). This is a
 practical proxy, that you can set if you wish, and means that assigned
-GfS points per descriptive-text in your survey should be read as
+GfS+ points per descriptive-text in your survey should be read as
 approximate. This assumption only affects descriptive / instruction-text
 scores and every other question type is unaffected.</p>
 <p>You can set the words per line in your survey with:</p>
@@ -98,8 +98,8 @@ scores and every other question type is unaffected.</p>
 <div class="section level2">
 <h2 id="points_per_minute">points_per_minute<a class="anchor" aria-label="anchor" href="#points_per_minute"></a>
 </h2>
-<p>To convert GfS points to minutes of survey time, they have a rule of
-thumb of 12 points per minute. As a rule of thumb, do not assume that it
+<p>To convert GfS+ points to minutes of survey time, the GfS rule of
+thumb is 12 points per minute. As a rule of thumb, do not assume that it
 predicts the completion time, or applies to online surveys. You can
 either override it by setting <code>points_per_minute</code> on a
 weights object:</p>
@@ -127,11 +127,11 @@ the completion-time data of your survey to calculate
 <h2 id="limitations">Limitations<a class="anchor" aria-label="anchor" href="#limitations"></a>
 </h2>
 <ul>
-<li>The Qualtrics-to-GfS mapping is sometimes inferential. Where a
+<li>The Qualtrics-to-GfS+ mapping is sometimes inferential. Where a
 question type has no exact match in Table 1, the package applies a
 documented rule and flags the question <code>inferred</code>.</li>
-<li>The GfS scheme predates modern web survey interfaces. It was
-calibrated on earlier survey practice.</li>
+<li>The original GfS scheme predates modern web survey interfaces. It
+was calibrated on earlier survey practice.</li>
 <li>Rendered text length cannot be recovered from a <code>.qsf</code>.
 The file stores words, not an on-screen line count;
 <code>words_per_line</code> is a configurable proxy for that missing
@@ -145,7 +145,7 @@ feasible combination is counted once, and “median” means the median
 across combinations, not across respondents.</li>
 <li>Loop &amp; Merge can make the path space large. The package unrolls
 to the explicit cap and treats the iteration count as uniform.</li>
-<li>The points-to-minutes conversion is the published GfS rule of thumb,
+<li>The points-to-minutes conversion is the original GfS rule of thumb,
 roughly 12 points per minute.</li>
 <li>Burden scores are not predictions of completion time, dropout, or
 satisficing. Those are empirical questions about respondent behaviour,

@@ -10,7 +10,7 @@
   QSF](https://pmpk20.github.io/surveyBurden/articles/extensions.md):
 - [Reading the burden
   report](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md):
-- [The GfS scoring
+- [The GfS+ scoring
   method](https://pmpk20.github.io/surveyBurden/articles/gfs-scoring.md):
 - [Paths and display
   logic](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md):

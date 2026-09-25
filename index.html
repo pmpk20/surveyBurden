@@ -11,8 +11,8 @@
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Ex-Ante Path-Aware Survey Instrument Burden Assessment">
-<meta name="description" content="Estimates the response burden of a Qualtrics survey instrument before it is fielded. Parses a .qsf export (or fetches a live survey through the Qualtrics API), reconstructs the respondent paths the survey's flow and display logic allow, scores every question with the GfS points scheme (Heimgartner and Axhausen 2024) &lt;doi:10.32866/001c.121624&gt;, and reports the burden across those paths as a structured object.">
-<meta property="og:description" content="Estimates the response burden of a Qualtrics survey instrument before it is fielded. Parses a .qsf export (or fetches a live survey through the Qualtrics API), reconstructs the respondent paths the survey's flow and display logic allow, scores every question with the GfS points scheme (Heimgartner and Axhausen 2024) &lt;doi:10.32866/001c.121624&gt;, and reports the burden across those paths as a structured object.">
+<meta name="description" content="Estimates the response burden of a Qualtrics survey instrument before it is fielded. Parses a .qsf export (or fetches a live survey through the Qualtrics API), reconstructs the respondent paths the survey's flow and display logic allow, scores every question with the GfS+ points scheme (extending Heimgartner and Axhausen 2024) &lt;doi:10.32866/001c.121624&gt;, and reports the burden across those paths as a structured object.">
+<meta property="og:description" content="Estimates the response burden of a Qualtrics survey instrument before it is fielded. Parses a .qsf export (or fetches a live survey through the Qualtrics API), reconstructs the respondent paths the survey's flow and display logic allow, scores every question with the GfS+ points scheme (extending Heimgartner and Axhausen 2024) &lt;doi:10.32866/001c.121624&gt;, and reports the burden across those paths as a structured object.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -39,7 +39,7 @@
 <li><a class="dropdown-item" href="articles/realised-burden.html">Realised burden from response data</a></li>
     <li><a class="dropdown-item" href="articles/extensions.html">Extensions: scoring surveys without a QSF</a></li>
     <li><a class="dropdown-item" href="articles/reading-the-report.html">Reading the burden report</a></li>
-    <li><a class="dropdown-item" href="articles/gfs-scoring.html">The GfS scoring method</a></li>
+    <li><a class="dropdown-item" href="articles/gfs-scoring.html">The GfS+ scoring method</a></li>
     <li><a class="dropdown-item" href="articles/paths-and-display-logic.html">Paths and display logic</a></li>
     <li><a class="dropdown-item" href="articles/calibration.html">Calibration and limitations</a></li>
   </ul>
@@ -89,7 +89,7 @@
 <span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">qsf</span><span class="op">)</span></span>
 <span><span class="va">report</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt; ── Survey Burden Report: Neighbourhood Travel Survey (demo) ────────────────────</span></span>
-<span><span class="co">#&gt; Median completing path: 123 GfS points, ~10 min - 0.3x the benchmark median of</span></span>
+<span><span class="co">#&gt; Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of</span></span>
 <span><span class="co">#&gt; 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; ── Instrument ──</span></span>
@@ -106,7 +106,7 @@
 <span><span class="co">#&gt; Structural paths: 4 (2 complete, 2 screen-out)</span></span>
 <span><span class="co">#&gt; Display-logic combinations checked: 3-4 per complete path</span></span>
 <span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt; ── Burden (12 GfS points ~ 1 minute; index = points / 1500) ──</span></span>
+<span><span class="co">#&gt; ── Burden (12 GfS+ points ~ 1 minute; index = points / 1500) ──</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Statistic        Points  ~Min  Index</span></span>
 <span><span class="co">#&gt; ------------------------------------</span></span>
@@ -115,7 +115,7 @@
 <span><span class="co">#&gt; Median              123    10   0.08</span></span>
 <span><span class="co">#&gt; 75th percentile     129    11   0.09</span></span>
 <span><span class="co">#&gt; Maximum             143    12   0.10</span></span>
-<span><span class="co">#&gt; Benchmark: median 399 points across 79 GfS-scored survey waves (Heimgartner &amp;</span></span>
+<span><span class="co">#&gt; Benchmark: median 399 points across 79 GfS-scored waves (Heimgartner &amp;</span></span>
 <span><span class="co">#&gt; Axhausen 2024).</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; ── Burden by block (survey order; share of all-question points) ──</span></span>
@@ -142,7 +142,7 @@
 <span><span class="co">#&gt; QID1       11 pts  0 opt    Welcome, and thank you for taking part in the Neighbour...</span></span>
 <span><span class="co">#&gt; QID7        8 pts  4x3      For each area, do you have a condition that makes trave...</span></span>
 <span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt; ── Readability diagnostics (reading load; not part of the GfS score) ──</span></span>
+<span><span class="co">#&gt; ── Readability diagnostics (reading load; not part of the GfS+ score) ──</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Long stems (&gt; 40 words)          0</span></span>
 <span><span class="co">#&gt; Long matrix labels (&gt; 10 words)  0</span></span>
@@ -172,9 +172,9 @@
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">report</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── Neighbourhood Travel Survey (demo) ──────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; 26 questions, 12 blocks, 4 structural paths (2 complete).</span></span>
-<span><span class="co">#&gt; Median completing path: 123 GfS points, ~10 min - 0.3x the benchmark median of</span></span>
+<span><span class="co">#&gt; Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of</span></span>
 <span><span class="co">#&gt; 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.</span></span>
-<span><span class="co">#&gt; Benchmark: median 399 points across 79 GfS-scored waves.</span></span></code></pre></div>
+<span><span class="co">#&gt; Benchmark: median 399 points across 79 GfS+-scored waves.</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="reading-the-report">Reading the report<a class="anchor" aria-label="anchor" href="#reading-the-report"></a>
@@ -183,7 +183,7 @@
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">report</span><span class="op">$</span><span class="va">instrument</span>  <span class="co"># one-row tibble of the survey's structural counts</span></span>
 <span><span class="va">report</span><span class="op">$</span><span class="va">burden</span>      <span class="co"># min / p25 / median / p75 / max, in points, minutes and index</span></span>
-<span><span class="va">report</span><span class="op">$</span><span class="va">items</span>       <span class="co"># one row per question, with its GfS score and the rule used</span></span>
+<span><span class="va">report</span><span class="op">$</span><span class="va">items</span>       <span class="co"># one row per question, with its GfS+ score and the rule used</span></span>
 <span><span class="va">report</span><span class="op">$</span><span class="va">paths</span>       <span class="co"># one row per structural path, with its burden floor and ceiling</span></span>
 <span><span class="va">report</span><span class="op">$</span><span class="va">blocks</span>      <span class="co"># burden totalled by block, in survey order</span></span></code></pre></div>
 <ul>
@@ -211,7 +211,7 @@
     paths --&gt; report["burden_report()"]
     report --&gt; out["verdict line +&lt;br&gt;8 report sections"]</code></pre>
 <p><code><a href="reference/burden_report.html">burden_report()</a></code> runs the whole pipeline. The lower-level functions expose each step for inspection or reuse; see the reference table below.</p>
-<p>surveyBurden scores every question with the published GfS / Axhausen burden scheme (Heimgartner &amp; Axhausen 2024, Table 1), then follows the survey’s flow and display logic to work out which questions can appear together and how burden varies across the feasible respondent paths. The score for one question is its <strong>question burden</strong>; the total along one route is a <strong>path burden</strong>. The default result is a <strong>structural burden profile</strong>: each feasible path and display-logic sub-state is counted once, so the reported “median” is the middle value across those combinations, not the burden half of respondents exceed. Given real respondent route data, the report instead reports a <strong>population-weighted respondent burden</strong>.</p>
+<p>surveyBurden scores every question with the GfS+ point scheme (extending Heimgartner &amp; Axhausen 2024, Table 1), then follows the survey’s flow and display logic to work out which questions can appear together and how burden varies across the feasible respondent paths. The score for one question is its <strong>question burden</strong>; the total along one route is a <strong>path burden</strong>. The default result is a <strong>structural burden profile</strong>: each feasible path and display-logic sub-state is counted once, so the reported “median” is the middle value across those combinations, not the burden half of respondents exceed. Given real respondent route data, the report instead reports a <strong>population-weighted respondent burden</strong>.</p>
 <p>The package describes the instrument, not the respondent: it does not claim that burden causes dropout, satisficing or slower responses. The methodology is set out in <code><a href="articles/gfs-scoring.html">vignette("gfs-scoring")</a></code> and <code><a href="articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code>.</p>
 </div>
 <div class="section level2">
@@ -260,7 +260,7 @@
 </tr>
 <tr>
 <td><code><a href="reference/gfs_scheme.html">gfs_scheme()</a></code></td>
-<td>the GfS Table 1 point weights and the time conversion</td>
+<td>the GfS+ point scheme and the time conversion</td>
 </tr>
 <tr>
 <td><code>score_burden(catalogue, weights)</code></td>
@@ -330,8 +330,8 @@
 <h2 id="limitations">Limitations<a class="anchor" aria-label="anchor" href="#limitations"></a>
 </h2>
 <ul>
-<li>The Qualtrics-to-GfS mapping is sometimes inferential; the package applies a documented rule and flags the question.</li>
-<li>The GfS scheme predates modern web survey interfaces.</li>
+<li>The Qualtrics-to-GfS+ mapping is sometimes inferential; the package applies a documented rule and flags the question.</li>
+<li>The original GfS scheme predates modern web survey interfaces.</li>
 <li>Rendered text length cannot be recovered exactly from a <code>.qsf</code>, so <code>words_per_line</code> is a configurable proxy.</li>
 <li>Display-logic reconstruction depends on what the <code>.qsf</code> encodes; unusual or externally controlled logic may need manual interpretation.</li>
 <li>The structural burden profile is not a respondent probability distribution.</li>

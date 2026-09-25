@@ -9,7 +9,7 @@ The function
 [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
 can estimate burden **ex ante** from the survey alone. Once responses
 are collected, however, you can also compute the **realised burden**:
-the GfS points each respondent actually incurred, given the questions
+the GfS+ points each respondent actually incurred, given the questions
 they answered, the display-logic branches they took and the loop
 iterations they completed.
 
@@ -157,8 +157,8 @@ Each row gives:
   respondent answered at least one question.
 - **`n_questions_answered`** – count of distinct questions with at least
   one non-blank response.
-- **`realised_points`** / **`realised_minutes`** – the actual GfS burden
-  from questions the respondent answered.
+- **`realised_points`** / **`realised_minutes`** – the actual GfS+
+  burden from questions the respondent answered.
 - **`predicted_points`** / **`predicted_minutes`** – the structural path
   prediction for comparison (from
   [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
@@ -233,7 +233,7 @@ par(mar = c(4, 5.5, 2, 1))
 at <- seq_along(ids)
 plot(NA, xlim = range(c(rp, pp), na.rm = TRUE) * c(0, 1.1),
      ylim = c(max(at) + 0.5, 0.5),
-     xlab = "GfS points", ylab = "", yaxt = "n",
+     xlab = "GfS+ points", ylab = "", yaxt = "n",
      main = "Predicted vs realised burden")
 axis(2, at = at, labels = ids, las = 1, cex.axis = 0.8)
 segments(rp, at, pp, at, col = "grey70")
@@ -277,7 +277,7 @@ ord <- order(rb$realised_points, decreasing = TRUE)
 cols <- ifelse(rb$finished[ord], "#2166ac", "#b2182b")
 barplot(rb$realised_points[ord], names.arg = rb$response_id[ord],
         col = cols, border = NA, las = 2, cex.names = 0.8,
-        ylab = "Realised burden (GfS points)",
+        ylab = "Realised burden (GfS+ points)",
         main = "Per-respondent realised burden")
 legend("topright", fill = c("#2166ac", "#b2182b"),
        legend = c("Complete", "Dropout"), bty = "n", cex = 0.8)

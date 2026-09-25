@@ -13,16 +13,16 @@ demo <- system.file("extdata", "demo_travel_survey.qsf", package = "surveyBurden
 
 ## words_per_line
 
-In the original GfS papers, they provide a score for each additional
-line of text in the survey. However, a `.qsf` does not provide the
-number of additional lines of text, as this may vary with the survey
-mode. Instead, it returns the words per question. The package,
-therefore, assumes that the number of words that make an additional line
+In the original GfS scheme, a score is provided for each additional line
+of text in the survey. However, a `.qsf` does not provide the number of
+additional lines of text, as this may vary with the survey mode.
+Instead, it returns the words per question. The package, therefore,
+assumes that the number of words that make an additional line
 (`words_per_line` = default 12). This is a practical proxy, that you can
-set if you wish, and means that assigned GfS points per descriptive-text
-in your survey should be read as approximate. This assumption only
-affects descriptive / instruction-text scores and every other question
-type is unaffected.
+set if you wish, and means that assigned GfS+ points per
+descriptive-text in your survey should be read as approximate. This
+assumption only affects descriptive / instruction-text scores and every
+other question type is unaffected.
 
 You can set the words per line in your survey with:
 
@@ -34,8 +34,8 @@ burden_report(demo, words_per_line = 8, quiet = TRUE)$burden$points[1:2]
 
 ## points_per_minute
 
-To convert GfS points to minutes of survey time, they have a rule of
-thumb of 12 points per minute. As a rule of thumb, do not assume that it
+To convert GfS+ points to minutes of survey time, the GfS rule of thumb
+is 12 points per minute. As a rule of thumb, do not assume that it
 predicts the completion time, or applies to online surveys. You can
 either override it by setting `points_per_minute` on a weights object:
 
@@ -68,10 +68,10 @@ burden_report(demo, scheme = w)
 
 ## Limitations
 
-- The Qualtrics-to-GfS mapping is sometimes inferential. Where a
+- The Qualtrics-to-GfS+ mapping is sometimes inferential. Where a
   question type has no exact match in Table 1, the package applies a
   documented rule and flags the question `inferred`.
-- The GfS scheme predates modern web survey interfaces. It was
+- The original GfS scheme predates modern web survey interfaces. It was
   calibrated on earlier survey practice.
 - Rendered text length cannot be recovered from a `.qsf`. The file
   stores words, not an on-screen line count; `words_per_line` is a
@@ -85,7 +85,7 @@ burden_report(demo, scheme = w)
   across combinations, not across respondents.
 - Loop & Merge can make the path space large. The package unrolls to the
   explicit cap and treats the iteration count as uniform.
-- The points-to-minutes conversion is the published GfS rule of thumb,
+- The points-to-minutes conversion is the original GfS rule of thumb,
   roughly 12 points per minute.
 - Burden scores are not predictions of completion time, dropout, or
   satisficing. Those are empirical questions about respondent behaviour,

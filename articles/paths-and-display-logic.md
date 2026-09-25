@@ -185,14 +185,17 @@ routes <- data.frame(
   loop_BL8 = rbinom(50, 3, 0.5)    # "Vehicle details" loop, cap 3
 )
 burden_report(demo, routes = routes, quiet = TRUE)$population
-#> # A tibble: 5 × 4
+#> # A tibble: 8 × 4
 #>   statistic points minutes  index
 #>   <fct>      <dbl>   <dbl>  <dbl>
 #> 1 min         100     8.33 0.0667
-#> 2 p25         110.    9.19 0.0735
-#> 3 median      116     9.67 0.0773
-#> 4 p75         122.   10.1  0.0812
-#> 5 max         132    11    0.088
+#> 2 p10         105     8.75 0.07  
+#> 3 p25         110.    9.19 0.0735
+#> 4 median      116     9.67 0.0773
+#> 5 mean        114.    9.52 0.0761
+#> 6 p75         122.   10.1  0.0812
+#> 7 p90         122.   10.2  0.0814
+#> 8 max         132    11    0.088
 ```
 
 Real route data would come from your fielded response file: count each
@@ -209,5 +212,5 @@ turns it into a sentence:
 ``` r
 
 summary_line(respondent_burden(demo))
-#> [1] "Typical respondent burden is about 118 GfS points (~10 min). The lightest complete route is ~117 pts (~10 min); with the Loop & Merge sections fully repeated it reaches ~143 pts (~12 min)."
+#> [1] "Typical respondent burden is about 118 GfS+ points (~10 min). The lightest complete route is ~117 pts (~10 min); with the Loop & Merge sections fully repeated it reaches ~143 pts (~12 min)."
 ```

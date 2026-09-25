@@ -22,7 +22,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/realised-burden.html">Realised burden from response data</a></li>
     <li><a class="dropdown-item" href="../articles/extensions.html">Extensions: scoring surveys without a QSF</a></li>
     <li><a class="dropdown-item" href="../articles/reading-the-report.html">Reading the burden report</a></li>
-    <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS scoring method</a></li>
+    <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS+ scoring method</a></li>
     <li><a class="dropdown-item" href="../articles/paths-and-display-logic.html">Paths and display logic</a></li>
     <li><a class="dropdown-item" href="../articles/calibration.html">Calibration and limitations</a></li>
   </ul></li>
@@ -43,6 +43,10 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="surveyburden-development-version">surveyBurden (development version)<a class="anchor" aria-label="anchor" href="#surveyburden-development-version"></a></h2>
+<ul><li>When <code>routes</code> is supplied, <code><a href="../reference/burden_report.html">burden_report()</a></code> now includes the arithmetic mean and the 10th and 90th percentiles of per-respondent predictions in <code>$population</code> and its printed table, alongside the existing five statistics.</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.0" id="surveyburden-020">surveyBurden 0.2.0<a class="anchor" aria-label="anchor" href="#surveyburden-020"></a></h2>
 <p>CRAN preparation release.</p>
 <ul><li>Added runnable <code>@examples</code> to all exported functions using the shipped demo fixture (<code>demo_travel_survey.qsf</code>).</li>
@@ -59,15 +63,15 @@
 <h2 class="pkg-version" data-toc-text="0.1.0" id="surveyburden-010">surveyBurden 0.1.0<a class="anchor" aria-label="anchor" href="#surveyburden-010"></a></h2>
 <p>First release.</p>
 <ul><li>
-<code><a href="../reference/burden_report.html">burden_report()</a></code> scores a Qualtrics <code>.qsf</code> (or a live survey via the API) with the published GfS / Axhausen burden weights, reconstructs the respondent paths the survey’s flow and display logic allow, and reports burden across those paths as a structured object.</li>
+<code><a href="../reference/burden_report.html">burden_report()</a></code> scores a Qualtrics <code>.qsf</code> (or a live survey via the API) with the GfS+ burden-point scheme (extending Heimgartner and Axhausen 2024), reconstructs the respondent paths the survey’s flow and display logic allow, and reports burden across those paths as a structured object.</li>
 <li>
-<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> on the report opens with a one-line verdict: the median completing-path burden in points and minutes, its ratio to the 399-point GfS benchmark, and the range across completing paths. <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> gives the same headline.</li>
+<code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> on the report opens with a one-line verdict: the median completing-path burden in points and minutes, its ratio to the 399-point GfS+ benchmark, and the range across completing paths. <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> gives the same headline.</li>
 <li>Supplying observed respondent routes turns the structural profile into a population-weighted burden figure.</li>
 <li>
 <code>burden_report(quiet = FALSE)</code> reports progress through the pipeline stages with <code><a href="https://cli.r-lib.org/reference/cli_progress_step.html" class="external-link">cli::cli_progress_step()</a></code>.</li>
 <li>A survey where every structural path screens out (an unconditional <code>EndSurvey</code> in the flow) returns a report with <code>NA</code> burden and an explanatory warning rather than erroring; the per-path burdens are still in <code>$paths</code>.</li>
 <li>Lower-level steps are exported for inspection or reuse: <code><a href="../reference/read_qsf.html">read_qsf()</a></code>, <code><a href="../reference/fetch_qsf.html">fetch_qsf()</a></code>, <code><a href="../reference/parse_qsf.html">parse_qsf()</a></code>, <code><a href="../reference/classify_question.html">classify_question()</a></code>, <code><a href="../reference/gfs_scheme.html">gfs_scheme()</a></code>, <code><a href="../reference/score_burden.html">score_burden()</a></code>, <code><a href="../reference/resolve_flow.html">resolve_flow()</a></code>, <code><a href="../reference/resolve_paths.html">resolve_paths()</a></code>, <code><a href="../reference/path_burden.html">path_burden()</a></code>, <code><a href="../reference/path_burden_profile.html">path_burden_profile()</a></code>, <code><a href="../reference/respondent_burden.html">respondent_burden()</a></code>, <code><a href="../reference/calculation_certainty.html">calculation_certainty()</a></code>, <code><a href="../reference/validate_times.html">validate_times()</a></code>.</li>
-<li>Five vignettes: “Get started”, “Reading the report”, “The GfS scoring method”, “Paths and display logic”, and “Calibration and limits”.</li>
+<li>Five vignettes: “Get started”, “Reading the report”, “The GfS+ scoring method”, “Paths and display logic”, and “Calibration and limits”.</li>
 </ul></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>

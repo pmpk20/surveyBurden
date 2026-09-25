@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>The GfS scoring method • surveyBurden</title>
+<title>The GfS+ scoring method • surveyBurden</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="The GfS scoring method">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="The GfS+ scoring method">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -37,7 +37,7 @@
 <li><a class="dropdown-item" href="../articles/realised-burden.html">Realised burden from response data</a></li>
     <li><a class="dropdown-item" href="../articles/extensions.html">Extensions: scoring surveys without a QSF</a></li>
     <li><a class="dropdown-item" href="../articles/reading-the-report.html">Reading the burden report</a></li>
-    <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS scoring method</a></li>
+    <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS+ scoring method</a></li>
     <li><a class="dropdown-item" href="../articles/paths-and-display-logic.html">Paths and display logic</a></li>
     <li><a class="dropdown-item" href="../articles/calibration.html">Calibration and limitations</a></li>
   </ul>
@@ -62,7 +62,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>The GfS scoring method</h1>
+      <h1>The GfS+ scoring method</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/pmpk20/surveyBurden/blob/main/vignettes/gfs-scoring.Rmd" class="external-link"><code>vignettes/gfs-scoring.Rmd</code></a></small>
@@ -71,7 +71,7 @@
 
     
     
-<p>This article covers how one Qualtrics question becomes a GfS point
+<p>This article covers how one Qualtrics question becomes a GfS+ point
 score. For how those scores are combined across the survey’s routes see
 <code><a href="../articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code>; for reading the
 finished report see <code><a href="../articles/reading-the-report.html">vignette("reading-the-report")</a></code>.</p>
@@ -80,10 +80,11 @@ finished report see <code><a href="../articles/reading-the-report.html">vignette
 <span><span class="va">demo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"demo_travel_survey.qsf"</span>, package <span class="op">=</span> <span class="st">"surveyBurden"</span><span class="op">)</span></span>
 <span><span class="va">qsf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_qsf.html">read_qsf</a></span><span class="op">(</span><span class="va">demo</span><span class="op">)</span></span>
 <span><span class="va">catalogue</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/parse_qsf.html">parse_qsf</a></span><span class="op">(</span><span class="va">qsf</span><span class="op">)</span></span></code></pre></div>
-<p>surveyBurden implements the published GfS / Axhausen scheme
-(Heimgartner and Axhausen 2024, Table 1); it does not invent a new
-burden scale. The point weights are transcribed verbatim into
-<code><a href="../reference/gfs_scheme.html">gfs_scheme()</a></code>.</p>
+<p>surveyBurden implements and extends the published GfS scheme
+(Heimgartner and Axhausen 2024, Table 1). The original point weights are
+transcribed verbatim into <code><a href="../reference/gfs_scheme.html">gfs_scheme()</a></code>; the package adds
+documented inference rules for Qualtrics question types that have no row
+in the original table, hence GfS+.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">w</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gfs_scheme.html">gfs_scheme</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">w</span><span class="op">$</span><span class="va">yes_no</span></span>
@@ -98,7 +99,7 @@ burden scale. The point weights are transcribed verbatim into
 <table class="table">
 <thead><tr class="header">
 <th>response action</th>
-<th>GfS points</th>
+<th>GfS+ points</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
@@ -176,7 +177,7 @@ not carry what the scheme needs, the package applies an
 <p><code>score_flag</code> has four values:</p>
 <ul>
 <li>
-<code>auto</code> – the GfS mapping is deterministic from the
+<code>auto</code> – the GfS+ mapping is deterministic from the
 structure.</li>
 <li>
 <code>inferred</code> – the structure is clear, but choosing the
@@ -193,10 +194,11 @@ uncertain.</li>
 and <code><a href="../reference/burden_report.html">burden_report()</a></code> warns.</li>
 </ul>
 <p>This is the distinction between <strong>GfS-native</strong>
-quantities (question type, response action, number of alternatives – all
-specified by the scheme) and <strong>package-derived</strong> ones
-(estimated line counts, response-unit structure – inferred because the
-<code>.qsf</code> lacks them).</p>
+quantities (from the original scheme: question type, response action,
+number of alternatives – all specified by the scheme) and
+<strong>package-derived</strong> ones (estimated line counts,
+response-unit structure – inferred because the <code>.qsf</code> lacks
+them).</p>
 </div>
 <div class="section level2">
 <h2 id="documented-inference-rules-where-table-1-is-silent">Documented inference rules where Table 1 is silent<a class="anchor" aria-label="anchor" href="#documented-inference-rules-where-table-1-is-silent"></a>
@@ -249,7 +251,7 @@ Each cell is one trivial closed yes/no decision; GfS scores a closed
 yes/no at 1.0, discounted here for the working-memory efficiency of
 answering in a grid. This proxy is symmetric in rows and columns so it
 does not change with how Qualtrics happened to store the grid. It is a
-documented inference, not GfS. The weight is
+GfS+ extension, not part of the original GfS table. The weight is
 <code>gfs_scheme()$matrix_cell_multi</code>.</p>
 </div>
 </div>

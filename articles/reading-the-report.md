@@ -17,7 +17,7 @@ report <- burden_report(demo, quiet = TRUE)
 report
 #> 
 #> ── Survey Burden Report: Neighbourhood Travel Survey (demo) ────────────────────
-#> Median completing path: 123 GfS points, ~10 min - 0.3x the benchmark median of
+#> Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of
 #> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.
 #> 
 #> ── Instrument ──
@@ -34,7 +34,7 @@ report
 #> Structural paths: 4 (2 complete, 2 screen-out)
 #> Display-logic combinations checked: 3-4 per complete path
 #> 
-#> ── Burden (12 GfS points ~ 1 minute; index = points / 1500) ──
+#> ── Burden (12 GfS+ points ~ 1 minute; index = points / 1500) ──
 #> 
 #> Statistic        Points  ~Min  Index
 #> ------------------------------------
@@ -43,8 +43,8 @@ report
 #> Median              123    10   0.08
 #> 75th percentile     129    11   0.09
 #> Maximum             143    12   0.10
-#> Benchmark: median 399 points across 79 GfS-scored survey waves (Heimgartner &
-#> Axhausen 2024).
+#> Benchmark: median 399 points across 79 GfS-scored waves (Heimgartner & Axhausen
+#> 2024).
 #> 
 #> ── Burden by block (survey order; share of all-question points) ──
 #> 
@@ -70,7 +70,7 @@ report
 #> QID1       11 pts  0 opt    Welcome, and thank you for taking part in the Neighbour...
 #> QID7        8 pts  4x3      For each area, do you have a condition that makes trave...
 #> 
-#> ── Readability diagnostics (reading load; not part of the GfS score) ──
+#> ── Readability diagnostics (reading load; not part of the GfS+ score) ──
 #> 
 #> Long stems (> 40 words)          0
 #> Long matrix labels (> 10 words)  0
@@ -93,7 +93,7 @@ report
 ## The verdict line
 
 The first line under the title is a plain-language summary: the median
-completing-path burden in GfS points and in minutes, its ratio to the
+completing-path burden in GfS+ points and in minutes, its ratio to the
 399-point GfS benchmark, and the point range across the survey’s
 completing paths. When you supply `routes` it also reports the
 population-weighted median (see
@@ -164,7 +164,7 @@ attr(report$burden, "basis")
 #> [1] "structural"
 ```
 
-- `points` is the GfS point total; `minutes` is `points` divided by the
+- `points` is the GfS+ point total; `minutes` is `points` divided by the
   points-per-minute rate (default 12); `index` is `points / 1500`, a 0–1
   rescaling where 1.0 is the level Heimgartner and Axhausen’s sample
   found rare.
@@ -271,7 +271,7 @@ report$readability$long_grids[, c("question_id", "block_name", "n_rows")]
 Three counts: question stems over `stem_threshold` words (default 40),
 matrix row/option labels over `label_threshold` words (default 10), and
 matrix questions with more than 6 rows. These are **reading-load
-signals** reported separately – **none of them changes any GfS score**.
+signals** reported separately – **none of them changes any GfS+ score**.
 A long grid or a wordy stem is flagged so it is visible without being
 silently included in the burden total. Long grids in particular invite
 satisficing (answering the same way down every row).

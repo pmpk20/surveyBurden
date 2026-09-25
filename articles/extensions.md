@@ -41,7 +41,7 @@ platform-specific. Non-Qualtrics platforms would need to provide an
 equivalent flow structure or an adapter (see *What a new parser must
 provide* below).
 
-**Layer 3** applies the GfS points to the catalogue, computes per-path
+**Layer 3** applies the GfS+ points to the catalogue, computes per-path
 burden bands, and assembles the report. This layer operates entirely on
 the question catalogue and the resolved path structure. It never touches
 the QSF, so it is feasibly platform-agnostic.
@@ -102,7 +102,7 @@ for debugging and provenance. The scorer does not read them; it uses
 
 The `std_type` column uses the following vocabulary:
 
-| `std_type` | Description | GfS scoring |
+| `std_type` | Description | GfS+ scoring |
 |----|----|----|
 | `single_choice` | One answer from a list (radio, dropdown, NPS) | By option count |
 | `multi_choice` | Multiple answers from a list (checkboxes) | By option count |
@@ -207,9 +207,9 @@ survey-level total:
 
 total_points <- sum(scored$gfs_points, na.rm = TRUE)
 total_minutes <- total_points / gfs_scheme()$points_per_minute
-cat(sprintf("Total: %.0f GfS points, ~%.0f minutes\n",
+cat(sprintf("Total: %.0f GfS+ points, ~%.0f minutes\n",
             total_points, total_minutes))
-#> Total: 43 GfS points, ~4 minutes
+#> Total: 43 GfS+ points, ~4 minutes
 ```
 
 This provides a headline estimate of the burden across one single path
@@ -224,7 +224,7 @@ A hand-built catalogue scored with
 [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
 gives you:
 
-- Per-question GfS burden points, using the same scoring rules as
+- Per-question GfS+ burden points, using the same scoring rules as
   [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md).
 - A survey-level total (the [`sum()`](https://rdrr.io/r/base/sum.html)
   above).
@@ -243,7 +243,7 @@ It does **not** give you:
 The total from a hand-built catalogue is a defensible measure of
 instrument burden for any survey that can be expressed as a list of
 questions with their types and option counts. It applies the same
-published GfS point weights (Heimgartner and Axhausen, 2024) as the full
+published GfS+ point scheme (Heimgartner and Axhausen, 2024) as the full
 Qualtrics pipeline.
 
 ## What a new parser must provide

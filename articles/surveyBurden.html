@@ -37,7 +37,7 @@
 <li><a class="dropdown-item" href="../articles/realised-burden.html">Realised burden from response data</a></li>
     <li><a class="dropdown-item" href="../articles/extensions.html">Extensions: scoring surveys without a QSF</a></li>
     <li><a class="dropdown-item" href="../articles/reading-the-report.html">Reading the burden report</a></li>
-    <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS scoring method</a></li>
+    <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS+ scoring method</a></li>
     <li><a class="dropdown-item" href="../articles/paths-and-display-logic.html">Paths and display logic</a></li>
     <li><a class="dropdown-item" href="../articles/calibration.html">Calibration and limitations</a></li>
   </ul>
@@ -74,9 +74,10 @@
 <p><code>surveyBurden</code> estimates <strong>ex-ante instrument
 burden</strong>: the response effort a programmed Qualtrics survey
 demands, worked out before fielding from the instrument alone. It reads
-the survey, scores every question with the published GfS / Axhausen
-point scheme, reconstructs the routes the flow and display logic allow,
-and reports how burden varies across those routes.</p>
+the survey, scores every question with the GfS+ point scheme (extending
+Heimgartner and Axhausen 2024), reconstructs the routes the flow and
+display logic allow, and reports how burden varies across those
+routes.</p>
 <p>In the terms of Yan and Williams (2022) this is the
 <em>instrument</em> side of respondent burden – length, difficulty, and
 the effort the design requires. It is not the <em>perceived</em> burden
@@ -130,7 +131,7 @@ numbers the current package produces. To use your own survey, replace
 <span><span class="va">report</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Burden Report: Neighbourhood Travel Survey (demo)</span> <span style="color: #00BBBB;">────────────────────</span></span></span>
-<span><span class="co">#&gt; Median completing path: 123 GfS points, ~10 min - 0.3x the benchmark median of</span></span>
+<span><span class="co">#&gt; Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of</span></span>
 <span><span class="co">#&gt; 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Instrument</span> ──</span></span>
@@ -147,7 +148,7 @@ numbers the current package produces. To use your own survey, replace
 <span><span class="co">#&gt; Structural paths: 4 (2 complete, 2 screen-out)</span></span>
 <span><span class="co">#&gt; Display-logic combinations checked: 3-4 per complete path</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── <span style="font-weight: bold;">Burden (12 GfS points ~ 1 minute; index = points / 1500)</span> ──</span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Burden (12 GfS+ points ~ 1 minute; index = points / 1500)</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Statistic        Points  ~Min  Index</span></span>
 <span><span class="co">#&gt; ------------------------------------</span></span>
@@ -156,8 +157,8 @@ numbers the current package produces. To use your own survey, replace
 <span><span class="co">#&gt; Median              123    10   0.08</span></span>
 <span><span class="co">#&gt; 75th percentile     129    11   0.09</span></span>
 <span><span class="co">#&gt; Maximum             143    12   0.10</span></span>
-<span><span class="co">#&gt; Benchmark: median 399 points across 79 GfS-scored survey waves (Heimgartner &amp;</span></span>
-<span><span class="co">#&gt; Axhausen 2024).</span></span>
+<span><span class="co">#&gt; Benchmark: median 399 points across 79 GfS-scored waves (Heimgartner &amp; Axhausen</span></span>
+<span><span class="co">#&gt; 2024).</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Burden by block (survey order; share of all-question points)</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -183,7 +184,7 @@ numbers the current package produces. To use your own survey, replace
 <span><span class="co">#&gt; QID1       11 pts  0 opt    Welcome, and thank you for taking part in the Neighbour...</span></span>
 <span><span class="co">#&gt; QID7        8 pts  4x3      For each area, do you have a condition that makes trave...</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── <span style="font-weight: bold;">Readability diagnostics (reading load; not part of the GfS score)</span> ──</span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Readability diagnostics (reading load; not part of the GfS+ score)</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Long stems (&gt; 40 words)          0</span></span>
 <span><span class="co">#&gt; Long matrix labels (&gt; 10 words)  0</span></span>
@@ -241,7 +242,7 @@ turn.</p>
 <tbody>
 <tr class="odd">
 <td><strong>question burden</strong></td>
-<td>the GfS point score for one question, from its type and
+<td>the GfS+ point score for one question, from its type and
 structure</td>
 </tr>
 <tr class="even">
@@ -268,7 +269,7 @@ are exact and parts that rest on documented approximations</td>
 <tr class="even">
 <td><strong>readability diagnostics</strong></td>
 <td>counts of long question stems, long matrix labels, and long grids.
-Reading-load signals, reported separately, never folded into the GfS
+Reading-load signals, reported separately, never folded into the GfS+
 score.</td>
 </tr>
 </tbody>
@@ -312,7 +313,7 @@ live on attributes: <code>attr(report, "points_per_minute")</code>.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Neighbourhood Travel Survey (demo)</span> <span style="color: #00BBBB;">──────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; 26 questions, 12 blocks, 4 structural paths (2 complete).</span></span>
-<span><span class="co">#&gt; Median completing path: 123 GfS points, ~10 min - 0.3x the benchmark median of</span></span>
+<span><span class="co">#&gt; Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of</span></span>
 <span><span class="co">#&gt; 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.</span></span>
 <span><span class="co">#&gt; Benchmark: median 399 points across 79 GfS-scored waves.</span></span></code></pre></div>
 </div>

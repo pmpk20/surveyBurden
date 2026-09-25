@@ -37,7 +37,7 @@
 <li><a class="dropdown-item" href="../articles/realised-burden.html">Realised burden from response data</a></li>
     <li><a class="dropdown-item" href="../articles/extensions.html">Extensions: scoring surveys without a QSF</a></li>
     <li><a class="dropdown-item" href="../articles/reading-the-report.html">Reading the burden report</a></li>
-    <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS scoring method</a></li>
+    <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS+ scoring method</a></li>
     <li><a class="dropdown-item" href="../articles/paths-and-display-logic.html">Paths and display logic</a></li>
     <li><a class="dropdown-item" href="../articles/calibration.html">Calibration and limitations</a></li>
   </ul>
@@ -270,14 +270,17 @@ two loops in sequence.</p>
 <span>  loop_BL8 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Binomial.html" class="external-link">rbinom</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">3</span>, <span class="fl">0.5</span><span class="op">)</span>    <span class="co"># "Vehicle details" loop, cap 3</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">demo</span>, routes <span class="op">=</span> <span class="va">routes</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">$</span><span class="va">population</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 8 × 4</span></span></span>
 <span><span class="co">#&gt;   statistic points minutes  index</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> min         100     8.33 0.066<span style="text-decoration: underline;">7</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> p25         110.    9.19 0.073<span style="text-decoration: underline;">5</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> median      116     9.67 0.077<span style="text-decoration: underline;">3</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> p75         122.   10.1  0.081<span style="text-decoration: underline;">2</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> max         132    11    0.088</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> p10         105     8.75 0.07  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> p25         110.    9.19 0.073<span style="text-decoration: underline;">5</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> median      116     9.67 0.077<span style="text-decoration: underline;">3</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> mean        114.    9.52 0.076<span style="text-decoration: underline;">1</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> p75         122.   10.1  0.081<span style="text-decoration: underline;">2</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> p90         122.   10.2  0.081<span style="text-decoration: underline;">4</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> max         132    11    0.088</span></span></code></pre></div>
 <p>Real route data would come from your fielded response file: count
 each respondent’s loop iterations and flag which optional blocks they
 entered. When <code>routes</code> are supplied the report’s verdict line
@@ -287,7 +290,7 @@ per-path table and <code><a href="../reference/summary_line.html">summary_line()
 sentence:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summary_line.html">summary_line</a></span><span class="op">(</span><span class="fu"><a href="../reference/respondent_burden.html">respondent_burden</a></span><span class="op">(</span><span class="va">demo</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Typical respondent burden is about 118 GfS points (~10 min). The lightest complete route is ~117 pts (~10 min); with the Loop &amp; Merge sections fully repeated it reaches ~143 pts (~12 min)."</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "Typical respondent burden is about 118 GfS+ points (~10 min). The lightest complete route is ~117 pts (~10 min); with the Loop &amp; Merge sections fully repeated it reaches ~143 pts (~12 min)."</span></span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

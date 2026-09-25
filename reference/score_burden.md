@@ -1,6 +1,6 @@
 # Score per-question ex-ante burden
 
-Applies the GfS points scoring rules (Heimgartner and Axhausen 2024,
+Applies the GfS+ scoring rules (extending Heimgartner and Axhausen 2024,
 [doi:10.32866/001c.121624](https://doi.org/10.32866/001c.121624) ) via
 [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)
 to a question catalogue from

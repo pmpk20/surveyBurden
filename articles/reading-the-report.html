@@ -37,7 +37,7 @@
 <li><a class="dropdown-item" href="../articles/realised-burden.html">Realised burden from response data</a></li>
     <li><a class="dropdown-item" href="../articles/extensions.html">Extensions: scoring surveys without a QSF</a></li>
     <li><a class="dropdown-item" href="../articles/reading-the-report.html">Reading the burden report</a></li>
-    <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS scoring method</a></li>
+    <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS+ scoring method</a></li>
     <li><a class="dropdown-item" href="../articles/paths-and-display-logic.html">Paths and display logic</a></li>
     <li><a class="dropdown-item" href="../articles/calibration.html">Calibration and limitations</a></li>
   </ul>
@@ -83,7 +83,7 @@ produced see <code><a href="../articles/gfs-scoring.html">vignette("gfs-scoring"
 <span><span class="va">report</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Burden Report: Neighbourhood Travel Survey (demo)</span> <span style="color: #00BBBB;">────────────────────</span></span></span>
-<span><span class="co">#&gt; Median completing path: 123 GfS points, ~10 min - 0.3x the benchmark median of</span></span>
+<span><span class="co">#&gt; Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of</span></span>
 <span><span class="co">#&gt; 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Instrument</span> ──</span></span>
@@ -100,7 +100,7 @@ produced see <code><a href="../articles/gfs-scoring.html">vignette("gfs-scoring"
 <span><span class="co">#&gt; Structural paths: 4 (2 complete, 2 screen-out)</span></span>
 <span><span class="co">#&gt; Display-logic combinations checked: 3-4 per complete path</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── <span style="font-weight: bold;">Burden (12 GfS points ~ 1 minute; index = points / 1500)</span> ──</span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Burden (12 GfS+ points ~ 1 minute; index = points / 1500)</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Statistic        Points  ~Min  Index</span></span>
 <span><span class="co">#&gt; ------------------------------------</span></span>
@@ -109,8 +109,8 @@ produced see <code><a href="../articles/gfs-scoring.html">vignette("gfs-scoring"
 <span><span class="co">#&gt; Median              123    10   0.08</span></span>
 <span><span class="co">#&gt; 75th percentile     129    11   0.09</span></span>
 <span><span class="co">#&gt; Maximum             143    12   0.10</span></span>
-<span><span class="co">#&gt; Benchmark: median 399 points across 79 GfS-scored survey waves (Heimgartner &amp;</span></span>
-<span><span class="co">#&gt; Axhausen 2024).</span></span>
+<span><span class="co">#&gt; Benchmark: median 399 points across 79 GfS-scored waves (Heimgartner &amp; Axhausen</span></span>
+<span><span class="co">#&gt; 2024).</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Burden by block (survey order; share of all-question points)</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -136,7 +136,7 @@ produced see <code><a href="../articles/gfs-scoring.html">vignette("gfs-scoring"
 <span><span class="co">#&gt; QID1       11 pts  0 opt    Welcome, and thank you for taking part in the Neighbour...</span></span>
 <span><span class="co">#&gt; QID7        8 pts  4x3      For each area, do you have a condition that makes trave...</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── <span style="font-weight: bold;">Readability diagnostics (reading load; not part of the GfS score)</span> ──</span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Readability diagnostics (reading load; not part of the GfS+ score)</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Long stems (&gt; 40 words)          0</span></span>
 <span><span class="co">#&gt; Long matrix labels (&gt; 10 words)  0</span></span>
@@ -158,8 +158,8 @@ produced see <code><a href="../articles/gfs-scoring.html">vignette("gfs-scoring"
 <h2 id="the-verdict-line">The verdict line<a class="anchor" aria-label="anchor" href="#the-verdict-line"></a>
 </h2>
 <p>The first line under the title is a plain-language summary: the
-median completing-path burden in GfS points and in minutes, its ratio to
-the 399-point GfS benchmark, and the point range across the survey’s
+median completing-path burden in GfS+ points and in minutes, its ratio
+to the 399-point GfS benchmark, and the point range across the survey’s
 completing paths. When you supply <code>routes</code> it also reports
 the population-weighted median (see
 <code><a href="../articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code>).</p>
@@ -224,7 +224,7 @@ of feasible skip-logic states enumerated per complete path.</p>
 <span><span class="co">#&gt; [1] "structural"</span></span></code></pre></div>
 <ul>
 <li>
-<code>points</code> is the GfS point total; <code>minutes</code> is
+<code>points</code> is the GfS+ point total; <code>minutes</code> is
 <code>points</code> divided by the points-per-minute rate (default 12);
 <code>index</code> is <code>points / 1500</code>, a 0–1 rescaling where
 1.0 is the level Heimgartner and Axhausen’s sample found rare.</li>
@@ -326,7 +326,7 @@ that records the rule used for each:</p>
 (default 40), matrix row/option labels over <code>label_threshold</code>
 words (default 10), and matrix questions with more than 6 rows. These
 are <strong>reading-load signals</strong> reported separately –
-<strong>none of them changes any GfS score</strong>. A long grid or a
+<strong>none of them changes any GfS+ score</strong>. A long grid or a
 wordy stem is flagged so it is visible without being silently included
 in the burden total. Long grids in particular invite satisficing
 (answering the same way down every row).</p>

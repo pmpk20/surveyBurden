@@ -39,7 +39,7 @@ Classify each question and apply the GfS / Axhausen point weights.
 - [`validate_catalogue()`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md)
   : Validate (and coerce) a question catalogue
 - [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)
-  : GfS burden-scoring scheme (Heimgartner and Axhausen 2024)
+  : GfS+ burden-scoring scheme
 - [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
   : Score per-question ex-ante burden
 

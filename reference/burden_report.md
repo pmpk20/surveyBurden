@@ -18,6 +18,7 @@ burden_report(
   stem_warning_threshold = 40L,
   label_warning_threshold = 10L,
   words_per_line = NULL,
+  max_paths = 10000L,
   certainty = TRUE,
   quiet = FALSE
 )
@@ -83,6 +84,14 @@ summary(object, ...)
   in rendered lines, and a QSF has words, not a rendered width – not an
   empirically calibrated constant. Set it to your survey theme's typical
   line length if you have one.
+
+- max_paths:
+
+  Cap on the number of distinct structural paths to enumerate (default
+  10 000). Passed to
+  [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md).
+  Surveys with heavily branching flows may exceed this; raise the cap or
+  treat the error as a diagnostic finding (intractable routing).
 
 - certainty:
 
@@ -191,12 +200,11 @@ values that are genuinely reachable, which is why its minimum is usually
 the one range shown, whenever `profile = TRUE`.**
 
 **Path-space cap.** The structural path space is enumerated up to
-`max_paths` (10000, set inside
-[`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md)).
-A flow that would produce more raises an error rather than a partial
-answer; a survey that hits it has genuinely intractable routing. Block
-randomisers are treated as "all sub-blocks shown, in survey order" – the
-randomised subsets are not enumerated.
+`max_paths` (default 10 000). A flow that would produce more raises an
+error rather than a partial answer; raise `max_paths` or treat it as a
+diagnostic finding (intractable routing). Block randomisers are treated
+as "all sub-blocks shown, in survey order" – the randomised subsets are
+not enumerated.
 
 ## Examples
 
@@ -206,16 +214,16 @@ qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
                          package = "surveyBurden")
 br <- burden_report(qsf_path)
 #> ℹ Reading survey
-#> ✔ Reading survey [9ms]
+#> ✔ Reading survey [8ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [107ms]
+#> ✔ Scoring questions and resolving paths [78ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [34ms]
+#> ✔ Checking calculation certainty [25ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [30ms]
+#> ✔ Enumerating display-logic combinations [22ms]
 #> 
 br
 #> 

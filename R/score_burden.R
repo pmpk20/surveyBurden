@@ -1,6 +1,6 @@
 #' Score per-question ex-ante burden
 #'
-#' Applies the GfS points scoring rules (Heimgartner and Axhausen 2024,
+#' Applies the GfS+ scoring rules (extending Heimgartner and Axhausen 2024,
 #' \doi{10.32866/001c.121624}) via [gfs_scheme()] to a question catalogue
 #' from [parse_qsf()], adding burden points, an estimated completion time,
 #' a confidence flag and a plain-language rationale per item.

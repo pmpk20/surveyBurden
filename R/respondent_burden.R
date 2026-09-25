@@ -196,7 +196,7 @@ summary_line.respondent_burden <- function(x, ...) {
   lo  <- min(x$typical_pts)
   hi  <- max(x$ceiling_pts)
   sprintf(
-    paste0("Typical respondent burden is about %.0f GfS points (~%.0f min). ",
+    paste0("Typical respondent burden is about %.0f GfS+ points (~%.0f min). ",
            "The lightest complete route is ~%.0f pts (~%.0f min); with the Loop ",
            "& Merge sections fully repeated it reaches ~%.0f pts (~%.0f min)."),
     med, med / ppm, lo, lo / ppm, hi, hi / ppm

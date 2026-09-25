@@ -1,8 +1,8 @@
 #' Ex-ante instrument burden report
 #'
 #' The user-facing entry point. Parses a Qualtrics `.qsf`, resolves its flow and
-#' display logic, scores every question with the GfS burden-point scheme
-#' (Heimgartner and Axhausen 2024, \doi{10.32866/001c.121624}), and
+#' display logic, scores every question with the GfS+ burden-point scheme
+#' (extending Heimgartner and Axhausen 2024, \doi{10.32866/001c.121624}), and
 #' summarises the burden across the instrument's structural path space.
 #'
 #' @param x A path to a `.qsf` file, or a `qsf_raw` object from [read_qsf()].
@@ -16,13 +16,13 @@
 #'   When supplied, the report adds a population-weighted burden summary: each
 #'   route is weighted by how often respondents actually take it, so unlike the
 #'   structural profile this is a real average over respondents.
-#' @param rare_threshold GfS points above which Heimgartner & Axhausen (2024)
+#' @param rare_threshold GfS+ points above which Heimgartner & Axhausen (2024)
 #'   found surveys to be rare (their sample: median 399, n = 79 waves). Used for
 #'   the "rare burden" warning and to scale the `index` column of `$burden` to
 #'   0-1.
 #' @param stem_warning_threshold Question stems longer than this many words are
 #'   flagged in the readability diagnostics (default 40). Diagnostic only --
-#'   this does **not** change any GfS score.
+#'   this does **not** change any GfS+ score.
 #' @param label_warning_threshold For matrix/grid questions, response-option or
 #'   row labels longer than this many words are flagged (default 10). Diagnostic
 #'   only.
@@ -72,14 +72,19 @@
 #'       `n_questions_ceiling`, `burden_floor`, `burden_ceiling`, `n_gates`, and
 #'       `burden_min` / `burden_median` / `burden_max` (`NA` when
 #'       `profile = FALSE`).}
-#'     \item{readability}{Diagnostic, not part of the GfS score: `stem_threshold`,
+#'     \item{readability}{Diagnostic, not part of the GfS+ score: `stem_threshold`,
 #'       `label_threshold`, and the tibbles `long_stems`, `long_labels` and
 #'       `long_grids`.}
 #'     \item{certainty}{[calculation_certainty()] output, or `NULL` when
 #'       `certainty = FALSE`.}
 #'     \item{warnings}{Character vector of QC flags, in plain language.}
-#'     \item{population}{Present only when `routes` is supplied: a tibble the
-#'       same shape as `burden`, weighted by observed respondent routes.}
+#'     \item{population}{Present only when `routes` is supplied: an eight-row
+#'       tibble with the same columns as `burden`, summarising per-respondent
+#'       predictions as `min`, `p10`, `p25`, `median`, `mean`, `p75`, `p90`,
+#'       `max`. Each respondent has equal weight. Quantiles use
+#'       [stats::quantile()] with its default `type = 7`; `mean` is the
+#'       arithmetic mean. Missing predictions are excluded; all statistics
+#'       are `NA` when no non-missing predictions are available.}
 #'   }
 #'   Scalars are attributes: `points_per_minute`, `rare_threshold`, `benchmark`
 #'   (`list(median_points, n_waves)`) and `profile_used`.
@@ -260,7 +265,7 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
   }
   if (nrow(ls) > 0) {
     warnings <- c(warnings, sprintf(
-      "%d question stem%s exceed%s %d words (reading load, not scored as GfS burden): %s",
+      "%d question stem%s exceed%s %d words (reading load, not scored as GfS+ burden): %s",
       nrow(ls), if (nrow(ls) == 1) "" else "s", if (nrow(ls) == 1) "s" else "",
       stem_warning_threshold, paste(ls$question_id, collapse = ", ")))
   }
@@ -292,7 +297,7 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
   } else if (identical(basis, "structural")) {
     if (burden_tbl$points[burden_tbl$statistic == "max"] > rare_threshold) {
       warnings <- c(warnings, sprintf(
-        "The heaviest reachable burden (%.0f pts) is above %.0f points, the level Heimgartner & Axhausen (2024) found rare among the %d survey waves they scored with the same GfS method (their sample median: 399 pts).",
+        "The heaviest reachable burden (%.0f pts) is above %.0f points, the level Heimgartner & Axhausen (2024) found rare among the %d survey waves they scored with the GfS method (their sample median: 399 pts).",
         burden_tbl$points[burden_tbl$statistic == "max"], rare_threshold, 79L))
     }
     warnings <- c(warnings, paste(
@@ -307,9 +312,13 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
   population <- NULL
   if (!is.null(routes)) {
     pr <- respondent_burden(qsf, routes = routes, scheme = scheme, engine = engine)
-    qp <- stats::quantile(pr$pred_pts, c(0, .25, .5, .75, 1), na.rm = TRUE)
+    population_stats <- c("min", "p10", "p25", "median", "mean", "p75", "p90", "max")
+    predictions <- pr$pred_pts[!is.na(pr$pred_pts)]
+    qp <- stats::quantile(predictions, c(0, .1, .25, .5, .75, .9, 1))
+    qp <- append(qp, if (length(predictions)) mean(predictions) else NA_real_,
+                 after = 4L)
     population <- tibble::tibble(
-      statistic = factor(probs, levels = probs),
+      statistic = factor(population_stats, levels = population_stats),
       points    = as.numeric(qp),
       minutes   = as.numeric(qp) / ppm,
       index     = as.numeric(qp) / rare_threshold
@@ -399,7 +408,7 @@ burden_verdict_line <- function(burden, ppm, benchmark_median, n_complete,
   med_m <- round(pt("median") / ppm)
   ratio <- sprintf("%.1f", pt("median") / benchmark_median)
   line1 <- sprintf(
-    "Median completing path: %d GfS points, ~%d min - %sx the benchmark median of %d. Path burden ranges %d-%d points (%d-%d min) across %d completing path%s.",
+    "Median completing path: %d GfS+ points, ~%d min - %sx the benchmark median of %d. Path burden ranges %d-%d points (%d-%d min) across %d completing path%s.",
     med, med_m, ratio, round(benchmark_median), mn, mx, mn_m, mx_m, n_complete, pl)
 
   if (is.null(population_median)) return(line1)
@@ -441,10 +450,11 @@ print_burden_report_body <- function(x) {
     cli::cli_text("Display-logic combinations checked: {gr[1]}-{gr[2]} per complete path")
   }
 
-  cli::cli_h2("Burden ({ppm} GfS points ~ 1 minute; index = points / {rt})")
+  cli::cli_h2("Burden ({ppm} GfS+ points ~ 1 minute; index = points / {rt})")
   b <- x$burden
-  labs <- c(min = "Minimum", p25 = "25th percentile", median = "Median",
-            p75 = "75th percentile", max = "Maximum")
+  labs <- c(min = "Minimum", p10 = "10th percentile", p25 = "25th percentile",
+            median = "Median", mean = "Mean", p75 = "75th percentile",
+            p90 = "90th percentile", max = "Maximum")
   if (identical(attr(b, "basis"), "none")) {
     cli::cli_text("No completing path: every structural path screens out. Per-path burden is in {.code $paths}.")
   } else {
@@ -457,7 +467,7 @@ print_burden_report_body <- function(x) {
             formatC(b$index,   format = "f", digits = 2))
     )))
   }
-  cli::cli_text("Benchmark: median {bm$median_points} points across {bm$n_waves} GfS-scored survey waves (Heimgartner & Axhausen 2024).")
+  cli::cli_text("Benchmark: median {bm$median_points} points across {bm$n_waves} GfS-scored waves (Heimgartner & Axhausen 2024).")
 
   if (!is.null(x$population)) {
     p <- x$population
@@ -487,7 +497,7 @@ print_burden_report_body <- function(x) {
             dims[i], trunc_txt(ti$question_text[i], 58)), character(1)))
 
   rd <- x$readability
-  cli::cli_h2("Readability diagnostics (reading load; not part of the GfS score)")
+  cli::cli_h2("Readability diagnostics (reading load; not part of the GfS+ score)")
   cli::cli_verbatim(render_table(rbind(
     c("", ""),
     c(sprintf("Long stems (> %d words)", rd$stem_threshold),        nrow(rd$long_stems)),

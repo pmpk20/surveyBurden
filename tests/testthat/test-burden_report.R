@@ -135,7 +135,7 @@ test_that("$readability carries long_stems, long_labels and long_grids", {
   expect_true("QID19" %in% rd$long_grids$question_id)
 })
 
-test_that("routes = adds a $population tibble the same shape as $burden", {
+test_that("routes = adds eight population statistics with the same columns as $burden", {
   set.seed(1)
   routes <- data.frame(
     source = "roots",
@@ -148,8 +148,44 @@ test_that("routes = adds a $population tibble the same shape as $burden", {
   expect_s3_class(r$population, "tbl_df")
   expect_equal(names(r$population), names(r$burden))
   expect_equal(as.character(r$population$statistic),
-               c("min", "p25", "median", "p75", "max"))
+               c("min", "p10", "p25", "median", "mean", "p75", "p90", "max"))
+  pred <- respondent_burden(fx(), routes = routes)$pred_pts
+  expect_equal(bstat(r$population, "mean"), mean(pred))
+  expect_equal(bstat(r$population, "p10"), unname(quantile(pred, .1)))
+  expect_equal(bstat(r$population, "p90"), unname(quantile(pred, .9)))
+  expect_equal(r$population$minutes, r$population$points / 12)
+  expect_equal(r$population$index, r$population$points / 1500)
+  out <- paste(format(r), collapse = "\n")
+  expect_match(out, "10th percentile")
+  expect_match(out, "90th percentile")
+  expect_match(out, "Mean")
   expect_match(paste(r$warnings, collapse = " "), "route", ignore.case = TRUE)
+})
+
+test_that("population statistics describe skewed predictions and omit missing values", {
+  local_mocked_bindings(
+    respondent_burden = function(...) data.frame(pred_pts = c(10, 10, 10, 50, 120, NA))
+  )
+  scheme <- gfs_scheme()
+  scheme$points_per_minute <- 20
+  r <- burden_report(fx(), routes = data.frame(id = 1:6), scheme = scheme,
+                     profile = FALSE, certainty = FALSE, quiet = TRUE,
+                     rare_threshold = 200)
+  expect_equal(r$population$points, c(10, 10, 10, 10, 40, 50, 92, 120))
+  expect_equal(r$population$minutes, r$population$points / 20)
+  expect_equal(r$population$index, r$population$points / 200)
+})
+
+test_that("population statistics handle a single prediction and no predictions", {
+  for (pred in list(42, numeric(0), c(NA_real_, NA_real_))) {
+    local_mocked_bindings(
+      respondent_burden = function(...) data.frame(pred_pts = pred)
+    )
+    r <- burden_report(fx(), routes = data.frame(id = seq_along(pred)),
+                       profile = FALSE, certainty = FALSE, quiet = TRUE)
+    expect_equal(r$population$points,
+                 rep(if (length(pred) == 1L) 42 else NA_real_, 8L))
+  }
 })
 
 test_that("print.burden_report renders the headline and returns invisibly", {
@@ -259,7 +295,7 @@ test_that("the structural verdict states median, minutes, benchmark ratio and ra
   v <- paste(burden_verdict_line(
     report_full()$burden, 12, 399, report_full()$instrument$n_complete_paths),
     collapse = " ")
-  expect_match(v, "Median completing path: 123 GfS points, ~10 min")
+  expect_match(v, "Median completing path: 123 GfS\\+ points, ~10 min")
   expect_match(v, "0[.]3x the benchmark median of 399")
   expect_match(v, "ranges 106-143 points [(]9-12 min[)] across 2 completing paths")
 })

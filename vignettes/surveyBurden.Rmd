@@ -17,7 +17,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 `surveyBurden` estimates **ex-ante instrument burden**: the response
 effort a programmed Qualtrics survey demands, worked out before fielding
 from the instrument alone. It reads the survey, scores every question
-with the published GfS / Axhausen point scheme, reconstructs the routes
+with the GfS+ point scheme (extending Heimgartner and Axhausen 2024), reconstructs the routes
 the flow and display logic allow, and reports how burden varies across
 those routes.
 
@@ -88,12 +88,12 @@ Five terms are used throughout, with fixed meanings:
 
 | term | meaning |
 |---|---|
-| **question burden** | the GfS point score for one question, from its type and structure |
+| **question burden** | the GfS+ point score for one question, from its type and structure |
 | **path burden** | the total question burden along one structural path through the survey flow |
 | **structural burden profile** | the set of feasible burden values across a path's display-logic sub-states, each counted once. Not a probability distribution. |
 | **population-weighted respondent burden** | burden averaged over real respondent routes, where route frequencies stand in for the sub-state probabilities. Produced only when `routes` are supplied. |
 | **calculation certainty** | the split, for a given survey, between parts of the calculation that are exact and parts that rest on documented approximations |
-| **readability diagnostics** | counts of long question stems, long matrix labels, and long grids. Reading-load signals, reported separately, never folded into the GfS score. |
+| **readability diagnostics** | counts of long question stems, long matrix labels, and long grids. Reading-load signals, reported separately, never folded into the GfS+ score. |
 
 ## The report object
 

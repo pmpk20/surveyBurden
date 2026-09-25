@@ -1,3 +1,9 @@
+# surveyBurden (development version)
+
+* When `routes` is supplied, `burden_report()` now includes the arithmetic
+  mean and the 10th and 90th percentiles of per-respondent predictions in
+  `$population` and its printed table, alongside the existing five statistics.
+
 # surveyBurden 0.2.0
 
 CRAN preparation release.
@@ -26,11 +32,11 @@ and expanded the Statement of Need to meet the 250-word guideline.
 First release.
 
 * `burden_report()` scores a Qualtrics `.qsf` (or a live survey via the API)
-  with the published GfS / Axhausen burden weights, reconstructs the respondent
+  with the GfS+ burden-point scheme (extending Heimgartner and Axhausen 2024), reconstructs the respondent
   paths the survey's flow and display logic allow, and reports burden across
   those paths as a structured object.
 * `print()` on the report opens with a one-line verdict: the median
-  completing-path burden in points and minutes, its ratio to the 399-point GfS
+  completing-path burden in points and minutes, its ratio to the 399-point GfS+
   benchmark, and the range across completing paths. `summary()` gives the same
   headline.
 * Supplying observed respondent routes turns the structural profile into a
@@ -45,5 +51,5 @@ First release.
   `score_burden()`, `resolve_flow()`, `resolve_paths()`, `path_burden()`,
   `path_burden_profile()`, `respondent_burden()`, `calculation_certainty()`,
   `validate_times()`.
-* Five vignettes: "Get started", "Reading the report", "The GfS scoring method",
+* Five vignettes: "Get started", "Reading the report", "The GfS+ scoring method",
   "Paths and display logic", and "Calibration and limits".

@@ -29,7 +29,7 @@ report
 ## The verdict line
 
 The first line under the title is a plain-language summary: the median
-completing-path burden in GfS points and in minutes, its ratio to the
+completing-path burden in GfS+ points and in minutes, its ratio to the
 399-point GfS benchmark, and the point range across the survey's
 completing paths. When you supply `routes` it also reports the
 population-weighted median (see
@@ -75,7 +75,7 @@ report$burden
 attr(report$burden, "basis")
 ```
 
-- `points` is the GfS point total; `minutes` is `points` divided by the
+- `points` is the GfS+ point total; `minutes` is `points` divided by the
   points-per-minute rate (default 12); `index` is `points / 1500`, a
   0--1 rescaling where 1.0 is the level Heimgartner and Axhausen's sample
   found rare.
@@ -142,7 +142,7 @@ report$readability$long_grids[, c("question_id", "block_name", "n_rows")]
 Three counts: question stems over `stem_threshold` words (default 40),
 matrix row/option labels over `label_threshold` words (default 10), and
 matrix questions with more than 6 rows. These are **reading-load
-signals** reported separately -- **none of them changes any GfS score**.
+signals** reported separately -- **none of them changes any GfS+ score**.
 A long grid or a wordy stem is flagged so it is visible without being
 silently included in the burden total. Long grids in particular invite
 satisficing (answering the same way down every row).

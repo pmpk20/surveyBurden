@@ -21,7 +21,7 @@ test_that("repeating the Loop & Merge sections lifts the ceiling above the floor
 test_that("summary_line() produces a sentence with points and minutes", {
   s <- summary_line(respondent_burden(qsf_fx()))
   expect_type(s, "character")
-  expect_match(s, "GfS points")
+  expect_match(s, "GfS\\+ points")
   expect_match(s, "min")
 })
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/gfs_scheme.R
 \name{gfs_scheme}
 \alias{gfs_scheme}
-\title{GfS burden-scoring scheme (Heimgartner and Axhausen 2024)}
+\title{GfS+ burden-scoring scheme}
 \usage{
 gfs_scheme()
 }
@@ -10,11 +10,13 @@ gfs_scheme()
 A named list of point values and conversion parameters.
 }
 \description{
-The default scoring backend. Values are transcribed from Table 1 of
-Heimgartner and Axhausen (2024), "Predicting Response Rates Once Again"
-(\emph{Findings}, \doi{10.32866/001c.121624}), which prints the GfS / ETH
-Zurich scheme (GfS Zurich 2006, updated). Override any element and pass
-the result to \code{\link[=score_burden]{score_burden()}}.
+The default scoring backend. The original GfS point values are
+transcribed from Table 1 of Heimgartner and Axhausen (2024),
+"Predicting Response Rates Once Again" (\emph{Findings},
+\doi{10.32866/001c.121624}). The package extends the original scheme
+with documented inference rules for question types not in Table 1
+(dropdowns, sliders, multi-answer matrices), hence GfS+. Override any
+element and pass the result to \code{\link[=score_burden]{score_burden()}}.
 }
 \details{
 Table 1 items and the names used here:

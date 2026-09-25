@@ -8,7 +8,7 @@ Description: Estimates the response burden of a Qualtrics survey instrument
     before it is fielded. Parses a '.qsf' export (or fetches a live survey
     through the Qualtrics API), reconstructs the respondent paths the
     survey's flow and display logic allow, scores every question with the
-    GfS points scheme (Heimgartner and Axhausen 2024)
+    GfS+ points scheme (extending Heimgartner and Axhausen 2024)
     <doi:10.32866/001c.121624>, and reports the burden across those paths
     as a structured object.
 License: MIT + file LICENSE

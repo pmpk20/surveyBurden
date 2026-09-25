@@ -67,7 +67,7 @@ mapped to any question in the QSF.}
 }
 }
 \description{
-Scores the questions each respondent actually answered, using the GfS point
+Scores the questions each respondent actually answered, using the GfS+
 scheme and the survey's structure from the QSF. Unlike \code{\link[=respondent_burden]{respondent_burden()}},
 which predicts burden from structural paths, this function measures it from
 data: every respondent gets a unique score reflecting their actual route

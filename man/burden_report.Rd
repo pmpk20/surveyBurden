@@ -36,14 +36,14 @@ When supplied, the report adds a population-weighted burden summary: each
 route is weighted by how often respondents actually take it, so unlike the
 structural profile this is a real average over respondents.}
 
-\item{rare_threshold}{GfS points above which Heimgartner & Axhausen (2024)
+\item{rare_threshold}{GfS+ points above which Heimgartner & Axhausen (2024)
 found surveys to be rare (their sample: median 399, n = 79 waves). Used for
 the "rare burden" warning and to scale the \code{index} column of \verb{$burden} to
 0-1.}
 
 \item{stem_warning_threshold}{Question stems longer than this many words are
 flagged in the readability diagnostics (default 40). Diagnostic only --
-this does \strong{not} change any GfS score.}
+this does \strong{not} change any GfS+ score.}
 
 \item{label_warning_threshold}{For matrix/grid questions, response-option or
 row labels longer than this many words are flagged (default 10). Diagnostic
@@ -89,22 +89,27 @@ its \code{gfs_points}, \code{score_flag} and \code{score_basis}.}
 \code{n_questions_ceiling}, \code{burden_floor}, \code{burden_ceiling}, \code{n_gates}, and
 \code{burden_min} / \code{burden_median} / \code{burden_max} (\code{NA} when
 \code{profile = FALSE}).}
-\item{readability}{Diagnostic, not part of the GfS score: \code{stem_threshold},
+\item{readability}{Diagnostic, not part of the GfS+ score: \code{stem_threshold},
 \code{label_threshold}, and the tibbles \code{long_stems}, \code{long_labels} and
 \code{long_grids}.}
 \item{certainty}{\code{\link[=calculation_certainty]{calculation_certainty()}} output, or \code{NULL} when
 \code{certainty = FALSE}.}
 \item{warnings}{Character vector of QC flags, in plain language.}
-\item{population}{Present only when \code{routes} is supplied: a tibble the
-same shape as \code{burden}, weighted by observed respondent routes.}
+\item{population}{Present only when \code{routes} is supplied: an eight-row
+tibble with the same columns as \code{burden}, summarising per-respondent
+predictions as \code{min}, \code{p10}, \code{p25}, \code{median}, \code{mean}, \code{p75}, \code{p90},
+\code{max}. Each respondent has equal weight. Quantiles use
+\code{\link[stats:quantile]{stats::quantile()}} with its default \code{type = 7}; \code{mean} is the
+arithmetic mean. Missing predictions are excluded; all statistics
+are \code{NA} when no non-missing predictions are available.}
 }
 Scalars are attributes: \code{points_per_minute}, \code{rare_threshold}, \code{benchmark}
 (\code{list(median_points, n_waves)}) and \code{profile_used}.
 }
 \description{
 The user-facing entry point. Parses a Qualtrics \code{.qsf}, resolves its flow and
-display logic, scores every question with the GfS burden-point scheme
-(Heimgartner and Axhausen 2024, \doi{10.32866/001c.121624}), and
+display logic, scores every question with the GfS+ burden-point scheme
+(extending Heimgartner and Axhausen 2024, \doi{10.32866/001c.121624}), and
 summarises the burden across the instrument's structural path space.
 }
 \details{

@@ -214,16 +214,16 @@ qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
                          package = "surveyBurden")
 br <- burden_report(qsf_path)
 #> ℹ Reading survey
-#> ✔ Reading survey [8ms]
+#> ✔ Reading survey [7ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [78ms]
+#> ✔ Scoring questions and resolving paths [80ms]
 #> 
 #> ℹ Checking calculation certainty
 #> ✔ Checking calculation certainty [25ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [22ms]
+#> ✔ Enumerating display-logic combinations [17ms]
 #> 
 br
 #> 

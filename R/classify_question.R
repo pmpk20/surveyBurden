@@ -162,7 +162,12 @@ label_texts <- function(x) {
   vapply(x, function(el) {
     if (is.character(el)) return(paste(el, collapse = " "))
     if (!is.list(el)) return("")
-    el$Display %||% el$ChoiceText %||% el$Text %||% ""
+    lab <- el$Display %||% el$ChoiceText %||% el$Text %||% ""
+    if (is.character(lab) && length(lab) == 1L) return(lab)
+    # slider tick labels arrive as JSON numbers (e.g. Display = 0, 10, ... 100)
+    if (is.atomic(lab) && length(lab) && !is.character(lab)) lab <- as.character(lab)
+    if (!is.character(lab)) return("")
+    paste(lab, collapse = " ")
   }, character(1))
 }
 

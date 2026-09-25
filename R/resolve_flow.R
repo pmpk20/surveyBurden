@@ -96,8 +96,10 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
       taken <- annotate(outcomes(c(node$Flow %||% list(), rest)), fid, TRUE)
       not   <- annotate(outcomes(rest), fid, FALSE)
       c(taken, not)   # deduped with every other node type below
-    } else if (type == "Group") {
-      outcomes(c(node$Flow %||% list(), rest))
+    } else if (type %in% c("Group", "Authenticator")) {
+      # an Authenticator wraps the flow shown once a respondent authenticates;
+      # failed authentication never yields a response, so only that flow counts
+      outcomes(c(node[["Flow"]] %||% list(), rest))
     } else if (type == "BlockRandomizer") {
       randomisers <<- c(randomisers, node$FlowID %||% node$ID %||% "BlockRandomizer")
       outcomes(c(node$Flow %||% list(), rest))

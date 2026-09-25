@@ -57,6 +57,19 @@ test_that("branches with no block effect collapse to one path", {
   expect_identical(paths$block_ids[[1]], c("A", "B"))
 })
 
+test_that("an Authenticator node's nested flow is walked like a Group", {
+  auth <- list(Type = "Authenticator", FlowID = "F_auth",
+               Flow = list(n_block("A"), n_branch("S", n_end()), n_block("B")))
+  expect_no_warning(paths <- enumerate_paths(list(auth, n_block("C"))))
+  expect_setequal(paste(vapply(paths$block_ids, paste, "", collapse = ">"),
+                        paths$terminates_early),
+                  c("A TRUE", "A>B>C FALSE"))
+
+  # an Authenticator with no nested flow contributes nothing
+  empty <- list(Type = "Authenticator", FlowID = "F_auth")
+  expect_identical(enumerate_paths(list(empty, n_block("C")))$block_ids[[1]], "C")
+})
+
 test_that("same blocks with different early-exit status stay distinct paths", {
   # taken: A, then EndSurvey with B still to come (early); not taken: A, B.
   # A second branch re-shows only A before ending -> same blocks as the first

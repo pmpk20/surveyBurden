@@ -171,6 +171,19 @@ test_that("label_text joins response and answer labels, lowercased; NA when none
   expect_true(is.na(classify_question(bare)$label_text))
 })
 
+test_that("numeric slider tick labels (JSON numbers) are read as text", {
+  # Qualtrics stores HSLIDER tick labels as numbers: Display = 0, 10, ..., 100
+  p <- payload(QuestionType = "Slider", Selector = "HSLIDER",
+               Answers = stats::setNames(lapply(seq(0L, 100L, 10L), function(i) list(Display = i)),
+                                         seq_len(11)))
+  r <- classify_question(p)
+  expect_match(r$label_text, "0 | 10 | 20 | 30 | 40 | 50 | 60 | 70 | 80 | 90 | 100", fixed = TRUE)
+
+  expect_identical(label_texts(list(list(Display = 2.5), list(Display = TRUE),
+                                    list(Display = list()), list(Display = "a"))),
+                   c("2.5", "TRUE", "", "a"))
+})
+
 test_that("sliders are flagged inferred (not in GfS Table 1)", {
   expect_equal(classify_question(payload(QuestionType = "Slider", Selector = "HSLIDER"))$flag,
                "inferred")

@@ -44,9 +44,9 @@
 #' uses the profile's range as the one range shown, whenever `profile = TRUE`.**
 #'
 #' **Path-space cap.** The structural path space is enumerated up to
-#' `max_paths` (10000, set inside [resolve_flow()]). A flow that would produce
-#' more raises an error rather than a partial answer; a survey that hits it has
-#' genuinely intractable routing. Block randomisers are treated as "all
+#' `max_paths` (default 10 000). A flow that would produce more raises an
+#' error rather than a partial answer; raise `max_paths` or treat it as a
+#' diagnostic finding (intractable routing). Block randomisers are treated as "all
 #' sub-blocks shown, in survey order" -- the randomised subsets are not
 #' enumerated.
 #'
@@ -95,6 +95,10 @@
 #'   a QSF has words, not a rendered width -- not an empirically calibrated
 #'   constant. Set it to your survey theme's typical line length if you have
 #'   one.
+#' @param max_paths Cap on the number of distinct structural paths to
+#'   enumerate (default 10 000). Passed to [resolve_flow()]. Surveys with
+#'   heavily branching flows may exceed this; raise the cap or treat the
+#'   error as a diagnostic finding (intractable routing).
 #'
 #' @examples
 #' \donttest{
@@ -112,6 +116,7 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
                           stem_warning_threshold = 40L,
                           label_warning_threshold = 10L,
                           words_per_line = NULL,
+                          max_paths = 10000L,
                           certainty = TRUE,
                           quiet = FALSE) {
   step <- if (isTRUE(quiet)) function(...) invisible() else cli::cli_progress_step
@@ -127,7 +132,7 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
   catalogue <- parse_qsf(qsf)
   scored    <- score_burden(catalogue, scheme = scheme)
   blocks    <- resolve_live_blocks(qsf)
-  paths     <- resolve_paths(qsf, catalogue = catalogue, blocks = blocks)
+  paths     <- resolve_paths(qsf, max_paths = max_paths, catalogue = catalogue, blocks = blocks)
   isum      <- instrument_summary(qsf, blocks = blocks)
   pb        <- path_burden(qsf, scheme = scheme, paths = paths, scored = scored)
   ppm    <- scheme$points_per_minute

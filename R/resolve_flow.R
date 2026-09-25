@@ -105,7 +105,7 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
       cli::cli_abort(c(
         "This survey's path space is too large to enumerate.",
         i = "More than {max_paths} distinct paths; the flow has {count_branches(nodes)} branches.",
-        i = "Raise {.arg max_paths} or treat this as a diagnostic finding (intractable routing)."
+        i = "Raise {.arg max_paths} (e.g. {.code burden_report(x, max_paths = 50000)}) or treat this as a diagnostic finding (intractable routing)."
       ))
     }
     memo[[key]] <- res

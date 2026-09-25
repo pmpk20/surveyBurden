@@ -346,6 +346,15 @@ test_that("the verdict names the population-weighted median when routes are give
   expect_true(any(grepl("Population-weighted median", format(r), fixed = TRUE)))
 })
 
+test_that("max_paths is threaded through burden_report to resolve_flow", {
+  expect_error(
+    burden_report(fx(), max_paths = 1L, certainty = FALSE, quiet = TRUE),
+    "too large"
+  )
+  r <- burden_report(fx(), max_paths = 50000L, certainty = FALSE, quiet = TRUE)
+  expect_s3_class(r, "burden_report")
+})
+
 test_that("burden_report reports progress under quiet = FALSE", {
   withr::local_options(cli.progress_show_after = 0, cli.progress_clear = FALSE)
   expect_message(burden_report(fx(), certainty = FALSE, quiet = FALSE))

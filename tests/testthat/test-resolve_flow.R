@@ -70,6 +70,18 @@ test_that("an Authenticator node's nested flow is walked like a Group", {
   expect_identical(enumerate_paths(list(empty, n_block("C")))$block_ids[[1]], "C")
 })
 
+test_that("container nodes with no Flow key are empty, not their FlowID", {
+  # `node$Flow` would partial-match `FlowID` and splice a string into the flow
+  bare_branch <- list(Type = "Branch", FlowID = "F_br", BranchLogic = list())
+  bare_group  <- list(Type = "Group", FlowID = "F_gr")
+  bare_rand   <- list(Type = "BlockRandomizer", FlowID = "F_rn")
+  for (node in list(bare_branch, bare_group, bare_rand)) {
+    paths <- suppressWarnings(enumerate_paths(list(n_block("A"), node, n_block("B"))))
+    expect_equal(nrow(paths), 1L)
+    expect_identical(paths$block_ids[[1]], c("A", "B"))
+  }
+})
+
 test_that("same blocks with different early-exit status stay distinct paths", {
   # taken: A, then EndSurvey with B still to come (early); not taken: A, B.
   # A second branch re-shows only A before ending -> same blocks as the first

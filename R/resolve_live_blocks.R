@@ -31,7 +31,7 @@ resolve_live_blocks <- function(qsf) {
 
   # 1. Ordered, de-duplicated list of block ids referenced by the flow.
   referenced <- character(0)
-  flow_walk(qsf_flow(qsf)$Flow, function(node) {
+  flow_walk(qsf_flow(qsf)[["Flow"]], function(node) {
     if (node$Type %in% c("Standard", "Block") && !is.null(node$ID)) {
       referenced <<- c(referenced, node$ID)
     }

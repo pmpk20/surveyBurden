@@ -66,7 +66,7 @@ calculation_certainty <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L
 
   # --- branches: trigger variable(s); both outcomes always enumerated ---
   br <- list()
-  flow_walk(qsf_flow(qsf)$Flow, function(n) {
+  flow_walk(qsf_flow(qsf)[["Flow"]], function(n) {
     if (identical(n$Type, "Branch")) {
       v <- tryCatch(parse_display_logic(n$BranchLogic)$vars,
                     error = function(e) character(0))

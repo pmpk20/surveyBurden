@@ -116,7 +116,7 @@ reachability_split <- function(qids, has_dl, refs, path_qids) {
 #' @export
 instrument_summary <- function(qsf, blocks = NULL) {
   if (is.null(blocks)) blocks <- resolve_live_blocks(qsf)
-  nodes  <- qsf_flow(qsf)$Flow
+  nodes  <- qsf_flow(qsf)[["Flow"]]
 
   counts <- c(Branch = 0L, BlockRandomizer = 0L, EndSurvey = 0L)
   flow_walk(nodes, function(node) {

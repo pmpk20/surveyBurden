@@ -35,7 +35,7 @@ resolve_flow <- function(qsf, max_paths = 10000L) {
   if (!inherits(qsf, "qsf_raw")) {
     cli::cli_abort("{.arg qsf} must be a {.cls qsf_raw} object from {.fn read_qsf}.")
   }
-  enumerate_paths(qsf_flow(qsf)$Flow, max_paths = max_paths)
+  enumerate_paths(qsf_flow(qsf)[["Flow"]], max_paths = max_paths)
 }
 
 #' Enumerate paths from a bare list of flow nodes. Internal; see [resolve_flow()].
@@ -93,7 +93,7 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
       list(list(blocks = character(0), bkey = "", early = length(rest) > 0L, decisions = list()))
     } else if (type == "Branch") {
       fid <- node$FlowID %||% "branch"
-      taken <- annotate(outcomes(c(node$Flow %||% list(), rest)), fid, TRUE)
+      taken <- annotate(outcomes(c(node[["Flow"]] %||% list(), rest)), fid, TRUE)
       not   <- annotate(outcomes(rest), fid, FALSE)
       c(taken, not)   # deduped with every other node type below
     } else if (type %in% c("Group", "Authenticator")) {
@@ -102,7 +102,7 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
       outcomes(c(node[["Flow"]] %||% list(), rest))
     } else if (type == "BlockRandomizer") {
       randomisers <<- c(randomisers, node$FlowID %||% node$ID %||% "BlockRandomizer")
-      outcomes(c(node$Flow %||% list(), rest))
+      outcomes(c(node[["Flow"]] %||% list(), rest))
     } else {
       cli::cli_warn("Unhandled flow node type {.val {type}}; skipping.")
       outcomes(rest)

@@ -54,7 +54,7 @@ flow_walk <- function(node, fn) {
   for (it in items) {
     if (!is.list(it) || is.null(it$Type)) next
     fn(it)
-    if (!is.null(it$Flow)) flow_walk(it$Flow, fn)
+    if (!is.null(it[["Flow"]])) flow_walk(it[["Flow"]], fn)
   }
   invisible()
 }

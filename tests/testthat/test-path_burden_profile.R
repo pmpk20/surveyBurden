@@ -42,6 +42,20 @@ test_that("path_burden_profile returns a per-path structural burden profile", {
   expect_true(all(full$burden_median <= full$burden_max))
 })
 
+test_that("each path's quantile columns match its own profile, one row per path", {
+  d <- .profile_cache()
+
+  expect_equal(d$path_id, unique(d$path_id))
+  for (i in seq_len(nrow(d))) {
+    p <- d$profile[[i]]
+    expect_s3_class(p, "tbl_df")
+    expect_named(p, c("burden", "weight"))
+    q <- weighted_quantile(p$burden, p$weight, c(0, .25, .5, .75, 1))
+    expect_equal(unname(unlist(d[i, c("burden_min", "burden_p25", "burden_median",
+                                      "burden_p75", "burden_max")])), q)
+  }
+})
+
 test_that("the enumerated profile sits inside the floor/ceiling band and is narrower", {
   band <- path_burden(read_qsf(demo_qsf()))
   prof <- .profile_cache()

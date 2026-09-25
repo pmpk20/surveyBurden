@@ -64,20 +64,24 @@ path_burden_profile <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
   e <- engine %||% burden_engine(qsf, scheme = scheme, max_paths = max_paths,
                                  parsed_dl = parsed_dl)
 
-  rows <- lapply(seq_len(nrow(e$paths)), function(i) {
-    cp <- e$components[[i]]
-    prof <- assemble_path_distribution(cp)
-    q <- weighted_quantile(prof$burden, prof$weight, c(0, .25, .5, .75, 1))
-    tibble::tibble(
-      path_id = e$paths$path_id[i],
-      terminates_early = e$paths$terminates_early[i],
-      n_gates = e$paths$n_gates[i],
-      burden_min = q[1], burden_p25 = q[2], burden_median = q[3],
-      burden_p75 = q[4], burden_max = q[5],
-      profile = list(prof)
-    )
-  })
-  do.call(rbind, rows)
+  # Fill plain vectors per path and build the tibble once: a tibble() per path
+  # (then rbind) dominated runtime on surveys with tens of thousands of paths.
+  n <- nrow(e$paths)
+  profiles <- vector("list", n)
+  q <- matrix(NA_real_, n, 5L)
+  for (i in seq_len(n)) {
+    prof <- assemble_path_distribution(e$components[[i]])
+    profiles[[i]] <- prof
+    q[i, ] <- weighted_quantile(prof$burden, prof$weight, c(0, .25, .5, .75, 1))
+  }
+  tibble::tibble(
+    path_id = e$paths$path_id,
+    terminates_early = e$paths$terminates_early,
+    n_gates = e$paths$n_gates,
+    burden_min = q[, 1], burden_p25 = q[, 2], burden_median = q[, 3],
+    burden_p75 = q[, 4], burden_max = q[, 5],
+    profile = profiles
+  )
 }
 
 #' Shared setup for the path-burden family: parse, score, resolve paths, and
@@ -141,7 +145,9 @@ assemble_path_distribution <- function(cp) {
     d <- convolve_dist(d, bw_df(lp$per_iter * seq_len(lp$n), 1 / lp$n))
   }
   d <- convolve_dist(d, cp$display_dist)
-  tibble::tibble(burden = d$burden, weight = d$weight)
+  # new_tibble() skips tibble()'s per-call name checks; called once per path.
+  tibble::new_tibble(list(burden = d$burden, weight = d$weight),
+                     nrow = length(d$burden))
 }
 
 #' Burden components for one flow path: base, loops, display-logic distribution.

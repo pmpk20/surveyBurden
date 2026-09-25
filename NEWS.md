@@ -1,16 +1,39 @@
-# surveyBurden (development version)
+# surveyBurden 0.2.0
 
-* When `routes` is supplied, `burden_report()` now includes the arithmetic
-  mean and the 10th and 90th percentiles of per-respondent predictions in
-  `$population` and its printed table, alongside the existing five statistics.
+## New features
+
+* New `realised_burden()` scores the questions each respondent actually
+  answered, using exported response data. Case-insensitive `ExportTag`
+  matching.
+* New `validate_catalogue()` checks and coerces a hand-built question
+  catalogue, enabling platform-agnostic scoring without a QSF file.
+* New "Extensions" vignette showing the catalogue schema and a worked
+  example of scoring a non-Qualtrics survey.
+* New "Realised burden" vignette with a Qualtrics-export walkthrough.
+* `gfs_weights()` renamed to `gfs_scheme()`; old name still works but is
+
+  deprecated.
+* `burden_report()` gains a `words_per_line` argument for per-respondent
+  reading-load estimation.
 * `burden_report()` gains a `max_paths` argument (default 10,000), passed to
   `resolve_flow()`, so surveys with heavily branching flows can be analysed
   by raising the cap. The "too many paths" error now suggests it.
+* When `routes` is supplied, `burden_report()` now includes the arithmetic
+  mean and the 10th and 90th percentiles of per-respondent predictions in
+  `$population` and its printed table, alongside the existing five statistics.
+* Scoring and documentation now use "GfS+" to distinguish the package's
+  extended scheme (with documented inference rules for dropdowns, sliders,
+  and multi-answer matrices) from the original GfS table.
+
+## Performance
+
 * `path_burden_profile()`, and so the display-logic step of `burden_report()`,
-  is much faster on surveys with many paths (about 15x on a 65,536-path
-  survey). Results are unchanged.
+  is about 15x faster on surveys with many paths. Results are unchanged.
 * `resolve_paths()` and `resolve_flow()` are about twice as fast on surveys
   with many paths. Results are unchanged.
+
+## Bug fixes
+
 * `parse_qsf()` no longer fails on sliders whose tick labels Qualtrics stores
   as numbers rather than text.
 * Surveys whose flow sits inside an `Authenticator` node are now resolved;
@@ -18,10 +41,9 @@
   and a burden of 0.
 * A `Branch`, `Group` or `BlockRandomizer` flow node with no child flow no
   longer crashes `resolve_flow()`; it is treated as empty.
+* Vignettes updated from `weights =` to `scheme =` after the rename.
 
-# surveyBurden 0.2.0
-
-CRAN preparation release.
+## Documentation
 
 * Added runnable `@examples` to all exported functions using the shipped
   demo fixture (`demo_travel_survey.qsf`).

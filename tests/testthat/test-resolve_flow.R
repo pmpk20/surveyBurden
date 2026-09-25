@@ -57,6 +57,36 @@ test_that("branches with no block effect collapse to one path", {
   expect_identical(paths$block_ids[[1]], c("A", "B"))
 })
 
+test_that("same blocks with different early-exit status stay distinct paths", {
+  # taken: A, then EndSurvey with B still to come (early); not taken: A, B.
+  # A second branch re-shows only A before ending -> same blocks as the first
+  # early path, so it collapses into it.
+  paths <- enumerate_paths(list(
+    n_block("A"),
+    n_branch("S1", n_end()),
+    n_branch("S2", n_end()),
+    n_block("B")
+  ))
+  expect_equal(nrow(paths), 2L)
+  expect_setequal(paste(vapply(paths$block_ids, paste, "", collapse = ">"),
+                        paths$terminates_early),
+                  c("A TRUE", "A>B FALSE"))
+})
+
+test_that("identical block sequences from different branch routes collapse", {
+  # BR1 and BR2 both add X: taking either one alone gives A>X>B, so the four
+  # routes collapse to three paths.
+  paths <- enumerate_paths(list(
+    n_block("A"),
+    n_branch("BR1", n_block("X")),
+    n_branch("BR2", n_block("X")),
+    n_block("B")
+  ))
+  seqs <- vapply(paths$block_ids, paste, "", collapse = ">")
+  expect_equal(nrow(paths), 3L)
+  expect_setequal(seqs, c("A>X>X>B", "A>X>B", "A>B"))
+})
+
 test_that("branch decisions are recorded per path", {
   paths <- enumerate_paths(list(n_branch("BR1", n_block("X")), n_block("B")))
   taken <- paths[vapply(paths$block_ids, function(b) "X" %in% b, logical(1)), ]

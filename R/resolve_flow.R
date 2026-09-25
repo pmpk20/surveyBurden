@@ -54,9 +54,11 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
     paste(vapply(remaining, function(n) n$FlowID %||% n$Type %||% "?", character(1)),
           collapse = ",")
   }
+  # Each outcome carries `bkey` == paste(blocks, collapse = ">"), built one
+  # block at a time as outcomes are extended, so dedupe never re-collapses a
+  # whole block sequence.
   dedupe <- function(outs) {
-    keys <- vapply(outs, function(o) paste0(paste(o$blocks, collapse = ">"), "|", o$early),
-                   character(1))
+    keys <- vapply(outs, function(o) paste0(o$bkey, "|", o$early), character(1))
     outs[!duplicated(keys)]
   }
   annotate <- function(outs, fid, value) {
@@ -68,7 +70,7 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
 
   outcomes <- function(remaining) {
     if (length(remaining) == 0L) {
-      return(list(list(blocks = character(0), early = FALSE, decisions = list())))
+      return(list(list(blocks = character(0), bkey = "", early = FALSE, decisions = list())))
     }
     key <- key_of(remaining)
     hit <- memo[[key]]
@@ -80,16 +82,20 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
 
     res <- if (type %in% c("Standard", "Block")) {
       id <- node$ID %||% NA_character_
-      lapply(outcomes(rest), function(o) { o$blocks <- c(id, o$blocks); o })
+      lapply(outcomes(rest), function(o) {
+        o$bkey <- if (length(o$blocks)) paste0(id, ">", o$bkey) else paste(id)
+        o$blocks <- c(id, o$blocks)
+        o
+      })
     } else if (type == "EmbeddedData") {
       outcomes(rest)
     } else if (type == "EndSurvey") {
-      list(list(blocks = character(0), early = length(rest) > 0L, decisions = list()))
+      list(list(blocks = character(0), bkey = "", early = length(rest) > 0L, decisions = list()))
     } else if (type == "Branch") {
       fid <- node$FlowID %||% "branch"
       taken <- annotate(outcomes(c(node$Flow %||% list(), rest)), fid, TRUE)
       not   <- annotate(outcomes(rest), fid, FALSE)
-      dedupe(c(taken, not))
+      c(taken, not)   # deduped with every other node type below
     } else if (type == "Group") {
       outcomes(c(node$Flow %||% list(), rest))
     } else if (type == "BlockRandomizer") {

@@ -43,11 +43,17 @@ resolve_paths <- function(qsf, max_paths = 10000L, catalogue = NULL, blocks = NU
 
   cond_ids <- catalogue$question_id[catalogue$has_display_logic]
 
+  # Pull the columns out once: subsetting the tibble per path dominated
+  # runtime on surveys with tens of thousands of paths.
+  cq    <- catalogue$question_id
+  c_dl  <- catalogue$has_display_logic
+  c_ref <- catalogue$display_logic_refs
+
   parts <- lapply(flow$block_ids, function(bids) {
     path_qids <- unlist(block_q[bids], use.names = FALSE)
-    sub <- catalogue[catalogue$question_id %in% path_qids, ]
-    r <- classify_reachability(sub, path_qids)
-    triggers <- unique(unlist(sub$display_logic_refs[sub$question_id %in% r$maybe]))
+    on <- cq %in% path_qids
+    r <- reachability_split(cq[on], c_dl[on], c_ref[on], path_qids)
+    triggers <- unique(unlist(c_ref[on][cq[on] %in% r$maybe]))
     root_gates <- setdiff(triggers, cond_ids)
     list(q_always = r$always, q_maybe = r$maybe, n_gates = length(root_gates))
   })
@@ -75,24 +81,23 @@ resolve_paths <- function(qsf, max_paths = 10000L, catalogue = NULL, blocks = NU
 #'
 #' @export
 classify_reachability <- function(catalogue, path_qids) {
-  always <- character(0)
-  maybe <- character(0)
-  unreachable <- character(0)
+  reachability_split(catalogue$question_id, catalogue$has_display_logic,
+                     catalogue$display_logic_refs, path_qids)
+}
 
-  for (i in seq_len(nrow(catalogue))) {
-    qid  <- catalogue$question_id[i]
-    if (!isTRUE(catalogue$has_display_logic[i])) {
-      always <- c(always, qid)
-      next
-    }
-    refs <- catalogue$display_logic_refs[[i]]
-    if (length(refs) == 0 || all(refs %in% path_qids)) {
-      maybe <- c(maybe, qid)
-    } else {
-      unreachable <- c(unreachable, qid)
-    }
-  }
-  list(always = always, maybe = maybe, unreachable = unreachable)
+#' Vectorised core of [classify_reachability()], on bare columns so
+#' [resolve_paths()] can call it per path without subsetting a tibble.
+#' No display logic (or `NA`) -> always; every referenced question on the path
+#' (or no question reference) -> maybe; otherwise unreachable. Each output
+#' keeps the input order.
+#' @noRd
+reachability_split <- function(qids, has_dl, refs, path_qids) {
+  qids <- as.character(qids)
+  dl  <- has_dl %in% TRUE
+  idx <- which(dl)
+  ok  <- vapply(refs[idx], function(r) length(r) == 0L || all(r %in% path_qids),
+                logical(1))
+  list(always = qids[!dl], maybe = qids[idx[ok]], unreachable = qids[idx[!ok]])
 }
 
 #' Structural summary of an instrument

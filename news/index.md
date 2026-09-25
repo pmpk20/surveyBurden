@@ -7,6 +7,11 @@
   now includes the arithmetic mean and the 10th and 90th percentiles of
   per-respondent predictions in `$population` and its printed table,
   alongside the existing five statistics.
+- [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
+  gains a `max_paths` argument (default 10,000), passed to
+  [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md),
+  so surveys with heavily branching flows can be analysed by raising the
+  cap. The “too many paths” error now suggests it.
 - [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md),
   and so the display-logic step of
   [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md),

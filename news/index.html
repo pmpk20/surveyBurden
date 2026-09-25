@@ -46,6 +46,8 @@
 <h2 class="pkg-version" data-toc-text="development version" id="surveyburden-development-version">surveyBurden (development version)<a class="anchor" aria-label="anchor" href="#surveyburden-development-version"></a></h2>
 <ul><li>When <code>routes</code> is supplied, <code><a href="../reference/burden_report.html">burden_report()</a></code> now includes the arithmetic mean and the 10th and 90th percentiles of per-respondent predictions in <code>$population</code> and its printed table, alongside the existing five statistics.</li>
 <li>
+<code><a href="../reference/burden_report.html">burden_report()</a></code> gains a <code>max_paths</code> argument (default 10,000), passed to <code><a href="../reference/resolve_flow.html">resolve_flow()</a></code>, so surveys with heavily branching flows can be analysed by raising the cap. The “too many paths” error now suggests it.</li>
+<li>
 <code><a href="../reference/path_burden_profile.html">path_burden_profile()</a></code>, and so the display-logic step of <code><a href="../reference/burden_report.html">burden_report()</a></code>, is much faster on surveys with many paths (about 15x on a 65,536-path survey). Results are unchanged.</li>
 <li>
 <code><a href="../reference/resolve_paths.html">resolve_paths()</a></code> and <code><a href="../reference/resolve_flow.html">resolve_flow()</a></code> are about twice as fast on surveys with many paths. Results are unchanged.</li>

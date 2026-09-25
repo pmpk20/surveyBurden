@@ -3,6 +3,18 @@
 * When `routes` is supplied, `burden_report()` now includes the arithmetic
   mean and the 10th and 90th percentiles of per-respondent predictions in
   `$population` and its printed table, alongside the existing five statistics.
+* `path_burden_profile()`, and so the display-logic step of `burden_report()`,
+  is much faster on surveys with many paths (about 15x on a 65,536-path
+  survey). Results are unchanged.
+* `resolve_paths()` and `resolve_flow()` are about twice as fast on surveys
+  with many paths. Results are unchanged.
+* `parse_qsf()` no longer fails on sliders whose tick labels Qualtrics stores
+  as numbers rather than text.
+* Surveys whose flow sits inside an `Authenticator` node are now resolved;
+  previously the node and everything in it was skipped, giving an empty path
+  and a burden of 0.
+* A `Branch`, `Group` or `BlockRandomizer` flow node with no child flow no
+  longer crashes `resolve_flow()`; it is treated as empty.
 
 # surveyBurden 0.2.0
 

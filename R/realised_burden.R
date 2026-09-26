@@ -20,6 +20,11 @@
 #'   3. Column names match `DataExportTag` values from the QSF (`Q15`,
 #'      `travel_mode_1`), exactly or ignoring case.
 #'
+#'   Leading label and ImportId rows from a raw Qualtrics CSV export are
+#'   removed, with a message, when recognisable (an ImportId JSON cell, or a
+#'   system column holding its own label such as `ResponseId` =
+#'   "Response ID"); other rows are always kept.
+#'
 #'   The recommended way to obtain this data frame is
 #'   `qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE,
 #'   add_column_map = FALSE)`.
@@ -98,6 +103,13 @@
 realised_burden <- function(qsf, responses, scheme = gfs_scheme(),
                             words_per_line = NULL, id_col = NULL) {
   if (!inherits(qsf, "qsf_raw")) qsf <- read_qsf(qsf)
+
+  # raw CSV exports carry label / ImportId rows under the header
+  hdr <- drop_qualtrics_header_rows(responses)
+  if (hdr$n_dropped > 0L && length(words_per_line) == nrow(responses)) {
+    words_per_line <- words_per_line[-seq_len(hdr$n_dropped)]
+  }
+  responses <- hdr$data
 
   n_resp <- nrow(responses)
 
@@ -215,6 +227,49 @@ realised_burden <- function(qsf, responses, scheme = gfs_scheme(),
     words_per_line       = wpl_vec,
     n_unmapped_cols      = rep(n_unmapped, n_resp)
   )
+}
+
+
+# ==============================================================================
+# Qualtrics export header rows
+# ==============================================================================
+
+#' Drop the label and ImportId rows a raw Qualtrics CSV export carries.
+#'
+#' Removes only leading rows that are recognisably Qualtrics metadata: a cell
+#' holding ImportId JSON (`{"ImportId":...}`), or a system column holding its
+#' own label (`ResponseId` = "Response ID", `Finished` = "Finished",
+#' `StartDate` = "Start Date"). Stops at the first row that is neither, so
+#' respondent data -- including a cleaned export whose first rows are real
+#' respondents -- is never dropped on guesswork.
+#' @return list(data, n_dropped); `data` keeps the input's attributes
+#'   (e.g. `col_map`).
+#' @noRd
+drop_qualtrics_header_rows <- function(responses, quiet = FALSE) {
+  labels <- c(ResponseId = "Response ID", Finished = "Finished",
+              StartDate = "Start Date", EndDate = "End Date",
+              RecordedDate = "Recorded Date")
+  labels <- labels[names(labels) %in% names(responses)]
+  is_header <- function(i) {
+    row <- vapply(responses[i, , drop = FALSE],
+                  function(v) trimws(as.character(v)), character(1))
+    any(grepl('^\\{"ImportId":', row)) ||
+      any(!is.na(row[names(labels)]) & row[names(labels)] == labels)
+  }
+
+  n <- 0L
+  while (n < nrow(responses) && n < 3L && is_header(n + 1L)) n <- n + 1L
+  if (n == 0L) return(list(data = responses, n_dropped = 0L))
+
+  keep <- setdiff(names(attributes(responses)), c("names", "row.names", "class"))
+  out  <- responses[-seq_len(n), , drop = FALSE]
+  for (a in keep) attr(out, a) <- attr(responses, a)
+  if (!quiet) {
+    cli::cli_inform(
+      "Removed {n} Qualtrics header row{?s} (question labels / ImportId) from the top of {.arg responses}."
+    )
+  }
+  list(data = out, n_dropped = n)
 }
 
 

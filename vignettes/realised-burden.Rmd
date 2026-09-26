@@ -102,7 +102,21 @@ Then in R:
 qsf <- read_qsf("my_survey.qsf")
 responses <- read.csv("my_responses.csv", check.names = FALSE)
 rb <- realised_burden(qsf, responses)
+#> Removed 2 Qualtrics header rows (question labels / ImportId) from the top
+#> of `responses`.
+nrow(rb)   # should equal your number of respondents
 ```
+
+A raw Qualtrics CSV export has two extra rows under the column names: the
+question labels and the `{"ImportId": ...}` row. `realised_burden()`
+removes these when it can recognise them -- an ImportId cell, or a system
+column holding its own label (`ResponseId` = "Response ID") -- and says so.
+It only looks at the top rows and never guesses, so if you have edited the
+export (renamed or dropped those columns), remove the header rows yourself
+before scoring, and check that `nrow(rb)` matches your respondent count.
+
+Use the QSF exported from the survey version that collected the data: a
+later edit to the survey can change question ids and scoring.
 
 ## Understanding the output
 

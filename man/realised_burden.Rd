@@ -30,6 +30,11 @@ name (\verb{2_mycol} is iteration 2), else 0.
 \code{travel_mode_1}), exactly or ignoring case.
 }
 
+Leading label and ImportId rows from a raw Qualtrics CSV export are
+removed, with a message, when recognisable (an ImportId JSON cell, or a
+system column holding its own label such as \code{ResponseId} =
+"Response ID"); other rows are always kept.
+
 The recommended way to obtain this data frame is
 \code{qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE, add_column_map = FALSE)}.}
 

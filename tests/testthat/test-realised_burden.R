@@ -111,6 +111,50 @@ test_that("col_map keeps loop iterations: explicit, or from an N_ column prefix"
   expect_identical(rb_b$realised_points, ref$realised_points)
 })
 
+# A raw Qualtrics CSV export read with read.csv() has two extra rows under the
+# header: the question-text labels and the ImportId JSON.
+with_qualtrics_header_rows <- function(resp) {
+  lab <- stats::setNames(as.list(paste("Label for", names(resp))), names(resp))
+  lab$ResponseId <- "Response ID"; lab$Finished <- "Finished"
+  imp <- stats::setNames(as.list(sprintf('{"ImportId":"%s"}', names(resp))), names(resp))
+  rbind(as.data.frame(lab, check.names = FALSE, stringsAsFactors = FALSE),
+        as.data.frame(imp, check.names = FALSE, stringsAsFactors = FALSE),
+        resp)
+}
+
+test_that("leading Qualtrics label and ImportId rows are removed, with a message", {
+  resp <- make_responses()
+  ref  <- realised_burden(qsf_fx(), resp)
+  raw  <- with_qualtrics_header_rows(resp)
+
+  expect_message(rb <- realised_burden(qsf_fx(), raw), "2 Qualtrics header rows")
+  expect_equal(nrow(rb), nrow(resp))
+  expect_identical(rb$realised_points, ref$realised_points)
+  expect_identical(rb$response_id, ref$response_id)
+
+  # a per-respondent words_per_line given for the raw rows is trimmed to match
+  wpl <- c(NA, NA, 10, 12, 14, 16)
+  rb_w <- suppressMessages(realised_burden(qsf_fx(), raw, words_per_line = wpl))
+  expect_identical(rb_w$words_per_line, c(10, 12, 14, 16))
+})
+
+test_that("unrecognised or non-leading rows are kept", {
+  resp <- make_responses()
+  expect_no_message(rb <- realised_burden(qsf_fx(), resp))
+  expect_equal(nrow(rb), 4L)
+
+  # a label row that is not at the top is data, not a header: keep it
+  mid <- rbind(resp[1:2, ], with_qualtrics_header_rows(resp)[1, ], resp[3:4, ])
+  expect_no_message(rb2 <- realised_burden(qsf_fx(), mid))
+  expect_equal(nrow(rb2), 5L)
+
+  # col_map survives the header-row removal
+  raw <- with_qualtrics_header_rows(resp)
+  attr(raw, "col_map") <- list(QID1 = "QID2")
+  expect_identical(attr(drop_qualtrics_header_rows(raw, quiet = TRUE)$data, "col_map"),
+                   list(QID1 = "QID2"))
+})
+
 test_that("col_map takes precedence over automatic column matching", {
   resp <- data.frame(ResponseId = "R_1", QID1 = "x")
   attr(resp, "col_map") <- list(QID1 = "QID2")

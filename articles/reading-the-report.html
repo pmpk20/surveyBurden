@@ -72,6 +72,14 @@
 
     
     
+<p><strong>What this answers.</strong> What each section of the printed
+<code><a href="../reference/burden_report.html">burden_report()</a></code> output shows, and how to read it.</p>
+<p><strong>What you need.</strong> A report from
+<code><a href="../reference/burden_report.html">burden_report()</a></code> on your survey’s <code>.qsf</code>.</p>
+<p><strong>What it cannot establish.</strong> The report describes the
+modelled burden of the instrument. It does not predict completion time,
+dropout or data quality, and its median is not the burden half of
+respondents face.</p>
 <p>This article walks the printed <code><a href="../reference/burden_report.html">burden_report()</a></code> output
 section by section: what each shows, how to read it, and when it is
 telling you something is wrong. For how the underlying numbers are
@@ -402,6 +410,21 @@ structural range is not a respondent probability. The full vector is
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">report</span><span class="op">$</span><span class="va">warnings</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span></span>
 <span><span class="co">#&gt; [1] "1 matrix/grid question has more than 6 rows. Long grids invite satisficing (respondents picking the same answer down the column instead of reading each row): QID19"</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="next">Next<a class="anchor" aria-label="anchor" href="#next"></a>
+</h2>
+<ul>
+<li>
+<code><a href="../articles/survey-revision.html">vignette("survey-revision")</a></code> – act on the heaviest
+blocks and questions.</li>
+<li>
+<code><a href="../articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code> – how the paths and
+the burden spread are built.</li>
+<li>
+<code><a href="../articles/calibration.html">vignette("calibration")</a></code> – the points-to-minutes
+assumption and the limitations.</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

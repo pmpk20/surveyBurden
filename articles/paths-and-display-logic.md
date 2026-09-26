@@ -1,5 +1,17 @@
 # Paths and display logic
 
+**What this answers.** How the routes through a survey are
+reconstructed, what the structural profile’s weights mean, and how to
+get respondent-level predictions from route data.
+
+**What you need.** A `.qsf`; for respondent-level predictions, routes
+derived from response data (recipe below).
+
+**What it cannot establish.** The structural profile is not a respondent
+distribution; branch conditions are not checked against each other, so
+its extremes may be unreachable; and `matched = TRUE` does not certify a
+respondent’s loop counts or display-logic answers.
+
 This article covers how surveyBurden reconstructs the routes through a
 survey and turns them into a burden spread, and the difference between
 the structural profile and a population-weighted average. For
@@ -322,3 +334,10 @@ turns it into a sentence:
 summary_line(respondent_burden(demo))
 #> [1] "Typical respondent burden is about 118 GfS+ points (~10 min). The lightest complete route is ~117 pts (~10 min); with the Loop & Merge sections fully repeated it reaches ~143 pts (~12 min)."
 ```
+
+## Next
+
+- [`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md)
+  – answer-based burden from response data.
+- [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md)
+  – checking predictions against completion times.

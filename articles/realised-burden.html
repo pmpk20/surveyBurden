@@ -72,6 +72,16 @@
 
     
     
+<p><strong>What this answers.</strong> How much burden each respondent’s
+answers represent, after fielding, and how that compares with the
+structural prediction.</p>
+<p><strong>What you need.</strong> The <code>.qsf</code> of the survey
+version that collected the data, and the response data (API or CSV
+export).</p>
+<p><strong>What it cannot establish.</strong> Realised burden is
+answer-based: it does not measure exposure, reading time or partial
+completion, and a predicted-minus-realised gap does not by itself
+identify dropout.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/pmpk20/surveyBurden" class="external-link">surveyBurden</a></span><span class="op">)</span></span></code></pre></div>
 <p>The function <code><a href="../reference/respondent_burden.html">respondent_burden()</a></code> can estimate burden
@@ -414,6 +424,18 @@ before reading it that way.</p>
 <p>With a fielded survey with thousands of respondents, this gives the
 full empirical distribution of burden – useful for reporting in papers
 and for calibrating future survey designs.</p>
+</div>
+<div class="section level2">
+<h2 id="next">Next<a class="anchor" aria-label="anchor" href="#next"></a>
+</h2>
+<ul>
+<li>
+<code><a href="../articles/calibration.html">vignette("calibration")</a></code> – checking against completion
+times.</li>
+<li>
+<code><a href="../articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code> – building routes
+for population-level predictions.</li>
+</ul>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

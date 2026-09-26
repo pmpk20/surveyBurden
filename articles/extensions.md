@@ -1,5 +1,15 @@
 # Extensions: scoring surveys without a QSF
 
+**What this answers.** What you can do with a survey not built in
+Qualtrics, and what full support for another platform would take.
+
+**What you need.** A question catalogue describing your survey (schema
+below).
+
+**What it cannot establish.** Without routing and display-logic
+information, a catalogue gives per-question scores and a single-pass
+total, not a burden range or profile.
+
 ``` r
 
 library(surveyBurden)
@@ -375,3 +385,10 @@ For a platform with no branching, loops or conditional questions, the
 catalogue and
 [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
 already give the full answer.
+
+## Next
+
+- [`vignette("gfs-scoring")`](https://pmpk20.github.io/surveyBurden/articles/gfs-scoring.md)
+  – the scoring rules the catalogue feeds.
+- [`?validate_catalogue`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md)
+  – the catalogue checks and defaults.

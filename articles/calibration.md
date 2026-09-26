@@ -1,5 +1,16 @@
 # Calibration and limitations
 
+**What this answers.** How the two conversion assumptions (words per
+line, points per minute) work, how to check predictions against observed
+completion times, and the limitations of the approach.
+
+**What you need.** A `.qsf`; for validation, completion times for your
+respondents (ideally with their routes).
+
+**What it cannot establish.** An implied points-per-minute rate is
+rough, trim-sensitive and specific to one survey. Burden scores do not
+predict dropout, satisficing or data quality.
+
 This vignette covers two assumptions in the pipeline – words-to-lines
 and points-to-minutes – and the limitations of the approach as a whole.
 For the scoring rules see
@@ -168,6 +179,13 @@ burden_report(demo, scheme = w, quiet = TRUE)$burden[, c("statistic", "minutes")
 - Burden scores are not predictions of completion time, dropout, or
   satisficing. Those are empirical questions about respondent behaviour,
   outside the scope of this package.
+
+## Next
+
+- [`vignette("reading-the-report")`](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md)
+  – reading the full report.
+- [`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md)
+  – answer-based burden after fielding.
 
 ## References
 

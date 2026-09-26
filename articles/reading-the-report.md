@@ -1,5 +1,17 @@
 # Reading the burden report
 
+**What this answers.** What each section of the printed
+[`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
+output shows, and how to read it.
+
+**What you need.** A report from
+[`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
+on your survey’s `.qsf`.
+
+**What it cannot establish.** The report describes the modelled burden
+of the instrument. It does not predict completion time, dropout or data
+quality, and its median is not the burden half of respondents face.
+
 This article walks the printed
 [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
 output section by section: what each shows, how to read it, and when it
@@ -349,6 +361,15 @@ structural range is not a respondent probability. The full vector is
 report$warnings[1]
 #> [1] "1 matrix/grid question has more than 6 rows. Long grids invite satisficing (respondents picking the same answer down the column instead of reading each row): QID19"
 ```
+
+## Next
+
+- [`vignette("survey-revision")`](https://pmpk20.github.io/surveyBurden/articles/survey-revision.md)
+  – act on the heaviest blocks and questions.
+- [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md)
+  – how the paths and the burden spread are built.
+- [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md)
+  – the points-to-minutes assumption and the limitations.
 
 ## References
 

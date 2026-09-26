@@ -1,5 +1,16 @@
 # The GfS+ scoring method
 
+**What this answers.** How one question becomes a GfS+ point score, and
+which rule applies to each question type.
+
+**What you need.** A `.qsf` (or a question catalogue, see
+[`vignette("extensions")`](https://pmpk20.github.io/surveyBurden/articles/extensions.md)).
+
+**What it cannot establish.** Scores are per question and per loop
+iteration; routing is applied later. The rules map questions onto the
+published scheme; they are not measurements of effort, and some Table 1
+weights are not applied automatically.
+
 This article covers how one Qualtrics question becomes a GfS+ point
 score. For how those scores are combined across the survey’s routes see
 [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md);
@@ -233,6 +244,15 @@ w2$rating_small <- 2.5
 score_burden(catalogue, scheme = w2)$gfs_points[1:5]
 #> [1] 11.0  1.0  2.5  1.0  2.5
 ```
+
+## Next
+
+- [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md)
+  – how scores combine across routes.
+- [`vignette("survey-revision")`](https://pmpk20.github.io/surveyBurden/articles/survey-revision.md)
+  – using scores to revise a draft.
+- [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md)
+  – converting points to minutes.
 
 ## References
 

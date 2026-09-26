@@ -72,6 +72,14 @@
 
     
     
+<p><strong>What this answers.</strong> How one question becomes a GfS+
+point score, and which rule applies to each question type.</p>
+<p><strong>What you need.</strong> A <code>.qsf</code> (or a question
+catalogue, see <code><a href="../articles/extensions.html">vignette("extensions")</a></code>).</p>
+<p><strong>What it cannot establish.</strong> Scores are per question
+and per loop iteration; routing is applied later. The rules map
+questions onto the published scheme; they are not measurements of
+effort, and some Table 1 weights are not applied automatically.</p>
 <p>This article covers how one Qualtrics question becomes a GfS+ point
 score. For how those scores are combined across the survey’s routes see
 <code><a href="../articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code>; for reading the
@@ -442,6 +450,21 @@ back in; only the entries a rule uses (table above) affect scores:</p>
 <span><span class="va">w2</span><span class="op">$</span><span class="va">rating_small</span> <span class="op">&lt;-</span> <span class="fl">2.5</span></span>
 <span><span class="fu"><a href="../reference/score_burden.html">score_burden</a></span><span class="op">(</span><span class="va">catalogue</span>, scheme <span class="op">=</span> <span class="va">w2</span><span class="op">)</span><span class="op">$</span><span class="va">gfs_points</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span></span>
 <span><span class="co">#&gt; [1] 11.0  1.0  2.5  1.0  2.5</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="next">Next<a class="anchor" aria-label="anchor" href="#next"></a>
+</h2>
+<ul>
+<li>
+<code><a href="../articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code> – how scores
+combine across routes.</li>
+<li>
+<code><a href="../articles/survey-revision.html">vignette("survey-revision")</a></code> – using scores to revise a
+draft.</li>
+<li>
+<code><a href="../articles/calibration.html">vignette("calibration")</a></code> – converting points to
+minutes.</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

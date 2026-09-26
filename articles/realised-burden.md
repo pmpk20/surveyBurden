@@ -1,5 +1,16 @@
 # Realised burden from response data
 
+**What this answers.** How much burden each respondent’s answers
+represent, after fielding, and how that compares with the structural
+prediction.
+
+**What you need.** The `.qsf` of the survey version that collected the
+data, and the response data (API or CSV export).
+
+**What it cannot establish.** Realised burden is answer-based: it does
+not measure exposure, reading time or partial completion, and a
+predicted-minus-realised gap does not by itself identify dropout.
+
 ``` r
 
 library(surveyBurden)
@@ -341,3 +352,10 @@ status.](realised-burden_files/figure-html/burden-distribution-1.png)
 With a fielded survey with thousands of respondents, this gives the full
 empirical distribution of burden – useful for reporting in papers and
 for calibrating future survey designs.
+
+## Next
+
+- [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md)
+  – checking against completion times.
+- [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md)
+  – building routes for population-level predictions.

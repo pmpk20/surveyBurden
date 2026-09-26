@@ -25,6 +25,7 @@ Qualtrics provides no support for this package.
 | That, plus respondent routes and loop counts | `burden_report(qsf, routes = routes)` | a distribution of respondent-level predicted burden | `vignette("paths-and-display-logic")` |
 | A response export | `realised_burden(qsf, responses)` | answer-based burden per respondent | `vignette("realised-burden")` |
 | Completion times | `validate_times(qsf, observed)` | a check of predicted against observed time, and a survey-specific rate | `vignette("calibration")` |
+| A draft you want to make lighter | `burden_report()` before and after an edit | where the burden is, why, and how much a change removes | `vignette("survey-revision")` |
 | A survey from another platform | `score_burden(validate_catalogue(catalogue))` | per-question scores and a total | `vignette("extensions")` |
 
 ## Installation
@@ -193,7 +194,8 @@ step.
 
 Every function has a help page: `?burden_report`, `?score_burden`, and so on.
 The guides cover the workflow end to end — start with `vignette("surveyBurden")`,
-then `vignette("reading-the-report")`, `vignette("gfs-scoring")`,
+then `vignette("reading-the-report")`, `vignette("survey-revision")`,
+`vignette("gfs-scoring")`,
 `vignette("paths-and-display-logic")`, `vignette("calibration")`,
 `vignette("realised-burden")` and `vignette("extensions")`.
 

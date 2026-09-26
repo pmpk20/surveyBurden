@@ -35,12 +35,15 @@ on what you have:
 | That, plus respondent routes and loop counts | `burden_report(qsf, routes = routes)` | a distribution of respondent-level predicted burden | `vignette("paths-and-display-logic")` |
 | A response export | `realised_burden(qsf, responses)` | answer-based burden per respondent | `vignette("realised-burden")` |
 | Completion times | `validate_times(qsf, observed)` | a check of predicted against observed time, and a survey-specific rate | `vignette("calibration")` |
+| A draft you want to make lighter | `burden_report()` before and after an edit | where the burden is, why, and how much a change removes | `vignette("survey-revision")` |
 | A survey from another platform | `score_burden(validate_catalogue(catalogue))` | per-question scores and a total | `vignette("extensions")` |
 
 The other articles go deeper:
 
 - `vignette("reading-the-report")` -- what each part of the printed
   output means.
+- `vignette("survey-revision")` -- finding the heaviest parts of a draft,
+  changing them, and comparing before and after.
 - `vignette("gfs-scoring")` -- how a Qualtrics widget becomes points, and
   what the automatic scorer does and does not apply.
 - `vignette("paths-and-display-logic")` -- flow, skip logic, the

@@ -86,6 +86,38 @@ test_that("Finished accepts logical, numeric and text encodings; unknown is NA",
 })
 
 
+test_that("col_map keeps loop iterations: explicit, or from an N_ column prefix", {
+  resp <- make_responses()
+  ref  <- realised_burden(qsf_fx(), resp)
+  loop_cols <- grep("^[0-9]+_QID", names(resp), value = TRUE)
+  qid  <- sub("^[0-9]+_", "", loop_cols)
+  iter <- as.integer(sub("_.*$", "", loop_cols))
+
+  # (a) names with no recognisable pattern; iteration given in the map
+  a <- resp
+  names(a)[match(loop_cols, names(a))] <- paste0("loopA_", qid, "_it", iter)
+  attr(a, "col_map") <- stats::setNames(
+    Map(function(q, i) list(qid = q, iteration = i), qid, iter),
+    paste0("loopA_", qid, "_it", iter))
+  rb_a <- realised_burden(qsf_fx(), a)
+  expect_identical(rb_a$realised_points, ref$realised_points)
+  expect_identical(rb_a$n_questions_answered, ref$n_questions_answered)
+
+  # (b) renamed but keeping the N_ iteration prefix; map gives the QID only
+  b <- resp
+  names(b)[match(loop_cols, names(b))] <- paste0(iter, "_custom_", qid)
+  attr(b, "col_map") <- stats::setNames(as.list(qid), paste0(iter, "_custom_", qid))
+  rb_b <- realised_burden(qsf_fx(), b)
+  expect_identical(rb_b$realised_points, ref$realised_points)
+})
+
+test_that("col_map takes precedence over automatic column matching", {
+  resp <- data.frame(ResponseId = "R_1", QID1 = "x")
+  attr(resp, "col_map") <- list(QID1 = "QID2")
+  cm <- build_col_map(qsf_fx(), resp, parse_qsf(qsf_fx())$question_id)
+  expect_identical(cm$QID1$qid, "QID2")
+})
+
 test_that("ResponseId is detected as the id column", {
   resp <- make_responses()
   rb <- realised_burden(qsf_fx(), resp)

@@ -19,12 +19,15 @@ accepted by \code{\link[=fetch_qsf]{fetch_qsf()}}.}
 \item{responses}{A data frame of response data. Columns must be mappable to
 question ids via one of these strategies (tried in order):
 \enumerate{
-\item Column names match question ids directly (\code{QID15}, \code{QID15_1}).
+\item A \code{col_map} attribute on the data frame: a named list, one entry per
+column, each either a QID string or \code{list(qid = , iteration = )}. It
+overrides the automatic strategies for the columns it names. With a
+bare QID, the loop iteration comes from an \code{N_} prefix on the column
+name (\verb{2_mycol} is iteration 2), else 0.
+\item Column names match question ids directly (\code{QID15}, \code{QID15_1}, or
+\verb{2_QID15} for loop iteration 2).
 \item Column names match \code{DataExportTag} values from the QSF (\code{Q15},
-\code{travel_mode_1}).
-\item A \code{col_map} attribute on the data frame maps column names to QIDs
-(set by a future \code{read_responses()} helper from the Qualtrics CSV
-ImportId row).
+\code{travel_mode_1}), exactly or ignoring case.
 }
 
 The recommended way to obtain this data frame is

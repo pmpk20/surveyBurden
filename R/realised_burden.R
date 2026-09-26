@@ -10,12 +10,15 @@
 #'   accepted by [fetch_qsf()].
 #' @param responses A data frame of response data. Columns must be mappable to
 #'   question ids via one of these strategies (tried in order):
-#'   1. Column names match question ids directly (`QID15`, `QID15_1`).
-#'   2. Column names match `DataExportTag` values from the QSF (`Q15`,
-#'      `travel_mode_1`).
-#'   3. A `col_map` attribute on the data frame maps column names to QIDs
-#'      (set by a future `read_responses()` helper from the Qualtrics CSV
-#'      ImportId row).
+#'   1. A `col_map` attribute on the data frame: a named list, one entry per
+#'      column, each either a QID string or `list(qid = , iteration = )`. It
+#'      overrides the automatic strategies for the columns it names. With a
+#'      bare QID, the loop iteration comes from an `N_` prefix on the column
+#'      name (`2_mycol` is iteration 2), else 0.
+#'   2. Column names match question ids directly (`QID15`, `QID15_1`, or
+#'      `2_QID15` for loop iteration 2).
+#'   3. Column names match `DataExportTag` values from the QSF (`Q15`,
+#'      `travel_mode_1`), exactly or ignoring case.
 #'
 #'   The recommended way to obtain this data frame is
 #'   `qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE,
@@ -222,9 +225,9 @@ realised_burden <- function(qsf, responses, scheme = gfs_scheme(),
 #' Map response data columns to question ids
 #'
 #' Tries three strategies in order:
-#' 1. Direct QID-based column names (`QID15`, `QID15_1`)
-#' 2. ExportTag-based names from the QSF (`Q15`, `travel_mode_1`)
-#' 3. A `col_map` attribute on the data frame (set by a helper or user)
+#' 1. A `col_map` attribute on the data frame (see [user_col_mapping()])
+#' 2. Direct QID-based column names (`QID15`, `QID15_1`)
+#' 3. ExportTag-based names from the QSF (`Q15`, `travel_mode_1`)
 #'
 #' @return A named list: each element is named by a response column and contains
 #'   `list(qid, iteration)` where `iteration` is 0L for non-loop questions.
@@ -264,12 +267,9 @@ build_col_map <- function(qsf, responses, all_qids) {
 
     mapping <- NULL
 
-    # strategy 1: user-supplied attribute
+    # strategy 1: user-supplied attribute (overrides automatic matching)
     if (!is.null(user_map) && col %in% names(user_map)) {
-      qid <- user_map[[col]]
-      if (qid %in% all_qids) {
-        mapping <- list(qid = qid, iteration = 0L)
-      }
+      mapping <- user_col_mapping(col, user_map[[col]], all_qids)
     }
 
     # strategy 2: QID-based column name
@@ -303,6 +303,29 @@ build_col_map <- function(qsf, responses, all_qids) {
 
   attr(result, "n_unmapped") <- unmapped
   result
+}
+
+
+#' Resolve one user-supplied `col_map` entry to `list(qid, iteration)`.
+#' The entry is either a QID string -- the loop iteration then comes from an
+#' `N_` column-name prefix (`2_mycol`), as in automatic matching, else 0 -- or
+#' `list(qid = , iteration = )` giving the iteration explicitly. Returns NULL
+#' for a QID not in the survey.
+#' @noRd
+user_col_mapping <- function(col, entry, all_qids) {
+  if (is.list(entry)) {
+    qid  <- as.character(entry$qid %||% NA_character_)[1]
+    iter <- entry$iteration
+  } else {
+    qid  <- as.character(entry)[1]
+    iter <- NULL
+  }
+  if (is.na(qid) || !qid %in% all_qids) return(NULL)
+  if (is.null(iter)) {
+    m <- regmatches(col, regexec("^([0-9]+)_", col))[[1]]
+    iter <- if (length(m) == 2L) m[2] else 0L
+  }
+  list(qid = qid, iteration = as.integer(iter))
 }
 
 

@@ -162,16 +162,17 @@ Each row gives:
 The function maps response column names to QSF question IDs using three
 strategies, tried in order:
 
-1.  **Direct QID names** -- column is named `QID15`, `QID15_1`, or
+1.  **User-supplied `col_map`** -- set `attr(responses, "col_map")` to a
+    named list mapping column names to QIDs. An entry here overrides the
+    automatic strategies for that column.
+2.  **Direct QID names** -- column is named `QID15`, `QID15_1`, or
     `1_QID15` (loop iteration prefix). This is what
     `qualtRics::fetch_survey()` produces by default.
-2.  **Export tags** -- column name matches a `DataExportTag` from the
+3.  **Export tags** -- column name matches a `DataExportTag` from the
     QSF (e.g. `Q15`, `TravelMode`). Matching is case-insensitive, so
     lowercase columns from preprocessed exports also work.
-3.  **User-supplied `col_map`** -- set `attr(responses, "col_map")` to a
-    named list mapping column names to QID strings.
 
-Strategy 3 is useful when working with response data that has been
+A `col_map` is useful when working with response data that has been
 renamed or reformatted. For example, if you have a dictionary mapping
 custom column names to QIDs:
 
@@ -181,6 +182,19 @@ dict <- read.csv("my_dictionary.csv")
 col_map <- setNames(as.list(dict$qid), dict$column_name)
 attr(responses, "col_map") <- col_map
 rb <- realised_burden(qsf, responses)
+```
+
+For questions inside a Loop & Merge block, each column must also carry
+its loop iteration, or answers from different iterations are merged into
+one. Either keep an `N_` prefix on the column name (`2_adults_age` is
+iteration 2), or give the iteration in the map:
+
+``` r
+# dictionary has columns: column_name, qid, iteration
+col_map <- Map(function(q, i) list(qid = q, iteration = i),
+               dict$qid, dict$iteration)
+names(col_map) <- dict$column_name
+attr(responses, "col_map") <- col_map
 ```
 
 ## Comparing predicted and realised burden

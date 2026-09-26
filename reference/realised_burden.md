@@ -1,11 +1,10 @@
 # Realised response burden from observed responses
 
-Scores the questions each respondent actually answered, using the GfS+
-scheme and the survey's structure from the QSF. Unlike
+An answer-based GfS+ estimate for each respondent, from their response
+data and the survey's structure in the QSF. Unlike
 [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md),
-which predicts burden from structural paths, this function measures it
-from data: every respondent gets a unique score reflecting their actual
-route through the survey.
+which predicts burden from structural paths, this function scores what
+respondents answered.
 
 ## Usage
 
@@ -99,13 +98,14 @@ row per respondent:
 
 - `n_questions_answered`:
 
-  Count of distinct questions with at least one non-blank response
-  column.
+  Count of answered question-iteration pairs: a non-loop question counts
+  once, a looped question once per iteration with at least one non-blank
+  response column. Not a count of distinct questions.
 
 - `realised_points`:
 
-  Sum of GfS points for answered questions; loop questions scored once
-  per answered iteration.
+  Sum of the full GfS+ scores of answered questions, once per answered
+  iteration for looped questions (see the operational definition above).
 
 - `realised_minutes`:
 
@@ -113,9 +113,11 @@ row per respondent:
 
 - `predicted_points`:
 
-  Structural-path prediction for comparison (from
-  [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
-  logic, using inferred loop counts and visit flags).
+  Structural prediction for comparison, from
+  [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md):
+  the path matching the optional blocks the respondent answered in,
+  their loop counts inferred from the answered iterations, and the
+  path's model-weighted median display-logic burden.
 
 - `predicted_minutes`:
 
@@ -130,6 +132,15 @@ row per respondent:
 
   Number of response columns that could not be mapped to any question in
   the QSF.
+
+## Details
+
+**Operational definition.** A question counts as answered when at least
+one of its mapped response columns is non-blank, and then its full GfS+
+score is added – separately for each detected Loop & Merge iteration. A
+partly answered matrix therefore scores in full. Realised burden does
+not measure exposure (questions shown but left blank score 0), reading
+time, or the share of a question completed.
 
 ## Recommended Qualtrics export
 

@@ -76,9 +76,21 @@
 <p>The function <code><a href="../reference/respondent_burden.html">respondent_burden()</a></code> can estimate burden
 <strong>ex ante</strong> from the survey alone. Once responses are
 collected, however, you can also compute the <strong>realised
-burden</strong>: the GfS+ points each respondent actually incurred,
-given the questions they answered, the display-logic branches they took
-and the loop iterations they completed.</p>
+burden</strong>: an answer-based GfS+ estimate for each respondent.</p>
+<p>Its operational definition matters for interpretation. A question
+counts as answered when at least one of its mapped response columns is
+non-blank, and then its <strong>full</strong> GfS+ score is added,
+separately for each detected Loop &amp; Merge iteration. So:</p>
+<ul>
+<li>a partly answered matrix scores in full;</li>
+<li>a question shown but left blank scores 0, so realised burden does
+not measure exposure;</li>
+<li>it does not measure reading time, or how much of a question was
+completed;</li>
+<li>
+<code>n_questions_answered</code> counts question-iteration pairs,
+not distinct questions.</li>
+</ul>
 <p><code><a href="../reference/realised_burden.html">realised_burden()</a></code> takes the same QSF and the response
 data and returns one row per respondent with both the realised score and
 the structural prediction for comparison.</p>
@@ -108,14 +120,14 @@ the structural prediction for comparison.</p>
 <tr class="even">
 <td><code><a href="../reference/realised_burden.html">realised_burden()</a></code></td>
 <td>QSF + response data</td>
-<td>Per-respondent burden</td>
+<td>Per-respondent answer-based burden</td>
 <td><em>ex post</em></td>
 </tr>
 </tbody>
 </table>
 <p>Use <code><a href="../reference/respondent_burden.html">respondent_burden()</a></code> to evaluate a draft survey
 before fielding. Use <code><a href="../reference/realised_burden.html">realised_burden()</a></code> after fielding to
-see how burden was actually distributed across respondents.</p>
+see how answer-based burden was distributed across respondents.</p>
 </div>
 <div class="section level2">
 <h2 id="getting-the-data">Getting the data<a class="anchor" aria-label="anchor" href="#getting-the-data"></a>
@@ -327,11 +339,24 @@ respondent:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> R_4         FALSE                 32               95    63</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> R_5         FALSE                 17               95    78</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> R_6         FALSE                  0               95    95</span></span></code></pre></div>
-<p>Respondents who answered every question on their predicted path will
-have a small gap. Dropouts will have a large positive gap (predicted
-more burden than they experienced). Respondents who took more loop
-iterations than the median will sometimes have a negative gap (realised
-&gt; predicted).</p>
+<p>The prediction uses the same respondent’s inferred route: the path
+matching the optional blocks they answered in, their loop counts
+inferred from the answered iterations, and the path’s model-weighted
+<em>median</em> display-logic burden. A gap therefore has several
+possible sources, and the gap alone does not tell you which:</p>
+<ul>
+<li>
+<strong>positive gap</strong> (predicted &gt; realised): questions
+left blank – by dropping out, skipping non-forced questions, or display
+logic hiding more than the median state assumes;</li>
+<li>
+<strong>negative gap</strong> (realised &gt; predicted): display
+logic showing more than the median state, or questions answered that the
+route model does not expect.</li>
+</ul>
+<p>In particular a large positive gap is not by itself evidence of
+dropout; check <code>finished</code> and <code>furthest_block</code>
+before reading it that way.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ord</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="va">rb</span><span class="op">$</span><span class="va">realised_points</span>, decreasing <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">ids</span> <span class="op">&lt;-</span> <span class="va">rb</span><span class="op">$</span><span class="va">response_id</span><span class="op">[</span><span class="va">ord</span><span class="op">]</span></span>

@@ -8,10 +8,21 @@ library(surveyBurden)
 The function
 [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
 can estimate burden **ex ante** from the survey alone. Once responses
-are collected, however, you can also compute the **realised burden**:
-the GfS+ points each respondent actually incurred, given the questions
-they answered, the display-logic branches they took and the loop
-iterations they completed.
+are collected, however, you can also compute the **realised burden**: an
+answer-based GfS+ estimate for each respondent.
+
+Its operational definition matters for interpretation. A question counts
+as answered when at least one of its mapped response columns is
+non-blank, and then its **full** GfS+ score is added, separately for
+each detected Loop & Merge iteration. So:
+
+- a partly answered matrix scores in full;
+- a question shown but left blank scores 0, so realised burden does not
+  measure exposure;
+- it does not measure reading time, or how much of a question was
+  completed;
+- `n_questions_answered` counts question-iteration pairs, not distinct
+  questions.
 
 [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
 takes the same QSF and the response data and returns one row per
@@ -23,13 +34,13 @@ for comparison.
 | Function | Input | Output | Timing |
 |----|----|----|----|
 | [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md) | QSF only | Predicted burden by path | *ex ante* |
-| [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md) | QSF + response data | Per-respondent burden | *ex post* |
+| [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md) | QSF + response data | Per-respondent answer-based burden | *ex post* |
 
 Use
 [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
 to evaluate a draft survey before fielding. Use
 [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
-after fielding to see how burden was actually distributed across
+after fielding to see how answer-based burden was distributed across
 respondents.
 
 ## Getting the data
@@ -246,11 +257,21 @@ rb[, c("response_id", "finished", "realised_points",
 #> 6 R_6         FALSE                  0               95    95
 ```
 
-Respondents who answered every question on their predicted path will
-have a small gap. Dropouts will have a large positive gap (predicted
-more burden than they experienced). Respondents who took more loop
-iterations than the median will sometimes have a negative gap (realised
-\> predicted).
+The prediction uses the same respondent’s inferred route: the path
+matching the optional blocks they answered in, their loop counts
+inferred from the answered iterations, and the path’s model-weighted
+*median* display-logic burden. A gap therefore has several possible
+sources, and the gap alone does not tell you which:
+
+- **positive gap** (predicted \> realised): questions left blank – by
+  dropping out, skipping non-forced questions, or display logic hiding
+  more than the median state assumes;
+- **negative gap** (realised \> predicted): display logic showing more
+  than the median state, or questions answered that the route model does
+  not expect.
+
+In particular a large positive gap is not by itself evidence of dropout;
+check `finished` and `furthest_block` before reading it that way.
 
 ``` r
 

@@ -58,5 +58,5 @@ test_that("burden_report embeds and prints calculation certainty", {
   expect_s3_class(r$certainty, "calculation_certainty")
   out <- format(r)
   expect_true(any(grepl("Calculation certainty", out)))
-  expect_true(any(grepl("resolve exactly", out)))
+  expect_true(any(grepl("no unresolved display-logic question", out)))
 })

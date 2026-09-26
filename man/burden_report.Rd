@@ -27,20 +27,22 @@ burden_report(
 \item{scheme}{A \code{\link[=gfs_scheme]{gfs_scheme()}} list.}
 
 \item{profile}{If \code{TRUE} (default), enumerate the display-logic structural
-burden profile (\code{\link[=path_burden_profile]{path_burden_profile()}}) to get the \emph{achievable} min/median/
-max burden for this survey -- a few seconds of extra work. \code{FALSE} skips
+burden profile (\code{\link[=path_burden_profile]{path_burden_profile()}}) to get the min/median/max burden
+over the display-logic states the package can model for this survey -- a
+few seconds of extra work. \code{FALSE} skips
 that and falls back to a much faster but naive range (see Details): min/max
 only, no median, and the numbers can understate the true minimum.}
 
 \item{routes}{Optional respondent data frame (see \code{\link[=respondent_burden]{respondent_burden()}}).
-When supplied, the report adds a population-weighted burden summary: each
-route is weighted by how often respondents actually take it, so unlike the
-structural profile this is a real average over respondents.}
+When supplied, the report adds \verb{$population}: quantiles and the mean of
+one predicted burden per respondent, so each route counts as often as
+respondents took it. Unlike the structural profile, this summarises
+observed respondents.}
 
 \item{rare_threshold}{GfS+ points above which Heimgartner & Axhausen (2024)
 found surveys to be rare (their sample: median 399, n = 79 waves). Used for
-the "rare burden" warning and to scale the \code{index} column of \verb{$burden} to
-0-1.}
+the "rare burden" warning and to scale the \code{index} column of \verb{$burden}
+(\code{points / rare_threshold}: 1 is the threshold, and it can exceed 1).}
 
 \item{stem_warning_threshold}{Question stems longer than this many words are
 flagged in the readability diagnostics (default 40). Diagnostic only --
@@ -122,12 +124,14 @@ summarises the burden across the instrument's structural path space.
 \strong{Why two ranges exist.} \code{\link[=path_burden]{path_burden()}} (the fast, naive check) scores each
 flow path by assuming every optional (display-logic-gated) question can be
 independently hidden for the minimum, or independently shown for the maximum.
-That assumption is not always achievable: some questions are gated by
+That assumption does not always hold: some questions are gated by
 conditions that are satisfied by default (e.g. "shown unless a specific answer
 was picked"), so they cannot actually be hidden regardless of what else the
-respondent answers. \code{\link[=path_burden_profile]{path_burden_profile()}} enumerates the real display-logic
-combinations and finds the burden values that are genuinely reachable, which
-is why its minimum is usually \emph{higher} than the naive floor. \strong{This report
+respondent answers. \code{\link[=path_burden_profile]{path_burden_profile()}} enumerates the display-logic
+combinations the package can model and finds the burden values they
+produce, which is why its minimum is usually \emph{higher} than the naive floor.
+Branch conditions are not checked against each other, so these extremes are
+not guaranteed to be reachable by a real respondent. \strong{This report
 uses the profile's range as the one range shown, whenever \code{profile = TRUE}.}
 
 \strong{Path-space cap.} The structural path space is enumerated up to

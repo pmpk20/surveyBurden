@@ -1,11 +1,13 @@
-#' Enumerate feasible respondent paths through the survey flow
+#' Enumerate the structural paths through the survey flow
 #'
 #' Walks the `SurveyFlow`, forking at every `Branch` into a condition-true and a
 #' condition-false path. Branch conditions are not evaluated: they depend on
 #' embedded data or prior answers that are unknown ex ante, so both outcomes are
-#' treated as feasible. The result is the *structural path space* -- every block
-#' sequence a respondent could encounter -- without any assumption about branch
-#' probabilities.
+#' kept at every branch. The result is the *structural path space* -- every
+#' block sequence the flow allows -- without any assumption about branch
+#' probabilities. Because conditions are never checked against each other, two
+#' branches that no respondent could both take are still combined, so a path
+#' here is not guaranteed to be one a real respondent can follow.
 #'
 #' Within-block display logic (whether an individual question is shown) is *not*
 #' resolved here; that is a separate step. Paths are at block granularity.

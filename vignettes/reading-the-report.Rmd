@@ -95,8 +95,9 @@ attr(report$burden, "basis")
   Axhausen (2024). The verdict line's ratio is the survey's median over
   that 399.
 
-The median here is the middle value across the feasible skip-logic
-combinations, **not** the burden half of respondents exceed --
+The median here is the middle value of the modelled skip-logic
+combinations, with each complete path given equal total weight -- **not**
+the burden half of respondents exceed.
 `vignette("paths-and-display-logic")` returns to this.
 
 Per-path structural figures are in `$paths`:
@@ -160,14 +161,17 @@ report$certainty$loops[c("n_known", "n_unknown")]
 report$certainty$scores
 ```
 
-For each survey this states which parts of the calculation are exact and
-which rest on a documented approximation: how many paths resolve to a
-single burden value, how many conditional questions were enumerated
-exactly versus approximated, whether every loop has a known cap, and the
-`auto` / `inferred` / `manual` / `unknown` split of the item scores. A
-result can be fully reproducible without every underlying interpretation
-being certain; this block makes the uncertain parts countable. Pass
-`certainty = FALSE` to skip it.
+For each survey this counts which parts of the calculation rest on a
+documented approximation: how many complete paths have no unresolved
+display-logic question, how many conditional questions were enumerated in
+full (every state the model represents) versus approximated, whether every
+loop has a known cap, and the `auto` / `inferred` / `manual` / `unknown`
+split of the item scores. These are modelling diagnostics, not a
+certificate that the result matches the live survey: branch conditions,
+embedded-data conditions and unusual Qualtrics constructs are outside what
+they check. A result can be fully reproducible without every underlying
+interpretation being certain; this block makes the uncertain parts
+countable. Pass `certainty = FALSE` to skip it.
 
 ## QC warnings
 

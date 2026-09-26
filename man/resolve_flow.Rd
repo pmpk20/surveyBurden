@@ -2,7 +2,7 @@
 % Please edit documentation in R/resolve_flow.R
 \name{resolve_flow}
 \alias{resolve_flow}
-\title{Enumerate feasible respondent paths through the survey flow}
+\title{Enumerate the structural paths through the survey flow}
 \usage{
 resolve_flow(qsf, max_paths = 10000L)
 }
@@ -27,9 +27,11 @@ on a representative route to this path, \code{TRUE} = condition taken.}
 Walks the \code{SurveyFlow}, forking at every \code{Branch} into a condition-true and a
 condition-false path. Branch conditions are not evaluated: they depend on
 embedded data or prior answers that are unknown ex ante, so both outcomes are
-treated as feasible. The result is the \emph{structural path space} -- every block
-sequence a respondent could encounter -- without any assumption about branch
-probabilities.
+kept at every branch. The result is the \emph{structural path space} -- every
+block sequence the flow allows -- without any assumption about branch
+probabilities. Because conditions are never checked against each other, two
+branches that no respondent could both take are still combined, so a path
+here is not guaranteed to be one a real respondent can follow.
 }
 \details{
 Within-block display logic (whether an individual question is shown) is \emph{not}

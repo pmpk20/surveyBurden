@@ -82,10 +82,11 @@ test_that("median across full paths is well inside the floor/ceiling extremes", 
   expect_lt(med, max(full$burden_max))
 })
 
-test_that("the profile's weight column is a sub-state count, not a probability", {
+test_that("each path's profile weights are model weights summing to 1", {
   d <- .profile_cache()
-  full <- d[!d$terminates_early, ]
-  # weights need not sum to 1 -- they are counts of feasible sub-states
-  totals <- vapply(full$profile, function(p) sum(p$weight), numeric(1))
-  expect_true(any(totals != 1))
+  # equal weight per modelled state, normalised per path, so pooling complete
+  # paths in burden_report() gives every path equal total weight
+  totals <- vapply(d$profile, function(p) sum(p$weight), numeric(1))
+  expect_equal(totals, rep(1, nrow(d)))
+  expect_true(all(vapply(d$profile, function(p) all(p$weight > 0), logical(1))))
 })

@@ -90,9 +90,9 @@ Five terms are used throughout, with fixed meanings:
 |---|---|
 | **question burden** | the GfS+ point score for one question, from its type and structure |
 | **path burden** | the total question burden along one structural path through the survey flow |
-| **structural burden profile** | the set of feasible burden values across a path's display-logic sub-states, each counted once. Not a probability distribution. |
-| **population-weighted respondent burden** | burden averaged over real respondent routes, where route frequencies stand in for the sub-state probabilities. Produced only when `routes` are supplied. |
-| **calculation certainty** | the split, for a given survey, between parts of the calculation that are exact and parts that rest on documented approximations |
+| **structural burden profile** | the burden values a path's modelled display-logic states produce, with model weights (equal per state; each path's weights sum to 1). Not a respondent probability distribution. |
+| **population-weighted respondent burden** | one predicted burden per respondent from their observed route, summarised across respondents, so each route counts as often as respondents took it. Produced only when `routes` are supplied. |
+| **calculation certainty** | counts, for a given survey, of the parts of the calculation that are enumerated in full within the model and the parts that rest on documented approximations. A modelling diagnostic, not a check against the live survey. |
 | **readability diagnostics** | counts of long question stems, long matrix labels, and long grids. Reading-load signals, reported separately, never folded into the GfS+ score. |
 
 ## The report object

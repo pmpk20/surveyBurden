@@ -8,18 +8,20 @@
 #' @param x A path to a `.qsf` file, or a `qsf_raw` object from [read_qsf()].
 #' @param scheme A [gfs_scheme()] list.
 #' @param profile If `TRUE` (default), enumerate the display-logic structural
-#'   burden profile ([path_burden_profile()]) to get the *achievable* min/median/
-#'   max burden for this survey -- a few seconds of extra work. `FALSE` skips
+#'   burden profile ([path_burden_profile()]) to get the min/median/max burden
+#'   over the display-logic states the package can model for this survey -- a
+#'   few seconds of extra work. `FALSE` skips
 #'   that and falls back to a much faster but naive range (see Details): min/max
 #'   only, no median, and the numbers can understate the true minimum.
 #' @param routes Optional respondent data frame (see [respondent_burden()]).
-#'   When supplied, the report adds a population-weighted burden summary: each
-#'   route is weighted by how often respondents actually take it, so unlike the
-#'   structural profile this is a real average over respondents.
+#'   When supplied, the report adds `$population`: quantiles and the mean of
+#'   one predicted burden per respondent, so each route counts as often as
+#'   respondents took it. Unlike the structural profile, this summarises
+#'   observed respondents.
 #' @param rare_threshold GfS+ points above which Heimgartner & Axhausen (2024)
 #'   found surveys to be rare (their sample: median 399, n = 79 waves). Used for
-#'   the "rare burden" warning and to scale the `index` column of `$burden` to
-#'   0-1.
+#'   the "rare burden" warning and to scale the `index` column of `$burden`
+#'   (`points / rare_threshold`: 1 is the threshold, and it can exceed 1).
 #' @param stem_warning_threshold Question stems longer than this many words are
 #'   flagged in the readability diagnostics (default 40). Diagnostic only --
 #'   this does **not** change any GfS+ score.
@@ -35,12 +37,14 @@
 #' **Why two ranges exist.** [path_burden()] (the fast, naive check) scores each
 #' flow path by assuming every optional (display-logic-gated) question can be
 #' independently hidden for the minimum, or independently shown for the maximum.
-#' That assumption is not always achievable: some questions are gated by
+#' That assumption does not always hold: some questions are gated by
 #' conditions that are satisfied by default (e.g. "shown unless a specific answer
 #' was picked"), so they cannot actually be hidden regardless of what else the
-#' respondent answers. [path_burden_profile()] enumerates the real display-logic
-#' combinations and finds the burden values that are genuinely reachable, which
-#' is why its minimum is usually *higher* than the naive floor. **This report
+#' respondent answers. [path_burden_profile()] enumerates the display-logic
+#' combinations the package can model and finds the burden values they
+#' produce, which is why its minimum is usually *higher* than the naive floor.
+#' Branch conditions are not checked against each other, so these extremes are
+#' not guaranteed to be reachable by a real respondent. **This report
 #' uses the profile's range as the one range shown, whenever `profile = TRUE`.**
 #'
 #' **Path-space cap.** The structural path space is enumerated up to
@@ -306,11 +310,12 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
         burden_tbl$points[burden_tbl$statistic == "max"], rare_threshold, 79L))
     }
     warnings <- c(warnings, paste(
-      "The point range above comes from checking every combination of optional",
-      "questions this survey's skip logic could show. Each combination is",
-      "counted once; we have no data on how likely each one is for a given",
-      "respondent, so this is a structural range, not a probability -- it does",
-      "NOT mean \"there's a 50% chance a respondent sees the median burden\"."))
+      "The point range above comes from the combinations of optional questions",
+      "the package can model for this survey's flow and skip logic. Each complete",
+      "path carries equal weight, and so does each modelled combination within a",
+      "path; these are model weights, not how often respondents see each one, so",
+      "this is a structural range, not a probability -- it does NOT mean",
+      "\"there's a 50% chance a respondent sees the median burden\"."))
   }
 
   # ---- $population (optional) --------------------------------------
@@ -514,8 +519,8 @@ print_burden_report_body <- function(x) {
   if (!is.null(ct)) {
     cp <- ct$paths; cd <- ct$display_logic; cl <- ct$loops; cs <- ct$scores
     cli::cli_h2("Calculation certainty")
-    cli::cli_text("Paths: {cp$n_exact}/{cp$n_full} resolve exactly; {cp$n_with_unresolved} carry an unresolved display-logic condition.")
-    cli::cli_text("Display logic: {cd$n_exact}/{cd$n_conditional} conditional questions enumerated exactly, {cd$n_approx} approximated.")
+    cli::cli_text("Paths: {cp$n_exact}/{cp$n_full} have no unresolved display-logic question; {cp$n_with_unresolved} carry at least one.")
+    cli::cli_text("Display logic: {cd$n_exact}/{cd$n_conditional} conditional questions enumerated in full within the model, {cd$n_approx} approximated.")
     cli::cli_text("Loops: {cl$n_known} with a known cap, {cl$n_unknown} unknown.  Item scores: {cs$auto} auto / {cs$inferred} inferred / {cs$manual} manual.")
   }
 

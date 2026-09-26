@@ -5,9 +5,13 @@
 #' counts), then compares the predicted distribution and a predicted-vs-observed
 #' regression against observed completion times.
 #'
-#' The observed data frame needs `completion_seconds` or `completion_mins` and,
-#' where available, the Loop & Merge count columns that [respondent_burden()]
-#' recognises (`loop_<question id>`, `loop_<block id>`, or any `loop_*` column).
+#' The observed data frame needs a completion time -- `completion_mins`,
+#' `completion_seconds`, or Qualtrics' own `Duration (in seconds)` column
+#' (first found wins; text values are converted to numbers) -- and, where
+#' available, the Loop & Merge count columns that [respondent_burden()]
+#' recognises (`loop_<question id>`, `loop_<block id>`, or any `loop_*`
+#' column). The label and ImportId rows at the top of a raw Qualtrics CSV
+#' export are removed, with a message, when recognisable.
 #'
 #' @param qsf A `qsf_raw` object or path.
 #' @param observed A data frame, or a path to a CSV.
@@ -49,10 +53,9 @@
 validate_times <- function(qsf, observed, scheme = gfs_scheme(), trim = c(3, 180)) {
   if (!inherits(qsf, "qsf_raw")) qsf <- read_qsf(qsf)
   if (is.character(observed)) observed <- utils::read.csv(observed)
+  observed <- drop_qualtrics_header_rows(observed)$data
 
-  if (is.null(observed$completion_mins)) {
-    observed$completion_mins <- observed$completion_seconds / 60
-  }
+  observed$completion_mins <- completion_minutes(observed)
   o <- observed[is.finite(observed$completion_mins) &
                   observed$completion_mins >= trim[1] &
                   observed$completion_mins <= trim[2], , drop = FALSE]
@@ -78,4 +81,21 @@ validate_times <- function(qsf, observed, scheme = gfs_scheme(), trim = c(3, 180
     lm = fit,
     predicted_burden = o$pred_pts
   )
+}
+
+#' Completion time in minutes from the first duration column found:
+#' `completion_mins`, `completion_seconds`, or Qualtrics' `Duration (in
+#' seconds)` (also as `read.csv()` renames it). Text values are converted to
+#' numbers; anything unparseable becomes NA and is later dropped by the trim.
+#' @noRd
+completion_minutes <- function(observed) {
+  num <- function(v) suppressWarnings(as.numeric(as.character(v)))
+  if (!is.null(observed[["completion_mins"]])) return(num(observed[["completion_mins"]]))
+  for (col in c("completion_seconds", "Duration (in seconds)", "Duration..in.seconds.")) {
+    if (!is.null(observed[[col]])) return(num(observed[[col]]) / 60)
+  }
+  cli::cli_abort(c(
+    "No completion-time column found in {.arg observed}.",
+    i = "Supply {.field completion_mins}, {.field completion_seconds}, or Qualtrics' {.field Duration (in seconds)}."
+  ))
 }

@@ -63,6 +63,12 @@
   of a raw Qualtrics CSV export, with a message, when it can recognise them.
   Previously they were scored as respondents. Unrecognised rows are always
   kept.
+* `validate_times()` reads Qualtrics' `Duration (in seconds)` column directly
+  (as exported, or as `read.csv()` renames it), converts text durations to
+  numbers, removes a raw export's header rows, and gives a clear error when
+  no duration column is found. Previously only `completion_mins` /
+  `completion_seconds` were recognised, and a missing column failed with an
+  unhelpful message.
 * Display-logic reachability: a question is now classed as never shown on a
   path only when its logic is shown to be false there. Previously any
   reference to a question off the path ruled it out, which was wrong for OR
@@ -110,10 +116,9 @@
   `?respondent_burden` and the vignette now state how `0`, `NA`, over-cap and
   non-logical values in route columns are read.
 * The calibration vignette has a runnable `validate_times()` recipe:
-  filtering non-finishers first, naming the duration column (Qualtrics'
-  `Duration (in seconds)` is not recognised), adding route columns, choosing
-  and reporting the trim, and how to read `ratio`, `cor` and
-  `implied_points_per_minute`.
+  filtering non-finishers first, the accepted duration columns, adding route
+  columns, choosing and reporting the trim, and how to read `ratio`, `cor`
+  and `implied_points_per_minute`.
 * The extensions vignette and README no longer say downstream functions work
   "unchanged" on any catalogue. They now separate what works now
   (`score_burden()` on a catalogue), what needs an adapter (`path_burden()`

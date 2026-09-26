@@ -46,9 +46,13 @@ counts), then compares the predicted distribution and a predicted-vs-observed
 regression against observed completion times.
 }
 \details{
-The observed data frame needs \code{completion_seconds} or \code{completion_mins} and,
-where available, the Loop & Merge count columns that \code{\link[=respondent_burden]{respondent_burden()}}
-recognises (\verb{loop_<question id>}, \verb{loop_<block id>}, or any \verb{loop_*} column).
+The observed data frame needs a completion time -- \code{completion_mins},
+\code{completion_seconds}, or Qualtrics' own \verb{Duration (in seconds)} column
+(first found wins; text values are converted to numbers) -- and, where
+available, the Loop & Merge count columns that \code{\link[=respondent_burden]{respondent_burden()}}
+recognises (\verb{loop_<question id>}, \verb{loop_<block id>}, or any \verb{loop_*}
+column). The label and ImportId rows at the top of a raw Qualtrics CSV
+export are removed, with a message, when recognisable.
 }
 \examples{
 \dontrun{

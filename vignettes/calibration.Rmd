@@ -61,10 +61,11 @@ Prepare the data first; the function does little of this for you:
 1. **Keep completed responses only.** `trim` filters on duration alone
    and does not detect non-finishers, so filter on `Finished` yourself
    (see `vignette("realised-burden")` for its encodings).
-2. **Name the duration column** `completion_seconds` or
-   `completion_mins`. Qualtrics exports it as `Duration (in seconds)`,
-   which is not recognised. If you read a raw CSV, drop the two header
-   rows first, or the column is read as text.
+2. **Provide a duration column.** Qualtrics' own `Duration (in seconds)`
+   is read directly (also as `read.csv()` renames it), as are
+   `completion_seconds` and `completion_mins`; the first found wins. The
+   two header rows of a raw CSV export are removed automatically when
+   recognisable.
 3. **Add route columns** (`loop_*`, `visit_*`) if you have them -- see
    `vignette("paths-and-display-logic")`. Without them every respondent
    is predicted at `loop_typical`.
@@ -88,9 +89,8 @@ paradata <- data.frame(
 )
 
 obs <- paradata[paradata$Finished == 1, ]            # step 1
-obs$completion_seconds <- obs$`Duration (in seconds)` # step 2
 
-vt <- validate_times(demo, obs, trim = c(3, 180))    # step 4
+vt <- validate_times(demo, obs, trim = c(3, 180))    # steps 2 and 4
 c(rows = nrow(paradata), finished = nrow(obs), kept_after_trim = vt$n)
 round(c(ratio = vt$ratio, cor = vt$cor,
         implied_ppm = vt$implied_points_per_minute), 2)

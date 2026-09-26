@@ -37,3 +37,39 @@ test_that("validate_times reads a CSV path and trims out-of-range times", {
   v <- validate_times(qsf, tmp)
   expect_equal(v$n, 1L)
 })
+
+test_that("validate_times reads Qualtrics' Duration (in seconds) column directly", {
+  qsf <- read_qsf(demo_qsf())
+  secs <- c(60 * 20, 60 * 25, 60 * 30)
+  ref  <- validate_times(qsf, data.frame(completion_seconds = secs))
+
+  # as named in the export, and as read.csv() mangles it
+  d1 <- data.frame(`Duration (in seconds)` = secs, check.names = FALSE)
+  d2 <- data.frame(Duration..in.seconds. = secs)
+  expect_equal(validate_times(qsf, d1)$observed, ref$observed)
+  expect_equal(validate_times(qsf, d2)$observed, ref$observed)
+
+  # stored as text (e.g. a raw export read without type conversion)
+  d3 <- data.frame(`Duration (in seconds)` = as.character(secs), check.names = FALSE)
+  expect_equal(validate_times(qsf, d3)$observed, ref$observed)
+})
+
+test_that("validate_times reads a raw Qualtrics CSV export with its header rows", {
+  qsf <- read_qsf(demo_qsf())
+  tmp <- tempfile(fileext = ".csv")
+  writeLines(c(
+    '"ResponseId","Finished","Duration (in seconds)"',
+    '"Response ID","Finished","Duration (in seconds)"',
+    '"{""ImportId"":""_recordId""}","{""ImportId"":""finished""}","{""ImportId"":""duration""}"',
+    '"R_1","1","1200"',
+    '"R_2","1","1500"'
+  ), tmp)
+  expect_message(v <- validate_times(qsf, tmp), "2 Qualtrics header rows")
+  expect_equal(v$n, 2L)
+})
+
+test_that("validate_times says which duration columns it looks for", {
+  qsf <- read_qsf(demo_qsf())
+  expect_error(validate_times(qsf, data.frame(minutes = 20)),
+               "completion_mins")
+})

@@ -70,11 +70,13 @@ complete flow path, with `path_id`, `n_loop_blocks`, `optional_blocks`
 turns it into a sentence.
 
 If `routes` is supplied: the routes tibble with `path_id`, `matched`
-(`TRUE` if the respondent's branch signature matched one of the
-enumerated complete flow paths; `FALSE` falls back to the heaviest path
-and warns – a route-recovery diagnostic on the flow model itself),
-`pred_pts` and `pred_min` (predicted burden using each respondent's real
-loop counts).
+(`TRUE` only if the set of optional blocks the respondent visited equals
+that of one of the enumerated complete flow paths; otherwise `FALSE`,
+the prediction falls back to the path with no optional blocks – or, if
+there is none, the heaviest path – and a warning reports how many routes
+went to each. This is a route-recovery diagnostic on the flow model
+itself), `pred_pts` and `pred_min` (predicted burden using each
+respondent's real loop counts).
 
 ## Examples
 

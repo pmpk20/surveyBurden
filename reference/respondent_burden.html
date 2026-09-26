@@ -112,10 +112,13 @@ of branch-gated block ids on that path) and <code>floor_pts</code> / <code>typic
 <code>ceiling_pts</code> (+ <code>_min</code> in minutes). <code><a href="summary_line.html">summary_line()</a></code> turns it into a
 sentence.</p>
 <p>If <code>routes</code> is supplied: the routes tibble with <code>path_id</code>, <code>matched</code>
-(<code>TRUE</code> if the respondent's branch signature matched one of the enumerated
-complete flow paths; <code>FALSE</code> falls back to the heaviest path and warns –
-a route-recovery diagnostic on the flow model itself), <code>pred_pts</code> and
-<code>pred_min</code> (predicted burden using each respondent's real loop counts).</p>
+(<code>TRUE</code> only if the set of optional blocks the respondent visited equals
+that of one of the enumerated complete flow paths; otherwise <code>FALSE</code>, the
+prediction falls back to the path with no optional blocks – or, if
+there is none, the heaviest path – and a warning reports how many
+routes went to each. This is a route-recovery diagnostic on the flow
+model itself), <code>pred_pts</code> and <code>pred_min</code> (predicted burden using each
+respondent's real loop counts).</p>
     </div>
 
     <div class="section level2">

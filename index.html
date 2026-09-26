@@ -11,8 +11,8 @@
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Ex-Ante Path-Aware Survey Instrument Burden Assessment">
-<meta name="description" content="Estimates the response burden of a Qualtrics survey instrument before it is fielded. Parses a .qsf export (or fetches a live survey through the Qualtrics API), reconstructs the respondent paths the survey's flow and display logic allow, scores every question with the GfS+ points scheme (extending Heimgartner and Axhausen 2024) &lt;doi:10.32866/001c.121624&gt;, and reports the burden across those paths as a structured object.">
-<meta property="og:description" content="Estimates the response burden of a Qualtrics survey instrument before it is fielded. Parses a .qsf export (or fetches a live survey through the Qualtrics API), reconstructs the respondent paths the survey's flow and display logic allow, scores every question with the GfS+ points scheme (extending Heimgartner and Axhausen 2024) &lt;doi:10.32866/001c.121624&gt;, and reports the burden across those paths as a structured object.">
+<meta name="description" content="Estimates the response burden of a Qualtrics survey instrument before it is fielded. Parses a .qsf export (or fetches a live survey through the Qualtrics API), reconstructs the respondent paths the survey's flow and display logic allow, scores every question with the GfS+ points scheme (extending Heimgartner and Axhausen 2024) &lt;doi:10.32866/001c.125481&gt;, and reports the burden across those paths as a structured object.">
+<meta property="og:description" content="Estimates the response burden of a Qualtrics survey instrument before it is fielded. Parses a .qsf export (or fetches a live survey through the Qualtrics API), reconstructs the respondent paths the survey's flow and display logic allow, scores every question with the GfS+ points scheme (extending Heimgartner and Axhausen 2024) &lt;doi:10.32866/001c.125481&gt;, and reports the burden across those paths as a structured object.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -104,7 +104,7 @@
 <span><span class="co">#&gt; ── Paths ──</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; Structural paths: 4 (2 complete, 2 screen-out)</span></span>
-<span><span class="co">#&gt; Display-logic combinations checked: 3-4 per complete path</span></span>
+<span><span class="co">#&gt; Display-logic trigger questions: 3-4 per complete path</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; ── Burden (12 GfS+ points ~ 1 minute; index = points / 1500) ──</span></span>
 <span><span class="co">#&gt;</span></span>
@@ -263,7 +263,7 @@
 <td>the GfS+ point scheme and the time conversion</td>
 </tr>
 <tr>
-<td><code>score_burden(catalogue, weights)</code></td>
+<td><code>score_burden(catalogue, scheme)</code></td>
 <td>catalogue plus <code>gfs_points</code>, <code>score_flag</code>, <code>score_basis</code>
 </td>
 </tr>
@@ -280,15 +280,15 @@
 <td>reachability label for each question on a path</td>
 </tr>
 <tr>
-<td><code>path_burden(qsf, weights, max_paths)</code></td>
+<td><code>path_burden(qsf, scheme, max_paths)</code></td>
 <td>burden floor and ceiling per path</td>
 </tr>
 <tr>
-<td><code>path_burden_profile(qsf, weights, max_paths)</code></td>
+<td><code>path_burden_profile(qsf, scheme, max_paths)</code></td>
 <td>enumerated feasible burden values per path</td>
 </tr>
 <tr>
-<td><code>respondent_burden(qsf, routes, weights, loop_typical)</code></td>
+<td><code>respondent_burden(qsf, routes, scheme, loop_typical)</code></td>
 <td>population-weighted burden from observed routes</td>
 </tr>
 <tr>
@@ -296,11 +296,11 @@
 <td>a one-sentence burden summary</td>
 </tr>
 <tr>
-<td><code>calculation_certainty(qsf, weights, max_paths)</code></td>
+<td><code>calculation_certainty(qsf, scheme, max_paths)</code></td>
 <td>which parts of the calculation are exact and which are approximated</td>
 </tr>
 <tr>
-<td><code>burden_report(x, weights, profile, routes, rare_threshold, ...)</code></td>
+<td><code>burden_report(x, scheme, profile, routes, max_paths, ...)</code></td>
 <td>the structured report object</td>
 </tr>
 <tr>
@@ -312,7 +312,7 @@
 <td>check and coerce a hand-built question catalogue</td>
 </tr>
 <tr>
-<td><code>validate_times(qsf, observed, weights, trim)</code></td>
+<td><code>validate_times(qsf, observed, scheme, trim)</code></td>
 <td>a points-per-minute rate fitted to your completion-time data</td>
 </tr>
 </tbody>

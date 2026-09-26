@@ -59,7 +59,7 @@ report
     #> ── Paths ──
     #>
     #> Structural paths: 4 (2 complete, 2 screen-out)
-    #> Display-logic combinations checked: 3-4 per complete path
+    #> Display-logic trigger questions: 3-4 per complete path
     #>
     #> ── Burden (12 GfS+ points ~ 1 minute; index = points / 1500) ──
     #>
@@ -245,19 +245,19 @@ runs the whole pipeline. The lower-level functions expose each step.
 | `parse_qsf(x)` | question catalogue, one row per live question |
 | `classify_question(payload)` | standard question type for one question |
 | [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md) | the GfS+ point scheme and the time conversion |
-| `score_burden(catalogue, weights)` | catalogue plus `gfs_points`, `score_flag`, `score_basis` |
+| `score_burden(catalogue, scheme)` | catalogue plus `gfs_points`, `score_flag`, `score_basis` |
 | `resolve_flow(qsf, max_paths)` | the distinct block sequences (structural paths) |
 | `resolve_paths(qsf, max_paths)` | per path: questions always shown, may be shown, never shown |
 | `classify_reachability(catalogue, path_qids)` | reachability label for each question on a path |
-| `path_burden(qsf, weights, max_paths)` | burden floor and ceiling per path |
-| `path_burden_profile(qsf, weights, max_paths)` | enumerated feasible burden values per path |
-| `respondent_burden(qsf, routes, weights, loop_typical)` | population-weighted burden from observed routes |
+| `path_burden(qsf, scheme, max_paths)` | burden floor and ceiling per path |
+| `path_burden_profile(qsf, scheme, max_paths)` | enumerated feasible burden values per path |
+| `respondent_burden(qsf, routes, scheme, loop_typical)` | population-weighted burden from observed routes |
 | `summary_line(x, ...)` | a one-sentence burden summary |
-| `calculation_certainty(qsf, weights, max_paths)` | which parts of the calculation are exact and which are approximated |
-| `burden_report(x, weights, profile, routes, rare_threshold, ...)` | the structured report object |
+| `calculation_certainty(qsf, scheme, max_paths)` | which parts of the calculation are exact and which are approximated |
+| `burden_report(x, scheme, profile, routes, max_paths, ...)` | the structured report object |
 | `realised_burden(qsf, responses)` | per-respondent ex-post burden from response data |
 | `validate_catalogue(catalogue)` | check and coerce a hand-built question catalogue |
-| `validate_times(qsf, observed, weights, trim)` | a points-per-minute rate fitted to your completion-time data |
+| `validate_times(qsf, observed, scheme, trim)` | a points-per-minute rate fitted to your completion-time data |
 
 Every function has a help page:
 [`?burden_report`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md),

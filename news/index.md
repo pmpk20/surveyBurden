@@ -8,39 +8,33 @@
   [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
   scores the questions each respondent actually answered, using exported
   response data. Case-insensitive `ExportTag` matching.
-
 - New
   [`validate_catalogue()`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md)
   checks and coerces a hand-built question catalogue, enabling
   platform-agnostic scoring without a QSF file.
-
 - New “Extensions” vignette showing the catalogue schema and a worked
   example of scoring a non-Qualtrics survey.
-
 - New “Realised burden” vignette with a Qualtrics-export walkthrough.
-
 - `gfs_weights()` renamed to
-  [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md);
-  old name still works but is
-
-  deprecated.
-
+  [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md),
+  and the `weights` argument of the scoring and reporting functions
+  renamed to `scheme`. The old names have been removed, not deprecated:
+  update calls to
+  [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)
+  and `scheme =`.
 - [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
   gains a `words_per_line` argument for per-respondent reading-load
   estimation.
-
 - [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
   gains a `max_paths` argument (default 10,000), passed to
   [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md),
   so surveys with heavily branching flows can be analysed by raising the
   cap. The “too many paths” error now suggests it.
-
 - When `routes` is supplied,
   [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
   now includes the arithmetic mean and the 10th and 90th percentiles of
   per-respondent predictions in `$population` and its printed table,
   alongside the existing five statistics.
-
 - Scoring and documentation now use “GfS+” to distinguish the package’s
   extended scheme (with documented inference rules for dropdowns,
   sliders, and multi-answer matrices) from the original GfS table.

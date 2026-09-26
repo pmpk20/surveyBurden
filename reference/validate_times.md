@@ -31,7 +31,10 @@ validate_times(qsf, observed, scheme = gfs_scheme(), trim = c(3, 180))
 
 - trim:
 
-  Completion-minute range to keep (drops non-finishers and stalls).
+  Length-2 numeric: the completion-time range to keep, in minutes. Rows
+  outside it, or with a missing or non-finite time, are dropped. This
+  filters on duration only; it does not detect non-finishers, so remove
+  unfinished responses from `observed` before calling.
 
 ## Value
 
@@ -65,9 +68,10 @@ A list:
 
 - implied_points_per_minute:
 
-  Slope of `observed_seconds ~ 0 + predicted_points`. Trim-sensitive;
-  prefer a median-regression estimate from a dedicated calibration on
-  real completion times.
+  `60 / b`, where `b` is the slope of the through-origin fit
+  `observed_seconds ~ 0 + predicted_points` (seconds per point).
+  Trim-sensitive; prefer a median-regression estimate from a dedicated
+  calibration on real completion times.
 
 - lm:
 

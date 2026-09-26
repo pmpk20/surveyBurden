@@ -32,7 +32,7 @@ report
 #> ── Paths ──
 #> 
 #> Structural paths: 4 (2 complete, 2 screen-out)
-#> Display-logic combinations checked: 3-4 per complete path
+#> Display-logic trigger questions: 3-4 per complete path
 #> 
 #> ── Burden (12 GfS+ points ~ 1 minute; index = points / 1500) ──
 #> 
@@ -144,8 +144,12 @@ could take. `status` is `complete` (reaches a real submission) or
 questions, loops run once, versus every reachable question with loops at
 their cap.
 
-The printed “Display-logic combinations checked” line is the number of
-feasible skip-logic states enumerated per complete path.
+The printed “Display-logic trigger questions” line gives the range,
+across complete paths, of `n_gates`: the number of distinct questions on
+a path whose answers decide whether some other question is shown. It is
+a count of trigger questions, not of the display-logic combinations
+enumerated; one trigger question with five answer options can produce
+several combinations.
 
 ## Burden
 

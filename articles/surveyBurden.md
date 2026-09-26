@@ -77,7 +77,7 @@ report
 #> ── Paths ──
 #> 
 #> Structural paths: 4 (2 complete, 2 screen-out)
-#> Display-logic combinations checked: 3-4 per complete path
+#> Display-logic trigger questions: 3-4 per complete path
 #> 
 #> ── Burden (12 GfS+ points ~ 1 minute; index = points / 1500) ──
 #> 

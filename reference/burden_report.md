@@ -3,7 +3,7 @@
 The user-facing entry point. Parses a Qualtrics `.qsf`, resolves its
 flow and display logic, scores every question with the GfS+ burden-point
 scheme (extending Heimgartner and Axhausen 2024,
-[doi:10.32866/001c.121624](https://doi.org/10.32866/001c.121624) ), and
+[doi:10.32866/001c.125481](https://doi.org/10.32866/001c.125481) ), and
 summarises the burden across the instrument's structural path space.
 
 ## Usage
@@ -217,13 +217,13 @@ br <- burden_report(qsf_path)
 #> ✔ Reading survey [9ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [102ms]
+#> ✔ Scoring questions and resolving paths [101ms]
 #> 
 #> ℹ Checking calculation certainty
 #> ✔ Checking calculation certainty [32ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [21ms]
+#> ✔ Enumerating display-logic combinations [22ms]
 #> 
 br
 #> 
@@ -243,7 +243,7 @@ br
 #> ── Paths ──
 #> 
 #> Structural paths: 4 (2 complete, 2 screen-out)
-#> Display-logic combinations checked: 3-4 per complete path
+#> Display-logic trigger questions: 3-4 per complete path
 #> 
 #> ── Burden (12 GfS+ points ~ 1 minute; index = points / 1500) ──
 #> 

@@ -65,7 +65,7 @@
       <h1>Reading the burden report</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/pmpk20/surveyBurden/blob/v0.2.0/vignettes/reading-the-report.Rmd" class="external-link"><code>vignettes/reading-the-report.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/pmpk20/surveyBurden/blob/main/vignettes/reading-the-report.Rmd" class="external-link"><code>vignettes/reading-the-report.Rmd</code></a></small>
       <div class="d-none name"><code>reading-the-report.Rmd</code></div>
     </div>
 
@@ -98,7 +98,7 @@ produced see <code><a href="../articles/gfs-scoring.html">vignette("gfs-scoring"
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Paths</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Structural paths: 4 (2 complete, 2 screen-out)</span></span>
-<span><span class="co">#&gt; Display-logic combinations checked: 3-4 per complete path</span></span>
+<span><span class="co">#&gt; Display-logic trigger questions: 3-4 per complete path</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Burden (12 GfS+ points ~ 1 minute; index = points / 1500)</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -204,8 +204,12 @@ a respondent could take. <code>status</code> is <code>complete</code>
 <code>burden_ceiling</code> are the naive per-path bounds – only
 always-shown questions, loops run once, versus every reachable question
 with loops at their cap.</p>
-<p>The printed “Display-logic combinations checked” line is the number
-of feasible skip-logic states enumerated per complete path.</p>
+<p>The printed “Display-logic trigger questions” line gives the range,
+across complete paths, of <code>n_gates</code>: the number of distinct
+questions on a path whose answers decide whether some other question is
+shown. It is a count of trigger questions, not of the display-logic
+combinations enumerated; one trigger question with five answer options
+can produce several combinations.</p>
 </div>
 <div class="section level2">
 <h2 id="burden">Burden<a class="anchor" aria-label="anchor" href="#burden"></a>

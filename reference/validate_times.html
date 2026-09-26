@@ -45,7 +45,7 @@ regression against observed completion times."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Validate predicted burden against observed completion times</h1>
-      <small class="dont-index">Source: <a href="https://github.com/pmpk20/surveyBurden/blob/v0.2.0/R/validate_times.R" class="external-link"><code>R/validate_times.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/pmpk20/surveyBurden/blob/main/R/validate_times.R" class="external-link"><code>R/validate_times.R</code></a></small>
       <div class="d-none name"><code>validate_times.Rd</code></div>
     </div>
 
@@ -78,7 +78,10 @@ regression against observed completion times.</p>
 
 
 <dt id="arg-trim">trim<a class="anchor" aria-label="anchor" href="#arg-trim"></a></dt>
-<dd><p>Completion-minute range to keep (drops non-finishers and stalls).</p></dd>
+<dd><p>Length-2 numeric: the completion-time range to keep, in
+minutes. Rows outside it, or with a missing or non-finite time, are
+dropped. This filters on duration only; it does not detect non-finishers,
+so remove unfinished responses from <code>observed</code> before calling.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -104,8 +107,10 @@ from <code>lm</code> below – it is a through-origin pseudo-\(R^2\), much large
 and not a variance-explained figure.</p></dd>
 
 <dt>implied_points_per_minute</dt>
-<dd><p>Slope of <code>observed_seconds ~ 0 + predicted_points</code>. Trim-sensitive; prefer a median-regression estimate
-from a dedicated calibration on real completion times.</p></dd>
+<dd><p><code>60 / b</code>, where <code>b</code> is the slope of
+the through-origin fit <code>observed_seconds ~ 0 + predicted_points</code>
+(seconds per point). Trim-sensitive; prefer a median-regression
+estimate from a dedicated calibration on real completion times.</p></dd>
 
 <dt>lm</dt>
 <dd><p>The through-origin <code>lm</code> (kept for back-compatibility).</p></dd>

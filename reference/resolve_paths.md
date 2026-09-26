@@ -5,8 +5,10 @@ Combines
 (block-level routing) with a within-block display-logic reachability
 analysis. For each flow path it partitions the questions into those
 always shown, those that *may* be shown (a display-logic condition we
-cannot evaluate ex ante), and those that can never be shown on that path
-(the condition's trigger question is not on the path).
+cannot evaluate ex ante), and those whose display logic is shown to be
+false on that path because of the questions the path does not show (see
+[`classify_reachability()`](https://pmpk20.github.io/surveyBurden/reference/classify_reachability.md)
+for the rule).
 
 ## Usage
 

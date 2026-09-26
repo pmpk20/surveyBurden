@@ -88,6 +88,21 @@
   Qualtrics CSV export, with a message, when it can recognise them.
   Previously they were scored as respondents. Unrecognised rows are
   always kept.
+- Display-logic reachability: a question is now classed as never shown
+  on a path only when its logic is shown to be false there. Previously
+  any reference to a question off the path ruled it out, which was wrong
+  for OR conditions, `ElseIf` groups and negated conditions (“not
+  selected”, “not displayed”), and understated that path’s burden.
+  Questions that depend on a ruled-out question are now re-checked, and
+  enumeration fixes off-path trigger questions as unanswered. On the
+  surveys tested the burden figures are unchanged; the fix matters for
+  surveys with such logic across branches.
+- [`classify_reachability()`](https://pmpk20.github.io/surveyBurden/reference/classify_reachability.md)
+  gains a `display_logic` argument (the questions’ `DisplayLogic`
+  trees). Without it the logic cannot be evaluated, so it no longer
+  classes any question as unreachable;
+  [`resolve_paths()`](https://pmpk20.github.io/surveyBurden/reference/resolve_paths.md)
+  supplies the trees.
 
 ### Documentation
 

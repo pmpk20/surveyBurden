@@ -17,6 +17,16 @@ widely used in academic and commercial research. surveyBurden is an independent
 project: its authors and contributors have no affiliation with Qualtrics, and
 Qualtrics provides no support for this package.
 
+## Where to start
+
+| What you have | Start with | What you get | Guide |
+|---|---|---|---|
+| A Qualtrics survey (`.qsf` or API) | `burden_report(qsf)` | a model-based structural burden profile across the survey's paths | `vignette("reading-the-report")` |
+| That, plus respondent routes and loop counts | `burden_report(qsf, routes = routes)` | a distribution of respondent-level predicted burden | `vignette("paths-and-display-logic")` |
+| A response export | `realised_burden(qsf, responses)` | answer-based burden per respondent | `vignette("realised-burden")` |
+| Completion times | `validate_times(qsf, observed)` | a check of predicted against observed time, and a survey-specific rate | `vignette("calibration")` |
+| A survey from another platform | `score_burden(validate_catalogue(catalogue))` | per-question scores and a total | `vignette("extensions")` |
+
 ## Installation
 
 surveyBurden is not on CRAN. Install the development version from GitHub:
@@ -50,83 +60,12 @@ report
 #> ── Survey Burden Report: Neighbourhood Travel Survey (demo) ────────────────────
 #> Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of
 #> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.
-#>
-#> ── Instrument ──
-#>
-#> Questions (live)     26
-#> Blocks               12
-#> Branch points         3
-#> Randomisers           0
-#> Loop & Merge blocks   2
-#> Early-exit points     2
-#>
-#> ── Paths ──
-#>
-#> Structural paths: 4 (2 complete, 2 screen-out)
-#> Display-logic trigger questions: 3-4 per complete path
-#>
-#> ── Burden (12 GfS+ points ~ 1 minute; index = points / 1500) ──
-#>
-#> Statistic        Points  ~Min  Index
-#> ------------------------------------
-#> Minimum             106     9   0.07
-#> 25th percentile     117    10   0.08
-#> Median              123    10   0.08
-#> 75th percentile     129    11   0.09
-#> Maximum             143    12   0.10
-#> Benchmark: median 399 points across 79 GfS-scored waves (Heimgartner &
-#> Axhausen 2024).
-#>
-#> ── Burden by block (survey order; share of all-question points) ──
-#>
-#> Welcome                   10%  ###
-#> Consent                    1%  #
-#> Area check                 2%  #
-#> About you                 13%  ####
-#> Household                  3%  #
-#> Other adults               4%  #
-#> Vehicles                  12%  ###
-#> Vehicle details            5%  ##
-#> Travel                    23%  #######
-#> Attitudes                 16%  #####
-#> Commuting                  5%  ##
-#> Closing                    6%  ##
-#>
-#> ── Highest-burden questions ──
-#>
-#> QID21      18 pts  6x7      How much do you agree with each statement?
-#> QID19      14 pts  7x4      In the past month, how often did you use each of these?
-#> QID14      12 pts  6 opt    Which of these does your household own or have use of? ...
-#> QID20      12 pts  6x4      And for each of these reasons for travelling, how often...
-#> QID1       11 pts  0 opt    Welcome, and thank you for taking part in the Neighbour...
-#> QID7        8 pts  4x3      For each area, do you have a condition that makes trave...
-#>
-#> ── Readability diagnostics (reading load; not part of the GfS+ score) ──
-#>
-#> Long stems (> 40 words)          0
-#> Long matrix labels (> 10 words)  0
-#> Long grids (> 6 rows)            1
-#>
-#> ── Calculation certainty ──
-#>
-#> Paths: 0/2 have no unresolved display-logic question; 2 carry at least one.
-#> Display logic: 6/6 conditional questions enumerated in full within the model, 0 approximated.
-#> Loops: 2 with a known cap, 0 unknown.  Item scores: 19 auto / 7 inferred / 0
-#> manual.
-#>
-#> ── QC warnings (3) ──
-#>
-#> ! 1 matrix/grid question has more than 6 rows. Long grids invite satisficing
-#>   (respondents picking the same answer down the column instead of reading each
-#>   row): QID19
-#> ! 2 of 4 structural paths are screen-outs (the survey ends early there) rather
-#>   than complete responses.
-#> ! The point range above comes from checking every combination of optional
-#>   questions this survey's skip logic could show. Each combination is counted
-#>   once; we have no data on how likely each one is for a given respondent, so
-#>   this is a structural range, not a probability -- it does NOT mean "there's a
-#>   50% chance a respondent sees the median burden".
+#> ...
 ```
+
+The full printout adds the instrument counts, the burden quantiles, burden by
+block, the heaviest questions, readability diagnostics, calculation certainty
+and QC warnings. `vignette("reading-the-report")` walks through every section.
 
 `summary(report)` prints just the headline:
 

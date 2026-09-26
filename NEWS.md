@@ -109,6 +109,11 @@
   before summarising, with what a match does and does not certify.
   `?respondent_burden` and the vignette now state how `0`, `NA`, over-cap and
   non-logical values in route columns are read.
+* The calibration vignette has a runnable `validate_times()` recipe:
+  filtering non-finishers first, naming the duration column (Qualtrics'
+  `Duration (in seconds)` is not recognised), adding route columns, choosing
+  and reporting the trim, and how to read `ratio`, `cor` and
+  `implied_points_per_minute`.
 * Added runnable `@examples` to all exported functions using the shipped
   demo fixture (`demo_travel_survey.qsf`).
 * Switched `burden_report()` and `calculation_certainty()` examples from

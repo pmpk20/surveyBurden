@@ -64,6 +64,11 @@
   [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md);
   it is treated as empty.
 - Vignettes updated from `weights =` to `scheme =` after the rename.
+- [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
+  now reads a `Finished` column coded `TRUE`/`FALSE` or yes/no (any
+  case) as well as `1`/`0`. Blank or unrecognised values are `NA`
+  (status unknown); previously `TRUE`/`FALSE` became `NA`, and values
+  such as `"2"` or `"0.5"` were misread as finished or not finished.
 
 ### Documentation
 

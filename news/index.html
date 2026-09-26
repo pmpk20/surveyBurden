@@ -73,6 +73,8 @@
 <li>Surveys whose flow sits inside an <code>Authenticator</code> node are now resolved; previously the node and everything in it was skipped, giving an empty path and a burden of 0.</li>
 <li>A <code>Branch</code>, <code>Group</code> or <code>BlockRandomizer</code> flow node with no child flow no longer crashes <code><a href="../reference/resolve_flow.html">resolve_flow()</a></code>; it is treated as empty.</li>
 <li>Vignettes updated from <code>weights =</code> to <code>scheme =</code> after the rename.</li>
+<li>
+<code><a href="../reference/realised_burden.html">realised_burden()</a></code> now reads a <code>Finished</code> column coded <code>TRUE</code>/<code>FALSE</code> or yes/no (any case) as well as <code>1</code>/<code>0</code>. Blank or unrecognised values are <code>NA</code> (status unknown); previously <code>TRUE</code>/<code>FALSE</code> became <code>NA</code>, and values such as <code>"2"</code> or <code>"0.5"</code> were misread as finished or not finished.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="documentation-0-2-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-2-0"></a></h3>

@@ -78,7 +78,10 @@ row per respondent:
 
 - `finished`:
 
-  Logical: did the respondent reach the end?
+  Logical: did the respondent reach the end? Read from a `Finished`
+  column coded `1`/`0`, `TRUE`/`FALSE` or yes/no (any case). `NA` means
+  the status is unknown (no such column, a blank, or an unrecognised
+  value), not that the respondent did not finish.
 
 - `furthest_block`:
 

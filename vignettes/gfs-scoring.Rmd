@@ -48,10 +48,12 @@ A few of the Table 1 weights, in points per response action:
 | rating scale, up to 5 options | 2 |
 | rating scale, more than 5 options | 3 |
 | first answer to an open question | 6 |
-| two-alternative stated-choice task | 2 |
+| two-alternative stated-choice task | 2 (reference only -- see below) |
 
 The full table is in Heimgartner and Axhausen (2024); it is not
-reproduced here.
+reproduced here. `gfs_scheme()` transcribes every Table 1 weight, but the
+automatic scorer does not use all of them -- see [What the automatic
+scorer applies](#what-the-automatic-scorer-applies).
 
 ## Classification first
 
@@ -119,9 +121,13 @@ structure -- inferred because the `.qsf` lacks them).
   when the axis label carries units, otherwise as a rating.
 - **Hidden questions.** A question hidden from the respondent by injected
   CSS or JavaScript scores 0.
-- **Loop & Merge blocks** are scored per iteration and multiplied by the
-  block's explicit iteration cap. Within-loop display logic is not
-  enumerated.
+- **Loop & Merge blocks.** Item scores are per iteration; the
+  multiplication happens later, when paths are scored. The structural
+  profile spreads each loop's iteration count evenly over 1 to the
+  block's explicit cap (never 0); the naive ceiling uses the cap and the
+  naive floor one iteration. A loop with no explicit cap is not multiplied
+  at all -- its questions count once -- which can understate the upper
+  figures. Within-loop display logic is not enumerated.
 
 ### Question stems are not separately scored
 
@@ -142,9 +148,56 @@ This proxy is symmetric in rows and columns so it does not change with how
 Qualtrics happened to store the grid. It is a GfS+ extension, not part of
 the original GfS table. The weight is `gfs_scheme()$matrix_cell_multi`.
 
+## What the automatic scorer applies
+
+Each standard question type gets one rule. This table is the complete
+list; `score_basis` names the rule used for each question.
+
+| Question type (`std_type`) | Automatic rule | Scheme entries used | Flag |
+|---|---|---|---|
+| `single_choice`, 2 options | closed yes/no | `yes_no` | auto |
+| `single_choice`, 3-5 / 6+ options | rating | `rating_small` / `rating_large` | auto |
+| `single_choice`, option count unknown | assumed a rating up to 5 | `rating_small` | inferred |
+| dropdown | rating by option count; a simple numerical answer when the options are numbers and the question asks for a quantity or date | `rating_small`, `rating_large`, `numeric_answer` | inferred |
+| `multi_choice`, n options | half-open: base + per extra option, switching at `multi_large_threshold` | `multi_small_*`, `multi_large_*` | auto |
+| `matrix`, single answer per row | rows x rating by column count | `rating_small` / `rating_large` | auto |
+| `matrix`, multiple answers per row | rows x cols x cell weight | `matrix_cell_multi` | inferred |
+| `open_text`, single line | answer of up to 5 words | `open_short` | auto |
+| `open_text`, multi-line | first answer to an open question | `open_essay` | auto |
+| `slider` | numerical answer when the label has units, else a rating | `numeric_answer`, `slider` | inferred |
+| `ranking` | best-of ranking, first item only | `rank_base` | auto |
+| `constant_sum` | numerical answer | `numeric_answer` | inferred |
+| `descriptive` | base + per line beyond 3, lines = words / `words_per_line` | `descriptive_*`, `words_per_line` | auto |
+| `captcha` | fixed small cost | `captcha` | auto |
+| `timing`, `meta`, or hidden by CSS/JS | 0 | -- | auto / inferred |
+| anything else | not scored: `NA`, counted as 0 in totals | -- | unknown |
+
+**Reference-only entries.** These Table 1 weights are in `gfs_scheme()`
+for completeness, but no automatic rule reads them, so changing them does
+not change any score: `rank_per_item`, `open_medium`, `please_specify`,
+`open_essay_per_extra`, `filter`, `branching`, `sc_2_alt`, `sc_3_alt`
+and `sc_per_variable`. In practice:
+
+- a ranking scores its first item only, so rankings of several items are
+  under-scored;
+- stated-choice tasks, "please specify" boxes and repeated open answers
+  are scored as whatever widget Qualtrics used for them (a single choice,
+  a text box), not with the stated-choice or follow-up weights;
+- branching and filter points are not added.
+
+Where your survey has these, check the affected questions' `score_basis`
+and adjust by hand if needed.
+
+**What can make the reported figures too low.** Unscored (`unknown`)
+questions contribute 0, loops without an explicit cap are counted once,
+and the reference-only items above are under-scored. `burden_report()`
+warns about unscored questions; `calculation_certainty()` counts loops
+with unknown caps.
+
 ## Overriding the weights
 
-Every weight in `gfs_scheme()` can be changed and passed back in:
+Every weight in `gfs_scheme()` can be changed and passed back in; only
+the entries a rule uses (table above) affect scores:
 
 ```{r override}
 w2 <- gfs_scheme()

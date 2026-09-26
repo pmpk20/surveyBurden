@@ -35,6 +35,13 @@
 #'   Per SC variable, per question \tab 1.0 \tab `sc_per_variable` \cr
 #' }
 #'
+#' Reference only: `rank_per_item`, `open_medium`, `please_specify`,
+#' `open_essay_per_extra`, `filter`, `branching`, `sc_2_alt`, `sc_3_alt` and
+#' `sc_per_variable` are transcribed for completeness but not read by any
+#' automatic rule in [score_burden()], so changing them does not change
+#' scores. `vignette("gfs-scoring")` lists the rule used for each question
+#' type.
+#'
 #' Not in Table 1 -- package-derived, used only where the QSF does not contain
 #' the quantity the scheme needs:
 #' \describe{

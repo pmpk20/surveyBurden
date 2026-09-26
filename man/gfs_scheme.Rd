@@ -44,6 +44,13 @@ Stated choice question, 3 alternatives \tab 3.0 \tab \code{sc_3_alt} \cr
 Per SC variable, per question \tab 1.0 \tab \code{sc_per_variable} \cr
 }
 
+Reference only: \code{rank_per_item}, \code{open_medium}, \code{please_specify},
+\code{open_essay_per_extra}, \code{filter}, \code{branching}, \code{sc_2_alt}, \code{sc_3_alt} and
+\code{sc_per_variable} are transcribed for completeness but not read by any
+automatic rule in \code{\link[=score_burden]{score_burden()}}, so changing them does not change
+scores. \code{vignette("gfs-scoring")} lists the rule used for each question
+type.
+
 Not in Table 1 -- package-derived, used only where the QSF does not contain
 the quantity the scheme needs:
 \describe{

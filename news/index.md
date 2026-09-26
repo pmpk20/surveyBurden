@@ -145,6 +145,12 @@
   [`?respondent_burden`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
   and the vignette now state how `0`, `NA`, over-cap and non-logical
   values in route columns are read.
+- The calibration vignette has a runnable
+  [`validate_times()`](https://pmpk20.github.io/surveyBurden/reference/validate_times.md)
+  recipe: filtering non-finishers first, naming the duration column
+  (Qualtrics’ `Duration (in seconds)` is not recognised), adding route
+  columns, choosing and reporting the trim, and how to read `ratio`,
+  `cor` and `implied_points_per_minute`.
 - Added runnable `@examples` to all exported functions using the shipped
   demo fixture (`demo_travel_survey.qsf`).
 - Switched

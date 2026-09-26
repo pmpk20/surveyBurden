@@ -57,13 +57,87 @@ burden_report(demo, scheme = w, quiet = TRUE)$burden[, c("statistic", "minutes")
 Alternatively, if you are calculating burden ex post then you can use
 the completion-time data of your survey to calculate
 [`validate_times()`](https://pmpk20.github.io/surveyBurden/reference/validate_times.md)
-and use the rate it returns:
+and use the rate it returns.
+
+### Validating against completion times
+
+[`validate_times()`](https://pmpk20.github.io/surveyBurden/reference/validate_times.md)
+predicts each respondent’s burden from their route (via
+[`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md))
+and compares it with their completion time. Prepare the data first; the
+function does little of this for you:
+
+1.  **Keep completed responses only.** `trim` filters on duration alone
+    and does not detect non-finishers, so filter on `Finished` yourself
+    (see
+    [`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md)
+    for its encodings).
+2.  **Name the duration column** `completion_seconds` or
+    `completion_mins`. Qualtrics exports it as `Duration (in seconds)`,
+    which is not recognised. If you read a raw CSV, drop the two header
+    rows first, or the column is read as text.
+3.  **Add route columns** (`loop_*`, `visit_*`) if you have them – see
+    [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md).
+    Without them every respondent is predicted at `loop_typical`.
+4.  **Choose the trim.** The default keeps 3 to 180 minutes, to drop
+    speeders and people who left the survey open. Report how many rows
+    it removed (`n` against your row count); the implied rate is
+    sensitive to it.
+
+A simulated example:
+
+``` r
+
+set.seed(2)
+n <- 120
+paradata <- data.frame(
+  ResponseId = paste0("R_", seq_len(n)),
+  Finished   = rbinom(n, 1, 0.9),                    # 1 = completed
+  `Duration (in seconds)` = round(rlnorm(n, log(600), 0.5)),
+  loop_BL6   = rbinom(n, 5, 0.4),
+  loop_BL8   = rbinom(n, 3, 0.5),
+  check.names = FALSE
+)
+
+obs <- paradata[paradata$Finished == 1, ]            # step 1
+obs$completion_seconds <- obs$`Duration (in seconds)` # step 2
+
+vt <- validate_times(demo, obs, trim = c(3, 180))    # step 4
+c(rows = nrow(paradata), finished = nrow(obs), kept_after_trim = vt$n)
+#>            rows        finished kept_after_trim 
+#>             120             107             107
+round(c(ratio = vt$ratio, cor = vt$cor,
+        implied_ppm = vt$implied_points_per_minute), 2)
+#>       ratio         cor implied_ppm 
+#>        0.97        0.15       10.22
+```
+
+Reading the output:
+
+- `ratio` is the predicted median over the observed median, in minutes.
+- `cor` is the correlation of predicted points with observed minutes.
+  Route-level predictions cannot see within-path variation, so expect it
+  to be small on real data.
+- `implied_points_per_minute` is `60 / b`, where `b` is the slope, in
+  seconds per point, of a through-origin fit of observed seconds on
+  predicted points. It is a rough, trim-sensitive rate for this survey,
+  not a calibrated constant.
+
+To use that rate:
 
 ``` r
 
 w <- gfs_scheme()
-w$points_per_minute <- validate_times(demo, "times.csv")$implied_points_per_minute
-burden_report(demo, scheme = w)
+w$points_per_minute <- vt$implied_points_per_minute
+burden_report(demo, scheme = w, quiet = TRUE)$burden[, c("statistic", "minutes")]
+#> # A tibble: 5 × 2
+#>   statistic minutes
+#>   <fct>       <dbl>
+#> 1 min          10.4
+#> 2 p25          11.5
+#> 3 median       12.0
+#> 4 p75          12.6
+#> 5 max          14.0
 ```
 
 ## Limitations

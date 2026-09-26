@@ -73,13 +73,48 @@
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/pmpk20/surveyBurden" class="external-link">surveyBurden</a></span><span class="op">)</span></span></code></pre></div>
-<p>surveyBurden reads Qualtrics <code>.qsf</code> files. However,
-Qualtrics is closed-source and not universal. Instead, a better scenario
-would be for surveyBurden to separate the platform-specific parser from
-the platform-agnostic scoring and analysis layers. In this vignette, we
-document that boundary so that someone who wanted to add support for
-another platform (LimeSurvey, SurveyEngine, REDCap, etc.) could write a
-new parser without touching the scoring or path-analysis code.</p>
+<p>surveyBurden reads Qualtrics <code>.qsf</code> files, but many
+surveys are built on other platforms (LimeSurvey, SurveyEngine, REDCap,
+and so on). This vignette documents where the Qualtrics-specific code
+ends, what you can already do with a survey from another platform, and
+what supporting a new platform fully would take.</p>
+<p>In short:</p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr class="header">
+<th>Status</th>
+<th>What</th>
+<th>How</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td><strong>Working now</strong></td>
+<td>Per-question GfS+ scores and a survey total for any survey you can
+describe as a list of questions</td>
+<td>
+<code><a href="../reference/validate_catalogue.html">validate_catalogue()</a></code> then
+<code><a href="../reference/score_burden.html">score_burden()</a></code>
+</td>
+</tr>
+<tr class="even">
+<td><strong>Requires an adapter</strong></td>
+<td>A floor/ceiling burden band per path</td>
+<td>build a paths table yourself, then
+<code>path_burden(NULL, paths = , scored = )</code>
+</td>
+</tr>
+<tr class="odd">
+<td><strong>Future interface work</strong></td>
+<td>Display-logic profiles, <code><a href="../reference/burden_report.html">burden_report()</a></code>, respondent
+predictions, realised burden, calculation certainty</td>
+<td>these currently need a Qualtrics <code>qsf_raw</code> object</td>
+</tr>
+</tbody>
+</table>
 <div class="section level2">
 <h2 id="three-layer-architecture">Three-layer architecture<a class="anchor" aria-label="anchor" href="#three-layer-architecture"></a>
 </h2>
@@ -100,23 +135,27 @@ question, in flow order, with the structural fields the scorer needs.
 This is the intermediate representation.</p>
 <p><strong>Layer 2</strong> resolves the survey’s routing logic
 (branches, block randomisers, early exits) and display logic
-(conditional questions) into a set of feasible respondent paths. This
-layer currently reads the QSF’s <code>SurveyFlow</code> element directly
-and is, therefore, partially platform-specific. Non-Qualtrics platforms
-would need to provide an equivalent flow structure or an adapter (see
-<em>What a new parser must provide</em> below).</p>
+(conditional questions) into the structural paths the flow allows. This
+layer reads the QSF’s <code>SurveyFlow</code>, block and
+<code>DisplayLogic</code> elements directly, so it is
+Qualtrics-specific.</p>
 <p><strong>Layer 3</strong> applies the GfS+ points to the catalogue,
-computes per-path burden bands, and assembles the report. This layer
-operates entirely on the question catalogue and the resolved path
-structure. It never touches the QSF, so it is feasibly
-platform-agnostic.</p>
+computes per-path burden bands and profiles, and assembles the report.
+Only part of it is independent of the QSF: <code><a href="../reference/score_burden.html">score_burden()</a></code>
+needs just the catalogue, and <code><a href="../reference/path_burden.html">path_burden()</a></code> needs just the
+catalogue and a paths table. The profile engine behind
+<code><a href="../reference/path_burden_profile.html">path_burden_profile()</a></code> and <code><a href="../reference/burden_report.html">burden_report()</a></code>
+still reads block definitions and display-logic trees from the
+<code>qsf_raw</code> object.</p>
 </div>
 <div class="section level2">
 <h2 id="the-question-catalogue">The question catalogue<a class="anchor" aria-label="anchor" href="#the-question-catalogue"></a>
 </h2>
 <p>The catalogue is a tibble produced by <code><a href="../reference/parse_qsf.html">parse_qsf()</a></code>, one
 row per live question. Any parser that produces this schema can use
-<code><a href="../reference/score_burden.html">score_burden()</a></code> and downstream functions unchanged.</p>
+<code><a href="../reference/score_burden.html">score_burden()</a></code> directly. The functions further down the
+pipeline need more than the catalogue; see <a href="#what-a-new-parser-must-provide">What a new parser must
+provide</a>.</p>
 <div class="section level3">
 <h3 id="required-columns">Required columns<a class="anchor" aria-label="anchor" href="#required-columns"></a>
 </h3>
@@ -447,11 +486,11 @@ survey-level total:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Total: %.0f GfS+ points, ~%.0f minutes\n"</span>,</span>
 <span>            <span class="va">total_points</span>, <span class="va">total_minutes</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Total: 43 GfS+ points, ~4 minutes</span></span></code></pre></div>
-<p>This provides a headline estimate of the burden across one single
-path through the survey i.e., every question is counted once. For a
-survey with conditional questions, it is an upper bound – the burden a
-respondent would face if every question were shown. Future work will add
-support for display logic.</p>
+<p>This is the burden of one route that shows every question once. For a
+survey with conditional questions it is an upper bound on a single pass
+– the burden a respondent would face if every question were shown – but
+not if questions repeat in a loop: multiply looped questions by their
+iteration count yourself.</p>
 </div>
 <div class="section level3">
 <h3 id="what-this-gives-you-and-what-it-does-not">What this gives you and what it does not<a class="anchor" aria-label="anchor" href="#what-this-gives-you-and-what-it-does-not"></a>
@@ -467,12 +506,13 @@ the score was reached.</li>
 </ul>
 <p>It does <strong>not</strong> give you:</p>
 <ul>
-<li>A burden <em>range</em> across branching paths – that requires flow
-resolution, which needs a QSF or an equivalent flow structure.</li>
+<li>A burden <em>range</em> across branching paths – that requires a
+paths table (see the adapter below).</li>
 <li>A display-logic profile – the structural min/median/max within a
-path. That requires the parsed display-logic predicates.</li>
-<li>A population-weighted burden – that requires response data
-(<code><a href="../reference/realised_burden.html">realised_burden()</a></code>).</li>
+path. That currently requires a Qualtrics survey.</li>
+<li>A population-weighted or realised burden –
+<code><a href="../reference/respondent_burden.html">respondent_burden()</a></code> and <code><a href="../reference/realised_burden.html">realised_burden()</a></code>
+currently require a Qualtrics survey as well as response data.</li>
 </ul>
 <p>The total from a hand-built catalogue is a defensible measure of
 instrument burden for any survey that can be expressed as a list of
@@ -484,60 +524,72 @@ Qualtrics pipeline.</p>
 <div class="section level2">
 <h2 id="what-a-new-parser-must-provide">What a new parser must provide<a class="anchor" aria-label="anchor" href="#what-a-new-parser-must-provide"></a>
 </h2>
-<p>To support a new survey platform, you need to provide:</p>
 <div class="section level3">
-<h3 id="a-question-catalogue-required">1. A question catalogue (required)<a class="anchor" aria-label="anchor" href="#a-question-catalogue-required"></a>
+<h3 id="working-now-a-question-catalogue">Working now: a question catalogue<a class="anchor" aria-label="anchor" href="#working-now-a-question-catalogue"></a>
 </h3>
 <p>A data frame matching the schema above, passed through
-<code><a href="../reference/validate_catalogue.html">validate_catalogue()</a></code>. This is sufficient for
-<code><a href="../reference/score_burden.html">score_burden()</a></code> – per-question burden scoring works
-immediately.</p>
+<code><a href="../reference/validate_catalogue.html">validate_catalogue()</a></code>. This is all
+<code><a href="../reference/score_burden.html">score_burden()</a></code> needs: per-question scores and a survey
+total work immediately, as in the worked example.</p>
 </div>
 <div class="section level3">
-<h3 id="a-flow-structure-for-path-analysis">2. A flow structure (for path analysis)<a class="anchor" aria-label="anchor" href="#a-flow-structure-for-path-analysis"></a>
+<h3 id="requires-an-adapter-a-paths-table">Requires an adapter: a paths table<a class="anchor" aria-label="anchor" href="#requires-an-adapter-a-paths-table"></a>
 </h3>
-<p><code><a href="../reference/resolve_flow.html">resolve_flow()</a></code> currently walks the QSF’s
-<code>SurveyFlow</code> node tree, which uses Qualtrics-specific node
-types (<code>Standard</code>, <code>Branch</code>,
-<code>EndSurvey</code>, <code>BlockRandomizer</code>,
-<code>Group</code>, <code>EmbeddedData</code>). The function returns a
-tibble of
-<code>(path_id, block_ids, terminates_early, decisions)</code>.</p>
-<p>There are two options for extending surveyBurden to a new
-platform:</p>
+<p><code><a href="../reference/path_burden.html">path_burden()</a></code> gives a floor/ceiling band per path
+without a QSF if you pass it the scored catalogue and a paths table with
+one row per route: <code>path_id</code>, <code>terminates_early</code>,
+<code>block_ids</code> (list), <code>q_always</code> (list of question
+ids always shown on that route), <code>q_maybe</code> (list of question
+ids that may be shown) and <code>n_gates</code>.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">paths</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
+<span>  path_id          <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>,</span>
+<span>  terminates_early <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">FALSE</span>, <span class="cn">FALSE</span><span class="op">)</span>,</span>
+<span>  block_ids        <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"B1"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"B1"</span>, <span class="st">"B2"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  q_always         <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Q1"</span>, <span class="st">"Q2"</span>, <span class="st">"Q3"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Q1"</span>, <span class="st">"Q2"</span>, <span class="st">"Q3"</span>, <span class="st">"Q4"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  q_maybe          <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>, <span class="st">"Q5"</span><span class="op">)</span>,</span>
+<span>  n_gates          <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0L</span>, <span class="fl">1L</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/path_burden.html">path_burden</a></span><span class="op">(</span><span class="cn">NULL</span>, paths <span class="op">=</span> <span class="va">paths</span>, scored <span class="op">=</span> <span class="va">scored</span><span class="op">)</span><span class="op">[</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"path_id"</span>, <span class="st">"gfs_floor"</span>, <span class="st">"gfs_ceiling"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 3</span></span></span>
+<span><span class="co">#&gt;   path_id gfs_floor gfs_ceiling</span></span>
+<span><span class="co">#&gt;     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       1        35          35</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>       2        41          43</span></span></code></pre></div>
+<p>Building that table is the adapter’s job: enumerating the platform’s
+routes and deciding, for each, which questions are always or maybe
+shown. Loop multiplication in the ceiling uses the catalogue’s
+<code>loop_max</code>.</p>
+</div>
+<div class="section level3">
+<h3 id="future-interface-work-routing-and-display-logic">Future interface work: routing and display logic<a class="anchor" aria-label="anchor" href="#future-interface-work-routing-and-display-logic"></a>
+</h3>
+<p>Everything beyond the band – <code><a href="../reference/path_burden_profile.html">path_burden_profile()</a></code>,
+<code><a href="../reference/burden_report.html">burden_report()</a></code>, <code><a href="../reference/respondent_burden.html">respondent_burden()</a></code>,
+<code><a href="../reference/calculation_certainty.html">calculation_certainty()</a></code> and <code><a href="../reference/realised_burden.html">realised_burden()</a></code>
+– currently takes a <code>qsf_raw</code> object and reads its
+<code>SurveyFlow</code>, block and <code>DisplayLogic</code> elements
+directly. Supporting another platform there needs one of:</p>
 <ul>
 <li>
-<strong>1) Adoption</strong>: translate the platform’s routing model
-into the same node-list format <code>enumerate_paths()</code> consumes.
-This requires mapping the platform’s branching constructs to
-<code>Branch</code> nodes, its randomisation to
-<code>BlockRandomizer</code>, etc.</li>
+<strong>Translation</strong>: convert the platform’s survey into a
+<code>qsf_raw</code>-shaped object – flow nodes (<code>Standard</code>,
+<code>Branch</code>, <code>EndSurvey</code>,
+<code>BlockRandomizer</code>, <code>Group</code>,
+<code>EmbeddedData</code>), block definitions, and question payloads
+with Qualtrics-format <code>DisplayLogic</code> trees. This works with
+the current code but is a substantial mapping.</li>
 <li>
-<strong>2) Replacement</strong>: write a platform-specific path
-enumerator that returns the same output schema (a tibble with
-<code>path_id</code>, <code>block_ids</code>,
-<code>terminates_early</code>, <code>decisions</code> columns).</li>
+<strong>A platform-neutral interface</strong> (not yet built):
+letting these functions accept a catalogue, a paths table and parsed
+display-logic predicates in place of <code>qsf_raw</code>.</li>
 </ul>
-<p>Either way, <code><a href="../reference/path_burden.html">path_burden()</a></code> and
-<code><a href="../reference/path_burden_profile.html">path_burden_profile()</a></code> work unchanged once they receive the
-resolved paths.</p>
-</div>
-<div class="section level3">
-<h3 id="display-logic-for-the-burden-profile">3. Display logic (for the burden profile)<a class="anchor" aria-label="anchor" href="#display-logic-for-the-burden-profile"></a>
-</h3>
-<p><code>parse_display_logic()</code> reads the QSF’s
-<code>DisplayLogic</code> tree format. The display-logic layer is the
-most tightly coupled to Qualtrics. A new platform would need to produce
-an equivalent parsed structure: for each conditional question, the set
-of gate variables it reads and a predicate function that evaluates the
-logic against an assignment of those variables. See
-<code><a href="../reference/classify_reachability.html">?classify_reachability</a></code> for how the downstream code consumes
-display-logic information.</p>
-<p>For a first implementation, setting
-<code>has_display_logic = FALSE</code> for all questions is a valid
-starting point. The scorer and per-path burden still work; only the
-within-path display-logic profile (<code><a href="../reference/path_burden_profile.html">path_burden_profile()</a></code>)
-is skipped.</p>
+<p>Setting <code>has_display_logic = FALSE</code> for every question
+does <strong>not</strong> skip the display-logic profile: it tells the
+package the question is always shown, so conditional questions count on
+every route and burden is overstated. It removes conditionality from the
+model rather than modelling it.</p>
 </div>
 </div>
 <div class="section level2">
@@ -604,48 +656,62 @@ is skipped.</p>
 </tr>
 <tr class="even">
 <td><code><a href="../reference/classify_reachability.html">classify_reachability()</a></code></td>
-<td>3</td>
-<td>No – operates on catalogue fields</td>
+<td>2-3</td>
+<td>Partly – catalogue fields, but ruling questions out needs
+Qualtrics-format <code>DisplayLogic</code> trees</td>
 </tr>
 <tr class="odd">
 <td><code><a href="../reference/path_burden.html">path_burden()</a></code></td>
 <td>3</td>
-<td>No – operates on scored catalogue + paths</td>
+<td>No, given a paths table and the scored catalogue</td>
 </tr>
 <tr class="even">
 <td><code><a href="../reference/path_burden_profile.html">path_burden_profile()</a></code></td>
 <td>3</td>
-<td>No – operates on the burden engine</td>
+<td>Yes, at present – its engine reads blocks and display logic from
+<code>qsf_raw</code>
+</td>
 </tr>
 <tr class="odd">
+<td>
+<code><a href="../reference/respondent_burden.html">respondent_burden()</a></code>,
+<code><a href="../reference/calculation_certainty.html">calculation_certainty()</a></code>,
+<code><a href="../reference/realised_burden.html">realised_burden()</a></code>
+</td>
+<td>3</td>
+<td>Yes, at present – take <code>qsf_raw</code>
+</td>
+</tr>
+<tr class="even">
 <td><code><a href="../reference/burden_report.html">burden_report()</a></code></td>
 <td>3</td>
-<td>Orchestrator – takes <code>qsf_raw</code> but threads it through
+<td>Orchestrator – takes <code>qsf_raw</code> and threads it through
 Layers 1-2</td>
 </tr>
 </tbody>
 </table>
 <p>The boundary between platform-specific and platform-agnostic code
-sits at the question catalogue. Everything below
-<code><a href="../reference/score_burden.html">score_burden()</a></code> is reusable; everything above it (and the
-flow/display-logic resolvers) is Qualtrics-specific.</p>
+currently sits at the question catalogue for scoring, and at a paths
+table for the floor/ceiling band. Everything else still reads the
+QSF.</p>
 </div>
 <div class="section level2">
 <h2 id="design-rationale">Design rationale<a class="anchor" aria-label="anchor" href="#design-rationale"></a>
 </h2>
-<p>For now, this a Qualtrics-first tool that does not claim to be
-platform-agnostic. However, the three-layer design means that adding a
-new platform does not require touching the scoring rules, the path
-enumeration algebra, or the reporting logic. What it does require
-is:</p>
+<p>surveyBurden is a Qualtrics-first tool and does not claim to be
+platform-agnostic. The scoring rules are already separate from the
+parser, so scoring another platform’s survey needs only a catalogue.
+Full support would additionally need:</p>
 <ol style="list-style-type: decimal">
 <li>A parser that produces the question catalogue (the main work).</li>
-<li>A flow enumerator if the platform has conditional routing.</li>
-<li>A display-logic parser if the platform has per-question visibility
+<li>Routing: either translation into Qualtrics flow nodes, or the
+platform-neutral interface above.</li>
+<li>Display logic, likewise, if the platform has per-question visibility
 conditions.</li>
 </ol>
-<p>For platforms with simpler routing than Qualtrics (no branching, no
-block randomisers), steps 2 and 3 may be trivial or unnecessary.</p>
+<p>For a platform with no branching, loops or conditional questions, the
+catalogue and <code><a href="../reference/score_burden.html">score_burden()</a></code> already give the full
+answer.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

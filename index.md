@@ -278,9 +278,8 @@ and
 
 ## Extensibility
 
-surveyBurden is Qualtrics-first, but its architecture separates the
-platform-specific parser (Layer 1) from the platform-agnostic scorer and
-reporter (Layer 3). The intermediate representation — a standardised
+surveyBurden is Qualtrics-first. Its scoring rules are separate from the
+Qualtrics parser: the intermediate representation — a standardised
 question catalogue — is a documented data-frame schema that any parser
 can produce.
 
@@ -294,9 +293,13 @@ is in
 along with the full catalogue schema and a map of which functions are
 platform-specific and which are reusable.
 
-Adding support for a new platform (LimeSurvey, SurveyMonkey, REDCap,
-etc.) means writing a parser that produces the catalogue; the scoring
-rules, path enumeration, and reporting logic are reusable unchanged.
+For a survey from another platform (LimeSurvey, SurveyMonkey, REDCap,
+etc.), per-question scores and a survey total work now from a catalogue
+alone, and a per-path floor/ceiling band works given a paths table you
+build. Display-logic profiles,
+[`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
+and the respondent-level functions still need a Qualtrics survey; the
+vignette sets out what full support would take.
 
 ## Limitations
 

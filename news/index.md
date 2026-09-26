@@ -151,6 +151,16 @@
   (Qualtrics’ `Duration (in seconds)` is not recognised), adding route
   columns, choosing and reporting the trim, and how to read `ratio`,
   `cor` and `implied_points_per_minute`.
+- The extensions vignette and README no longer say downstream functions
+  work “unchanged” on any catalogue. They now separate what works now
+  ([`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
+  on a catalogue), what needs an adapter
+  ([`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md)
+  with a hand-built paths table, shown runnable) and what still needs a
+  Qualtrics survey (profiles,
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md),
+  respondent functions), and note that `has_display_logic = FALSE`
+  removes conditionality rather than skipping the profile.
 - Added runnable `@examples` to all exported functions using the shipped
   demo fixture (`demo_travel_survey.qsf`).
 - Switched

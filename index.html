@@ -322,9 +322,9 @@
 <div class="section level2">
 <h2 id="extensibility">Extensibility<a class="anchor" aria-label="anchor" href="#extensibility"></a>
 </h2>
-<p>surveyBurden is Qualtrics-first, but its architecture separates the platform-specific parser (Layer 1) from the platform-agnostic scorer and reporter (Layer 3). The intermediate representation — a standardised question catalogue — is a documented data-frame schema that any parser can produce.</p>
+<p>surveyBurden is Qualtrics-first. Its scoring rules are separate from the Qualtrics parser: the intermediate representation — a standardised question catalogue — is a documented data-frame schema that any parser can produce.</p>
 <p><code><a href="reference/validate_catalogue.html">validate_catalogue()</a></code> checks a hand-built catalogue against the schema, fills missing columns with safe defaults, and feeds it straight to <code><a href="reference/score_burden.html">score_burden()</a></code>. A worked example that scores a five-question survey without any QSF file is in <code><a href="articles/extensions.html">vignette("extensions")</a></code>, along with the full catalogue schema and a map of which functions are platform-specific and which are reusable.</p>
-<p>Adding support for a new platform (LimeSurvey, SurveyMonkey, REDCap, etc.) means writing a parser that produces the catalogue; the scoring rules, path enumeration, and reporting logic are reusable unchanged.</p>
+<p>For a survey from another platform (LimeSurvey, SurveyMonkey, REDCap, etc.), per-question scores and a survey total work now from a catalogue alone, and a per-path floor/ceiling band works given a paths table you build. Display-logic profiles, <code><a href="reference/burden_report.html">burden_report()</a></code> and the respondent-level functions still need a Qualtrics survey; the vignette sets out what full support would take.</p>
 </div>
 <div class="section level2">
 <h2 id="limitations">Limitations<a class="anchor" aria-label="anchor" href="#limitations"></a>

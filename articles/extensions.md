@@ -5,13 +5,19 @@
 library(surveyBurden)
 ```
 
-surveyBurden reads Qualtrics `.qsf` files. However, Qualtrics is
-closed-source and not universal. Instead, a better scenario would be for
-surveyBurden to separate the platform-specific parser from the
-platform-agnostic scoring and analysis layers. In this vignette, we
-document that boundary so that someone who wanted to add support for
-another platform (LimeSurvey, SurveyEngine, REDCap, etc.) could write a
-new parser without touching the scoring or path-analysis code.
+surveyBurden reads Qualtrics `.qsf` files, but many surveys are built on
+other platforms (LimeSurvey, SurveyEngine, REDCap, and so on). This
+vignette documents where the Qualtrics-specific code ends, what you can
+already do with a survey from another platform, and what supporting a
+new platform fully would take.
+
+In short:
+
+| Status | What | How |
+|----|----|----|
+| **Working now** | Per-question GfS+ scores and a survey total for any survey you can describe as a list of questions | [`validate_catalogue()`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md) then [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md) |
+| **Requires an adapter** | A floor/ceiling burden band per path | build a paths table yourself, then `path_burden(NULL, paths = , scored = )` |
+| **Future interface work** | Display-logic profiles, [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md), respondent predictions, realised burden, calculation certainty | these currently need a Qualtrics `qsf_raw` object |
 
 ## Three-layer architecture
 
@@ -35,16 +41,22 @@ intermediate representation.
 
 **Layer 2** resolves the survey’s routing logic (branches, block
 randomisers, early exits) and display logic (conditional questions) into
-a set of feasible respondent paths. This layer currently reads the QSF’s
-`SurveyFlow` element directly and is, therefore, partially
-platform-specific. Non-Qualtrics platforms would need to provide an
-equivalent flow structure or an adapter (see *What a new parser must
-provide* below).
+the structural paths the flow allows. This layer reads the QSF’s
+`SurveyFlow`, block and `DisplayLogic` elements directly, so it is
+Qualtrics-specific.
 
 **Layer 3** applies the GfS+ points to the catalogue, computes per-path
-burden bands, and assembles the report. This layer operates entirely on
-the question catalogue and the resolved path structure. It never touches
-the QSF, so it is feasibly platform-agnostic.
+burden bands and profiles, and assembles the report. Only part of it is
+independent of the QSF:
+[`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
+needs just the catalogue, and
+[`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md)
+needs just the catalogue and a paths table. The profile engine behind
+[`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md)
+and
+[`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
+still reads block definitions and display-logic trees from the `qsf_raw`
+object.
 
 ## The question catalogue
 
@@ -52,7 +64,9 @@ The catalogue is a tibble produced by
 [`parse_qsf()`](https://pmpk20.github.io/surveyBurden/reference/parse_qsf.md),
 one row per live question. Any parser that produces this schema can use
 [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
-and downstream functions unchanged.
+directly. The functions further down the pipeline need more than the
+catalogue; see [What a new parser must
+provide](#what-a-new-parser-must-provide).
 
 ### Required columns
 
@@ -212,11 +226,11 @@ cat(sprintf("Total: %.0f GfS+ points, ~%.0f minutes\n",
 #> Total: 43 GfS+ points, ~4 minutes
 ```
 
-This provides a headline estimate of the burden across one single path
-through the survey i.e., every question is counted once. For a survey
-with conditional questions, it is an upper bound – the burden a
-respondent would face if every question were shown. Future work will add
-support for display logic.
+This is the burden of one route that shows every question once. For a
+survey with conditional questions it is an upper bound on a single pass
+– the burden a respondent would face if every question were shown – but
+not if questions repeat in a loop: multiply looped questions by their
+iteration count yourself.
 
 ### What this gives you and what it does not
 
@@ -233,12 +247,15 @@ gives you:
 
 It does **not** give you:
 
-- A burden *range* across branching paths – that requires flow
-  resolution, which needs a QSF or an equivalent flow structure.
+- A burden *range* across branching paths – that requires a paths table
+  (see the adapter below).
 - A display-logic profile – the structural min/median/max within a path.
-  That requires the parsed display-logic predicates.
-- A population-weighted burden – that requires response data
-  ([`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)).
+  That currently requires a Qualtrics survey.
+- A population-weighted or realised burden –
+  [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
+  and
+  [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
+  currently require a Qualtrics survey as well as response data.
 
 The total from a hand-built catalogue is a defensible measure of
 instrument burden for any survey that can be expressed as a list of
@@ -248,56 +265,75 @@ Qualtrics pipeline.
 
 ## What a new parser must provide
 
-To support a new survey platform, you need to provide:
-
-### 1. A question catalogue (required)
+### Working now: a question catalogue
 
 A data frame matching the schema above, passed through
 [`validate_catalogue()`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md).
-This is sufficient for
+This is all
 [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
-– per-question burden scoring works immediately.
+needs: per-question scores and a survey total work immediately, as in
+the worked example.
 
-### 2. A flow structure (for path analysis)
+### Requires an adapter: a paths table
 
-[`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md)
-currently walks the QSF’s `SurveyFlow` node tree, which uses
-Qualtrics-specific node types (`Standard`, `Branch`, `EndSurvey`,
-`BlockRandomizer`, `Group`, `EmbeddedData`). The function returns a
-tibble of `(path_id, block_ids, terminates_early, decisions)`.
-
-There are two options for extending surveyBurden to a new platform:
-
-- **1) Adoption**: translate the platform’s routing model into the same
-  node-list format `enumerate_paths()` consumes. This requires mapping
-  the platform’s branching constructs to `Branch` nodes, its
-  randomisation to `BlockRandomizer`, etc.
-- **2) Replacement**: write a platform-specific path enumerator that
-  returns the same output schema (a tibble with `path_id`, `block_ids`,
-  `terminates_early`, `decisions` columns).
-
-Either way,
 [`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md)
+gives a floor/ceiling band per path without a QSF if you pass it the
+scored catalogue and a paths table with one row per route: `path_id`,
+`terminates_early`, `block_ids` (list), `q_always` (list of question ids
+always shown on that route), `q_maybe` (list of question ids that may be
+shown) and `n_gates`.
+
+``` r
+
+paths <- tibble::tibble(
+  path_id          = 1:2,
+  terminates_early = c(FALSE, FALSE),
+  block_ids        = list("B1", c("B1", "B2")),
+  q_always         = list(c("Q1", "Q2", "Q3"), c("Q1", "Q2", "Q3", "Q4")),
+  q_maybe          = list(character(0), "Q5"),
+  n_gates          = c(0L, 1L)
+)
+path_burden(NULL, paths = paths, scored = scored)[,
+  c("path_id", "gfs_floor", "gfs_ceiling")]
+#> # A tibble: 2 × 3
+#>   path_id gfs_floor gfs_ceiling
+#>     <int>     <dbl>       <dbl>
+#> 1       1        35          35
+#> 2       2        41          43
+```
+
+Building that table is the adapter’s job: enumerating the platform’s
+routes and deciding, for each, which questions are always or maybe
+shown. Loop multiplication in the ceiling uses the catalogue’s
+`loop_max`.
+
+### Future interface work: routing and display logic
+
+Everything beyond the band –
+[`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md),
+[`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md),
+[`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md),
+[`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md)
 and
-[`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md)
-work unchanged once they receive the resolved paths.
+[`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
+– currently takes a `qsf_raw` object and reads its `SurveyFlow`, block
+and `DisplayLogic` elements directly. Supporting another platform there
+needs one of:
 
-### 3. Display logic (for the burden profile)
+- **Translation**: convert the platform’s survey into a `qsf_raw`-shaped
+  object – flow nodes (`Standard`, `Branch`, `EndSurvey`,
+  `BlockRandomizer`, `Group`, `EmbeddedData`), block definitions, and
+  question payloads with Qualtrics-format `DisplayLogic` trees. This
+  works with the current code but is a substantial mapping.
+- **A platform-neutral interface** (not yet built): letting these
+  functions accept a catalogue, a paths table and parsed display-logic
+  predicates in place of `qsf_raw`.
 
-`parse_display_logic()` reads the QSF’s `DisplayLogic` tree format. The
-display-logic layer is the most tightly coupled to Qualtrics. A new
-platform would need to produce an equivalent parsed structure: for each
-conditional question, the set of gate variables it reads and a predicate
-function that evaluates the logic against an assignment of those
-variables. See
-[`?classify_reachability`](https://pmpk20.github.io/surveyBurden/reference/classify_reachability.md)
-for how the downstream code consumes display-logic information.
-
-For a first implementation, setting `has_display_logic = FALSE` for all
-questions is a valid starting point. The scorer and per-path burden
-still work; only the within-path display-logic profile
-([`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md))
-is skipped.
+Setting `has_display_logic = FALSE` for every question does **not** skip
+the display-logic profile: it tells the package the question is always
+shown, so conditional questions count on every route and burden is
+overstated. It removes conditionality from the model rather than
+modelling it.
 
 ## Where platform-specific code lives
 
@@ -312,28 +348,30 @@ is skipped.
 | [`validate_catalogue()`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md) | boundary | No – validates the intermediate representation |
 | [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md) | 3 | No – operates on the catalogue |
 | [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md) | 3 | No – scoring parameters |
-| [`classify_reachability()`](https://pmpk20.github.io/surveyBurden/reference/classify_reachability.md) | 3 | No – operates on catalogue fields |
-| [`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md) | 3 | No – operates on scored catalogue + paths |
-| [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md) | 3 | No – operates on the burden engine |
-| [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md) | 3 | Orchestrator – takes `qsf_raw` but threads it through Layers 1-2 |
+| [`classify_reachability()`](https://pmpk20.github.io/surveyBurden/reference/classify_reachability.md) | 2-3 | Partly – catalogue fields, but ruling questions out needs Qualtrics-format `DisplayLogic` trees |
+| [`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md) | 3 | No, given a paths table and the scored catalogue |
+| [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md) | 3 | Yes, at present – its engine reads blocks and display logic from `qsf_raw` |
+| [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md), [`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md), [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md) | 3 | Yes, at present – take `qsf_raw` |
+| [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md) | 3 | Orchestrator – takes `qsf_raw` and threads it through Layers 1-2 |
 
-The boundary between platform-specific and platform-agnostic code sits
-at the question catalogue. Everything below
-[`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
-is reusable; everything above it (and the flow/display-logic resolvers)
-is Qualtrics-specific.
+The boundary between platform-specific and platform-agnostic code
+currently sits at the question catalogue for scoring, and at a paths
+table for the floor/ceiling band. Everything else still reads the QSF.
 
 ## Design rationale
 
-For now, this a Qualtrics-first tool that does not claim to be
-platform-agnostic. However, the three-layer design means that adding a
-new platform does not require touching the scoring rules, the path
-enumeration algebra, or the reporting logic. What it does require is:
+surveyBurden is a Qualtrics-first tool and does not claim to be
+platform-agnostic. The scoring rules are already separate from the
+parser, so scoring another platform’s survey needs only a catalogue.
+Full support would additionally need:
 
 1.  A parser that produces the question catalogue (the main work).
-2.  A flow enumerator if the platform has conditional routing.
-3.  A display-logic parser if the platform has per-question visibility
+2.  Routing: either translation into Qualtrics flow nodes, or the
+    platform-neutral interface above.
+3.  Display logic, likewise, if the platform has per-question visibility
     conditions.
 
-For platforms with simpler routing than Qualtrics (no branching, no
-block randomisers), steps 2 and 3 may be trivial or unnecessary.
+For a platform with no branching, loops or conditional questions, the
+catalogue and
+[`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
+already give the full answer.

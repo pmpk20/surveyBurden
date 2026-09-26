@@ -125,6 +125,8 @@
   blocks and questions, check how they were scored, make a change, re-score
   and compare, and what the comparison does and does not establish. README
   and the get-started vignette open with a "where to start" table.
+* Every guide now opens with what it answers, what you need and what it
+  cannot establish, and ends with a "Next" section.
 * Added runnable `@examples` to all exported functions using the shipped
   demo fixture (`demo_travel_survey.qsf`).
 * Switched `burden_report()` and `calculation_certainty()` examples from

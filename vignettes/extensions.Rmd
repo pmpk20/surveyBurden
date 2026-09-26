@@ -14,6 +14,12 @@ editor_options:
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
+**What this answers.** What you can do with a survey not built in Qualtrics, and what full support for another platform would take.
+
+**What you need.** A question catalogue describing your survey (schema below).
+
+**What it cannot establish.** Without routing and display-logic information, a catalogue gives per-question scores and a single-pass total, not a burden range or profile.
+
 ```{r setup}
 library(surveyBurden)
 ```
@@ -333,3 +339,9 @@ Full support would additionally need:
 
 For a platform with no branching, loops or conditional questions, the
 catalogue and `score_burden()` already give the full answer.
+
+## Next
+
+- `vignette("gfs-scoring")` -- the scoring rules the catalogue feeds.
+- `?validate_catalogue` -- the catalogue checks and defaults.
+

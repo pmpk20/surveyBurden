@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Ex-Ante Path-Aware Survey Instrument Burden Assessment • surveyBurden</title>
+<title>An R package for assessing the response-burden of web surveys • surveyBurden</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Ex-Ante Path-Aware Survey Instrument Burden Assessment">
-<meta name="description" content="Estimates the response burden of a Qualtrics survey instrument before it is fielded. Parses a .qsf export (or fetches a live survey through the Qualtrics API), reconstructs the respondent paths the survey's flow and display logic allow, scores every question with the GfS+ points scheme (extending Heimgartner and Axhausen 2024) &lt;doi:10.32866/001c.125481&gt;, and reports the burden across those paths as a structured object.">
-<meta property="og:description" content="Estimates the response burden of a Qualtrics survey instrument before it is fielded. Parses a .qsf export (or fetches a live survey through the Qualtrics API), reconstructs the respondent paths the survey's flow and display logic allow, scores every question with the GfS+ points scheme (extending Heimgartner and Axhausen 2024) &lt;doi:10.32866/001c.125481&gt;, and reports the burden across those paths as a structured object.">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="An R package for assessing the response-burden of web surveys">
+<meta name="description" content="This package tells you how burdensome your survey is. It works primarily with Qualtrics (.qsf export or API access), but can take your own question catalogue. Burden is scored using the GfS+ points scheme.">
+<meta property="og:description" content="This package tells you how burdensome your survey is. It works primarily with Qualtrics (.qsf export or API access), but can take your own question catalogue. Burden is scored using the GfS+ points scheme.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -62,10 +62,33 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="surveyburden">surveyBurden<a class="anchor" aria-label="anchor" href="#surveyburden"></a>
 </h1></div>
-<!-- badges: start -->
-
-<p>surveyBurden reads a Qualtrics survey and estimates how much response effort the programmed instrument requires, from the survey design alone, before it is fielded.</p>
-<p>Qualtrics is a commercial platform for building and running online surveys, widely used in academic and commercial research. surveyBurden is an independent project: its authors and contributors have no affiliation with Qualtrics, and Qualtrics provides no support for this package.</p>
+<p><a href="https://github.com/pmpk20/surveyBurden/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/pmpk20/surveyBurden/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a> <a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a> <a href="https://opensource.org/licenses/MIT" class="external-link"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a> <a href="https://orcid.org/0000-0001-8550-466X" class="external-link"><img src="https://img.shields.io/badge/ORCID-0000--0001--8550--466X-A6CE39?logo=orcid" alt="ORCID"></a> <a href="https://app.codecov.io/gh/pmpk20/surveyBurden" class="external-link"><img src="https://codecov.io/gh/pmpk20/surveyBurden/graph/badge.svg" alt="Codecov test coverage"></a></p>
+<p>surveyBurden estimates how much response effort a survey instrument requires. It scores every question with the GfS+ point scheme (extending Heimgartner &amp; Axhausen 2024). It can read a Qualtrics file directly and follows its display logic to show how burden varies across the routes respondents can take. If you have response data, the survey can also tell you the burden per-respondent. surveyBurden is an independent project with no affiliation with Qualtrics or any other survey platform, and no platform provides support for it.</p>
+<div class="section level2">
+<h2 id="platform-support">Platform support<a class="anchor" aria-label="anchor" href="#platform-support"></a>
+</h2>
+<table class="table">
+<colgroup>
+<col width="30%">
+<col width="70%">
+</colgroup>
+<thead><tr>
+<th>Your survey</th>
+<th>What surveyBurden gives you</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><strong>Any platform</strong></td>
+<td>Per-question GfS+ scores and a survey total, from a simple table of your questions (<code><a href="reference/validate_catalogue.html">validate_catalogue()</a></code> then <code><a href="reference/score_burden.html">score_burden()</a></code>); a burden range per route if you also list which questions each route shows (<code><a href="reference/path_burden.html">path_burden()</a></code>)</td>
+</tr>
+<tr>
+<td>
+<strong>Qualtrics</strong> (<code>.qsf</code> file or API)</td>
+<td>All of the above, worked out automatically, plus the full report: routing and skip logic, burden across paths, respondent-level predictions, and analysis of response data and completion times</td>
+</tr>
+</tbody>
+</table>
+</div>
 <div class="section level2">
 <h2 id="where-to-start">Where to start<a class="anchor" aria-label="anchor" href="#where-to-start"></a>
 </h2>
@@ -84,6 +107,12 @@
 </tr></thead>
 <tbody>
 <tr>
+<td>A survey on any platform, as a list of questions</td>
+<td><code>score_burden(validate_catalogue(catalogue))</code></td>
+<td>per-question scores and a total</td>
+<td><code><a href="articles/extensions.html">vignette("extensions")</a></code></td>
+</tr>
+<tr>
 <td>A Qualtrics survey (<code>.qsf</code> or API)</td>
 <td><code>burden_report(qsf)</code></td>
 <td>a model-based structural burden profile across the survey’s paths</td>
@@ -96,7 +125,7 @@
 <td><code><a href="articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code></td>
 </tr>
 <tr>
-<td>A response export</td>
+<td>A Qualtrics response export</td>
 <td><code>realised_burden(qsf, responses)</code></td>
 <td>answer-based burden per respondent</td>
 <td><code><a href="articles/realised-burden.html">vignette("realised-burden")</a></code></td>
@@ -109,16 +138,9 @@
 </tr>
 <tr>
 <td>A draft you want to make lighter</td>
-<td>
-<code><a href="reference/burden_report.html">burden_report()</a></code> before and after an edit</td>
+<td>score it before and after an edit</td>
 <td>where the burden is, why, and how much a change removes</td>
 <td><code><a href="articles/survey-revision.html">vignette("survey-revision")</a></code></td>
-</tr>
-<tr>
-<td>A survey from another platform</td>
-<td><code>score_burden(validate_catalogue(catalogue))</code></td>
-<td>per-question scores and a total</td>
-<td><code><a href="articles/extensions.html">vignette("extensions")</a></code></td>
 </tr>
 </tbody>
 </table>
@@ -140,6 +162,7 @@
 <div class="section level2">
 <h2 id="quick-start">Quick start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
 </h2>
+<p>With a Qualtrics survey, one call gives the full report (this uses the demo survey shipped with the package). Not using Qualtrics? See <a href="#surveys-from-other-platforms">Surveys from other platforms</a>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/pmpk20/surveyBurden" class="external-link">surveyBurden</a></span><span class="op">)</span></span>
 <span></span>
@@ -189,12 +212,15 @@
 <h2 id="how-it-works">How it works<a class="anchor" aria-label="anchor" href="#how-it-works"></a>
 </h2>
 <pre class="mermaid"><code>flowchart LR
+    any["Survey on any platform&lt;br&gt;(table of questions)"] --&gt; val["validate_catalogue()"]
+    val --&gt; sb["score_burden()"]
+    sb --&gt; tot["per-question scores&lt;br&gt;+ survey total"]
     src["Qualtrics survey&lt;br&gt;(.qsf file or API)"] --&gt; read["read_qsf()"]
     read --&gt; score["parse_qsf() +&lt;br&gt;score_burden()"]
     score --&gt; paths["resolve_paths() +&lt;br&gt;path_burden_profile()"]
     paths --&gt; report["burden_report()"]
     report --&gt; out["verdict line +&lt;br&gt;8 report sections"]</code></pre>
-<p><code><a href="reference/burden_report.html">burden_report()</a></code> runs the whole pipeline. The lower-level functions expose each step for inspection or reuse; see the reference table below.</p>
+<p>Both routes score questions with the same rules. For a Qualtrics survey, <code><a href="reference/burden_report.html">burden_report()</a></code> runs the whole pipeline; the lower-level functions expose each step for inspection or reuse (see the reference table below).</p>
 <p>surveyBurden scores every question with the GfS+ point scheme (extending Heimgartner &amp; Axhausen 2024, Table 1), then follows the survey’s flow and display logic to work out which questions can appear together and how burden varies across the structural paths the flow allows. The score for one question is its <strong>question burden</strong>; the total along one route is a <strong>path burden</strong>. The default result is a <strong>structural burden profile</strong>: each complete path carries equal weight, and within a path each modelled display-logic state does, so the reported “median” is the middle value of that model-weighted distribution, not the burden half of respondents exceed. Branch conditions are not checked against each other, so the extremes are not guaranteed to be reachable by a real respondent. Given real respondent route data, the report instead reports a <strong>population-weighted respondent burden</strong>.</p>
 <p>The package describes the instrument, not the respondent: it does not claim that burden causes dropout, satisficing or slower responses. The methodology is set out in <code><a href="articles/gfs-scoring.html">vignette("gfs-scoring")</a></code> and <code><a href="articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code>.</p>
 </div>
@@ -211,6 +237,13 @@
 <p>Only the survey ID (<code>SV_...</code>) is needed, so a survey-builder link, a distribution link (<code>.../jfe/form/SV_...</code>), or the bare <code>SV_</code> id all work. <code><a href="reference/burden_report.html">burden_report()</a></code> fetches the survey <strong>definition</strong>, not its responses.</p>
 <p><code>QUALTRICS_BASE_URL</code> is the API datacenter host, which can differ from your survey-builder host. Check Account Settings, then Qualtrics IDs. Credentials are read from the environment and never appear in code.</p>
 <p>You can only score a survey you can access. <code><a href="reference/burden_report.html">burden_report()</a></code> reads the survey <strong>definition</strong> through the <code>survey-definitions</code> API, which requires a token with the “Manage Survey” permission on that survey — normally a survey in your own Qualtrics account. A public participation link (<code>.../jfe/form/SV_...</code>) only lets a respondent <em>take</em> the survey; it does not expose the definition. To score someone else’s survey you need either their <code>.qsf</code> export or an API token for the account that owns it.</p>
+</div>
+<div class="section level2">
+<h2 id="surveys-from-other-platforms">Surveys from other platforms<a class="anchor" aria-label="anchor" href="#surveys-from-other-platforms"></a>
+</h2>
+<p>The scoring rules do not depend on Qualtrics. Describe your questions in a data frame – one row per question, with its type and, where relevant, its number of options, rows or columns – and score it:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>catalogue <span class="ot">&lt;-</span> <span class="fu">validate_catalogue</span>(<span class="fu">data.frame</span>(   <span class="at">question_id =</span> <span class="fu">c</span>(<span class="st">"Q1"</span>, <span class="st">"Q2"</span>, <span class="st">"Q3"</span>),   <span class="at">std_type    =</span> <span class="fu">c</span>(<span class="st">"single_choice"</span>, <span class="st">"matrix"</span>, <span class="st">"open_text"</span>),   <span class="at">n_options   =</span> <span class="fu">c</span>(<span class="dv">5</span><span class="dt">L</span>, <span class="cn">NA</span>, <span class="cn">NA</span>),   <span class="at">n_rows      =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="dv">4</span><span class="dt">L</span>, <span class="cn">NA</span>),   <span class="at">n_cols      =</span> <span class="fu">c</span>(<span class="cn">NA</span>, <span class="dv">5</span><span class="dt">L</span>, <span class="cn">NA</span>) )) scored <span class="ot">&lt;-</span> <span class="fu">score_burden</span>(catalogue) <span class="fu">sum</span>(scored<span class="sc">$</span>gfs_points)   <span class="co"># survey total, in GfS+ points</span></span></code></pre></div>
+<p><code><a href="reference/validate_catalogue.html">validate_catalogue()</a></code> checks the table and fills in sensible defaults for anything you leave out. The scores use exactly the same rules as for a Qualtrics survey. If your survey has routing, list which questions each route shows and <code><a href="reference/path_burden.html">path_burden()</a></code> gives the burden range per route. <code><a href="articles/extensions.html">vignette("extensions")</a></code> has the full column list, a worked example, and what it would take for another platform’s routing and skip logic to be read automatically, as Qualtrics’ are.</p>
 </div>
 <div class="section level2">
 <h2 id="pipeline-and-api-reference">Pipeline and API reference<a class="anchor" aria-label="anchor" href="#pipeline-and-api-reference"></a>
@@ -304,17 +337,10 @@
 <p>Every function has a help page: <code><a href="reference/burden_report.html">?burden_report</a></code>, <code><a href="reference/score_burden.html">?score_burden</a></code>, and so on. The guides cover the workflow end to end — start with <code><a href="articles/surveyBurden.html">vignette("surveyBurden")</a></code>, then <code><a href="articles/reading-the-report.html">vignette("reading-the-report")</a></code>, <code><a href="articles/survey-revision.html">vignette("survey-revision")</a></code>, <code><a href="articles/gfs-scoring.html">vignette("gfs-scoring")</a></code>, <code><a href="articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code>, <code><a href="articles/calibration.html">vignette("calibration")</a></code>, <code><a href="articles/realised-burden.html">vignette("realised-burden")</a></code> and <code><a href="articles/extensions.html">vignette("extensions")</a></code>.</p>
 </div>
 <div class="section level2">
-<h2 id="extensibility">Extensibility<a class="anchor" aria-label="anchor" href="#extensibility"></a>
-</h2>
-<p>surveyBurden is Qualtrics-first. Its scoring rules are separate from the Qualtrics parser: the intermediate representation — a standardised question catalogue — is a documented data-frame schema that any parser can produce.</p>
-<p><code><a href="reference/validate_catalogue.html">validate_catalogue()</a></code> checks a hand-built catalogue against the schema, fills missing columns with safe defaults, and feeds it straight to <code><a href="reference/score_burden.html">score_burden()</a></code>. A worked example that scores a five-question survey without any QSF file is in <code><a href="articles/extensions.html">vignette("extensions")</a></code>, along with the full catalogue schema and a map of which functions are platform-specific and which are reusable.</p>
-<p>For a survey from another platform (LimeSurvey, SurveyMonkey, REDCap, etc.), per-question scores and a survey total work now from a catalogue alone, and a per-path floor/ceiling band works given a paths table you build. Display-logic profiles, <code><a href="reference/burden_report.html">burden_report()</a></code> and the respondent-level functions still need a Qualtrics survey; the vignette sets out what full support would take.</p>
-</div>
-<div class="section level2">
 <h2 id="limitations">Limitations<a class="anchor" aria-label="anchor" href="#limitations"></a>
 </h2>
 <ul>
-<li>The Qualtrics-to-GfS+ mapping is sometimes inferential; the package applies a documented rule and flags the question.</li>
+<li>The mapping from question types to GfS+ points is sometimes inferential; the package applies a documented rule and flags the question.</li>
 <li>The original GfS scheme predates modern web survey interfaces.</li>
 <li>Rendered text length cannot be recovered exactly from a <code>.qsf</code>, so <code>words_per_line</code> is a configurable proxy.</li>
 <li>Display-logic reconstruction depends on what the <code>.qsf</code> encodes; unusual or externally controlled logic may need manual interpretation.</li>
@@ -377,16 +403,7 @@
 </ul>
 </div>
 
-<div class="dev-status">
-<h2 data-toc-skip>Dev status</h2>
-<ul class="list-unstyled">
-<li><a href="https://github.com/pmpk20/surveyBurden/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/pmpk20/surveyBurden/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
-<li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
-<li><a href="https://opensource.org/licenses/MIT" class="external-link"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a></li>
-<li><a href="https://orcid.org/0000-0001-8550-466X" class="external-link"><img src="https://img.shields.io/badge/ORCID-0000--0001--8550--466X-A6CE39?logo=orcid" alt="ORCID"></a></li>
-<li><a href="https://app.codecov.io/gh/pmpk20/surveyBurden" class="external-link"><img src="https://codecov.io/gh/pmpk20/surveyBurden/graph/badge.svg" alt="Codecov test coverage"></a></li>
-</ul>
-</div>
+
 
   </aside>
 </div>

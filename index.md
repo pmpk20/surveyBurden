@@ -1,25 +1,40 @@
 # surveyBurden
 
-surveyBurden reads a Qualtrics survey and estimates how much response
-effort the programmed instrument requires, from the survey design alone,
-before it is fielded.
+[![R-CMD-check](https://github.com/pmpk20/surveyBurden/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/pmpk20/surveyBurden/actions/workflows/R-CMD-check.yaml)
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![License:
+MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![ORCID](https://img.shields.io/badge/ORCID-0000--0001--8550--466X-A6CE39?logo=orcid)](https://orcid.org/0000-0001-8550-466X)
+[![Codecov test
+coverage](https://codecov.io/gh/pmpk20/surveyBurden/graph/badge.svg)](https://app.codecov.io/gh/pmpk20/surveyBurden)
 
-Qualtrics is a commercial platform for building and running online
-surveys, widely used in academic and commercial research. surveyBurden
-is an independent project: its authors and contributors have no
-affiliation with Qualtrics, and Qualtrics provides no support for this
-package.
+surveyBurden estimates how much response effort a survey instrument
+requires. It scores every question with the GfS+ point scheme (extending
+Heimgartner & Axhausen 2024). It can read a Qualtrics file directly and
+follows its display logic to show how burden varies across the routes
+respondents can take. If you have response data, the survey can also
+tell you the burden per-respondent. surveyBurden is an independent
+project with no affiliation with Qualtrics or any other survey platform,
+and no platform provides support for it.
+
+## Platform support
+
+| Your survey | What surveyBurden gives you |
+|----|----|
+| **Any platform** | Per-question GfS+ scores and a survey total, from a simple table of your questions ([`validate_catalogue()`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md) then [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)); a burden range per route if you also list which questions each route shows ([`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md)) |
+| **Qualtrics** (`.qsf` file or API) | All of the above, worked out automatically, plus the full report: routing and skip logic, burden across paths, respondent-level predictions, and analysis of response data and completion times |
 
 ## Where to start
 
 | What you have | Start with | What you get | Guide |
 |----|----|----|----|
+| A survey on any platform, as a list of questions | `score_burden(validate_catalogue(catalogue))` | per-question scores and a total | [`vignette("extensions")`](https://pmpk20.github.io/surveyBurden/articles/extensions.md) |
 | A Qualtrics survey (`.qsf` or API) | `burden_report(qsf)` | a model-based structural burden profile across the survey’s paths | [`vignette("reading-the-report")`](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md) |
 | That, plus respondent routes and loop counts | `burden_report(qsf, routes = routes)` | a distribution of respondent-level predicted burden | [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md) |
-| A response export | `realised_burden(qsf, responses)` | answer-based burden per respondent | [`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md) |
+| A Qualtrics response export | `realised_burden(qsf, responses)` | answer-based burden per respondent | [`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md) |
 | Completion times | `validate_times(qsf, observed)` | a check of predicted against observed time, and a survey-specific rate | [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md) |
-| A draft you want to make lighter | [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md) before and after an edit | where the burden is, why, and how much a change removes | [`vignette("survey-revision")`](https://pmpk20.github.io/surveyBurden/articles/survey-revision.md) |
-| A survey from another platform | `score_burden(validate_catalogue(catalogue))` | per-question scores and a total | [`vignette("extensions")`](https://pmpk20.github.io/surveyBurden/articles/extensions.md) |
+| A draft you want to make lighter | score it before and after an edit | where the burden is, why, and how much a change removes | [`vignette("survey-revision")`](https://pmpk20.github.io/surveyBurden/articles/survey-revision.md) |
 
 ## Installation
 
@@ -44,6 +59,10 @@ Dependencies: `jsonlite`, `cli` and `tibble`, plus `httr2` only if you
 fetch from the Qualtrics API.
 
 ## Quick start
+
+With a Qualtrics survey, one call gives the full report (this uses the
+demo survey shipped with the package). Not using Qualtrics? See [Surveys
+from other platforms](#surveys-from-other-platforms).
 
 ``` r
 
@@ -111,6 +130,9 @@ Each printed section is explained in
 
 ``` mermaid
 flowchart LR
+    any["Survey on any platform<br>(table of questions)"] --> val["validate_catalogue()"]
+    val --> sb["score_burden()"]
+    sb --> tot["per-question scores<br>+ survey total"]
     src["Qualtrics survey<br>(.qsf file or API)"] --> read["read_qsf()"]
     read --> score["parse_qsf() +<br>score_burden()"]
     score --> paths["resolve_paths() +<br>path_burden_profile()"]
@@ -118,9 +140,10 @@ flowchart LR
     report --> out["verdict line +<br>8 report sections"]
 ```
 
+Both routes score questions with the same rules. For a Qualtrics survey,
 [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
-runs the whole pipeline. The lower-level functions expose each step for
-inspection or reuse; see the reference table below.
+runs the whole pipeline; the lower-level functions expose each step for
+inspection or reuse (see the reference table below).
 
 surveyBurden scores every question with the GfS+ point scheme (extending
 Heimgartner & Axhausen 2024, Table 1), then follows the survey’s flow
@@ -178,6 +201,27 @@ the survey; it does not expose the definition. To score someone else’s
 survey you need either their `.qsf` export or an API token for the
 account that owns it.
 
+## Surveys from other platforms
+
+The scoring rules do not depend on Qualtrics. Describe your questions in
+a data frame – one row per question, with its type and, where relevant,
+its number of options, rows or columns – and score it:
+
+``` r
+catalogue <- validate_catalogue(data.frame(   question_id = c("Q1", "Q2", "Q3"),   std_type    = c("single_choice", "matrix", "open_text"),   n_options   = c(5L, NA, NA),   n_rows      = c(NA, 4L, NA),   n_cols      = c(NA, 5L, NA) )) scored <- score_burden(catalogue) sum(scored$gfs_points)   # survey total, in GfS+ points
+```
+
+[`validate_catalogue()`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md)
+checks the table and fills in sensible defaults for anything you leave
+out. The scores use exactly the same rules as for a Qualtrics survey. If
+your survey has routing, list which questions each route shows and
+[`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md)
+gives the burden range per route.
+[`vignette("extensions")`](https://pmpk20.github.io/surveyBurden/articles/extensions.md)
+has the full column list, a worked example, and what it would take for
+another platform’s routing and skip logic to be read automatically, as
+Qualtrics’ are.
+
 ## Pipeline and API reference
 
 [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
@@ -219,35 +263,11 @@ then
 and
 [`vignette("extensions")`](https://pmpk20.github.io/surveyBurden/articles/extensions.md).
 
-## Extensibility
-
-surveyBurden is Qualtrics-first. Its scoring rules are separate from the
-Qualtrics parser: the intermediate representation — a standardised
-question catalogue — is a documented data-frame schema that any parser
-can produce.
-
-[`validate_catalogue()`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md)
-checks a hand-built catalogue against the schema, fills missing columns
-with safe defaults, and feeds it straight to
-[`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md).
-A worked example that scores a five-question survey without any QSF file
-is in
-[`vignette("extensions")`](https://pmpk20.github.io/surveyBurden/articles/extensions.md),
-along with the full catalogue schema and a map of which functions are
-platform-specific and which are reusable.
-
-For a survey from another platform (LimeSurvey, SurveyMonkey, REDCap,
-etc.), per-question scores and a survey total work now from a catalogue
-alone, and a per-path floor/ceiling band works given a paths table you
-build. Display-logic profiles,
-[`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
-and the respondent-level functions still need a Qualtrics survey; the
-vignette sets out what full support would take.
-
 ## Limitations
 
-- The Qualtrics-to-GfS+ mapping is sometimes inferential; the package
-  applies a documented rule and flags the question.
+- The mapping from question types to GfS+ points is sometimes
+  inferential; the package applies a documented rule and flags the
+  question.
 - The original GfS scheme predates modern web survey interfaces.
 - Rendered text length cannot be recovered exactly from a `.qsf`, so
   `words_per_line` is a configurable proxy.

@@ -47,6 +47,15 @@ Table 1 items and the names used here:
 | Stated choice question, 3 alternatives | 3.0 | `sc_3_alt` |
 | Per SC variable, per question | 1.0 | `sc_per_variable` |
 
+Reference only: `rank_per_item`, `open_medium`, `please_specify`,
+`open_essay_per_extra`, `filter`, `branching`, `sc_2_alt`, `sc_3_alt`
+and `sc_per_variable` are transcribed for completeness but not read by
+any automatic rule in
+[`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md),
+so changing them does not change scores.
+[`vignette("gfs-scoring")`](https://pmpk20.github.io/surveyBurden/articles/gfs-scoring.md)
+lists the rule used for each question type.
+
 Not in Table 1 – package-derived, used only where the QSF does not
 contain the quantity the scheme needs:
 

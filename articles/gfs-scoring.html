@@ -120,12 +120,14 @@ in the original table, hence GfS+.</p>
 </tr>
 <tr class="odd">
 <td>two-alternative stated-choice task</td>
-<td>2</td>
+<td>2 (reference only – see below)</td>
 </tr>
 </tbody>
 </table>
 <p>The full table is in Heimgartner and Axhausen (2024); it is not
-reproduced here.</p>
+reproduced here. <code><a href="../reference/gfs_scheme.html">gfs_scheme()</a></code> transcribes every Table 1
+weight, but the automatic scorer does not use all of them – see <a href="#what-the-automatic-scorer-applies">What the automatic scorer
+applies</a>.</p>
 <div class="section level2">
 <h2 id="classification-first">Classification first<a class="anchor" aria-label="anchor" href="#classification-first"></a>
 </h2>
@@ -226,9 +228,13 @@ rating.</li>
 <strong>Hidden questions.</strong> A question hidden from the
 respondent by injected CSS or JavaScript scores 0.</li>
 <li>
-<strong>Loop &amp; Merge blocks</strong> are scored per iteration
-and multiplied by the block’s explicit iteration cap. Within-loop
-display logic is not enumerated.</li>
+<strong>Loop &amp; Merge blocks.</strong> Item scores are per
+iteration; the multiplication happens later, when paths are scored. The
+structural profile spreads each loop’s iteration count evenly over 1 to
+the block’s explicit cap (never 0); the naive ceiling uses the cap and
+the naive floor one iteration. A loop with no explicit cap is not
+multiplied at all – its questions count once – which can understate the
+upper figures. Within-loop display logic is not enumerated.</li>
 </ul>
 <div class="section level3">
 <h3 id="question-stems-are-not-separately-scored">Question stems are not separately scored<a class="anchor" aria-label="anchor" href="#question-stems-are-not-separately-scored"></a>
@@ -256,10 +262,180 @@ GfS+ extension, not part of the original GfS table. The weight is
 </div>
 </div>
 <div class="section level2">
+<h2 id="what-the-automatic-scorer-applies">What the automatic scorer applies<a class="anchor" aria-label="anchor" href="#what-the-automatic-scorer-applies"></a>
+</h2>
+<p>Each standard question type gets one rule. This table is the complete
+list; <code>score_basis</code> names the rule used for each
+question.</p>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr class="header">
+<th>Question type (<code>std_type</code>)</th>
+<th>Automatic rule</th>
+<th>Scheme entries used</th>
+<th>Flag</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>
+<code>single_choice</code>, 2 options</td>
+<td>closed yes/no</td>
+<td><code>yes_no</code></td>
+<td>auto</td>
+</tr>
+<tr class="even">
+<td>
+<code>single_choice</code>, 3-5 / 6+ options</td>
+<td>rating</td>
+<td>
+<code>rating_small</code> / <code>rating_large</code>
+</td>
+<td>auto</td>
+</tr>
+<tr class="odd">
+<td>
+<code>single_choice</code>, option count unknown</td>
+<td>assumed a rating up to 5</td>
+<td><code>rating_small</code></td>
+<td>inferred</td>
+</tr>
+<tr class="even">
+<td>dropdown</td>
+<td>rating by option count; a simple numerical answer when the options
+are numbers and the question asks for a quantity or date</td>
+<td>
+<code>rating_small</code>, <code>rating_large</code>,
+<code>numeric_answer</code>
+</td>
+<td>inferred</td>
+</tr>
+<tr class="odd">
+<td>
+<code>multi_choice</code>, n options</td>
+<td>half-open: base + per extra option, switching at
+<code>multi_large_threshold</code>
+</td>
+<td>
+<code>multi_small_*</code>, <code>multi_large_*</code>
+</td>
+<td>auto</td>
+</tr>
+<tr class="even">
+<td>
+<code>matrix</code>, single answer per row</td>
+<td>rows x rating by column count</td>
+<td>
+<code>rating_small</code> / <code>rating_large</code>
+</td>
+<td>auto</td>
+</tr>
+<tr class="odd">
+<td>
+<code>matrix</code>, multiple answers per row</td>
+<td>rows x cols x cell weight</td>
+<td><code>matrix_cell_multi</code></td>
+<td>inferred</td>
+</tr>
+<tr class="even">
+<td>
+<code>open_text</code>, single line</td>
+<td>answer of up to 5 words</td>
+<td><code>open_short</code></td>
+<td>auto</td>
+</tr>
+<tr class="odd">
+<td>
+<code>open_text</code>, multi-line</td>
+<td>first answer to an open question</td>
+<td><code>open_essay</code></td>
+<td>auto</td>
+</tr>
+<tr class="even">
+<td><code>slider</code></td>
+<td>numerical answer when the label has units, else a rating</td>
+<td>
+<code>numeric_answer</code>, <code>slider</code>
+</td>
+<td>inferred</td>
+</tr>
+<tr class="odd">
+<td><code>ranking</code></td>
+<td>best-of ranking, first item only</td>
+<td><code>rank_base</code></td>
+<td>auto</td>
+</tr>
+<tr class="even">
+<td><code>constant_sum</code></td>
+<td>numerical answer</td>
+<td><code>numeric_answer</code></td>
+<td>inferred</td>
+</tr>
+<tr class="odd">
+<td><code>descriptive</code></td>
+<td>base + per line beyond 3, lines = words /
+<code>words_per_line</code>
+</td>
+<td>
+<code>descriptive_*</code>, <code>words_per_line</code>
+</td>
+<td>auto</td>
+</tr>
+<tr class="even">
+<td><code>captcha</code></td>
+<td>fixed small cost</td>
+<td><code>captcha</code></td>
+<td>auto</td>
+</tr>
+<tr class="odd">
+<td>
+<code>timing</code>, <code>meta</code>, or hidden by CSS/JS</td>
+<td>0</td>
+<td>–</td>
+<td>auto / inferred</td>
+</tr>
+<tr class="even">
+<td>anything else</td>
+<td>not scored: <code>NA</code>, counted as 0 in totals</td>
+<td>–</td>
+<td>unknown</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Reference-only entries.</strong> These Table 1 weights are in
+<code><a href="../reference/gfs_scheme.html">gfs_scheme()</a></code> for completeness, but no automatic rule reads
+them, so changing them does not change any score:
+<code>rank_per_item</code>, <code>open_medium</code>,
+<code>please_specify</code>, <code>open_essay_per_extra</code>,
+<code>filter</code>, <code>branching</code>, <code>sc_2_alt</code>,
+<code>sc_3_alt</code> and <code>sc_per_variable</code>. In practice:</p>
+<ul>
+<li>a ranking scores its first item only, so rankings of several items
+are under-scored;</li>
+<li>stated-choice tasks, “please specify” boxes and repeated open
+answers are scored as whatever widget Qualtrics used for them (a single
+choice, a text box), not with the stated-choice or follow-up
+weights;</li>
+<li>branching and filter points are not added.</li>
+</ul>
+<p>Where your survey has these, check the affected questions’
+<code>score_basis</code> and adjust by hand if needed.</p>
+<p><strong>What can make the reported figures too low.</strong> Unscored
+(<code>unknown</code>) questions contribute 0, loops without an explicit
+cap are counted once, and the reference-only items above are
+under-scored. <code><a href="../reference/burden_report.html">burden_report()</a></code> warns about unscored
+questions; <code><a href="../reference/calculation_certainty.html">calculation_certainty()</a></code> counts loops with
+unknown caps.</p>
+</div>
+<div class="section level2">
 <h2 id="overriding-the-weights">Overriding the weights<a class="anchor" aria-label="anchor" href="#overriding-the-weights"></a>
 </h2>
 <p>Every weight in <code><a href="../reference/gfs_scheme.html">gfs_scheme()</a></code> can be changed and passed
-back in:</p>
+back in; only the entries a rule uses (table above) affect scores:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">w2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gfs_scheme.html">gfs_scheme</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">w2</span><span class="op">$</span><span class="va">rating_small</span> <span class="op">&lt;-</span> <span class="fl">2.5</span></span>

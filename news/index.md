@@ -127,6 +127,17 @@
   question-iteration pairs. The vignette no longer presents a
   predicted-minus-realised gap as evidence of dropout, and explains that
   predictions use each respondent’s inferred route and loop counts.
+- The scoring vignette now lists the automatic rule for every question
+  type and which
+  [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)
+  entries each uses. Nine Table 1 entries (`rank_per_item`,
+  `open_medium`, `please_specify`, `open_essay_per_extra`, `filter`,
+  `branching`, `sc_2_alt`, `sc_3_alt`, `sc_per_variable`) are reference
+  only – no rule reads them, so changing them does not change scores;
+  [`?gfs_scheme`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)
+  says so too. It also states that item scores are per iteration, that
+  loop profiles run from 1 to the cap, and what can make the reported
+  figures too low.
 - Added runnable `@examples` to all exported functions using the shipped
   demo fixture (`demo_travel_survey.qsf`).
 - Switched

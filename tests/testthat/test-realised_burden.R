@@ -67,6 +67,25 @@ test_that("finished column is correctly detected", {
 })
 
 
+test_that("Finished accepts logical, numeric and text encodings; unknown is NA", {
+  fin <- function(v) detect_finished(data.frame(Finished = v, stringsAsFactors = FALSE))
+
+  expect_identical(fin(c(TRUE, FALSE, NA)), c(TRUE, FALSE, NA))
+  expect_identical(fin(c(1, 0, NA)), c(TRUE, FALSE, NA))
+  expect_identical(fin(c(1L, 0L)), c(TRUE, FALSE))
+  expect_identical(fin(c("1", "0", "")), c(TRUE, FALSE, NA))
+  expect_identical(fin(c("TRUE", "FALSE", "True", "false", " true ")),
+                   c(TRUE, FALSE, TRUE, FALSE, TRUE))
+  expect_identical(fin(c("Yes", "No", "y", "n")), c(TRUE, FALSE, TRUE, FALSE))
+  expect_identical(fin(factor(c("1", "0"))), c(TRUE, FALSE))
+  # anything unrecognised is unknown, not "did not finish"
+  expect_identical(fin(c("2", "maybe", "0.5")), c(NA, NA, NA))
+
+  # no Finished column at all -> all unknown
+  expect_identical(detect_finished(data.frame(x = 1:2)), c(NA, NA))
+})
+
+
 test_that("ResponseId is detected as the id column", {
   resp <- make_responses()
   rb <- realised_burden(qsf_fx(), resp)

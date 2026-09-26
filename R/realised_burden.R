@@ -35,7 +35,10 @@
 #' @return A [tibble][tibble::tibble] with one row per respondent:
 #'   \describe{
 #'     \item{`response_id`}{Respondent identifier (from `id_col`).}
-#'     \item{`finished`}{Logical: did the respondent reach the end?}
+#'     \item{`finished`}{Logical: did the respondent reach the end? Read from
+#'       a `Finished` column coded `1`/`0`, `TRUE`/`FALSE` or yes/no (any
+#'       case). `NA` means the status is unknown (no such column, a blank, or
+#'       an unrecognised value), not that the respondent did not finish.}
 #'     \item{`furthest_block`}{Integer ordinal of the last block in which the
 #'       respondent answered at least one question.}
 #'     \item{`n_questions_answered`}{Count of distinct questions with at least
@@ -423,11 +426,24 @@ resolve_id_col <- function(responses, id_col) {
 detect_finished <- function(responses) {
   for (col in c("Finished", "finished", "FINISHED")) {
     if (col %in% names(responses)) {
-      v <- responses[[col]]
-      return(as.logical(as.integer(as.character(v))))
+      return(parse_finished(responses[[col]]))
     }
   }
   rep(NA, nrow(responses))
+}
+
+#' Normalise a completion-status vector to TRUE / FALSE / NA.
+#' Accepts logical, 1/0 (numeric or text), TRUE/FALSE and yes/no text in any
+#' case. Anything else -- including blanks and other numbers -- is NA
+#' ("status unknown"), never FALSE ("did not finish").
+#' @noRd
+parse_finished <- function(v) {
+  if (is.logical(v)) return(v)
+  s <- tolower(trimws(as.character(v)))
+  out <- rep(NA, length(s))
+  out[s %in% c("1", "true", "t", "yes", "y")]  <- TRUE
+  out[s %in% c("0", "false", "f", "no", "n")] <- FALSE
+  out
 }
 
 

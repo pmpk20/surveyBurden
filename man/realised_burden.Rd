@@ -48,7 +48,10 @@ unique. Pass explicitly to override.}
 A \link[tibble:tibble]{tibble} with one row per respondent:
 \describe{
 \item{\code{response_id}}{Respondent identifier (from \code{id_col}).}
-\item{\code{finished}}{Logical: did the respondent reach the end?}
+\item{\code{finished}}{Logical: did the respondent reach the end? Read from
+a \code{Finished} column coded \code{1}/\code{0}, \code{TRUE}/\code{FALSE} or yes/no (any
+case). \code{NA} means the status is unknown (no such column, a blank, or
+an unrecognised value), not that the respondent did not finish.}
 \item{\code{furthest_block}}{Integer ordinal of the last block in which the
 respondent answered at least one question.}
 \item{\code{n_questions_answered}}{Count of distinct questions with at least

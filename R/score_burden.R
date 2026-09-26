@@ -4,7 +4,7 @@
 #' \doi{10.32866/001c.125481}) via [gfs_scheme()] to a question catalogue
 #' from [parse_qsf()], adding burden points, an estimated completion time,
 #' a confidence flag and a plain-language rationale per item.
-#' This is Layer 3 at the item level; propagation through respondent paths is a
+#' This is Layer 3 at the item level; propagation through the survey's paths is a
 #' later step.
 #'
 #' The published GfS Table 1 point values are applied directly where the

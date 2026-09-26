@@ -15,7 +15,7 @@
 #'   only, no median, and the numbers can understate the true minimum.
 #' @param routes Optional respondent data frame (see [respondent_burden()]).
 #'   When supplied, the report adds `$population`: quantiles and the mean of
-#'   one predicted burden per respondent, so each route counts as often as
+#'   one predicted burden per respondent, so each path counts as often as
 #'   respondents took it. Unlike the structural profile, this summarises
 #'   observed respondents.
 #' @param rare_threshold GfS+ points above which Heimgartner & Axhausen (2024)

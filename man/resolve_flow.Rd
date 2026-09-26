@@ -20,7 +20,8 @@ A \link[tibble:tibble]{tibble}, one row per distinct path:
 \item{terminates_early}{\code{TRUE} if the path hits an \code{EndSurvey} before the
 end of the flow (a screen-out or quota termination).}
 \item{decisions}{List column: named logical vector, one entry per branch
-on a representative route to this path, \code{TRUE} = condition taken.}
+on one combination of branch outcomes that produces this path, \code{TRUE} =
+condition taken.}
 }
 }
 \description{

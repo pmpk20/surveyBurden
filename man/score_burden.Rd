@@ -31,7 +31,7 @@ Applies the GfS+ scoring rules (extending Heimgartner and Axhausen 2024,
 \doi{10.32866/001c.125481}) via \code{\link[=gfs_scheme]{gfs_scheme()}} to a question catalogue
 from \code{\link[=parse_qsf]{parse_qsf()}}, adding burden points, an estimated completion time,
 a confidence flag and a plain-language rationale per item.
-This is Layer 3 at the item level; propagation through respondent paths is a
+This is Layer 3 at the item level; propagation through the survey's paths is a
 later step.
 }
 \details{

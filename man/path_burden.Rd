@@ -2,7 +2,7 @@
 % Please edit documentation in R/path_burden.R
 \name{path_burden}
 \alias{path_burden}
-\title{Burden per respondent path}
+\title{Burden per survey path}
 \usage{
 path_burden(
   qsf,

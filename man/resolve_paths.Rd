@@ -2,7 +2,7 @@
 % Please edit documentation in R/resolve_paths.R
 \name{resolve_paths}
 \alias{resolve_paths}
-\title{Resolve respondent paths, flow \emph{and} display logic}
+\title{Resolve the survey's paths, flow \emph{and} display logic}
 \usage{
 resolve_paths(qsf, max_paths = 10000L, catalogue = NULL, blocks = NULL)
 }

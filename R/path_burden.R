@@ -1,4 +1,4 @@
-#' Burden per respondent path
+#' Burden per survey path
 #'
 #' Joins [resolve_paths()] to [score_burden()] and reports, for every flow path,
 #' a burden band: the *floor* (only always-shown questions, loop blocks run once)

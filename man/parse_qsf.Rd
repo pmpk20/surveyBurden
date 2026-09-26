@@ -32,7 +32,7 @@ resolves the flow-reachable blocks, and classifies every live question into a
 standardised type with the structural fields the burden scorer needs.
 }
 \details{
-This function does not resolve respondent paths or compute burden. It reads
+This function does not resolve survey paths or compute burden. It reads
 and classifies questions.
 }
 \examples{

@@ -56,9 +56,9 @@ model itself), \code{pred_pts} and \code{pred_min} (predicted burden using each
 respondent's real loop counts).
 }
 \description{
-Turns the flow/display-logic model into a per-route expected burden, so you
+Turns the flow/display-logic model into a per-path expected burden, so you
 can say "a typical respondent faces ~X points, rising to ~Y once the Loop &
-Merge sections repeat, or ~Z on the shortest complete route".
+Merge sections repeat, or ~Z on the shortest complete path".
 }
 \examples{
 \donttest{

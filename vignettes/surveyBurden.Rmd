@@ -17,9 +17,9 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 `surveyBurden` estimates **ex-ante instrument burden**: the response
 effort a programmed Qualtrics survey demands, worked out before fielding
 from the instrument alone. It reads the survey, scores every question
-with the GfS+ point scheme (extending Heimgartner and Axhausen 2024), reconstructs the routes
+with the GfS+ point scheme (extending Heimgartner and Axhausen 2024), reconstructs the paths
 the flow and display logic allow, and reports how burden varies across
-those routes.
+those paths.
 
 In the terms of Yan and Williams (2022) this is the *instrument* side of
 respondent burden -- length, difficulty, and the effort the design
@@ -75,8 +75,8 @@ articles runs against the small fictional "Neighbourhood Travel Survey"
 that ships with the package, so the numbers shown are the numbers the
 current package produces. To use your own survey, replace `demo` with a
 path to a `.qsf` file, a bare `SV_...` survey id, or a Qualtrics
-survey-builder URL (see `vignette("paths-and-display-logic")` for the API
-route).
+survey-builder URL (see `?fetch_qsf` for fetching through the
+Qualtrics API).
 
 ```{r quick-start}
 report <- burden_report(demo, quiet = TRUE)
@@ -89,10 +89,10 @@ GfS benchmark, and the range across completing paths. Below it:
 
 - **Instrument** -- structural counts (questions, blocks, branch points,
   loop blocks, early exits).
-- **Paths** -- how many distinct routes the flow allows, and how many
+- **Paths** -- how many distinct paths the flow allows, and how many
   complete rather than screen out.
 - **Burden** -- the headline spread of path burden, in points, minutes
-  and a 0--1 index, with the published benchmark underneath.
+  and an index (points / 1500, so 1 is a rare burden), with the published benchmark underneath.
 - **Burden by block**, **Highest-burden questions**, **Readability
   diagnostics**, **Calculation certainty**, **QC warnings**.
 
@@ -100,14 +100,18 @@ GfS benchmark, and the range across completing paths. Below it:
 
 ## Vocabulary
 
-Five terms are used throughout, with fixed meanings:
+These terms are used throughout, with fixed meanings. The key distinction: a **path** is a possibility in the survey's design; a **route** is what one respondent actually did.
 
 | term | meaning |
 |---|---|
+| **path** | one way through the survey that its flow allows: the blocks shown, given which branches are taken. Worked out from the survey design alone; no respondent is involved. |
+| **route** | the way one respondent actually went: the optional blocks they entered and how many times they looped. Comes from response data (the `routes` argument). Many respondents' routes can fall on the same path. |
 | **question burden** | the GfS+ point score for one question, from its type and structure |
-| **path burden** | the total question burden along one structural path through the survey flow |
+| **path burden** | the total question burden along one path. Display logic and loops can vary within a path, so a path has a spread of burdens rather than one number. |
 | **structural burden profile** | the burden values a path's modelled display-logic states produce, with model weights (equal per state; each path's weights sum to 1). Not a respondent probability distribution. |
-| **population-weighted respondent burden** | one predicted burden per respondent from their observed route, summarised across respondents, so each route counts as often as respondents took it. Produced only when `routes` are supplied. |
+| **predicted respondent burden** | one respondent's predicted burden: the burden of the path matching their route, with their own loop counts (`pred_pts`). |
+| **population-weighted respondent burden** | predicted respondent burden summarised across respondents, so each path counts as often as respondents took it. Produced only when `routes` are supplied. |
+| **realised burden** | the burden of the questions a respondent actually answered, from response data (`realised_burden()`). |
 | **calculation certainty** | counts, for a given survey, of the parts of the calculation that are enumerated in full within the model and the parts that rest on documented approximations. A modelling diagnostic, not a check against the live survey. |
 | **readability diagnostics** | counts of long question stems, long matrix labels, and long grids. Reading-load signals, reported separately, never folded into the GfS+ score. |
 

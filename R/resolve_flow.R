@@ -23,7 +23,8 @@
 #'     \item{terminates_early}{`TRUE` if the path hits an `EndSurvey` before the
 #'       end of the flow (a screen-out or quota termination).}
 #'     \item{decisions}{List column: named logical vector, one entry per branch
-#'       on a representative route to this path, `TRUE` = condition taken.}
+#'       on one combination of branch outcomes that produces this path, `TRUE` =
+#'       condition taken.}
 #'   }
 #'
 #' @examples

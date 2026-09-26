@@ -18,8 +18,8 @@ coverage](https://codecov.io/gh/pmpk20/surveyBurden/graph/badge.svg)](https://ap
 surveyBurden estimates how much response effort a survey instrument
 requires. It scores every question with the GfS+ point scheme (extending
 Heimgartner & Axhausen 2024). It can read a Qualtrics file directly and
-follows its display logic to show how burden varies across the routes
-respondents can take. If you have response data, the survey can also
+follows its display logic to show how burden varies across the paths
+through the survey. If you have response data, the package can also
 tell you the burden per-respondent. surveyBurden is an independent
 project with no affiliation with Qualtrics or any other survey platform,
 and no platform provides support for it.
@@ -28,7 +28,7 @@ and no platform provides support for it.
 
 | Your survey                        | What surveyBurden gives you                                                                                                                                                                                                     |
 |---------------------|-------------------------------------------------|
-| **Any platform**                   | Per-question GfS+ scores and a survey total, from a simple table of your questions (`validate_catalogue()` then `score_burden()`); a burden range per route if you also list which questions each route shows (`path_burden()`) |
+| **Any platform**                   | Per-question GfS+ scores and a survey total, from a simple table of your questions (`validate_catalogue()` then `score_burden()`); a burden range per path if you also list which questions each path shows (`path_burden()`) |
 | **Qualtrics** (`.qsf` file or API) | All of the above, worked out automatically, plus the full report: routing and skip logic, burden across paths, respondent-level predictions, and analysis of response data and completion times                                 |
 
 ## Where to start
@@ -129,6 +129,25 @@ are stored as attributes: `attr(report, "points_per_minute")`,
 
 Each printed section is explained in `vignette("reading-the-report")`.
 
+## Vocabulary
+
+The documentation uses these terms with fixed meanings. The key distinction:
+a **path** is a possibility in the survey's design; a **route** is what one
+respondent actually did.
+
+| term | meaning |
+|---|---|
+| **path** | one way through the survey that its flow allows: the blocks shown, given which branches are taken. Worked out from the survey design alone; no respondent is involved. |
+| **route** | the way one respondent actually went: the optional blocks they entered and how many times they looped. Comes from response data (the `routes` argument). Many respondents' routes can fall on the same path. |
+| **question burden** | the GfS+ point score for one question, from its type and structure |
+| **path burden** | the total question burden along one path. Display logic and loops can vary within a path, so a path has a spread of burdens rather than one number. |
+| **structural burden profile** | the burden values a path's modelled display-logic states produce, with model weights (equal per state; each path's weights sum to 1). Not a respondent probability distribution. |
+| **predicted respondent burden** | one respondent's predicted burden: the burden of the path matching their route, with their own loop counts (`pred_pts`). |
+| **population-weighted respondent burden** | predicted respondent burden summarised across respondents, so each path counts as often as respondents took it. Produced only when `routes` are supplied. |
+| **realised burden** | the burden of the questions a respondent actually answered, from response data (`realised_burden()`). |
+| **calculation certainty** | counts, for a given survey, of the parts of the calculation that are enumerated in full within the model and the parts that rest on documented approximations. A modelling diagnostic, not a check against the live survey. |
+| **readability diagnostics** | counts of long question stems, long matrix labels, and long grids. Reading-load signals, reported separately, never folded into the GfS+ score. |
+
 ## How it works
 
 ``` mermaid
@@ -143,7 +162,7 @@ flowchart LR
     report --> out["verdict line +<br>8 report sections"]
 ```
 
-Both routes score questions with the same rules. For a Qualtrics survey,
+Both ways in score questions with the same rules. For a Qualtrics survey,
 `burden_report()` runs the whole pipeline; the lower-level functions
 expose each step for inspection or reuse (see the reference table
 below).
@@ -152,7 +171,7 @@ surveyBurden scores every question with the GfS+ point scheme (extending
 Heimgartner & Axhausen 2024, Table 1), then follows the survey's flow
 and display logic to work out which questions can appear together and
 how burden varies across the structural paths the flow allows. The score
-for one question is its **question burden**; the total along one route
+for one question is its **question burden**; the total along one path
 is a **path burden**. The default result is a **structural burden
 profile**: each complete path carries equal weight, and within a path
 each modelled display-logic state does, so the reported "median" is the
@@ -211,7 +230,7 @@ catalogue <- validate_catalogue(data.frame(   question_id = c("Q1", "Q2", "Q3"),
 `validate_catalogue()` checks the table and fills in sensible defaults
 for anything you leave out. The scores use exactly the same rules as for
 a Qualtrics survey. If your survey has routing, list which questions
-each route shows and `path_burden()` gives the burden range per route.
+each path shows and `path_burden()` gives the burden range per path.
 `vignette("extensions")` has the full column list, a worked example, and
 what it would take for another platform's routing and skip logic to be
 read automatically, as Qualtrics' are.

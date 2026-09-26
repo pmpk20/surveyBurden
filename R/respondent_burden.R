@@ -1,8 +1,8 @@
 #' Expected burden by respondent route
 #'
-#' Turns the flow/display-logic model into a per-route expected burden, so you
+#' Turns the flow/display-logic model into a per-path expected burden, so you
 #' can say "a typical respondent faces ~X points, rising to ~Y once the Loop &
-#' Merge sections repeat, or ~Z on the shortest complete route".
+#' Merge sections repeat, or ~Z on the shortest complete path".
 #'
 #' @param qsf A `qsf_raw` object or a path/URL accepted by [read_qsf()].
 #' @param routes Optional data frame of respondents. Recognised columns (all
@@ -224,7 +224,7 @@ summary_line.respondent_burden <- function(x, ...) {
   hi  <- max(x$ceiling_pts)
   sprintf(
     paste0("Typical respondent burden is about %.0f GfS+ points (~%.0f min). ",
-           "The lightest complete route is ~%.0f pts (~%.0f min); with the Loop ",
+           "The lightest complete path is ~%.0f pts (~%.0f min); with the Loop ",
            "& Merge sections fully repeated it reaches ~%.0f pts (~%.0f min)."),
     med, med / ppm, lo, lo / ppm, hi, hi / ppm
   )

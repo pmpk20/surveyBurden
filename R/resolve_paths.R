@@ -1,4 +1,4 @@
-#' Resolve respondent paths, flow *and* display logic
+#' Resolve the survey's paths, flow *and* display logic
 #'
 #' Combines [resolve_flow()] (block-level routing) with a within-block
 #' display-logic reachability analysis. For each flow path it partitions the

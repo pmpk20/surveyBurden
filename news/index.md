@@ -161,6 +161,11 @@
   [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md),
   respondent functions), and note that `has_display_logic = FALSE`
   removes conditionality rather than skipping the profile.
+- New “Revising a survey to reduce burden” vignette: find the heaviest
+  blocks and questions, check how they were scored, make a change,
+  re-score and compare, and what the comparison does and does not
+  establish. README and the get-started vignette open with a “where to
+  start” table.
 - Added runnable `@examples` to all exported functions using the shipped
   demo fixture (`demo_travel_survey.qsf`).
 - Switched

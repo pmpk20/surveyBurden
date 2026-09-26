@@ -18,6 +18,7 @@ package.
 | That, plus respondent routes and loop counts | `burden_report(qsf, routes = routes)` | a distribution of respondent-level predicted burden | [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md) |
 | A response export | `realised_burden(qsf, responses)` | answer-based burden per respondent | [`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md) |
 | Completion times | `validate_times(qsf, observed)` | a check of predicted against observed time, and a survey-specific rate | [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md) |
+| A draft you want to make lighter | [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md) before and after an edit | where the burden is, why, and how much a change removes | [`vignette("survey-revision")`](https://pmpk20.github.io/surveyBurden/articles/survey-revision.md) |
 | A survey from another platform | `score_burden(validate_catalogue(catalogue))` | per-question scores and a total | [`vignette("extensions")`](https://pmpk20.github.io/surveyBurden/articles/extensions.md) |
 
 ## Installation
@@ -210,6 +211,7 @@ and so on. The guides cover the workflow end to end — start with
 [`vignette("surveyBurden")`](https://pmpk20.github.io/surveyBurden/articles/surveyBurden.md),
 then
 [`vignette("reading-the-report")`](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md),
+[`vignette("survey-revision")`](https://pmpk20.github.io/surveyBurden/articles/survey-revision.md),
 [`vignette("gfs-scoring")`](https://pmpk20.github.io/surveyBurden/articles/gfs-scoring.md),
 [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md),
 [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md),

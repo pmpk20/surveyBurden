@@ -21,12 +21,16 @@ on what you have:
 | That, plus respondent routes and loop counts | `burden_report(qsf, routes = routes)` | a distribution of respondent-level predicted burden | [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md) |
 | A response export | `realised_burden(qsf, responses)` | answer-based burden per respondent | [`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md) |
 | Completion times | `validate_times(qsf, observed)` | a check of predicted against observed time, and a survey-specific rate | [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md) |
+| A draft you want to make lighter | [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md) before and after an edit | where the burden is, why, and how much a change removes | [`vignette("survey-revision")`](https://pmpk20.github.io/surveyBurden/articles/survey-revision.md) |
 | A survey from another platform | `score_burden(validate_catalogue(catalogue))` | per-question scores and a total | [`vignette("extensions")`](https://pmpk20.github.io/surveyBurden/articles/extensions.md) |
 
 The other articles go deeper:
 
 - [`vignette("reading-the-report")`](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md)
   – what each part of the printed output means.
+- [`vignette("survey-revision")`](https://pmpk20.github.io/surveyBurden/articles/survey-revision.md)
+  – finding the heaviest parts of a draft, changing them, and comparing
+  before and after.
 - [`vignette("gfs-scoring")`](https://pmpk20.github.io/surveyBurden/articles/gfs-scoring.md)
   – how a Qualtrics widget becomes points, and what the automatic scorer
   does and does not apply.

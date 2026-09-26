@@ -45,10 +45,13 @@ of branch-gated block ids on that path) and \code{floor_pts} / \code{typical_pts
 sentence.
 
 If \code{routes} is supplied: the routes tibble with \code{path_id}, \code{matched}
-(\code{TRUE} if the respondent's branch signature matched one of the enumerated
-complete flow paths; \code{FALSE} falls back to the heaviest path and warns --
-a route-recovery diagnostic on the flow model itself), \code{pred_pts} and
-\code{pred_min} (predicted burden using each respondent's real loop counts).
+(\code{TRUE} only if the set of optional blocks the respondent visited equals
+that of one of the enumerated complete flow paths; otherwise \code{FALSE}, the
+prediction falls back to the path with no optional blocks -- or, if
+there is none, the heaviest path -- and a warning reports how many
+routes went to each. This is a route-recovery diagnostic on the flow
+model itself), \code{pred_pts} and \code{pred_min} (predicted burden using each
+respondent's real loop counts).
 }
 \description{
 Turns the flow/display-logic model into a per-route expected burden, so you

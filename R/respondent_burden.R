@@ -32,10 +32,13 @@
 #'   sentence.
 #'
 #'   If `routes` is supplied: the routes tibble with `path_id`, `matched`
-#'   (`TRUE` if the respondent's branch signature matched one of the enumerated
-#'   complete flow paths; `FALSE` falls back to the heaviest path and warns --
-#'   a route-recovery diagnostic on the flow model itself), `pred_pts` and
-#'   `pred_min` (predicted burden using each respondent's real loop counts).
+#'   (`TRUE` only if the set of optional blocks the respondent visited equals
+#'   that of one of the enumerated complete flow paths; otherwise `FALSE`, the
+#'   prediction falls back to the path with no optional blocks -- or, if
+#'   there is none, the heaviest path -- and a warning reports how many
+#'   routes went to each. This is a route-recovery diagnostic on the flow
+#'   model itself), `pred_pts` and `pred_min` (predicted burden using each
+#'   respondent's real loop counts).
 #'
 #' @examples
 #' \donttest{
@@ -139,23 +142,13 @@ respondent_burden <- function(qsf, routes = NULL, scheme = gfs_scheme(),
     optional_blocks[keep]
   })
 
-  sig_of  <- function(v) paste(sort(unique(v)), collapse = "|")
-  path_sig <- vapply(info, function(x) sig_of(x$opt_blocks), character(1))
-  plain_i  <- which(path_sig == "")
-  heavy_i  <- which.max(vapply(info, function(x) x$base + x$disp[3], numeric(1)))
-
-  idx     <- integer(n_r)
-  matched <- logical(n_r)
-  for (r in seq_len(n_r)) {
-    hit <- which(path_sig == sig_of(desired_opt[[r]]))
-    if (length(hit)) {
-      idx[r] <- hit[1]; matched[r] <- TRUE
-    } else if (length(plain_i)) {
-      idx[r] <- plain_i[1]; matched[r] <- TRUE
-    } else {
-      idx[r] <- heavy_i; matched[r] <- FALSE
-    }
-  }
+  m <- match_routes(
+    path_opt    = lapply(info, `[[`, "opt_blocks"),
+    desired_opt = desired_opt,
+    heavy_i     = which.max(vapply(info, function(x) x$base + x$disp[3], numeric(1)))
+  )
+  idx     <- m$idx
+  matched <- m$matched
 
   pred <- vapply(seq_len(n_r), function(r) {
     x <- info[[idx[r]]]
@@ -174,11 +167,43 @@ respondent_burden <- function(qsf, routes = NULL, scheme = gfs_scheme(),
   out$pred_pts <- pred
   out$pred_min <- pred / ppm
   if (!all(matched)) {
-    cli::cli_warn(
-      "{sum(!matched)} of {length(matched)} respondent route(s) did not match any of the {length(full_i)} enumerated complete flow paths ({.field matched} = FALSE); their prediction fell back to the heaviest path. This flags either an incomplete flow model or a route-encoding mismatch."
-    )
+    n_plain <- sum(m$fallback == "plain")
+    n_heavy <- sum(m$fallback == "heaviest")
+    cli::cli_warn(c(
+      "{sum(!matched)} of {length(matched)} respondent route(s) did not match any of the {length(full_i)} enumerated complete flow paths ({.field matched} = FALSE).",
+      i = "Their predictions fell back to another path: {n_plain} to the path with no optional blocks, {n_heavy} to the heaviest path.",
+      i = "This flags either an incomplete flow model or a route-encoding mismatch."
+    ))
   }
   out
+}
+
+#' Match each respondent's optional-block set to a complete flow path.
+#'
+#' A respondent matches a path when the set of optional (branch-gated) blocks
+#' they visited equals that path's set exactly. Otherwise they fall back to
+#' the path with no optional blocks if one exists, else to `heavy_i`; either
+#' fallback is `matched = FALSE`.
+#' @param path_opt List, one character vector of optional block ids per path.
+#' @param desired_opt List, one character vector per respondent.
+#' @param heavy_i Index of the heaviest path.
+#' @return list(idx, matched, fallback), where `fallback` is `NA`, `"plain"`
+#'   or `"heaviest"` per respondent.
+#' @noRd
+match_routes <- function(path_opt, desired_opt, heavy_i) {
+  sig_of   <- function(v) paste(sort(unique(v)), collapse = "|")
+  path_sig <- vapply(path_opt, sig_of, character(1))
+  plain_i  <- which(path_sig == "")
+  hit      <- match(vapply(desired_opt, sig_of, character(1)), path_sig)
+
+  n <- length(desired_opt)
+  fallback <- rep(NA_character_, n)
+  miss <- is.na(hit)
+  if (any(miss)) {
+    fallback[miss] <- if (length(plain_i)) "plain" else "heaviest"
+    hit[miss]      <- if (length(plain_i)) plain_i[1] else heavy_i
+  }
+  list(idx = as.integer(hit), matched = !miss, fallback = fallback)
 }
 
 #' One-sentence summary of a burden object

@@ -74,6 +74,25 @@ test_that("route recovery: branch signatures all resolve to a real complete path
   expect_true(all(pr$matched))
 })
 
+test_that("match_routes: only an exact optional-block set counts as matched", {
+  paths <- list(c("B2", "B1"), character(0), "B3")
+  m <- match_routes(paths,
+                    desired_opt = list(c("B1", "B2"), character(0), "B3", "B1", c("B3", "B3")),
+                    heavy_i = 1L)
+  expect_identical(m$idx,      c(1L, 2L, 3L, 2L, 3L))
+  expect_identical(m$matched,  c(TRUE, TRUE, TRUE, FALSE, TRUE))
+  expect_identical(m$fallback, c(NA, NA, NA, "plain", NA))
+
+  # no path without optional blocks -> fall back to the heaviest path
+  m2 <- match_routes(list("B1", "B2"), desired_opt = list("B9"), heavy_i = 2L)
+  expect_identical(m2$idx, 2L)
+  expect_false(m2$matched)
+  expect_identical(m2$fallback, "heaviest")
+
+  m0 <- match_routes(paths, desired_opt = list(), heavy_i = 1L)
+  expect_length(m0$idx, 0)
+})
+
 test_that("a minimal route matches cleanly with no warning", {
   routes <- data.frame(loop_QID9 = 0, loop_QID15 = 0)
   expect_no_warning(pr <- respondent_burden(qsf_fx(), routes = routes))

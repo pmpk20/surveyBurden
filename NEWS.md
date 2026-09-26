@@ -47,6 +47,12 @@
   yes/no (any case) as well as `1`/`0`. Blank or unrecognised values are
   `NA` (status unknown); previously `TRUE`/`FALSE` became `NA`, and values
   such as `"2"` or `"0.5"` were misread as finished or not finished.
+* `respondent_burden()` (and `burden_report(routes = ...)`) now sets
+  `matched = TRUE` only when a respondent's optional-block set matches an
+  enumerated path exactly. Routes that fall back to the path with no optional
+  blocks were previously reported as matched; they are now `matched = FALSE`
+  and the warning says which fallback path each group received. Predictions
+  are unchanged.
 
 ## Documentation
 

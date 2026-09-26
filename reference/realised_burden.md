@@ -32,14 +32,18 @@ realised_burden(
   A data frame of response data. Columns must be mappable to question
   ids via one of these strategies (tried in order):
 
-  1.  Column names match question ids directly (`QID15`, `QID15_1`).
+  1.  A `col_map` attribute on the data frame: a named list, one entry
+      per column, each either a QID string or
+      `list(qid = , iteration = )`. It overrides the automatic
+      strategies for the columns it names. With a bare QID, the loop
+      iteration comes from an `N_` prefix on the column name (`2_mycol`
+      is iteration 2), else 0.
 
-  2.  Column names match `DataExportTag` values from the QSF (`Q15`,
-      `travel_mode_1`).
+  2.  Column names match question ids directly (`QID15`, `QID15_1`, or
+      `2_QID15` for loop iteration 2).
 
-  3.  A `col_map` attribute on the data frame maps column names to QIDs
-      (set by a future `read_responses()` helper from the Qualtrics CSV
-      ImportId row).
+  3.  Column names match `DataExportTag` values from the QSF (`Q15`,
+      `travel_mode_1`), exactly or ignoring case.
 
   The recommended way to obtain this data frame is
   `qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE, add_column_map = FALSE)`.

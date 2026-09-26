@@ -77,6 +77,8 @@
 <code><a href="../reference/realised_burden.html">realised_burden()</a></code> now reads a <code>Finished</code> column coded <code>TRUE</code>/<code>FALSE</code> or yes/no (any case) as well as <code>1</code>/<code>0</code>. Blank or unrecognised values are <code>NA</code> (status unknown); previously <code>TRUE</code>/<code>FALSE</code> became <code>NA</code>, and values such as <code>"2"</code> or <code>"0.5"</code> were misread as finished or not finished.</li>
 <li>
 <code><a href="../reference/respondent_burden.html">respondent_burden()</a></code> (and <code>burden_report(routes = ...)</code>) now sets <code>matched = TRUE</code> only when a respondent’s optional-block set matches an enumerated path exactly. Routes that fall back to the path with no optional blocks were previously reported as matched; they are now <code>matched = FALSE</code> and the warning says which fallback path each group received. Predictions are unchanged.</li>
+<li>
+<code><a href="../reference/realised_burden.html">realised_burden()</a></code>: columns mapped through a <code>col_map</code> attribute now keep their Loop &amp; Merge iteration, from an <code>N_</code> column-name prefix or from a <code>list(qid = , iteration = )</code> entry. Previously every mapped column was treated as iteration 0, so answers from different iterations of a looped question were merged and scored once. The help and vignette now also state that <code>col_map</code> overrides automatic column matching.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="documentation-0-2-0">Documentation<a class="anchor" aria-label="anchor" href="#documentation-0-2-0"></a></h3>

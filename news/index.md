@@ -76,6 +76,13 @@
   were previously reported as matched; they are now `matched = FALSE`
   and the warning says which fallback path each group received.
   Predictions are unchanged.
+- [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md):
+  columns mapped through a `col_map` attribute now keep their Loop &
+  Merge iteration, from an `N_` column-name prefix or from a
+  `list(qid = , iteration = )` entry. Previously every mapped column was
+  treated as iteration 0, so answers from different iterations of a
+  looped question were merged and scored once. The help and vignette now
+  also state that `col_map` overrides automatic column matching.
 
 ### Documentation
 

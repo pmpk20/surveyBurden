@@ -81,12 +81,15 @@ accepted by <code><a href="fetch_qsf.html">fetch_qsf()</a></code>.</p></dd>
 
 <dt id="arg-responses">responses<a class="anchor" aria-label="anchor" href="#arg-responses"></a></dt>
 <dd><p>A data frame of response data. Columns must be mappable to
-question ids via one of these strategies (tried in order):</p><ol><li><p>Column names match question ids directly (<code>QID15</code>, <code>QID15_1</code>).</p></li>
+question ids via one of these strategies (tried in order):</p><ol><li><p>A <code>col_map</code> attribute on the data frame: a named list, one entry per
+column, each either a QID string or <code>list(qid = , iteration = )</code>. It
+overrides the automatic strategies for the columns it names. With a
+bare QID, the loop iteration comes from an <code>N_</code> prefix on the column
+name (<code>2_mycol</code> is iteration 2), else 0.</p></li>
+<li><p>Column names match question ids directly (<code>QID15</code>, <code>QID15_1</code>, or
+<code>2_QID15</code> for loop iteration 2).</p></li>
 <li><p>Column names match <code>DataExportTag</code> values from the QSF (<code>Q15</code>,
-<code>travel_mode_1</code>).</p></li>
-<li><p>A <code>col_map</code> attribute on the data frame maps column names to QIDs
-(set by a future <code>read_responses()</code> helper from the Qualtrics CSV
-ImportId row).</p></li>
+<code>travel_mode_1</code>), exactly or ignoring case.</p></li>
 </ol><p>The recommended way to obtain this data frame is
 <code>qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE, add_column_map = FALSE)</code>.</p></dd>
 

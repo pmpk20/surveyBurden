@@ -223,7 +223,7 @@ br <- burden_report(qsf_path)
 #> ✔ Checking calculation certainty [34ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [23ms]
+#> ✔ Enumerating display-logic combinations [28ms]
 #> 
 br
 #> 

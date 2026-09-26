@@ -79,10 +79,14 @@ burden_report(demo, scheme = w)
 - Display-logic reconstruction depends on what the `.qsf` encodes. Logic
   controlled outside Qualtrics, or unusual constructs, may need manual
   interpretation.
-- Ex ante structural enumeration of all the paths through your survey
-  does not provide respondent probabilities. Without route data every
-  feasible combination is counted once, and “median” means the median
-  across combinations, not across respondents.
+- The structural profile is not a respondent distribution. Without route
+  data, each complete path gets equal total weight and, within a path,
+  each modelled display-logic state and loop count gets equal weight.
+  “Median” means the median of that model-weighted distribution, not
+  across respondents.
+- Structural paths are the block sequences the flow allows. Branch
+  conditions are not evaluated or checked against each other, so the
+  minimum or maximum may not be reachable by a real respondent.
 - Loop & Merge can make the path space large. The package unrolls to the
   explicit cap and treats the iteration count as uniform.
 - The points-to-minutes conversion is the original GfS rule of thumb,

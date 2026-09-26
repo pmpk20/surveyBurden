@@ -6,8 +6,8 @@ logic. Some of that propagation is exact (a fixed block sequence, a loop
 with an explicit cap); some rests on documented assumptions (the
 gate-independence approximation for large display-logic components, the
 independence of separate coupling components). This function reports the
-split so a reader can see which parts of the output to trust fully and
-which to read as assumption-dependent.
+split so a reader can see which parts of the output depend on those
+assumptions.
 
 ## Usage
 
@@ -85,6 +85,24 @@ An object of class `calculation_certainty` (list):
   Counts of `score_flag`: `auto` (confident structural mapping),
   `inferred` (mapping needs an assumption), `manual`, `unknown`.
 
+## Details
+
+"Exact" is used in two narrow senses here, and neither means the result
+matches the live survey:
+
+- a path counted in `n_exact` has no unresolved display-logic question
+  on it (every question is always shown or ruled out);
+
+- a display-logic question counted in `n_exact` was enumerated in full:
+  every joint state of its gates that the model represents was scored,
+  rather than approximated.
+
+Fidelity to the original survey's full logic is established by neither:
+branch conditions are not checked against each other, embedded-data
+conditions are treated as free, and unusual Qualtrics constructs may not
+be modelled at all. The breakdown describes these modelling diagnostics,
+not an overall certificate of correctness.
+
 ## Examples
 
 ``` r
@@ -97,8 +115,8 @@ calculation_certainty(qsf_path)
 #> 
 #> ── Paths ──
 #> 
-#> 0 of 2 complete paths resolve exactly (no unresolved display-logic condition);
-#> 2 carry at least one.
+#> 0 of 2 complete paths have no unresolved display-logic question; 2 carry at
+#> least one.
 #> 3 flow branches; both outcomes of each are enumerated, but which one a given
 #> respondent takes is unknown ex ante:
 #> FL_b_consent: trigger QID2

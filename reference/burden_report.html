@@ -93,24 +93,26 @@ summarises the burden across the instrument's structural path space.</p>
 
 <dt id="arg-profile">profile<a class="anchor" aria-label="anchor" href="#arg-profile"></a></dt>
 <dd><p>If <code>TRUE</code> (default), enumerate the display-logic structural
-burden profile (<code><a href="path_burden_profile.html">path_burden_profile()</a></code>) to get the <em>achievable</em> min/median/
-max burden for this survey – a few seconds of extra work. <code>FALSE</code> skips
+burden profile (<code><a href="path_burden_profile.html">path_burden_profile()</a></code>) to get the min/median/max burden
+over the display-logic states the package can model for this survey – a
+few seconds of extra work. <code>FALSE</code> skips
 that and falls back to a much faster but naive range (see Details): min/max
 only, no median, and the numbers can understate the true minimum.</p></dd>
 
 
 <dt id="arg-routes">routes<a class="anchor" aria-label="anchor" href="#arg-routes"></a></dt>
 <dd><p>Optional respondent data frame (see <code><a href="respondent_burden.html">respondent_burden()</a></code>).
-When supplied, the report adds a population-weighted burden summary: each
-route is weighted by how often respondents actually take it, so unlike the
-structural profile this is a real average over respondents.</p></dd>
+When supplied, the report adds <code>$population</code>: quantiles and the mean of
+one predicted burden per respondent, so each route counts as often as
+respondents took it. Unlike the structural profile, this summarises
+observed respondents.</p></dd>
 
 
 <dt id="arg-rare-threshold">rare_threshold<a class="anchor" aria-label="anchor" href="#arg-rare-threshold"></a></dt>
 <dd><p>GfS+ points above which Heimgartner &amp; Axhausen (2024)
 found surveys to be rare (their sample: median 399, n = 79 waves). Used for
-the "rare burden" warning and to scale the <code>index</code> column of <code>$burden</code> to
-0-1.</p></dd>
+the "rare burden" warning and to scale the <code>index</code> column of <code>$burden</code>
+(<code>points / rare_threshold</code>: 1 is the threshold, and it can exceed 1).</p></dd>
 
 
 <dt id="arg-stem-warning-threshold">stem_warning_threshold<a class="anchor" aria-label="anchor" href="#arg-stem-warning-threshold"></a></dt>
@@ -221,12 +223,14 @@ are <code>NA</code> when no non-missing predictions are available.</p></dd>
     <p><strong>Why two ranges exist.</strong> <code><a href="path_burden.html">path_burden()</a></code> (the fast, naive check) scores each
 flow path by assuming every optional (display-logic-gated) question can be
 independently hidden for the minimum, or independently shown for the maximum.
-That assumption is not always achievable: some questions are gated by
+That assumption does not always hold: some questions are gated by
 conditions that are satisfied by default (e.g. "shown unless a specific answer
 was picked"), so they cannot actually be hidden regardless of what else the
-respondent answers. <code><a href="path_burden_profile.html">path_burden_profile()</a></code> enumerates the real display-logic
-combinations and finds the burden values that are genuinely reachable, which
-is why its minimum is usually <em>higher</em> than the naive floor. <strong>This report
+respondent answers. <code><a href="path_burden_profile.html">path_burden_profile()</a></code> enumerates the display-logic
+combinations the package can model and finds the burden values they
+produce, which is why its minimum is usually <em>higher</em> than the naive floor.
+Branch conditions are not checked against each other, so these extremes are
+not guaranteed to be reachable by a real respondent. <strong>This report
 uses the profile's range as the one range shown, whenever <code>profile = TRUE</code>.</strong></p>
 <p><strong>Path-space cap.</strong> The structural path space is enumerated up to
 <code>max_paths</code> (default 10 000). A flow that would produce more raises an
@@ -246,13 +250,13 @@ enumerated.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Reading survey <span style="color: #B2B2B2;">[9ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Scoring questions and resolving paths</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Scoring questions and resolving paths <span style="color: #B2B2B2;">[106ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Scoring questions and resolving paths <span style="color: #B2B2B2;">[112ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Checking calculation certainty</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[33ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[31ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Enumerating display-logic combinations</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Enumerating display-logic combinations <span style="color: #B2B2B2;">[23ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Enumerating display-logic combinations <span style="color: #B2B2B2;">[24ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="va">br</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -318,8 +322,9 @@ enumerated.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Calculation certainty</span> ──</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Paths: 0/2 resolve exactly; 2 carry an unresolved display-logic condition.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Display logic: 6/6 conditional questions enumerated exactly, 0 approximated.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Paths: 0/2 have no unresolved display-logic question; 2 carry at least one.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Display logic: 6/6 conditional questions enumerated in full within the model, 0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> approximated.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Loops: 2 with a known cap, 0 unknown.  Item scores: 19 auto / 7 inferred / 0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> manual.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -327,7 +332,7 @@ enumerated.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> 1 matrix/grid question has more than 6 rows. Long grids invite satisficing (respondents picking the same answer down the column instead of reading each row): QID19</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> 2 of 4 structural paths are screen-outs (the survey ends early there) rather than complete responses.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> The point range above comes from checking every combination of optional questions this survey's skip logic could show. Each combination is counted once; we have no data on how likely each one is for a given respondent, so this is a structural range, not a probability -- it does NOT mean "there's a 50% chance a respondent sees the median burden".</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> The point range above comes from the combinations of optional questions the package can model for this survey's flow and skip logic. Each complete path carries equal weight, and so does each modelled combination within a path; these are model weights, not how often respondents see each one, so this is a structural range, not a probability -- it does NOT mean "there's a 50% chance a respondent sees the median burden".</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">br</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Neighbourhood Travel Survey (demo)</span> <span style="color: #00BBBB;">──────────────────────────────────────────</span></span>

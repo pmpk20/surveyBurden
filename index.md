@@ -105,8 +105,8 @@ report
     #>
     #> ── Calculation certainty ──
     #>
-    #> Paths: 0/2 resolve exactly; 2 carry an unresolved display-logic condition.
-    #> Display logic: 6/6 conditional questions enumerated exactly, 0 approximated.
+    #> Paths: 0/2 have no unresolved display-logic question; 2 carry at least one.
+    #> Display logic: 6/6 conditional questions enumerated in full within the model, 0 approximated.
     #> Loops: 2 with a known cap, 0 unknown.  Item scores: 19 auto / 7 inferred / 0
     #> manual.
     #>
@@ -183,13 +183,16 @@ inspection or reuse; see the reference table below.
 surveyBurden scores every question with the GfS+ point scheme (extending
 Heimgartner & Axhausen 2024, Table 1), then follows the survey’s flow
 and display logic to work out which questions can appear together and
-how burden varies across the feasible respondent paths. The score for
-one question is its **question burden**; the total along one route is a
-**path burden**. The default result is a **structural burden profile**:
-each feasible path and display-logic sub-state is counted once, so the
-reported “median” is the middle value across those combinations, not the
-burden half of respondents exceed. Given real respondent route data, the
-report instead reports a **population-weighted respondent burden**.
+how burden varies across the structural paths the flow allows. The score
+for one question is its **question burden**; the total along one route
+is a **path burden**. The default result is a **structural burden
+profile**: each complete path carries equal weight, and within a path
+each modelled display-logic state does, so the reported “median” is the
+middle value of that model-weighted distribution, not the burden half of
+respondents exceed. Branch conditions are not checked against each
+other, so the extremes are not guaranteed to be reachable by a real
+respondent. Given real respondent route data, the report instead reports
+a **population-weighted respondent burden**.
 
 The package describes the instrument, not the respondent: it does not
 claim that burden causes dropout, satisficing or slower responses. The
@@ -250,10 +253,10 @@ runs the whole pipeline. The lower-level functions expose each step.
 | `resolve_paths(qsf, max_paths)` | per path: questions always shown, may be shown, never shown |
 | `classify_reachability(catalogue, path_qids)` | reachability label for each question on a path |
 | `path_burden(qsf, scheme, max_paths)` | burden floor and ceiling per path |
-| `path_burden_profile(qsf, scheme, max_paths)` | enumerated feasible burden values per path |
+| `path_burden_profile(qsf, scheme, max_paths)` | model-weighted burden values per path, from the enumerated display-logic states |
 | `respondent_burden(qsf, routes, scheme, loop_typical)` | population-weighted burden from observed routes |
 | `summary_line(x, ...)` | a one-sentence burden summary |
-| `calculation_certainty(qsf, scheme, max_paths)` | which parts of the calculation are exact and which are approximated |
+| `calculation_certainty(qsf, scheme, max_paths)` | which parts of the calculation are enumerated in full within the model and which are approximated |
 | `burden_report(x, scheme, profile, routes, max_paths, ...)` | the structured report object |
 | `realised_burden(qsf, responses)` | per-respondent ex-post burden from response data |
 | `validate_catalogue(catalogue)` | check and coerce a hand-built question catalogue |

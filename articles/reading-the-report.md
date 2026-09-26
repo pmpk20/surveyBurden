@@ -78,8 +78,9 @@ report
 #> 
 #> ── Calculation certainty ──
 #> 
-#> Paths: 0/2 resolve exactly; 2 carry an unresolved display-logic condition.
-#> Display logic: 6/6 conditional questions enumerated exactly, 0 approximated.
+#> Paths: 0/2 have no unresolved display-logic question; 2 carry at least one.
+#> Display logic: 6/6 conditional questions enumerated in full within the model, 0
+#> approximated.
 #> Loops: 2 with a known cap, 0 unknown.  Item scores: 19 auto / 7 inferred / 0
 #> manual.
 #> 
@@ -87,7 +88,7 @@ report
 #> 
 #> ! 1 matrix/grid question has more than 6 rows. Long grids invite satisficing (respondents picking the same answer down the column instead of reading each row): QID19
 #> ! 2 of 4 structural paths are screen-outs (the survey ends early there) rather than complete responses.
-#> ! The point range above comes from checking every combination of optional questions this survey's skip logic could show. Each combination is counted once; we have no data on how likely each one is for a given respondent, so this is a structural range, not a probability -- it does NOT mean "there's a 50% chance a respondent sees the median burden".
+#> ! The point range above comes from the combinations of optional questions the package can model for this survey's flow and skip logic. Each complete path carries equal weight, and so does each modelled combination within a path; these are model weights, not how often respondents see each one, so this is a structural range, not a probability -- it does NOT mean "there's a 50% chance a respondent sees the median burden".
 ```
 
 ## The verdict line
@@ -184,8 +185,9 @@ attr(report$burden, "basis")
   Axhausen (2024). The verdict line’s ratio is the survey’s median over
   that 399.
 
-The median here is the middle value across the feasible skip-logic
-combinations, **not** the burden half of respondents exceed –
+The median here is the middle value of the modelled skip-logic
+combinations, with each complete path given equal total weight – **not**
+the burden half of respondents exceed.
 [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md)
 returns to this.
 
@@ -322,14 +324,17 @@ report$certainty$scores
 #> [1] 0
 ```
 
-For each survey this states which parts of the calculation are exact and
-which rest on a documented approximation: how many paths resolve to a
-single burden value, how many conditional questions were enumerated
-exactly versus approximated, whether every loop has a known cap, and the
-`auto` / `inferred` / `manual` / `unknown` split of the item scores. A
-result can be fully reproducible without every underlying interpretation
-being certain; this block makes the uncertain parts countable. Pass
-`certainty = FALSE` to skip it.
+For each survey this counts which parts of the calculation rest on a
+documented approximation: how many complete paths have no unresolved
+display-logic question, how many conditional questions were enumerated
+in full (every state the model represents) versus approximated, whether
+every loop has a known cap, and the `auto` / `inferred` / `manual` /
+`unknown` split of the item scores. These are modelling diagnostics, not
+a certificate that the result matches the live survey: branch
+conditions, embedded-data conditions and unusual Qualtrics constructs
+are outside what they check. A result can be fully reproducible without
+every underlying interpretation being certain; this block makes the
+uncertain parts countable. Pass `certainty = FALSE` to skip it.
 
 ## QC warnings
 

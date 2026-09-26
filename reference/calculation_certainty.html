@@ -4,14 +4,14 @@ flow and display logic. Some of that propagation is exact (a fixed block
 sequence, a loop with an explicit cap); some rests on documented assumptions
 (the gate-independence approximation for large display-logic components, the
 independence of separate coupling components). This function reports the
-split so a reader can see which parts of the output to trust fully and which
-to read as assumption-dependent."><meta property="og:description" content="burden_report() propagates an established item score through a survey's
+split so a reader can see which parts of the output depend on those
+assumptions."><meta property="og:description" content="burden_report() propagates an established item score through a survey's
 flow and display logic. Some of that propagation is exact (a fixed block
 sequence, a loop with an explicit cap); some rests on documented assumptions
 (the gate-independence approximation for large display-logic components, the
 independence of separate coupling components). This function reports the
-split so a reader can see which parts of the output to trust fully and which
-to read as assumption-dependent."></head><body>
+split so a reader can see which parts of the output depend on those
+assumptions."></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -61,8 +61,8 @@ flow and display logic. Some of that propagation is exact (a fixed block
 sequence, a loop with an explicit cap); some rests on documented assumptions
 (the gate-independence approximation for large display-logic components, the
 independence of separate coupling components). This function reports the
-split so a reader can see which parts of the output to trust fully and which
-to read as assumption-dependent.</p>
+split so a reader can see which parts of the output depend on those
+assumptions.</p>
     </div>
 
     <div class="section level2">
@@ -132,6 +132,20 @@ mapping), <code>inferred</code> (mapping needs an assumption), <code>manual</cod
 
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>"Exact" is used in two narrow senses here, and neither means the result
+matches the live survey:</p><ul><li><p>a path counted in <code>n_exact</code> has no unresolved display-logic
+question on it (every question is always shown or ruled out);</p></li>
+<li><p>a display-logic question counted in <code>n_exact</code> was enumerated in
+full: every joint state of its gates that the model represents was
+scored, rather than approximated.</p></li>
+</ul><p>Fidelity to the original survey's full logic is established by neither:
+branch conditions are not checked against each other, embedded-data
+conditions are treated as free, and unusual Qualtrics constructs may not be
+modelled at all. The breakdown describes these modelling diagnostics, not
+an overall certificate of correctness.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
@@ -144,8 +158,8 @@ mapping), <code>inferred</code> (mapping needs an assumption), <code>manual</cod
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Paths</span> ──</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0 of 2 complete paths resolve exactly (no unresolved display-logic condition);</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 carry at least one.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0 of 2 complete paths have no unresolved display-logic question; 2 carry at</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> least one.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3 flow branches; both outcomes of each are enumerated, but which one a given</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> respondent takes is unknown ex ante:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> FL_b_consent: trigger QID2</span>

@@ -89,15 +89,18 @@ question appears if any one of several conditions holds.
 ## Path enumeration
 
 [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md)
-goes inside the “may be shown” set and enumerates the feasible
-display-logic states.
+goes inside the “may be shown” set and enumerates the display-logic
+states the package can model.
 
 - Conditional questions are grouped into **coupling components**: two
   questions couple if they share a gate, directly or through a chain of
   shared gates.
-- A component with at most 5000 joint gate-states is enumerated
-  **exactly** – every joint state of its gates, respecting single-choice
-  mutual exclusion and AND-across-gates conditions.
+- A component with at most 5000 joint gate-states is enumerated **in
+  full** – every joint state of its gates that the model represents,
+  respecting single-choice mutual exclusion and AND-across-gates
+  conditions. “In full” means exhaustive within the model; embedded-data
+  conditions are still treated as free, and branch conditions are not
+  checked against each other.
 - A larger component (dozens of questions keyed off one popular trigger
   such as employment status) falls back to a **primary-gate
   approximation**: each question is scored against its first gate, the
@@ -119,25 +122,28 @@ pbp[, c("path_id", "terminates_early", "burden_min",
 #> 2       2 TRUE                     14            14         14
 #> 3       3 FALSE                   106           124        143
 #> 4       4 FALSE                   106           122        139
-nrow(pbp$profile[[3]])   # feasible burden values on complete path 3
+nrow(pbp$profile[[3]])   # distinct modelled burden values on complete path 3
 #> [1] 36
 ```
 
-Each row of a `profile` table is one feasible burden value with a
-structural weight from the gate combinatorics and the uniform
-loop-iteration assumption. **That weight is not a respondent
-probability.**
+Each row of a `profile` table is one modelled burden value with a
+structural weight: each joint gate state and each loop iteration count
+gets equal weight, a value produced by several states carries their
+combined weight, and the weights on a path sum to 1. **That weight is a
+model weight, not a respondent probability.**
 
 ## Structural versus population-weighted burden
 
 This distinction is central and is easy to state wrongly.
 
-The default result is a **structural burden profile**. It lists every
-feasible combination of optional questions once. It carries no
-respondent probabilities. When the report says the median is 123 points,
-it means the median across those feasible combinations. It does **not**
-mean half of respondents face at least that much burden. Nobody has told
-the package how common each combination is.
+The default result is a **structural burden profile**. It covers the
+combinations of optional questions the package can model, weighted by
+the model: each complete path carries equal total weight, and within a
+path each modelled combination does. It carries no respondent
+probabilities. When the report says the median is 123 points, it means
+the median of that model-weighted distribution. It does **not** mean
+half of respondents face at least that much burden. Nobody has told the
+package how common each path or combination is.
 
 To move from the structural profile to respondent-level predictions,
 pass a data frame of respondent routes to

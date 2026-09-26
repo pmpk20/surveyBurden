@@ -57,13 +57,17 @@ probability).
 ## Details
 
 This function returns the **structural burden profile**: every burden
-value the path's display logic can produce, each counted once. It is not
-a probability distribution. The quantiles below are unweighted order
-statistics over the enumerated sub-states, not percentiles of a
-respondent population. A real population average needs observed route
-frequencies; see
-[`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
-for that.
+value the path's modelled display-logic states can produce, with a
+weight. Each joint state of a component's gates (and each loop iteration
+count `1..max`) gets equal weight, a burden value produced by several
+states carries their combined weight, and each path's weights sum to 1.
+The quantiles are weighted by these model weights. They are not observed
+respondent frequencies, so they are not percentiles of a respondent
+population; for that, use observed routes with
+[`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md).
+[`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
+pools the complete paths' profiles, so each complete path carries equal
+total weight there.
 
 Each display-logic trigger is a *gate*: a single-choice question
 contributes its referenced choices as mutually exclusive states; a

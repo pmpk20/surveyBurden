@@ -48,7 +48,7 @@ Classify each question and apply the GfS / Axhausen point weights.
 Walk the flow and display logic to the feasible respondent paths.
 
 - [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md)
-  : Enumerate feasible respondent paths through the survey flow
+  : Enumerate the structural paths through the survey flow
 
 - [`resolve_live_blocks()`](https://pmpk20.github.io/surveyBurden/reference/resolve_live_blocks.md)
   : Resolve the survey blocks a respondent can actually reach

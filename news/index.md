@@ -106,6 +106,19 @@
 
 ### Documentation
 
+- Interpretation wording corrected throughout. The structural profile
+  was described as counting each combination “once” with unweighted
+  quantiles; in fact each modelled state carries an equal model weight,
+  each path’s weights sum to 1, and the report gives each complete path
+  equal total weight. “Feasible” / “achievable” paths are now described
+  as the paths the flow allows, with a note that branch conditions are
+  not checked against each other. “Exact” is qualified: the printed
+  certainty lines now read “have no unresolved display-logic question”
+  and “enumerated in full within the model”, and
+  [`?calculation_certainty`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md)
+  explains that neither means the result matches the live survey. The
+  `index` column is documented as `points / rare_threshold` (it can
+  exceed 1).
 - Added runnable `@examples` to all exported functions using the shipped
   demo fixture (`demo_travel_survey.qsf`).
 - Switched

@@ -45,24 +45,27 @@ summary(object, ...)
   If `TRUE` (default), enumerate the display-logic structural burden
   profile
   ([`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md))
-  to get the *achievable* min/median/ max burden for this survey – a few
-  seconds of extra work. `FALSE` skips that and falls back to a much
-  faster but naive range (see Details): min/max only, no median, and the
-  numbers can understate the true minimum.
+  to get the min/median/max burden over the display-logic states the
+  package can model for this survey – a few seconds of extra work.
+  `FALSE` skips that and falls back to a much faster but naive range
+  (see Details): min/max only, no median, and the numbers can understate
+  the true minimum.
 
 - routes:
 
   Optional respondent data frame (see
   [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)).
-  When supplied, the report adds a population-weighted burden summary:
-  each route is weighted by how often respondents actually take it, so
-  unlike the structural profile this is a real average over respondents.
+  When supplied, the report adds `$population`: quantiles and the mean
+  of one predicted burden per respondent, so each route counts as often
+  as respondents took it. Unlike the structural profile, this summarises
+  observed respondents.
 
 - rare_threshold:
 
   GfS+ points above which Heimgartner & Axhausen (2024) found surveys to
   be rare (their sample: median 399, n = 79 waves). Used for the "rare
-  burden" warning and to scale the `index` column of `$burden` to 0-1.
+  burden" warning and to scale the `index` column of `$burden`
+  (`points / rare_threshold`: 1 is the threshold, and it can exceed 1).
 
 - stem_warning_threshold:
 
@@ -188,16 +191,18 @@ Scalars are attributes: `points_per_minute`, `rare_threshold`,
 [`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md)
 (the fast, naive check) scores each flow path by assuming every optional
 (display-logic-gated) question can be independently hidden for the
-minimum, or independently shown for the maximum. That assumption is not
-always achievable: some questions are gated by conditions that are
+minimum, or independently shown for the maximum. That assumption does
+not always hold: some questions are gated by conditions that are
 satisfied by default (e.g. "shown unless a specific answer was picked"),
 so they cannot actually be hidden regardless of what else the respondent
 answers.
 [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md)
-enumerates the real display-logic combinations and finds the burden
-values that are genuinely reachable, which is why its minimum is usually
-*higher* than the naive floor. **This report uses the profile's range as
-the one range shown, whenever `profile = TRUE`.**
+enumerates the display-logic combinations the package can model and
+finds the burden values they produce, which is why its minimum is
+usually *higher* than the naive floor. Branch conditions are not checked
+against each other, so these extremes are not guaranteed to be reachable
+by a real respondent. **This report uses the profile's range as the one
+range shown, whenever `profile = TRUE`.**
 
 **Path-space cap.** The structural path space is enumerated up to
 `max_paths` (default 10 000). A flow that would produce more raises an
@@ -217,13 +222,13 @@ br <- burden_report(qsf_path)
 #> ✔ Reading survey [9ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [106ms]
+#> ✔ Scoring questions and resolving paths [112ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [33ms]
+#> ✔ Checking calculation certainty [31ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [23ms]
+#> ✔ Enumerating display-logic combinations [24ms]
 #> 
 br
 #> 
@@ -289,8 +294,9 @@ br
 #> 
 #> ── Calculation certainty ──
 #> 
-#> Paths: 0/2 resolve exactly; 2 carry an unresolved display-logic condition.
-#> Display logic: 6/6 conditional questions enumerated exactly, 0 approximated.
+#> Paths: 0/2 have no unresolved display-logic question; 2 carry at least one.
+#> Display logic: 6/6 conditional questions enumerated in full within the model, 0
+#> approximated.
 #> Loops: 2 with a known cap, 0 unknown.  Item scores: 19 auto / 7 inferred / 0
 #> manual.
 #> 
@@ -298,7 +304,7 @@ br
 #> 
 #> ! 1 matrix/grid question has more than 6 rows. Long grids invite satisficing (respondents picking the same answer down the column instead of reading each row): QID19
 #> ! 2 of 4 structural paths are screen-outs (the survey ends early there) rather than complete responses.
-#> ! The point range above comes from checking every combination of optional questions this survey's skip logic could show. Each combination is counted once; we have no data on how likely each one is for a given respondent, so this is a structural range, not a probability -- it does NOT mean "there's a 50% chance a respondent sees the median burden".
+#> ! The point range above comes from the combinations of optional questions the package can model for this survey's flow and skip logic. Each complete path carries equal weight, and so does each modelled combination within a path; these are model weights, not how often respondents see each one, so this is a structural range, not a probability -- it does NOT mean "there's a 50% chance a respondent sees the median burden".
 summary(br)
 #> 
 #> ── Neighbourhood Travel Survey (demo) ──────────────────────────────────────────

@@ -123,8 +123,9 @@ report
 #> 
 #> ── Calculation certainty ──
 #> 
-#> Paths: 0/2 resolve exactly; 2 carry an unresolved display-logic condition.
-#> Display logic: 6/6 conditional questions enumerated exactly, 0 approximated.
+#> Paths: 0/2 have no unresolved display-logic question; 2 carry at least one.
+#> Display logic: 6/6 conditional questions enumerated in full within the model, 0
+#> approximated.
 #> Loops: 2 with a known cap, 0 unknown.  Item scores: 19 auto / 7 inferred / 0
 #> manual.
 #> 
@@ -132,7 +133,7 @@ report
 #> 
 #> ! 1 matrix/grid question has more than 6 rows. Long grids invite satisficing (respondents picking the same answer down the column instead of reading each row): QID19
 #> ! 2 of 4 structural paths are screen-outs (the survey ends early there) rather than complete responses.
-#> ! The point range above comes from checking every combination of optional questions this survey's skip logic could show. Each combination is counted once; we have no data on how likely each one is for a given respondent, so this is a structural range, not a probability -- it does NOT mean "there's a 50% chance a respondent sees the median burden".
+#> ! The point range above comes from the combinations of optional questions the package can model for this survey's flow and skip logic. Each complete path carries equal weight, and so does each modelled combination within a path; these are model weights, not how often respondents see each one, so this is a structural range, not a probability -- it does NOT mean "there's a 50% chance a respondent sees the median burden".
 ```
 
 The printout opens with a one-line **verdict**: the median
@@ -159,9 +160,9 @@ Five terms are used throughout, with fixed meanings:
 |----|----|
 | **question burden** | the GfS+ point score for one question, from its type and structure |
 | **path burden** | the total question burden along one structural path through the survey flow |
-| **structural burden profile** | the set of feasible burden values across a path’s display-logic sub-states, each counted once. Not a probability distribution. |
-| **population-weighted respondent burden** | burden averaged over real respondent routes, where route frequencies stand in for the sub-state probabilities. Produced only when `routes` are supplied. |
-| **calculation certainty** | the split, for a given survey, between parts of the calculation that are exact and parts that rest on documented approximations |
+| **structural burden profile** | the burden values a path’s modelled display-logic states produce, with model weights (equal per state; each path’s weights sum to 1). Not a respondent probability distribution. |
+| **population-weighted respondent burden** | one predicted burden per respondent from their observed route, summarised across respondents, so each route counts as often as respondents took it. Produced only when `routes` are supplied. |
+| **calculation certainty** | counts, for a given survey, of the parts of the calculation that are enumerated in full within the model and the parts that rest on documented approximations. A modelling diagnostic, not a check against the live survey. |
 | **readability diagnostics** | counts of long question stems, long matrix labels, and long grids. Reading-load signals, reported separately, never folded into the GfS+ score. |
 
 ## The report object

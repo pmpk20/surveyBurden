@@ -146,14 +146,17 @@ question appears if any one of several conditions holds.</p>
 <h2 id="path-enumeration">Path enumeration<a class="anchor" aria-label="anchor" href="#path-enumeration"></a>
 </h2>
 <p><code><a href="../reference/path_burden_profile.html">path_burden_profile()</a></code> goes inside the “may be shown” set
-and enumerates the feasible display-logic states.</p>
+and enumerates the display-logic states the package can model.</p>
 <ul>
 <li>Conditional questions are grouped into <strong>coupling
 components</strong>: two questions couple if they share a gate, directly
 or through a chain of shared gates.</li>
 <li>A component with at most 5000 joint gate-states is enumerated
-<strong>exactly</strong> – every joint state of its gates, respecting
-single-choice mutual exclusion and AND-across-gates conditions.</li>
+<strong>in full</strong> – every joint state of its gates that the model
+represents, respecting single-choice mutual exclusion and
+AND-across-gates conditions. “In full” means exhaustive within the
+model; embedded-data conditions are still treated as free, and branch
+conditions are not checked against each other.</li>
 <li>A larger component (dozens of questions keyed off one popular
 trigger such as employment status) falls back to a <strong>primary-gate
 approximation</strong>: each question is scored against its first gate,
@@ -174,23 +177,26 @@ the rest held permissive.</li>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>       2 TRUE                     14            14         14</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>       3 FALSE                   106           124        143</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>       4 FALSE                   106           122        139</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">pbp</span><span class="op">$</span><span class="va">profile</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>   <span class="co"># feasible burden values on complete path 3</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">pbp</span><span class="op">$</span><span class="va">profile</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>   <span class="co"># distinct modelled burden values on complete path 3</span></span>
 <span><span class="co">#&gt; [1] 36</span></span></code></pre></div>
-<p>Each row of a <code>profile</code> table is one feasible burden value
-with a structural weight from the gate combinatorics and the uniform
-loop-iteration assumption. <strong>That weight is not a respondent
-probability.</strong></p>
+<p>Each row of a <code>profile</code> table is one modelled burden value
+with a structural weight: each joint gate state and each loop iteration
+count gets equal weight, a value produced by several states carries
+their combined weight, and the weights on a path sum to 1. <strong>That
+weight is a model weight, not a respondent probability.</strong></p>
 </div>
 <div class="section level2">
 <h2 id="structural-versus-population-weighted-burden">Structural versus population-weighted burden<a class="anchor" aria-label="anchor" href="#structural-versus-population-weighted-burden"></a>
 </h2>
 <p>This distinction is central and is easy to state wrongly.</p>
 <p>The default result is a <strong>structural burden profile</strong>.
-It lists every feasible combination of optional questions once. It
-carries no respondent probabilities. When the report says the median is
-123 points, it means the median across those feasible combinations. It
-does <strong>not</strong> mean half of respondents face at least that
-much burden. Nobody has told the package how common each combination
+It covers the combinations of optional questions the package can model,
+weighted by the model: each complete path carries equal total weight,
+and within a path each modelled combination does. It carries no
+respondent probabilities. When the report says the median is 123 points,
+it means the median of that model-weighted distribution. It does
+<strong>not</strong> mean half of respondents face at least that much
+burden. Nobody has told the package how common each path or combination
 is.</p>
 <p>To move from the structural profile to respondent-level predictions,
 pass a data frame of respondent routes to <code><a href="../reference/burden_report.html">burden_report()</a></code>

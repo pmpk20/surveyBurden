@@ -144,8 +144,9 @@ produced see <code><a href="../articles/gfs-scoring.html">vignette("gfs-scoring"
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Calculation certainty</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Paths: 0/2 resolve exactly; 2 carry an unresolved display-logic condition.</span></span>
-<span><span class="co">#&gt; Display logic: 6/6 conditional questions enumerated exactly, 0 approximated.</span></span>
+<span><span class="co">#&gt; Paths: 0/2 have no unresolved display-logic question; 2 carry at least one.</span></span>
+<span><span class="co">#&gt; Display logic: 6/6 conditional questions enumerated in full within the model, 0</span></span>
+<span><span class="co">#&gt; approximated.</span></span>
 <span><span class="co">#&gt; Loops: 2 with a known cap, 0 unknown.  Item scores: 19 auto / 7 inferred / 0</span></span>
 <span><span class="co">#&gt; manual.</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -153,7 +154,7 @@ produced see <code><a href="../articles/gfs-scoring.html">vignette("gfs-scoring"
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 1 matrix/grid question has more than 6 rows. Long grids invite satisficing (respondents picking the same answer down the column instead of reading each row): QID19</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 2 of 4 structural paths are screen-outs (the survey ends early there) rather than complete responses.</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> The point range above comes from checking every combination of optional questions this survey's skip logic could show. Each combination is counted once; we have no data on how likely each one is for a given respondent, so this is a structural range, not a probability -- it does NOT mean "there's a 50% chance a respondent sees the median burden".</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> The point range above comes from the combinations of optional questions the package can model for this survey's flow and skip logic. Each complete path carries equal weight, and so does each modelled combination within a path; these are model weights, not how often respondents see each one, so this is a structural range, not a probability -- it does NOT mean "there's a 50% chance a respondent sees the median burden".</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="the-verdict-line">The verdict line<a class="anchor" aria-label="anchor" href="#the-verdict-line"></a>
 </h2>
@@ -247,9 +248,10 @@ point: a median of 399 points across the 79 scored survey waves in
 Heimgartner and Axhausen (2024). The verdict line’s ratio is the
 survey’s median over that 399.</li>
 </ul>
-<p>The median here is the middle value across the feasible skip-logic
-combinations, <strong>not</strong> the burden half of respondents exceed
-– <code><a href="../articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code> returns to this.</p>
+<p>The median here is the middle value of the modelled skip-logic
+combinations, with each complete path given equal total weight –
+<strong>not</strong> the burden half of respondents exceed.
+<code><a href="../articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code> returns to this.</p>
 <p>Per-path structural figures are in <code>$paths</code>:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">report</span><span class="op">$</span><span class="va">paths</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"path_id"</span>, <span class="st">"status"</span>, <span class="st">"burden_min"</span>,</span>
@@ -375,15 +377,18 @@ in the burden total. Long grids in particular invite satisficing
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; $unknown</span></span>
 <span><span class="co">#&gt; [1] 0</span></span></code></pre></div>
-<p>For each survey this states which parts of the calculation are exact
-and which rest on a documented approximation: how many paths resolve to
-a single burden value, how many conditional questions were enumerated
-exactly versus approximated, whether every loop has a known cap, and the
-<code>auto</code> / <code>inferred</code> / <code>manual</code> /
-<code>unknown</code> split of the item scores. A result can be fully
-reproducible without every underlying interpretation being certain; this
-block makes the uncertain parts countable. Pass
-<code>certainty = FALSE</code> to skip it.</p>
+<p>For each survey this counts which parts of the calculation rest on a
+documented approximation: how many complete paths have no unresolved
+display-logic question, how many conditional questions were enumerated
+in full (every state the model represents) versus approximated, whether
+every loop has a known cap, and the <code>auto</code> /
+<code>inferred</code> / <code>manual</code> / <code>unknown</code> split
+of the item scores. These are modelling diagnostics, not a certificate
+that the result matches the live survey: branch conditions,
+embedded-data conditions and unusual Qualtrics constructs are outside
+what they check. A result can be fully reproducible without every
+underlying interpretation being certain; this block makes the uncertain
+parts countable. Pass <code>certainty = FALSE</code> to skip it.</p>
 </div>
 <div class="section level2">
 <h2 id="qc-warnings">QC warnings<a class="anchor" aria-label="anchor" href="#qc-warnings"></a>

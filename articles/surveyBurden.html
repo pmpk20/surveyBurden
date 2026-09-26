@@ -192,8 +192,9 @@ numbers the current package produces. To use your own survey, replace
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Calculation certainty</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Paths: 0/2 resolve exactly; 2 carry an unresolved display-logic condition.</span></span>
-<span><span class="co">#&gt; Display logic: 6/6 conditional questions enumerated exactly, 0 approximated.</span></span>
+<span><span class="co">#&gt; Paths: 0/2 have no unresolved display-logic question; 2 carry at least one.</span></span>
+<span><span class="co">#&gt; Display logic: 6/6 conditional questions enumerated in full within the model, 0</span></span>
+<span><span class="co">#&gt; approximated.</span></span>
 <span><span class="co">#&gt; Loops: 2 with a known cap, 0 unknown.  Item scores: 19 auto / 7 inferred / 0</span></span>
 <span><span class="co">#&gt; manual.</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -201,7 +202,7 @@ numbers the current package produces. To use your own survey, replace
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 1 matrix/grid question has more than 6 rows. Long grids invite satisficing (respondents picking the same answer down the column instead of reading each row): QID19</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 2 of 4 structural paths are screen-outs (the survey ends early there) rather than complete responses.</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> The point range above comes from checking every combination of optional questions this survey's skip logic could show. Each combination is counted once; we have no data on how likely each one is for a given respondent, so this is a structural range, not a probability -- it does NOT mean "there's a 50% chance a respondent sees the median burden".</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> The point range above comes from the combinations of optional questions the package can model for this survey's flow and skip logic. Each complete path carries equal weight, and so does each modelled combination within a path; these are model weights, not how often respondents see each one, so this is a structural range, not a probability -- it does NOT mean "there's a 50% chance a respondent sees the median burden".</span></span></code></pre></div>
 <p>The printout opens with a one-line <strong>verdict</strong>: the
 median completing-path burden in points and minutes, its ratio to the
 399-point GfS benchmark, and the range across completing paths. Below
@@ -252,19 +253,23 @@ survey flow</td>
 </tr>
 <tr class="odd">
 <td><strong>structural burden profile</strong></td>
-<td>the set of feasible burden values across a path’s display-logic
-sub-states, each counted once. Not a probability distribution.</td>
+<td>the burden values a path’s modelled display-logic states produce,
+with model weights (equal per state; each path’s weights sum to 1). Not
+a respondent probability distribution.</td>
 </tr>
 <tr class="even">
 <td><strong>population-weighted respondent burden</strong></td>
-<td>burden averaged over real respondent routes, where route frequencies
-stand in for the sub-state probabilities. Produced only when
-<code>routes</code> are supplied.</td>
+<td>one predicted burden per respondent from their observed route,
+summarised across respondents, so each route counts as often as
+respondents took it. Produced only when <code>routes</code> are
+supplied.</td>
 </tr>
 <tr class="odd">
 <td><strong>calculation certainty</strong></td>
-<td>the split, for a given survey, between parts of the calculation that
-are exact and parts that rest on documented approximations</td>
+<td>counts, for a given survey, of the parts of the calculation that are
+enumerated in full within the model and the parts that rest on
+documented approximations. A modelling diagnostic, not a check against
+the live survey.</td>
 </tr>
 <tr class="even">
 <td><strong>readability diagnostics</strong></td>

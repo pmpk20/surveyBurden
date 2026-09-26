@@ -8,13 +8,13 @@ articles:
     navbar: ~
     contents:
       - surveyBurden
-      - realised-burden
-      - extensions
       - reading-the-report
       - survey-revision
       - gfs-scoring
       - paths-and-display-logic
+      - realised-burden
       - calibration
+      - extensions
 
 reference:
   - title: One-call pipeline

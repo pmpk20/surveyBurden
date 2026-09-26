@@ -131,7 +131,11 @@
   and compare, and what the comparison does and does not establish. README
   and the get-started vignette open with a "where to start" table.
 * Every guide now opens with what it answers, what you need and what it
-  cannot establish, and ends with a "Next" section.
+  cannot establish, and ends with a "Next" section. The website lists the
+  guides in reading order.
+* "Path" now always means a way through the survey its design allows, and
+  "route" what one respondent actually did; both are in the vocabulary
+  table, which is now also in the README.
 * Added runnable `@examples` to all exported functions using the shipped
   demo fixture (`demo_travel_survey.qsf`).
 * Switched `burden_report()` and `calculation_certainty()` examples from

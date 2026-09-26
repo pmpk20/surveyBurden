@@ -10,9 +10,10 @@
 * New "Extensions" vignette showing the catalogue schema and a worked
   example of scoring a non-Qualtrics survey.
 * New "Realised burden" vignette with a Qualtrics-export walkthrough.
-* `gfs_weights()` renamed to `gfs_scheme()`; old name still works but is
-
-  deprecated.
+* `gfs_weights()` renamed to `gfs_scheme()`, and the `weights` argument of
+  the scoring and reporting functions renamed to `scheme`. The old names
+  have been removed, not deprecated: update calls to `gfs_scheme()` and
+  `scheme =`.
 * `burden_report()` gains a `words_per_line` argument for per-respondent
   reading-load estimation.
 * `burden_report()` gains a `max_paths` argument (default 10,000), passed to

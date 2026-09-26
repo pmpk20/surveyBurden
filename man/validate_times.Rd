@@ -13,7 +13,10 @@ validate_times(qsf, observed, scheme = gfs_scheme(), trim = c(3, 180))
 
 \item{scheme}{A \code{\link[=gfs_scheme]{gfs_scheme()}} list.}
 
-\item{trim}{Completion-minute range to keep (drops non-finishers and stalls).}
+\item{trim}{Length-2 numeric: the completion-time range to keep, in
+minutes. Rows outside it, or with a missing or non-finite time, are
+dropped. This filters on duration only; it does not detect non-finishers,
+so remove unfinished responses from \code{observed} before calling.}
 }
 \value{
 A list:
@@ -28,8 +31,10 @@ real dataset this is typically small. This is the honest fit statistic.}
 (with intercept). Do \strong{not} quote the no-intercept model's \code{r.squared}
 from \code{lm} below -- it is a through-origin pseudo-\eqn{R^2}, much larger
 and not a variance-explained figure.}
-\item{implied_points_per_minute}{Slope of \code{observed_seconds ~ 0 + predicted_points}. Trim-sensitive; prefer a median-regression estimate
-from a dedicated calibration on real completion times.}
+\item{implied_points_per_minute}{\code{60 / b}, where \code{b} is the slope of
+the through-origin fit \code{observed_seconds ~ 0 + predicted_points}
+(seconds per point). Trim-sensitive; prefer a median-regression
+estimate from a dedicated calibration on real completion times.}
 \item{lm}{The through-origin \code{lm} (kept for back-compatibility).}
 \item{predicted_burden}{Per-respondent points.}
 }

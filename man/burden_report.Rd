@@ -115,7 +115,7 @@ Scalars are attributes: \code{points_per_minute}, \code{rare_threshold}, \code{b
 \description{
 The user-facing entry point. Parses a Qualtrics \code{.qsf}, resolves its flow and
 display logic, scores every question with the GfS+ burden-point scheme
-(extending Heimgartner and Axhausen 2024, \doi{10.32866/001c.121624}), and
+(extending Heimgartner and Axhausen 2024, \doi{10.32866/001c.125481}), and
 summarises the burden across the instrument's structural path space.
 }
 \details{

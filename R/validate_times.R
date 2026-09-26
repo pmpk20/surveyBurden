@@ -12,7 +12,10 @@
 #' @param qsf A `qsf_raw` object or path.
 #' @param observed A data frame, or a path to a CSV.
 #' @param scheme A [gfs_scheme()] list.
-#' @param trim Completion-minute range to keep (drops non-finishers and stalls).
+#' @param trim Length-2 numeric: the completion-time range to keep, in
+#'   minutes. Rows outside it, or with a missing or non-finite time, are
+#'   dropped. This filters on duration only; it does not detect non-finishers,
+#'   so remove unfinished responses from `observed` before calling.
 #'
 #' @return A list:
 #'   \describe{
@@ -26,9 +29,10 @@
 #'       (with intercept). Do **not** quote the no-intercept model's `r.squared`
 #'       from `lm` below -- it is a through-origin pseudo-\eqn{R^2}, much larger
 #'       and not a variance-explained figure.}
-#'     \item{implied_points_per_minute}{Slope of `observed_seconds ~ 0 +
-#'       predicted_points`. Trim-sensitive; prefer a median-regression estimate
-#'       from a dedicated calibration on real completion times.}
+#'     \item{implied_points_per_minute}{`60 / b`, where `b` is the slope of
+#'       the through-origin fit `observed_seconds ~ 0 + predicted_points`
+#'       (seconds per point). Trim-sensitive; prefer a median-regression
+#'       estimate from a dedicated calibration on real completion times.}
 #'     \item{lm}{The through-origin `lm` (kept for back-compatibility).}
 #'     \item{predicted_burden}{Per-respondent points.}
 #'   }

@@ -2,7 +2,7 @@
 #'
 #' The user-facing entry point. Parses a Qualtrics `.qsf`, resolves its flow and
 #' display logic, scores every question with the GfS+ burden-point scheme
-#' (extending Heimgartner and Axhausen 2024, \doi{10.32866/001c.121624}), and
+#' (extending Heimgartner and Axhausen 2024, \doi{10.32866/001c.125481}), and
 #' summarises the burden across the instrument's structural path space.
 #'
 #' @param x A path to a `.qsf` file, or a `qsf_raw` object from [read_qsf()].
@@ -297,7 +297,7 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
   }
   if (identical(basis, "naive")) {
     warnings <- c(warnings, sprintf(
-      "%d-%d display-logic combinations per full path were not checked (profile = FALSE); the range below is a fast estimate and its minimum may not actually be reachable.",
+      "Display logic on each complete path depends on %d-%d trigger questions, and their combinations were not enumerated (profile = FALSE); the range below is a fast estimate and its minimum may not actually be reachable.",
       gate_range[1], gate_range[2]))
   } else if (identical(basis, "structural")) {
     if (burden_tbl$points[burden_tbl$statistic == "max"] > rare_threshold) {
@@ -452,7 +452,7 @@ print_burden_report_body <- function(x) {
   cli::cli_h2("Paths")
   cli::cli_text("Structural paths: {ins$n_paths} ({ins$n_complete_paths} complete, {ins$n_screenout_paths} screen-out)")
   if (ins$n_complete_paths > 0L) {
-    cli::cli_text("Display-logic combinations checked: {gr[1]}-{gr[2]} per complete path")
+    cli::cli_text("Display-logic trigger questions: {gr[1]}-{gr[2]} per complete path")
   }
 
   cli::cli_h2("Burden ({ppm} GfS+ points ~ 1 minute; index = points / {rt})")

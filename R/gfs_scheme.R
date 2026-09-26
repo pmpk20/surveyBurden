@@ -3,7 +3,7 @@
 #' The default scoring backend. The original GfS point values are
 #' transcribed from Table 1 of Heimgartner and Axhausen (2024),
 #' "Predicting Response Rates Once Again" (*Findings*,
-#' \doi{10.32866/001c.121624}). The package extends the original scheme
+#' \doi{10.32866/001c.125481}). The package extends the original scheme
 #' with documented inference rules for question types not in Table 1
 #' (dropdowns, sliders, multi-answer matrices), hence GfS+. Override any
 #' element and pass the result to [score_burden()].

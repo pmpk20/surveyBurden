@@ -66,6 +66,56 @@
 <p>surveyBurden reads a Qualtrics survey and estimates how much response effort the programmed instrument requires, from the survey design alone, before it is fielded.</p>
 <p>Qualtrics is a commercial platform for building and running online surveys, widely used in academic and commercial research. surveyBurden is an independent project: its authors and contributors have no affiliation with Qualtrics, and Qualtrics provides no support for this package.</p>
 <div class="section level2">
+<h2 id="where-to-start">Where to start<a class="anchor" aria-label="anchor" href="#where-to-start"></a>
+</h2>
+<table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
+<thead><tr>
+<th>What you have</th>
+<th>Start with</th>
+<th>What you get</th>
+<th>Guide</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>A Qualtrics survey (<code>.qsf</code> or API)</td>
+<td><code>burden_report(qsf)</code></td>
+<td>a model-based structural burden profile across the survey’s paths</td>
+<td><code><a href="articles/reading-the-report.html">vignette("reading-the-report")</a></code></td>
+</tr>
+<tr>
+<td>That, plus respondent routes and loop counts</td>
+<td><code>burden_report(qsf, routes = routes)</code></td>
+<td>a distribution of respondent-level predicted burden</td>
+<td><code><a href="articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code></td>
+</tr>
+<tr>
+<td>A response export</td>
+<td><code>realised_burden(qsf, responses)</code></td>
+<td>answer-based burden per respondent</td>
+<td><code><a href="articles/realised-burden.html">vignette("realised-burden")</a></code></td>
+</tr>
+<tr>
+<td>Completion times</td>
+<td><code>validate_times(qsf, observed)</code></td>
+<td>a check of predicted against observed time, and a survey-specific rate</td>
+<td><code><a href="articles/calibration.html">vignette("calibration")</a></code></td>
+</tr>
+<tr>
+<td>A survey from another platform</td>
+<td><code>score_burden(validate_catalogue(catalogue))</code></td>
+<td>per-question scores and a total</td>
+<td><code><a href="articles/extensions.html">vignette("extensions")</a></code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <p>surveyBurden is not on CRAN. Install the development version from GitHub:</p>
@@ -91,82 +141,8 @@
 <pre><code><span><span class="co">#&gt; ── Survey Burden Report: Neighbourhood Travel Survey (demo) ────────────────────</span></span>
 <span><span class="co">#&gt; Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of</span></span>
 <span><span class="co">#&gt; 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.</span></span>
-<span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt; ── Instrument ──</span></span>
-<span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt; Questions (live)     26</span></span>
-<span><span class="co">#&gt; Blocks               12</span></span>
-<span><span class="co">#&gt; Branch points         3</span></span>
-<span><span class="co">#&gt; Randomisers           0</span></span>
-<span><span class="co">#&gt; Loop &amp; Merge blocks   2</span></span>
-<span><span class="co">#&gt; Early-exit points     2</span></span>
-<span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt; ── Paths ──</span></span>
-<span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt; Structural paths: 4 (2 complete, 2 screen-out)</span></span>
-<span><span class="co">#&gt; Display-logic trigger questions: 3-4 per complete path</span></span>
-<span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt; ── Burden (12 GfS+ points ~ 1 minute; index = points / 1500) ──</span></span>
-<span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt; Statistic        Points  ~Min  Index</span></span>
-<span><span class="co">#&gt; ------------------------------------</span></span>
-<span><span class="co">#&gt; Minimum             106     9   0.07</span></span>
-<span><span class="co">#&gt; 25th percentile     117    10   0.08</span></span>
-<span><span class="co">#&gt; Median              123    10   0.08</span></span>
-<span><span class="co">#&gt; 75th percentile     129    11   0.09</span></span>
-<span><span class="co">#&gt; Maximum             143    12   0.10</span></span>
-<span><span class="co">#&gt; Benchmark: median 399 points across 79 GfS-scored waves (Heimgartner &amp;</span></span>
-<span><span class="co">#&gt; Axhausen 2024).</span></span>
-<span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt; ── Burden by block (survey order; share of all-question points) ──</span></span>
-<span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt; Welcome                   10%  ###</span></span>
-<span><span class="co">#&gt; Consent                    1%  #</span></span>
-<span><span class="co">#&gt; Area check                 2%  #</span></span>
-<span><span class="co">#&gt; About you                 13%  ####</span></span>
-<span><span class="co">#&gt; Household                  3%  #</span></span>
-<span><span class="co">#&gt; Other adults               4%  #</span></span>
-<span><span class="co">#&gt; Vehicles                  12%  ###</span></span>
-<span><span class="co">#&gt; Vehicle details            5%  ##</span></span>
-<span><span class="co">#&gt; Travel                    23%  #######</span></span>
-<span><span class="co">#&gt; Attitudes                 16%  #####</span></span>
-<span><span class="co">#&gt; Commuting                  5%  ##</span></span>
-<span><span class="co">#&gt; Closing                    6%  ##</span></span>
-<span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt; ── Highest-burden questions ──</span></span>
-<span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt; QID21      18 pts  6x7      How much do you agree with each statement?</span></span>
-<span><span class="co">#&gt; QID19      14 pts  7x4      In the past month, how often did you use each of these?</span></span>
-<span><span class="co">#&gt; QID14      12 pts  6 opt    Which of these does your household own or have use of? ...</span></span>
-<span><span class="co">#&gt; QID20      12 pts  6x4      And for each of these reasons for travelling, how often...</span></span>
-<span><span class="co">#&gt; QID1       11 pts  0 opt    Welcome, and thank you for taking part in the Neighbour...</span></span>
-<span><span class="co">#&gt; QID7        8 pts  4x3      For each area, do you have a condition that makes trave...</span></span>
-<span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt; ── Readability diagnostics (reading load; not part of the GfS+ score) ──</span></span>
-<span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt; Long stems (&gt; 40 words)          0</span></span>
-<span><span class="co">#&gt; Long matrix labels (&gt; 10 words)  0</span></span>
-<span><span class="co">#&gt; Long grids (&gt; 6 rows)            1</span></span>
-<span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt; ── Calculation certainty ──</span></span>
-<span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt; Paths: 0/2 have no unresolved display-logic question; 2 carry at least one.</span></span>
-<span><span class="co">#&gt; Display logic: 6/6 conditional questions enumerated in full within the model, 0 approximated.</span></span>
-<span><span class="co">#&gt; Loops: 2 with a known cap, 0 unknown.  Item scores: 19 auto / 7 inferred / 0</span></span>
-<span><span class="co">#&gt; manual.</span></span>
-<span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt; ── QC warnings (3) ──</span></span>
-<span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt; ! 1 matrix/grid question has more than 6 rows. Long grids invite satisficing</span></span>
-<span><span class="co">#&gt;   (respondents picking the same answer down the column instead of reading each</span></span>
-<span><span class="co">#&gt;   row): QID19</span></span>
-<span><span class="co">#&gt; ! 2 of 4 structural paths are screen-outs (the survey ends early there) rather</span></span>
-<span><span class="co">#&gt;   than complete responses.</span></span>
-<span><span class="co">#&gt; ! The point range above comes from checking every combination of optional</span></span>
-<span><span class="co">#&gt;   questions this survey's skip logic could show. Each combination is counted</span></span>
-<span><span class="co">#&gt;   once; we have no data on how likely each one is for a given respondent, so</span></span>
-<span><span class="co">#&gt;   this is a structural range, not a probability -- it does NOT mean "there's a</span></span>
-<span><span class="co">#&gt;   50% chance a respondent sees the median burden".</span></span></code></pre>
+<span><span class="co">#&gt; ...</span></span></code></pre>
+<p>The full printout adds the instrument counts, the burden quantiles, burden by block, the heaviest questions, readability diagnostics, calculation certainty and QC warnings. <code><a href="articles/reading-the-report.html">vignette("reading-the-report")</a></code> walks through every section.</p>
 <p><code>summary(report)</code> prints just the headline:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">report</span><span class="op">)</span></span>

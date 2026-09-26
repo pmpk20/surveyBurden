@@ -12,24 +12,35 @@ respondent burden – length, difficulty, and the effort the design
 requires. It is not the *perceived* burden a particular respondent
 reports feeling, and it is not a completion-time predictor.
 
-This article gets you to a first report. The others go deeper:
+This article gets you to a first report. Which function you need depends
+on what you have:
+
+| What you have | Start with | What you get | Guide |
+|----|----|----|----|
+| A Qualtrics survey (`.qsf` or API) | `burden_report(qsf)` | a model-based structural burden profile across the survey’s paths | [`vignette("reading-the-report")`](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md) |
+| That, plus respondent routes and loop counts | `burden_report(qsf, routes = routes)` | a distribution of respondent-level predicted burden | [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md) |
+| A response export | `realised_burden(qsf, responses)` | answer-based burden per respondent | [`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md) |
+| Completion times | `validate_times(qsf, observed)` | a check of predicted against observed time, and a survey-specific rate | [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md) |
+| A survey from another platform | `score_burden(validate_catalogue(catalogue))` | per-question scores and a total | [`vignette("extensions")`](https://pmpk20.github.io/surveyBurden/articles/extensions.md) |
+
+The other articles go deeper:
 
 - [`vignette("reading-the-report")`](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md)
   – what each part of the printed output means.
 - [`vignette("gfs-scoring")`](https://pmpk20.github.io/surveyBurden/articles/gfs-scoring.md)
-  – how a Qualtrics widget becomes points.
+  – how a Qualtrics widget becomes points, and what the automatic scorer
+  does and does not apply.
 - [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md)
-  – flow, skip logic, and the structural-versus-population-weighted
-  distinction.
+  – flow, skip logic, the structural-versus-population-weighted
+  distinction, and building respondent routes.
 - [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md)
-  – the `words_per_line` and points-per-minute assumptions, and the
-  limitations.
+  – the `words_per_line` and points-per-minute assumptions, validating
+  against completion times, and the limitations.
 - [`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md)
-  – scoring the questions each respondent actually answered from
-  response data.
+  – answer-based burden from response data.
 - [`vignette("extensions")`](https://pmpk20.github.io/surveyBurden/articles/extensions.md)
-  – scoring surveys without a QSF: the intermediate representation and
-  how to extend to other platforms.
+  – what works for surveys without a QSF, and what full support for
+  another platform would take.
 
 ## Install
 

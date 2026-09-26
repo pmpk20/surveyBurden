@@ -32,13 +32,17 @@ respondent_burden(
   :   Iteration count for a Loop & Merge block. `<id>` may be the
       driving question id (`loop_QID9`) or the block id (`loop_BL6`).
       Any other `loop_*` column is assigned to the survey's loop blocks
-      in flow order. `0` means the respondent never entered that loop; a
-      missing column falls back to `loop_typical`.
+      in flow order. `0` (or less) means the respondent never entered
+      that loop; a count above the block's cap is capped; `NA`, like a
+      missing column, falls back to `loop_typical`.
 
   `visit_<block_id>`
 
   :   `TRUE` to include a branch-gated optional block (e.g.
-      `visit_BL11`). Absent or `FALSE` excludes it.
+      `visit_BL11`). Read with
+      [`as.logical()`](https://rdrr.io/r/base/logical.html): `TRUE`, `1`
+      or `"TRUE"` include it; absent, `FALSE`, `NA` or any other value
+      excludes it.
 
   Missing columns are treated as absent/zero.
 

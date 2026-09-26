@@ -138,6 +138,13 @@
   says so too. It also states that item scores are per iteration, that
   loop profiles run from 1 to the cap, and what can make the reported
   figures too low.
+- The paths vignette has a runnable recipe for building `visit_*` and
+  `loop_*` route columns from a response export, and for checking
+  `matched` before summarising, with what a match does and does not
+  certify.
+  [`?respondent_burden`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
+  and the vignette now state how `0`, `NA`, over-cap and non-logical
+  values in route columns are read.
 - Added runnable `@examples` to all exported functions using the shipped
   demo fixture (`demo_travel_survey.qsf`).
 - Switched

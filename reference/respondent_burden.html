@@ -78,12 +78,14 @@ optional):</p><dl><dt><code>loop_&lt;id&gt;</code></dt>
 <dd><p>Iteration count for a Loop &amp; Merge block. <code>&lt;id&gt;</code> may be
 the driving question id (<code>loop_QID9</code>) or the block id (<code>loop_BL6</code>). Any
 other <code>loop_*</code> column is assigned to the survey's loop blocks in flow
-order. <code>0</code> means the respondent never entered that loop; a missing
-column falls back to <code>loop_typical</code>.</p></dd>
+order. <code>0</code> (or less) means the respondent never entered that loop; a
+count above the block's cap is capped; <code>NA</code>, like a missing column,
+falls back to <code>loop_typical</code>.</p></dd>
 
 <dt><code>visit_&lt;block_id&gt;</code></dt>
 <dd><p><code>TRUE</code> to include a branch-gated optional block
-(e.g. <code>visit_BL11</code>). Absent or <code>FALSE</code> excludes it.</p></dd>
+(e.g. <code>visit_BL11</code>). Read with <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">as.logical()</a></code>: <code>TRUE</code>, <code>1</code> or <code>"TRUE"</code>
+include it; absent, <code>FALSE</code>, <code>NA</code> or any other value excludes it.</p></dd>
 
 
 </dl><p>Missing columns are treated as absent/zero.</p></dd>

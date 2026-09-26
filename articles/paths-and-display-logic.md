@@ -174,6 +174,17 @@ missing columns get defaults.
 | `loop_<QID>` or `loop_<BL>` | integer | Iteration count for a Loop & Merge block, keyed by its driving question id or block id | `loop_typical` (default 2) |
 | `visit_<block_id>` | logical | `TRUE` if the respondent entered this branch-gated optional block | `FALSE` (block skipped) |
 
+How values are read:
+
+- `loop_*`: `0` (or less) means the loop was never entered; a count
+  above the block’s cap is capped; `NA` – like a missing column – means
+  “unknown” and uses `loop_typical`. Use `0`, not `NA`, for “did not
+  loop”.
+- `visit_*`: read with
+  [`as.logical()`](https://rdrr.io/r/base/logical.html), so `TRUE` / `1`
+  / `"TRUE"` count as visited; `FALSE`, `NA` and anything else
+  (including `"yes"`) count as not visited.
+
 Any `loop_*` column that does not match a known question or block id is
 assigned to loop blocks in flow order — so a generic `loop_1`, `loop_2`
 also works if the survey has two loops in sequence.
@@ -204,10 +215,101 @@ burden_report(demo, routes = routes, quiet = TRUE)$population
 #> 8 max         132    11    0.088
 ```
 
-Real route data would come from your fielded response file: count each
-respondent’s loop iterations and flag which optional blocks they
-entered. When `routes` are supplied the report’s verdict line also gives
-the population-weighted median.
+When `routes` are supplied the report’s verdict line also gives the
+population-weighted median.
+
+### Building routes from a response export
+
+Real routes come from your fielded response file: flag which optional
+blocks each respondent answered in, and count their loop iterations.
+Here a toy export stands in for yours; it uses `QID`-named columns with
+loop iterations prefixed `1_`, `2_`, … (what
+`qualtRics::fetch_survey(label = FALSE)` gives). Remove the two
+Qualtrics header rows first if you read a raw CSV (see
+[`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md)).
+
+``` r
+
+qsf    <- read_qsf(demo)
+cat    <- parse_qsf(qsf)
+blocks <- resolve_live_blocks(qsf)
+
+# toy export: respondents 1-3 answer the core questions; 1-2 enter the loops
+resp <- data.frame(ResponseId = paste0("R_", 1:4))
+for (q in cat$question_id[!cat$in_loop]) resp[[q]] <- c("1", "1", "1", NA)
+for (q in cat$question_id[cat$in_loop]) {
+  resp[[paste0("1_", q)]] <- c("1", "1", NA, NA)
+  resp[[paste0("2_", q)]] <- c("1", NA, NA, NA)
+}
+
+# 1. which question, and which loop iteration, each column belongs to
+cols   <- grep("QID[0-9]+", names(resp), value = TRUE)
+col_q  <- regmatches(cols, regexpr("QID[0-9]+", cols))
+col_it <- rep(0L, length(cols))
+pre    <- grepl("^[0-9]+_QID", cols)
+col_it[pre] <- as.integer(sub("_.*$", "", cols[pre]))
+filled <- vapply(resp[cols], function(v) !is.na(v) & nzchar(trimws(v)),
+                 logical(nrow(resp)))
+
+routes <- data.frame(ResponseId = resp$ResponseId)
+
+# 2. visit_<block>: answered anything in each branch-gated optional block
+optional <- unique(unlist(respondent_burden(qsf)$optional_blocks))
+for (bid in optional) {
+  in_blk <- col_q %in% blocks$question_ids[[match(bid, blocks$block_id)]]
+  routes[[paste0("visit_", bid)]] <- rowSums(filled[, in_blk, drop = FALSE]) > 0
+}
+
+# 3. loop_<block>: highest iteration with any answer; 0 = never entered
+for (i in which(blocks$in_loop)) {
+  in_blk <- col_q %in% blocks$question_ids[[i]]
+  it <- sweep(filled[, in_blk, drop = FALSE], 2, col_it[in_blk], `*`)
+  routes[[paste0("loop_", blocks$block_id[i])]] <- apply(it, 1, max, 0)
+}
+routes
+#>   ResponseId visit_BL11 loop_BL6 loop_BL8
+#> 1        R_1       TRUE        2        2
+#> 2        R_2       TRUE        1        1
+#> 3        R_3       TRUE        0        0
+#> 4        R_4      FALSE        0        0
+```
+
+This infers routes from answers, so it shares the limits of
+[`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md):
+a block a respondent was shown but answered nothing in looks unvisited,
+and a loop iteration left blank is not counted.
+
+### Checking routes before summarising
+
+Check the match before reading `$population`:
+
+``` r
+
+pr <- respondent_burden(qsf, routes = routes)
+pr[, c("ResponseId", "path_id", "matched", "pred_pts")]
+#> # A tibble: 4 × 4
+#>   ResponseId path_id matched pred_pts
+#>   <chr>        <int> <lgl>      <dbl>
+#> 1 R_1              3 TRUE         119
+#> 2 R_2              3 TRUE         108
+#> 3 R_3              3 TRUE          97
+#> 4 R_4              4 TRUE          95
+table(pr$matched)
+#> 
+#> TRUE 
+#>    4
+```
+
+`matched = TRUE` certifies only that the respondent’s set of visited
+optional blocks equals the set on one enumerated complete path. It does
+not check their loop counts, their display-logic answers, or that the
+branch conditions for that path were actually met. `matched = FALSE`
+means no enumerated path has that set; the prediction then falls back to
+another path and a warning says which, so treat those rows as suspect
+(often a sign of a route-encoding mistake, or of a flow the model does
+not represent). Note that a respondent who answered nothing, like `R_4`
+here, still matches the path with no optional blocks; filter such rows
+(or non-finishers) out first if they should not count.
 
 Without routes,
 [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)

@@ -259,6 +259,20 @@ optional block</td>
 </tr>
 </tbody>
 </table>
+<p>How values are read:</p>
+<ul>
+<li>
+<code>loop_*</code>: <code>0</code> (or less) means the loop was
+never entered; a count above the block’s cap is capped; <code>NA</code>
+– like a missing column – means “unknown” and uses
+<code>loop_typical</code>. Use <code>0</code>, not <code>NA</code>, for
+“did not loop”.</li>
+<li>
+<code>visit_*</code>: read with <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">as.logical()</a></code>, so
+<code>TRUE</code> / <code>1</code> / <code>"TRUE"</code> count as
+visited; <code>FALSE</code>, <code>NA</code> and anything else
+(including <code>"yes"</code>) count as not visited.</li>
+</ul>
 <p>Any <code>loop_*</code> column that does not match a known question
 or block id is assigned to loop blocks in flow order — so a generic
 <code>loop_1</code>, <code>loop_2</code> also works if the survey has
@@ -287,14 +301,100 @@ two loops in sequence.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> p75         122.   10.1  0.081<span style="text-decoration: underline;">2</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> p90         122.   10.2  0.081<span style="text-decoration: underline;">4</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> max         132    11    0.088</span></span></code></pre></div>
-<p>Real route data would come from your fielded response file: count
-each respondent’s loop iterations and flag which optional blocks they
-entered. When <code>routes</code> are supplied the report’s verdict line
-also gives the population-weighted median.</p>
+<p>When <code>routes</code> are supplied the report’s verdict line also
+gives the population-weighted median.</p>
+</div>
+<div class="section level3">
+<h3 id="building-routes-from-a-response-export">Building routes from a response export<a class="anchor" aria-label="anchor" href="#building-routes-from-a-response-export"></a>
+</h3>
+<p>Real routes come from your fielded response file: flag which optional
+blocks each respondent answered in, and count their loop iterations.
+Here a toy export stands in for yours; it uses <code>QID</code>-named
+columns with loop iterations prefixed <code>1_</code>, <code>2_</code>,
+… (what <code>qualtRics::fetch_survey(label = FALSE)</code> gives).
+Remove the two Qualtrics header rows first if you read a raw CSV (see
+<code><a href="../articles/realised-burden.html">vignette("realised-burden")</a></code>).</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">qsf</span>    <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_qsf.html">read_qsf</a></span><span class="op">(</span><span class="va">demo</span><span class="op">)</span></span>
+<span><span class="va">cat</span>    <span class="op">&lt;-</span> <span class="fu"><a href="../reference/parse_qsf.html">parse_qsf</a></span><span class="op">(</span><span class="va">qsf</span><span class="op">)</span></span>
+<span><span class="va">blocks</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/resolve_live_blocks.html">resolve_live_blocks</a></span><span class="op">(</span><span class="va">qsf</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># toy export: respondents 1-3 answer the core questions; 1-2 enter the loops</span></span>
+<span><span class="va">resp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>ResponseId <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"R_"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">q</span> <span class="kw">in</span> <span class="va">cat</span><span class="op">$</span><span class="va">question_id</span><span class="op">[</span><span class="op">!</span><span class="va">cat</span><span class="op">$</span><span class="va">in_loop</span><span class="op">]</span><span class="op">)</span> <span class="va">resp</span><span class="op">[[</span><span class="va">q</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"1"</span>, <span class="st">"1"</span>, <span class="cn">NA</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">q</span> <span class="kw">in</span> <span class="va">cat</span><span class="op">$</span><span class="va">question_id</span><span class="op">[</span><span class="va">cat</span><span class="op">$</span><span class="va">in_loop</span><span class="op">]</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">resp</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"1_"</span>, <span class="va">q</span><span class="op">)</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"1"</span>, <span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span></span>
+<span>  <span class="va">resp</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"2_"</span>, <span class="va">q</span><span class="op">)</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># 1. which question, and which loop iteration, each column belongs to</span></span>
+<span><span class="va">cols</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"QID[0-9]+"</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">resp</span><span class="op">)</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">col_q</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/regmatches.html" class="external-link">regmatches</a></span><span class="op">(</span><span class="va">cols</span>, <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">regexpr</a></span><span class="op">(</span><span class="st">"QID[0-9]+"</span>, <span class="va">cols</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">col_it</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">0L</span>, <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">cols</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">pre</span>    <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"^[0-9]+_QID"</span>, <span class="va">cols</span><span class="op">)</span></span>
+<span><span class="va">col_it</span><span class="op">[</span><span class="va">pre</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"_.*$"</span>, <span class="st">""</span>, <span class="va">cols</span><span class="op">[</span><span class="va">pre</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">filled</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">resp</span><span class="op">[</span><span class="va">cols</span><span class="op">]</span>, <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="op">&amp;</span> <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/trimws.html" class="external-link">trimws</a></span><span class="op">(</span><span class="va">v</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>                 <span class="fu"><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">resp</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">routes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>ResponseId <span class="op">=</span> <span class="va">resp</span><span class="op">$</span><span class="va">ResponseId</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 2. visit_&lt;block&gt;: answered anything in each branch-gated optional block</span></span>
+<span><span class="va">optional</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span><span class="fu"><a href="../reference/respondent_burden.html">respondent_burden</a></span><span class="op">(</span><span class="va">qsf</span><span class="op">)</span><span class="op">$</span><span class="va">optional_blocks</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">bid</span> <span class="kw">in</span> <span class="va">optional</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">in_blk</span> <span class="op">&lt;-</span> <span class="va">col_q</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">blocks</span><span class="op">$</span><span class="va">question_ids</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/match.html" class="external-link">match</a></span><span class="op">(</span><span class="va">bid</span>, <span class="va">blocks</span><span class="op">$</span><span class="va">block_id</span><span class="op">)</span><span class="op">]</span><span class="op">]</span></span>
+<span>  <span class="va">routes</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"visit_"</span>, <span class="va">bid</span><span class="op">)</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">filled</span><span class="op">[</span>, <span class="va">in_blk</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># 3. loop_&lt;block&gt;: highest iteration with any answer; 0 = never entered</span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">blocks</span><span class="op">$</span><span class="va">in_loop</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">in_blk</span> <span class="op">&lt;-</span> <span class="va">col_q</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">blocks</span><span class="op">$</span><span class="va">question_ids</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span></span>
+<span>  <span class="va">it</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sweep.html" class="external-link">sweep</a></span><span class="op">(</span><span class="va">filled</span><span class="op">[</span>, <span class="va">in_blk</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span>, <span class="fl">2</span>, <span class="va">col_it</span><span class="op">[</span><span class="va">in_blk</span><span class="op">]</span>, <span class="va">`*`</span><span class="op">)</span></span>
+<span>  <span class="va">routes</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"loop_"</span>, <span class="va">blocks</span><span class="op">$</span><span class="va">block_id</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">it</span>, <span class="fl">1</span>, <span class="va">max</span>, <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">routes</span></span>
+<span><span class="co">#&gt;   ResponseId visit_BL11 loop_BL6 loop_BL8</span></span>
+<span><span class="co">#&gt; 1        R_1       TRUE        2        2</span></span>
+<span><span class="co">#&gt; 2        R_2       TRUE        1        1</span></span>
+<span><span class="co">#&gt; 3        R_3       TRUE        0        0</span></span>
+<span><span class="co">#&gt; 4        R_4      FALSE        0        0</span></span></code></pre></div>
+<p>This infers routes from answers, so it shares the limits of
+<code><a href="../reference/realised_burden.html">realised_burden()</a></code>: a block a respondent was shown but
+answered nothing in looks unvisited, and a loop iteration left blank is
+not counted.</p>
+</div>
+<div class="section level3">
+<h3 id="checking-routes-before-summarising">Checking routes before summarising<a class="anchor" aria-label="anchor" href="#checking-routes-before-summarising"></a>
+</h3>
+<p>Check the match before reading <code>$population</code>:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/respondent_burden.html">respondent_burden</a></span><span class="op">(</span><span class="va">qsf</span>, routes <span class="op">=</span> <span class="va">routes</span><span class="op">)</span></span>
+<span><span class="va">pr</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ResponseId"</span>, <span class="st">"path_id"</span>, <span class="st">"matched"</span>, <span class="st">"pred_pts"</span><span class="op">)</span><span class="op">]</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 4</span></span></span>
+<span><span class="co">#&gt;   ResponseId path_id matched pred_pts</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> R_1              3 TRUE         119</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> R_2              3 TRUE         108</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> R_3              3 TRUE          97</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> R_4              4 TRUE          95</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">pr</span><span class="op">$</span><span class="va">matched</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; TRUE </span></span>
+<span><span class="co">#&gt;    4</span></span></code></pre></div>
+<p><code>matched = TRUE</code> certifies only that the respondent’s set
+of visited optional blocks equals the set on one enumerated complete
+path. It does not check their loop counts, their display-logic answers,
+or that the branch conditions for that path were actually met.
+<code>matched = FALSE</code> means no enumerated path has that set; the
+prediction then falls back to another path and a warning says which, so
+treat those rows as suspect (often a sign of a route-encoding mistake,
+or of a flow the model does not represent). Note that a respondent who
+answered nothing, like <code>R_4</code> here, still matches the path
+with no optional blocks; filter such rows (or non-finishers) out first
+if they should not count.</p>
 <p>Without routes, <code><a href="../reference/respondent_burden.html">respondent_burden()</a></code> still gives a
 per-path table and <code><a href="../reference/summary_line.html">summary_line()</a></code> turns it into a
 sentence:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summary_line.html">summary_line</a></span><span class="op">(</span><span class="fu"><a href="../reference/respondent_burden.html">respondent_burden</a></span><span class="op">(</span><span class="va">demo</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Typical respondent burden is about 118 GfS+ points (~10 min). The lightest complete route is ~117 pts (~10 min); with the Loop &amp; Merge sections fully repeated it reaches ~143 pts (~12 min)."</span></span></code></pre></div>
 </div>

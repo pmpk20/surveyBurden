@@ -83,11 +83,14 @@ A list:
 
 ## Details
 
-The observed data frame needs `completion_seconds` or `completion_mins`
-and, where available, the Loop & Merge count columns that
+The observed data frame needs a completion time – `completion_mins`,
+`completion_seconds`, or Qualtrics' own `Duration (in seconds)` column
+(first found wins; text values are converted to numbers) – and, where
+available, the Loop & Merge count columns that
 [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
 recognises (`loop_<question id>`, `loop_<block id>`, or any `loop_*`
-column).
+column). The label and ImportId rows at the top of a raw Qualtrics CSV
+export are removed, with a message, when recognisable.
 
 ## Examples
 

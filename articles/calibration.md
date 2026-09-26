@@ -83,10 +83,12 @@ function does little of this for you:
     (see
     [`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md)
     for its encodings).
-2.  **Name the duration column** `completion_seconds` or
-    `completion_mins`. Qualtrics exports it as `Duration (in seconds)`,
-    which is not recognised. If you read a raw CSV, drop the two header
-    rows first, or the column is read as text.
+2.  **Provide a duration column.** Qualtrics’ own
+    `Duration (in seconds)` is read directly (also as
+    [`read.csv()`](https://rdrr.io/r/utils/read.table.html) renames it),
+    as are `completion_seconds` and `completion_mins`; the first found
+    wins. The two header rows of a raw CSV export are removed
+    automatically when recognisable.
 3.  **Add route columns** (`loop_*`, `visit_*`) if you have them – see
     [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md).
     Without them every respondent is predicted at `loop_typical`.
@@ -111,9 +113,8 @@ paradata <- data.frame(
 )
 
 obs <- paradata[paradata$Finished == 1, ]            # step 1
-obs$completion_seconds <- obs$`Duration (in seconds)` # step 2
 
-vt <- validate_times(demo, obs, trim = c(3, 180))    # step 4
+vt <- validate_times(demo, obs, trim = c(3, 180))    # steps 2 and 4
 c(rows = nrow(paradata), finished = nrow(obs), kept_after_trim = vt$n)
 #>            rows        finished kept_after_trim 
 #>             120             107             107

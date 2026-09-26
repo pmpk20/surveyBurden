@@ -123,9 +123,13 @@ estimate from a dedicated calibration on real completion times.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The observed data frame needs <code>completion_seconds</code> or <code>completion_mins</code> and,
-where available, the Loop &amp; Merge count columns that <code><a href="respondent_burden.html">respondent_burden()</a></code>
-recognises (<code>loop_&lt;question id&gt;</code>, <code>loop_&lt;block id&gt;</code>, or any <code>loop_*</code> column).</p>
+    <p>The observed data frame needs a completion time – <code>completion_mins</code>,
+<code>completion_seconds</code>, or Qualtrics' own <code>Duration (in seconds)</code> column
+(first found wins; text values are converted to numbers) – and, where
+available, the Loop &amp; Merge count columns that <code><a href="respondent_burden.html">respondent_burden()</a></code>
+recognises (<code>loop_&lt;question id&gt;</code>, <code>loop_&lt;block id&gt;</code>, or any <code>loop_*</code>
+column). The label and ImportId rows at the top of a raw Qualtrics CSV
+export are removed, with a message, when recognisable.</p>
     </div>
 
     <div class="section level2">

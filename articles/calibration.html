@@ -143,11 +143,12 @@ filters on duration alone and does not detect non-finishers, so filter
 on <code>Finished</code> yourself (see
 <code><a href="../articles/realised-burden.html">vignette("realised-burden")</a></code> for its encodings).</li>
 <li>
-<strong>Name the duration column</strong>
-<code>completion_seconds</code> or <code>completion_mins</code>.
-Qualtrics exports it as <code>Duration (in seconds)</code>, which is not
-recognised. If you read a raw CSV, drop the two header rows first, or
-the column is read as text.</li>
+<strong>Provide a duration column.</strong> Qualtrics’ own
+<code>Duration (in seconds)</code> is read directly (also as
+<code><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv()</a></code> renames it), as are
+<code>completion_seconds</code> and <code>completion_mins</code>; the
+first found wins. The two header rows of a raw CSV export are removed
+automatically when recognisable.</li>
 <li>
 <strong>Add route columns</strong> (<code>loop_*</code>,
 <code>visit_*</code>) if you have them – see
@@ -173,9 +174,8 @@ implied rate is sensitive to it.</li>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">obs</span> <span class="op">&lt;-</span> <span class="va">paradata</span><span class="op">[</span><span class="va">paradata</span><span class="op">$</span><span class="va">Finished</span> <span class="op">==</span> <span class="fl">1</span>, <span class="op">]</span>            <span class="co"># step 1</span></span>
-<span><span class="va">obs</span><span class="op">$</span><span class="va">completion_seconds</span> <span class="op">&lt;-</span> <span class="va">obs</span><span class="op">$</span><span class="va">`Duration (in seconds)`</span> <span class="co"># step 2</span></span>
 <span></span>
-<span><span class="va">vt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/validate_times.html">validate_times</a></span><span class="op">(</span><span class="va">demo</span>, <span class="va">obs</span>, trim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">180</span><span class="op">)</span><span class="op">)</span>    <span class="co"># step 4</span></span>
+<span><span class="va">vt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/validate_times.html">validate_times</a></span><span class="op">(</span><span class="va">demo</span>, <span class="va">obs</span>, trim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">180</span><span class="op">)</span><span class="op">)</span>    <span class="co"># steps 2 and 4</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>rows <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">paradata</span><span class="op">)</span>, finished <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">obs</span><span class="op">)</span>, kept_after_trim <span class="op">=</span> <span class="va">vt</span><span class="op">$</span><span class="va">n</span><span class="op">)</span></span>
 <span><span class="co">#&gt;            rows        finished kept_after_trim </span></span>
 <span><span class="co">#&gt;             120             107             107</span></span>

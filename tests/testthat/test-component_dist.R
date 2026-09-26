@@ -17,6 +17,30 @@
   .dl_of(.grp(.lit_q(qidA, choiceA), .lit_q(qidB, choiceB, conj = "And")))
 }
 
+test_that("a trigger question the path never shows is fixed as unanswered", {
+  # QT shown if QX = 1 OR Q1 = 1; QX is off this path, Q1 is always shown
+  parsed <- list(QT = parse_display_logic(.dl_of(.grp(
+    .lit_q("QX", "1"), .lit_q("Q1", "1", conj = "Or")))))
+  stype <- c(QX = "single_choice", Q1 = "single_choice")
+  gfs   <- c(QT = 10)
+
+  d <- component_dist("QT", c("QX", "Q1"), parsed, gfs, stype, q_always = "Q1",
+                      off = "QX")
+  # only Q1's two states are enumerated: shown half the time
+  expect_equal(d$burden, c(0, 10))
+  expect_equal(d$weight, c(0.5, 0.5))
+
+  # without `off`, QX is enumerated as if answerable: shown 3 times in 4
+  d_all <- component_dist("QT", c("QX", "Q1"), parsed, gfs, stype, q_always = "Q1")
+  expect_equal(d_all$weight[d_all$burden == 10], 0.75)
+
+  # one_path_components works out `off` from the path's shown questions
+  cp <- one_path_components(q_always = "Q1", q_maybe = "QT", block_ids = "B1",
+                            parsed = parsed, gfs = c(Q1 = 1, gfs), stype = stype,
+                            qblock = c(Q1 = "B1", QT = "B1"), loop_blocks = integer(0))
+  expect_equal(cp$display_dist$weight, c(0.5, 0.5))
+})
+
 test_that("connected_components groups questions that share a gate", {
   parsed <- list(
     Q1 = parse_display_logic(.dl_of(.grp(.lit_q("GATE1", "1")))),

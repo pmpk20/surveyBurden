@@ -172,15 +172,19 @@ one_path_components <- function(q_always, q_maybe, block_ids,
   display_dist <- bw_df(0, 1)
   cond <- q_maybe_main[q_maybe_main %in% names(parsed)]
   if (length(cond) > 0) {
+    shown_q <- c(q_always, q_maybe)
     for (grp in connected_components(cond, parsed)) {
       gvars <- unique(unlist(lapply(grp, function(q) parsed[[q]]$vars)))
       disp  <- intersect(q_always, unlist(lapply(grp, function(q) parsed[[q]]$displayed)))
+      # trigger questions this path never shows: fixed as unanswered
+      off   <- gvars[!startsWith(gvars, "@") & !gvars %in% shown_q]
       key <- paste0(paste(sort(gvars), collapse = ","), "|",
                     paste(sort(grp), collapse = ","), "|",
-                    paste(sort(disp), collapse = ","))
+                    paste(sort(disp), collapse = ","), "|",
+                    paste(sort(off), collapse = ","))
       cc <- memo[[key]]
       if (is.null(cc)) {
-        cc <- component_dist(grp, gvars, parsed, gfs, stype, q_always)
+        cc <- component_dist(grp, gvars, parsed, gfs, stype, q_always, off = off)
         memo[[key]] <- cc
       }
       display_dist <- convolve_dist(display_dist, cc)
@@ -222,15 +226,16 @@ connected_components <- function(cond, parsed) {
 #' rest permissive -- restricted to just this component.
 #' @return data.frame(burden, weight)
 #' @noRd
-component_dist <- function(grp, gvars, parsed, gfs, stype, q_always, exact_cap = EXACT_CAP) {
-  states <- lapply(gvars, function(v) gate_states(v, grp, parsed, stype))
+component_dist <- function(grp, gvars, parsed, gfs, stype, q_always, exact_cap = EXACT_CAP,
+                           off = character(0)) {
+  states <- lapply(gvars, function(v) gate_states(v, grp, parsed, stype, off))
   names(states) <- gvars
   total <- prod(vapply(states, length, integer(1)))
 
   if (length(gvars) <= 1 || total <= exact_cap) {
     return(component_dist_exact(grp, gvars, states, parsed, gfs, q_always))
   }
-  component_dist_fallback(grp, parsed, gfs, stype, q_always)
+  component_dist_fallback(grp, parsed, gfs, stype, q_always, off)
 }
 
 #' Exact joint enumeration of a component's gate states.
@@ -264,13 +269,13 @@ component_dist_exact <- function(grp, gvars, states, parsed, gfs, q_always) {
 
 #' Primary-gate approximation for a component too large to enumerate exactly.
 #' @noRd
-component_dist_fallback <- function(grp, parsed, gfs, stype, q_always) {
+component_dist_fallback <- function(grp, parsed, gfs, stype, q_always, off = character(0)) {
   owner <- vapply(grp, function(q) parsed[[q]]$vars[1], character(1))
   by_gate <- split(grp, owner)
   d <- bw_df(0, 1)
   for (v in names(by_gate)) {
     dep <- sort(by_gate[[v]])
-    d <- convolve_dist(d, gate_component(v, dep, parsed, gfs, stype, q_always))
+    d <- convolve_dist(d, gate_component(v, dep, parsed, gfs, stype, q_always, off))
   }
   d
 }
@@ -294,13 +299,17 @@ one_path_distribution <- function(q_always, q_maybe, block_ids,
 #' Burden contribution distribution from one gate and the questions it owns.
 #' @return data.frame(burden, weight)
 #' @noRd
-gate_component <- function(v, deps, parsed, gfs, stype, q_always) {
-  states <- gate_states(v, deps, parsed, stype)
+gate_component <- function(v, deps, parsed, gfs, stype, q_always, off = character(0)) {
+  states <- gate_states(v, deps, parsed, stype, off)
   other_vars <- setdiff(unique(unlist(lapply(deps, function(q) parsed[[q]]$vars))), v)
+  # never-shown trigger questions are fixed as unanswered, not held permissive
+  other_off  <- intersect(other_vars, off)
+  other_vars <- setdiff(other_vars, other_off)
+  fixed_off  <- stats::setNames(rep(list(character(0)), length(other_off)), other_off)
   shown0 <- stats::setNames(rep(TRUE, length(q_always)), q_always)
 
   burdens <- vapply(states, function(s) {
-    assign <- stats::setNames(list(s), v)
+    assign <- c(stats::setNames(list(s), v), fixed_off)
     b <- 0
     for (q in deps) {
       if (isTRUE(parsed[[q]]$predicate(assign, shown0, permissive = other_vars))) {
@@ -339,7 +348,8 @@ group_sum <- function(burden, weight) {
 
 #' Possible states of a gate variable.
 #' @noRd
-gate_states <- function(v, deps, parsed, stype) {
+gate_states <- function(v, deps, parsed, stype, off = character(0)) {
+  if (v %in% off) return(list(character(0)))   # never shown: unanswered
   if (startsWith(v, "@")) return(list(TRUE, FALSE))
   refs <- unique(unlist(lapply(deps, function(q) lits_refs(parsed[[q]], v))))
   if (length(refs) == 0) return(list(TRUE, FALSE))

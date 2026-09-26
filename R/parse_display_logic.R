@@ -74,11 +74,38 @@ parse_display_logic <- function(dl) {
     isTRUE(acc)
   }
 
+  # Can the logic be TRUE on a path where the questions in `off_path` are never
+  # shown? Those questions are unanswered and not displayed, so their literals
+  # have a fixed value; every other literal is unknown (NA). Combining with
+  # R's three-valued `&` / `|`, only a definite FALSE rules the question out.
+  # Unknown literals are treated as independent, so this errs towards TRUE
+  # ("may be shown"), never towards a wrong "never shown".
+  possible <- function(off_path) {
+    lit_val <- function(pl) {
+      if (startsWith(pl$var, "@") || !pl$var %in% off_path) return(NA)
+      pl$eval(list(), c())
+    }
+    group_vals <- vapply(parsed_groups, function(lits) {
+      acc <- lit_val(lits[[1]])
+      for (k in seq_along(lits)[-1]) {
+        v <- lit_val(lits[[k]])
+        acc <- if (identical(lits[[k]]$conj, "Or")) acc | v else acc & v
+      }
+      acc
+    }, logical(1))
+    acc <- group_vals[1]
+    for (k in seq_along(group_vals)[-1]) {
+      and_k <- is.na(group_types[k]) || identical(group_types[k], "AndIf")
+      acc <- if (and_k) acc & group_vals[k] else acc | group_vals[k]
+    }
+    !isFALSE(acc)
+  }
+
   displayed <- unlist(lapply(parsed_groups, function(lits)
     unlist(lapply(lits, function(pl) pl$displayed_qid))))
 
   list(vars = unique(vars), predicate = predicate, refs = refs,
-       displayed = unique(displayed))
+       displayed = unique(displayed), possible = possible)
 }
 
 #' Parse one literal into `list(var, conj, eval)`

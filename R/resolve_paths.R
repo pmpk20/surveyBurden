@@ -3,8 +3,9 @@
 #' Combines [resolve_flow()] (block-level routing) with a within-block
 #' display-logic reachability analysis. For each flow path it partitions the
 #' questions into those always shown, those that *may* be shown (a display-logic
-#' condition we cannot evaluate ex ante), and those that can never be shown on
-#' that path (the condition's trigger question is not on the path).
+#' condition we cannot evaluate ex ante), and those whose display logic is
+#' shown to be false on that path because of the questions the path does not
+#' show (see [classify_reachability()] for the rule).
 #'
 #' Interior enumeration of the display-logic state space is **not** performed:
 #' a large instrument can carry dozens of root display-logic gates with
@@ -42,6 +43,7 @@ resolve_paths <- function(qsf, max_paths = 10000L, catalogue = NULL, blocks = NU
   block_q <- stats::setNames(blocks$question_ids, blocks$block_id)
 
   cond_ids <- catalogue$question_id[catalogue$has_display_logic]
+  parsed   <- parse_all_display_logic(qsf, catalogue)
 
   # Pull the columns out once: subsetting the tibble per path dominated
   # runtime on surveys with tens of thousands of paths.
@@ -52,8 +54,10 @@ resolve_paths <- function(qsf, max_paths = 10000L, catalogue = NULL, blocks = NU
   parts <- lapply(flow$block_ids, function(bids) {
     path_qids <- unlist(block_q[bids], use.names = FALSE)
     on <- cq %in% path_qids
-    r <- reachability_split(cq[on], c_dl[on], c_ref[on], path_qids)
-    triggers <- unique(unlist(c_ref[on][cq[on] %in% r$maybe]))
+    r <- reachability_split(cq[on], c_dl[on], c_ref[on], path_qids, parsed)
+    # trigger questions a respondent can actually answer on this path
+    triggers <- intersect(unique(unlist(c_ref[on][cq[on] %in% r$maybe])),
+                          c(r$always, r$maybe))
     root_gates <- setdiff(triggers, cond_ids)
     list(q_always = r$always, q_maybe = r$maybe, n_gates = length(root_gates))
   })
@@ -66,9 +70,29 @@ resolve_paths <- function(qsf, max_paths = 10000L, catalogue = NULL, blocks = NU
 
 #' Partition a set of catalogue rows into always / maybe / unreachable
 #'
+#' A question with no display logic is `always` shown. A question with display
+#' logic is `unreachable` only when its logic is shown to be false on this
+#' path: the questions it refers to that are not on the path (or are
+#' themselves unreachable) are unanswered and not displayed, so their
+#' conditions have fixed values, and if the logic is then false whatever the
+#' on-path answers are, the question can never be shown. Otherwise it is
+#' `maybe`. So a question whose logic is "Q9 is selected OR Q2 is selected"
+#' stays `maybe` when only Q9 is off the path, and "Q9 is not selected" is
+#' `maybe` (in fact always true) when Q9 is off the path.
+#'
+#' Unknown conditions are treated as independent, so the rule can leave a
+#' question as `maybe` that could be ruled out, but never marks a question
+#' `unreachable` wrongly (within the conditions it understands; embedded-data
+#' and other non-question conditions are always treated as unknown).
+#'
 #' @param catalogue Catalogue rows (needs `question_id`, `has_display_logic`,
 #'   `display_logic_refs`).
 #' @param path_qids Character vector of every question id on the path.
+#' @param display_logic Optional named list, by question id, of each
+#'   question's Qualtrics `DisplayLogic` tree (a question payload's
+#'   `$DisplayLogic`). Without it the logic cannot be evaluated, so no
+#'   question is classed `unreachable`: every question with display logic is
+#'   `maybe`. [resolve_paths()] supplies it from the survey.
 #'
 #' @return A list with character vectors `always`, `maybe`, `unreachable`.
 #'
@@ -80,24 +104,49 @@ resolve_paths <- function(qsf, max_paths = 10000L, catalogue = NULL, blocks = NU
 #' lengths(reach)
 #'
 #' @export
-classify_reachability <- function(catalogue, path_qids) {
+classify_reachability <- function(catalogue, path_qids, display_logic = NULL) {
+  parsed <- lapply(display_logic, function(dl) {
+    if (is.list(dl) && is.function(dl$possible)) dl else parse_display_logic(dl)
+  })
   reachability_split(catalogue$question_id, catalogue$has_display_logic,
-                     catalogue$display_logic_refs, path_qids)
+                     catalogue$display_logic_refs, path_qids, parsed)
 }
 
 #' Vectorised core of [classify_reachability()], on bare columns so
 #' [resolve_paths()] can call it per path without subsetting a tibble.
-#' No display logic (or `NA`) -> always; every referenced question on the path
-#' (or no question reference) -> maybe; otherwise unreachable. Each output
-#' keeps the input order.
+#' `parsed` is a named list of [parse_display_logic()] results. A question
+#' with display logic is unreachable only when `$possible()` proves its logic
+#' false given the questions that are off the path or already ruled out;
+#' ruling one out can rule out questions that depend on it, so this repeats
+#' until nothing changes. Each output keeps the input order.
 #' @noRd
-reachability_split <- function(qids, has_dl, refs, path_qids) {
+reachability_split <- function(qids, has_dl, refs, path_qids, parsed = NULL) {
   qids <- as.character(qids)
   dl  <- has_dl %in% TRUE
   idx <- which(dl)
-  ok  <- vapply(refs[idx], function(r) length(r) == 0L || all(r %in% path_qids),
-                logical(1))
-  list(always = qids[!dl], maybe = qids[idx[ok]], unreachable = qids[idx[!ok]])
+
+  # only a question referring to something off the path can be ruled out
+  refs_off <- function(r, gone) length(r) > 0L && !all(r %in% path_qids & !r %in% gone)
+  ruled_out <- character(0)
+  cand <- idx[vapply(refs[idx], refs_off, logical(1), gone = ruled_out)]
+  while (length(cand)) {
+    new <- character(0)
+    for (i in cand) {
+      p <- parsed[[qids[i]]]
+      if (is.null(p)) next                       # logic unknown: cannot prove
+      off <- union(setdiff(p$vars, path_qids), intersect(p$vars, ruled_out))
+      if (!p$possible(off)) new <- c(new, qids[i])
+    }
+    new <- setdiff(new, ruled_out)
+    if (!length(new)) break
+    ruled_out <- c(ruled_out, new)
+    # re-check questions that depend on a newly ruled-out question
+    cand <- idx[!qids[idx] %in% ruled_out &
+                vapply(refs[idx], function(r) any(r %in% new), logical(1))]
+  }
+
+  gone <- qids %in% ruled_out
+  list(always = qids[!dl], maybe = qids[dl & !gone], unreachable = qids[dl & gone])
 }
 
 #' Structural summary of an instrument

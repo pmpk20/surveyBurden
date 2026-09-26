@@ -4,19 +4,39 @@
 \alias{classify_reachability}
 \title{Partition a set of catalogue rows into always / maybe / unreachable}
 \usage{
-classify_reachability(catalogue, path_qids)
+classify_reachability(catalogue, path_qids, display_logic = NULL)
 }
 \arguments{
 \item{catalogue}{Catalogue rows (needs \code{question_id}, \code{has_display_logic},
 \code{display_logic_refs}).}
 
 \item{path_qids}{Character vector of every question id on the path.}
+
+\item{display_logic}{Optional named list, by question id, of each
+question's Qualtrics \code{DisplayLogic} tree (a question payload's
+\verb{$DisplayLogic}). Without it the logic cannot be evaluated, so no
+question is classed \code{unreachable}: every question with display logic is
+\code{maybe}. \code{\link[=resolve_paths]{resolve_paths()}} supplies it from the survey.}
 }
 \value{
 A list with character vectors \code{always}, \code{maybe}, \code{unreachable}.
 }
 \description{
-Partition a set of catalogue rows into always / maybe / unreachable
+A question with no display logic is \code{always} shown. A question with display
+logic is \code{unreachable} only when its logic is shown to be false on this
+path: the questions it refers to that are not on the path (or are
+themselves unreachable) are unanswered and not displayed, so their
+conditions have fixed values, and if the logic is then false whatever the
+on-path answers are, the question can never be shown. Otherwise it is
+\code{maybe}. So a question whose logic is "Q9 is selected OR Q2 is selected"
+stays \code{maybe} when only Q9 is off the path, and "Q9 is not selected" is
+\code{maybe} (in fact always true) when Q9 is off the path.
+}
+\details{
+Unknown conditions are treated as independent, so the rule can leave a
+question as \code{maybe} that could be ruled out, but never marks a question
+\code{unreachable} wrongly (within the conditions it understands; embedded-data
+and other non-question conditions are always treated as unknown).
 }
 \examples{
 qsf_path <- system.file("extdata", "demo_travel_survey.qsf",

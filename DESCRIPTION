@@ -1,16 +1,10 @@
 Package: surveyBurden
-Title: Ex-Ante Path-Aware Survey Instrument Burden Assessment
+Title: An R package for assessing the response-burden of web surveys
 Version: 0.2.0
 Authors@R: 
     person("Peter", "King", , "p.king1@leeds.ac.uk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-8550-466X"))
-Description: Estimates the response burden of a Qualtrics survey instrument
-    before it is fielded. Parses a '.qsf' export (or fetches a live survey
-    through the Qualtrics API), reconstructs the respondent paths the
-    survey's flow and display logic allow, scores every question with the
-    GfS+ points scheme (extending Heimgartner and Axhausen 2024)
-    <doi:10.32866/001c.125481>, and reports the burden across those paths
-    as a structured object.
+Description: This package tells you how burdensome your survey is. It works primarily with Qualtrics (.qsf export or API access), but can take your own question catalogue. Burden is scored using the GfS+ points scheme.
 License: MIT + file LICENSE
 Language: en-GB
 URL: https://github.com/pmpk20/surveyBurden

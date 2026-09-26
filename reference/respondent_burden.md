@@ -1,8 +1,8 @@
 # Expected burden by respondent route
 
-Turns the flow/display-logic model into a per-route expected burden, so
+Turns the flow/display-logic model into a per-path expected burden, so
 you can say "a typical respondent faces ~X points, rising to ~Y once the
-Loop & Merge sections repeat, or ~Z on the shortest complete route".
+Loop & Merge sections repeat, or ~Z on the shortest complete path".
 
 ## Usage
 
@@ -91,7 +91,7 @@ qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
 rb <- respondent_burden(read_qsf(qsf_path))
 rb[, c("path_id", "floor_pts", "typical_pts", "ceiling_pts")]
 #> Typical respondent burden is about 118 GfS+ points (~10 min). The lightest
-#> complete route is ~117 pts (~10 min); with the Loop & Merge sections fully
+#> complete path is ~117 pts (~10 min); with the Loop & Merge sections fully
 #> repeated it reaches ~143 pts (~12 min).
 #> 
 #> # A tibble: 2 × 4
@@ -100,6 +100,6 @@ rb[, c("path_id", "floor_pts", "typical_pts", "ceiling_pts")]
 #> 1       3       106         119         143
 #> 2       4       106         117         139
 summary_line(rb)
-#> [1] "Typical respondent burden is about 118 GfS+ points (~10 min). The lightest complete route is ~117 pts (~10 min); with the Loop & Merge sections fully repeated it reaches ~143 pts (~12 min)."
+#> [1] "Typical respondent burden is about 118 GfS+ points (~10 min). The lightest complete path is ~117 pts (~10 min); with the Loop & Merge sections fully repeated it reaches ~143 pts (~12 min)."
 # }
 ```

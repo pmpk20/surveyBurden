@@ -1,8 +1,8 @@
 # Paths and display logic
 
-**What this answers.** How the routes through a survey are
-reconstructed, what the structural profile’s weights mean, and how to
-get respondent-level predictions from route data.
+**What this answers.** How the paths through a survey are reconstructed,
+what the structural profile’s weights mean, and how to get
+respondent-level predictions from route data.
 
 **What you need.** A `.qsf`; for respondent-level predictions, routes
 derived from response data (recipe below).
@@ -12,7 +12,7 @@ distribution; branch conditions are not checked against each other, so
 its extremes may be unreachable; and `matched = TRUE` does not certify a
 respondent’s loop counts or display-logic answers.
 
-This article covers how surveyBurden reconstructs the routes through a
+This article covers how surveyBurden reconstructs the paths through a
 survey and turns them into a burden spread, and the difference between
 the structural profile and a population-weighted average. For
 per-question scoring see
@@ -332,7 +332,7 @@ turns it into a sentence:
 ``` r
 
 summary_line(respondent_burden(demo))
-#> [1] "Typical respondent burden is about 118 GfS+ points (~10 min). The lightest complete route is ~117 pts (~10 min); with the Loop & Merge sections fully repeated it reaches ~143 pts (~12 min)."
+#> [1] "Typical respondent burden is about 118 GfS+ points (~10 min). The lightest complete path is ~117 pts (~10 min); with the Loop & Merge sections fully repeated it reaches ~143 pts (~12 min)."
 ```
 
 ## Next

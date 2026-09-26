@@ -1,4 +1,4 @@
-# Burden per respondent path
+# Burden per survey path
 
 Joins
 [`resolve_paths()`](https://pmpk20.github.io/surveyBurden/reference/resolve_paths.md)

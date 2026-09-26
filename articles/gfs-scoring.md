@@ -12,7 +12,7 @@ published scheme; they are not measurements of effort, and some Table 1
 weights are not applied automatically.
 
 This article covers how one Qualtrics question becomes a GfS+ point
-score. For how those scores are combined across the survey’s routes see
+score. For how those scores are combined across the survey’s paths see
 [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md);
 for reading the finished report see
 [`vignette("reading-the-report")`](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md).
@@ -248,7 +248,7 @@ score_burden(catalogue, scheme = w2)$gfs_points[1:5]
 ## Next
 
 - [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md)
-  – how scores combine across routes.
+  – how scores combine across paths.
 - [`vignette("survey-revision")`](https://pmpk20.github.io/surveyBurden/articles/survey-revision.md)
   – using scores to revise a draft.
 - [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md)

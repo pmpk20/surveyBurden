@@ -495,7 +495,7 @@ survey-level total:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sprintf.html" class="external-link">sprintf</a></span><span class="op">(</span><span class="st">"Total: %.0f GfS+ points, ~%.0f minutes\n"</span>,</span>
 <span>            <span class="va">total_points</span>, <span class="va">total_minutes</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Total: 43 GfS+ points, ~4 minutes</span></span></code></pre></div>
-<p>This is the burden of one route that shows every question once. For a
+<p>This is the burden of one path that shows every question once. For a
 survey with conditional questions it is an upper bound on a single pass
 – the burden a respondent would face if every question were shown – but
 not if questions repeat in a loop: multiply looped questions by their
@@ -546,9 +546,9 @@ total work immediately, as in the worked example.</p>
 </h3>
 <p><code><a href="../reference/path_burden.html">path_burden()</a></code> gives a floor/ceiling band per path
 without a QSF if you pass it the scored catalogue and a paths table with
-one row per route: <code>path_id</code>, <code>terminates_early</code>,
+one row per path: <code>path_id</code>, <code>terminates_early</code>,
 <code>block_ids</code> (list), <code>q_always</code> (list of question
-ids always shown on that route), <code>q_maybe</code> (list of question
+ids always shown on that path), <code>q_maybe</code> (list of question
 ids that may be shown) and <code>n_gates</code>.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">paths</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
@@ -567,8 +567,8 @@ ids that may be shown) and <code>n_gates</code>.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       1        35          35</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>       2        41          43</span></span></code></pre></div>
 <p>Building that table is the adapter’s job: enumerating the platform’s
-routes and deciding, for each, which questions are always or maybe
-shown. Loop multiplication in the ceiling uses the catalogue’s
+paths and deciding, for each, which questions are always or maybe shown.
+Loop multiplication in the ceiling uses the catalogue’s
 <code>loop_max</code>.</p>
 </div>
 <div class="section level3">
@@ -597,7 +597,7 @@ display-logic predicates in place of <code>qsf_raw</code>.</li>
 <p>Setting <code>has_display_logic = FALSE</code> for every question
 does <strong>not</strong> skip the display-logic profile: it tells the
 package the question is always shown, so conditional questions count on
-every route and burden is overstated. It removes conditionality from the
+every path and burden is overstated. It removes conditionality from the
 model rather than modelling it.</p>
 </div>
 </div>

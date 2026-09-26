@@ -1,4 +1,4 @@
-# Resolve respondent paths, flow *and* display logic
+# Resolve the survey's paths, flow *and* display logic
 
 Combines
 [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md)

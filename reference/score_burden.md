@@ -7,7 +7,7 @@ to a question catalogue from
 [`parse_qsf()`](https://pmpk20.github.io/surveyBurden/reference/parse_qsf.md),
 adding burden points, an estimated completion time, a confidence flag
 and a plain-language rationale per item. This is Layer 3 at the item
-level; propagation through respondent paths is a later step.
+level; propagation through the survey's paths is a later step.
 
 ## Usage
 

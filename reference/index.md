@@ -56,7 +56,7 @@ Walk the flow and display logic to the feasible respondent paths.
 - [`resolve_paths()`](https://pmpk20.github.io/surveyBurden/reference/resolve_paths.md)
   :
 
-  Resolve respondent paths, flow *and* display logic
+  Resolve the survey's paths, flow *and* display logic
 
 - [`classify_reachability()`](https://pmpk20.github.io/surveyBurden/reference/classify_reachability.md)
   : Partition a set of catalogue rows into always / maybe / unreachable
@@ -66,7 +66,7 @@ Walk the flow and display logic to the feasible respondent paths.
 Turn the resolved paths into per-path and population-weighted burden.
 
 - [`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md)
-  : Burden per respondent path
+  : Burden per survey path
 - [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md)
   : Structural burden profile across a path's display-logic sub-states
 - [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)

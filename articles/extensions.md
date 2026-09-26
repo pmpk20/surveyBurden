@@ -236,7 +236,7 @@ cat(sprintf("Total: %.0f GfS+ points, ~%.0f minutes\n",
 #> Total: 43 GfS+ points, ~4 minutes
 ```
 
-This is the burden of one route that shows every question once. For a
+This is the burden of one path that shows every question once. For a
 survey with conditional questions it is an upper bound on a single pass
 – the burden a respondent would face if every question were shown – but
 not if questions repeat in a loop: multiply looped questions by their
@@ -288,9 +288,9 @@ the worked example.
 
 [`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md)
 gives a floor/ceiling band per path without a QSF if you pass it the
-scored catalogue and a paths table with one row per route: `path_id`,
+scored catalogue and a paths table with one row per path: `path_id`,
 `terminates_early`, `block_ids` (list), `q_always` (list of question ids
-always shown on that route), `q_maybe` (list of question ids that may be
+always shown on that path), `q_maybe` (list of question ids that may be
 shown) and `n_gates`.
 
 ``` r
@@ -313,9 +313,8 @@ path_burden(NULL, paths = paths, scored = scored)[,
 ```
 
 Building that table is the adapter’s job: enumerating the platform’s
-routes and deciding, for each, which questions are always or maybe
-shown. Loop multiplication in the ceiling uses the catalogue’s
-`loop_max`.
+paths and deciding, for each, which questions are always or maybe shown.
+Loop multiplication in the ceiling uses the catalogue’s `loop_max`.
 
 ### Future interface work: routing and display logic
 
@@ -341,7 +340,7 @@ needs one of:
 
 Setting `has_display_logic = FALSE` for every question does **not** skip
 the display-logic profile: it tells the package the question is always
-shown, so conditional questions count on every route and burden is
+shown, so conditional questions count on every path and burden is
 overstated. It removes conditionality from the model rather than
 modelling it.
 

@@ -56,7 +56,7 @@ summary(object, ...)
   Optional respondent data frame (see
   [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)).
   When supplied, the report adds `$population`: quantiles and the mean
-  of one predicted burden per respondent, so each route counts as often
+  of one predicted burden per respondent, so each path counts as often
   as respondents took it. Unlike the structural profile, this summarises
   observed respondents.
 
@@ -222,13 +222,13 @@ br <- burden_report(qsf_path)
 #> ✔ Reading survey [9ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [102ms]
+#> ✔ Scoring questions and resolving paths [116ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [31ms]
+#> ✔ Checking calculation certainty [36ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [18ms]
+#> ✔ Enumerating display-logic combinations [20ms]
 #> 
 br
 #> 

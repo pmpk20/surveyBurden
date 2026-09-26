@@ -48,8 +48,9 @@ per distinct path:
 
 - decisions:
 
-  List column: named logical vector, one entry per branch on a
-  representative route to this path, `TRUE` = condition taken.
+  List column: named logical vector, one entry per branch on one
+  combination of branch outcomes that produces this path, `TRUE` =
+  condition taken.
 
 ## Details
 

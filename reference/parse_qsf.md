@@ -37,8 +37,8 @@ injected CSS/JS), `has_display_logic`, `display_logic_refs`,
 
 ## Details
 
-This function does not resolve respondent paths or compute burden. It
-reads and classifies questions.
+This function does not resolve survey paths or compute burden. It reads
+and classifies questions.
 
 ## Examples
 

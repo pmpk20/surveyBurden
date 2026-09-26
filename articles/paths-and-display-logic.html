@@ -72,7 +72,7 @@
 
     
     
-<p><strong>What this answers.</strong> How the routes through a survey
+<p><strong>What this answers.</strong> How the paths through a survey
 are reconstructed, what the structural profile’s weights mean, and how
 to get respondent-level predictions from route data.</p>
 <p><strong>What you need.</strong> A <code>.qsf</code>; for
@@ -83,8 +83,8 @@ not a respondent distribution; branch conditions are not checked against
 each other, so its extremes may be unreachable; and
 <code>matched = TRUE</code> does not certify a respondent’s loop counts
 or display-logic answers.</p>
-<p>This article covers how surveyBurden reconstructs the routes through
-a survey and turns them into a burden spread, and the difference between
+<p>This article covers how surveyBurden reconstructs the paths through a
+survey and turns them into a burden spread, and the difference between
 the structural profile and a population-weighted average. For
 per-question scoring see <code><a href="../articles/gfs-scoring.html">vignette("gfs-scoring")</a></code>; for the
 printed output see <code><a href="../articles/reading-the-report.html">vignette("reading-the-report")</a></code>.</p>
@@ -408,7 +408,7 @@ per-path table and <code><a href="../reference/summary_line.html">summary_line()
 sentence:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summary_line.html">summary_line</a></span><span class="op">(</span><span class="fu"><a href="../reference/respondent_burden.html">respondent_burden</a></span><span class="op">(</span><span class="va">demo</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Typical respondent burden is about 118 GfS+ points (~10 min). The lightest complete route is ~117 pts (~10 min); with the Loop &amp; Merge sections fully repeated it reaches ~143 pts (~12 min)."</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "Typical respondent burden is about 118 GfS+ points (~10 min). The lightest complete path is ~117 pts (~10 min); with the Loop &amp; Merge sections fully repeated it reaches ~143 pts (~12 min)."</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">

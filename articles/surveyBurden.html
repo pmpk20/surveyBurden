@@ -76,9 +76,9 @@
 burden</strong>: the response effort a programmed Qualtrics survey
 demands, worked out before fielding from the instrument alone. It reads
 the survey, scores every question with the GfS+ point scheme (extending
-Heimgartner and Axhausen 2024), reconstructs the routes the flow and
+Heimgartner and Axhausen 2024), reconstructs the paths the flow and
 display logic allow, and reports how burden varies across those
-routes.</p>
+paths.</p>
 <p>In the terms of Yan and Williams (2022) this is the
 <em>instrument</em> side of respondent burden – length, difficulty, and
 the effort the design requires. It is not the <em>perceived</em> burden
@@ -187,7 +187,7 @@ Travel Survey” that ships with the package, so the numbers shown are the
 numbers the current package produces. To use your own survey, replace
 <code>demo</code> with a path to a <code>.qsf</code> file, a bare
 <code>SV_...</code> survey id, or a Qualtrics survey-builder URL (see
-<code><a href="../articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code> for the API route).</p>
+<code><a href="../reference/fetch_qsf.html">?fetch_qsf</a></code> for fetching through the Qualtrics API).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">demo</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="va">report</span></span>
@@ -274,12 +274,12 @@ it:</p>
 <strong>Instrument</strong> – structural counts (questions, blocks,
 branch points, loop blocks, early exits).</li>
 <li>
-<strong>Paths</strong> – how many distinct routes the flow allows,
+<strong>Paths</strong> – how many distinct paths the flow allows,
 and how many complete rather than screen out.</li>
 <li>
 <strong>Burden</strong> – the headline spread of path burden, in
-points, minutes and a 0–1 index, with the published benchmark
-underneath.</li>
+points, minutes and an index (points / 1500, so 1 is a rare burden),
+with the published benchmark underneath.</li>
 <li>
 <strong>Burden by block</strong>, <strong>Highest-burden
 questions</strong>, <strong>Readability diagnostics</strong>,
@@ -292,7 +292,10 @@ turn.</p>
 <div class="section level2">
 <h2 id="vocabulary">Vocabulary<a class="anchor" aria-label="anchor" href="#vocabulary"></a>
 </h2>
-<p>Five terms are used throughout, with fixed meanings:</p>
+<p>These terms are used throughout, with fixed meanings. The key
+distinction: a <strong>path</strong> is a possibility in the survey’s
+design; a <strong>route</strong> is what one respondent actually
+did.</p>
 <table class="table">
 <colgroup>
 <col width="50%">
@@ -304,14 +307,28 @@ turn.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
+<td><strong>path</strong></td>
+<td>one way through the survey that its flow allows: the blocks shown,
+given which branches are taken. Worked out from the survey design alone;
+no respondent is involved.</td>
+</tr>
+<tr class="even">
+<td><strong>route</strong></td>
+<td>the way one respondent actually went: the optional blocks they
+entered and how many times they looped. Comes from response data (the
+<code>routes</code> argument). Many respondents’ routes can fall on the
+same path.</td>
+</tr>
+<tr class="odd">
 <td><strong>question burden</strong></td>
 <td>the GfS+ point score for one question, from its type and
 structure</td>
 </tr>
 <tr class="even">
 <td><strong>path burden</strong></td>
-<td>the total question burden along one structural path through the
-survey flow</td>
+<td>the total question burden along one path. Display logic and loops
+can vary within a path, so a path has a spread of burdens rather than
+one number.</td>
 </tr>
 <tr class="odd">
 <td><strong>structural burden profile</strong></td>
@@ -320,11 +337,20 @@ with model weights (equal per state; each path’s weights sum to 1). Not
 a respondent probability distribution.</td>
 </tr>
 <tr class="even">
+<td><strong>predicted respondent burden</strong></td>
+<td>one respondent’s predicted burden: the burden of the path matching
+their route, with their own loop counts (<code>pred_pts</code>).</td>
+</tr>
+<tr class="odd">
 <td><strong>population-weighted respondent burden</strong></td>
-<td>one predicted burden per respondent from their observed route,
-summarised across respondents, so each route counts as often as
-respondents took it. Produced only when <code>routes</code> are
-supplied.</td>
+<td>predicted respondent burden summarised across respondents, so each
+path counts as often as respondents took it. Produced only when
+<code>routes</code> are supplied.</td>
+</tr>
+<tr class="even">
+<td><strong>realised burden</strong></td>
+<td>the burden of the questions a respondent actually answered, from
+response data (<code><a href="../reference/realised_burden.html">realised_burden()</a></code>).</td>
 </tr>
 <tr class="odd">
 <td><strong>calculation certainty</strong></td>

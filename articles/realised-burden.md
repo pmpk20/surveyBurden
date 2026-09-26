@@ -278,8 +278,8 @@ sources, and the gap alone does not tell you which:
   dropping out, skipping non-forced questions, or display logic hiding
   more than the median state assumes;
 - **negative gap** (realised \> predicted): display logic showing more
-  than the median state, or questions answered that the route model does
-  not expect.
+  than the median state, or questions answered that the matched path
+  does not include.
 
 In particular a large positive gap is not by itself evidence of dropout;
 check `finished` and `furthest_block` before reading it that way.

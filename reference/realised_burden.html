@@ -90,7 +90,11 @@ name (<code>2_mycol</code> is iteration 2), else 0.</p></li>
 <code>2_QID15</code> for loop iteration 2).</p></li>
 <li><p>Column names match <code>DataExportTag</code> values from the QSF (<code>Q15</code>,
 <code>travel_mode_1</code>), exactly or ignoring case.</p></li>
-</ol><p>The recommended way to obtain this data frame is
+</ol><p>Leading label and ImportId rows from a raw Qualtrics CSV export are
+removed, with a message, when recognisable (an ImportId JSON cell, or a
+system column holding its own label such as <code>ResponseId</code> =
+"Response ID"); other rows are always kept.</p>
+<p>The recommended way to obtain this data frame is
 <code>qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE, add_column_map = FALSE)</code>.</p></dd>
 
 

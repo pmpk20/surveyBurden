@@ -45,6 +45,11 @@ realised_burden(
   3.  Column names match `DataExportTag` values from the QSF (`Q15`,
       `travel_mode_1`), exactly or ignoring case.
 
+  Leading label and ImportId rows from a raw Qualtrics CSV export are
+  removed, with a message, when recognisable (an ImportId JSON cell, or
+  a system column holding its own label such as `ResponseId` = "Response
+  ID"); other rows are always kept.
+
   The recommended way to obtain this data frame is
   `qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE, add_column_map = FALSE)`.
 

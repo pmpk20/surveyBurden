@@ -83,6 +83,11 @@
   treated as iteration 0, so answers from different iterations of a
   looped question were merged and scored once. The help and vignette now
   also state that `col_map` overrides automatic column matching.
+- [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
+  removes the question-label and ImportId rows at the top of a raw
+  Qualtrics CSV export, with a message, when it can recognise them.
+  Previously they were scored as respondents. Unrecognised rows are
+  always kept.
 
 ### Documentation
 

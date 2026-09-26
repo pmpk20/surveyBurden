@@ -89,6 +89,13 @@
   the model", and `?calculation_certainty` explains that neither means the
   result matches the live survey. The `index` column is documented as
   `points / rare_threshold` (it can exceed 1).
+* `realised_burden()` now has an explicit operational definition: a
+  question's full score counts when at least one mapped response column is
+  non-blank, per detected loop iteration. It does not measure exposure,
+  reading time or partial completion, and `n_questions_answered` counts
+  question-iteration pairs. The vignette no longer presents a
+  predicted-minus-realised gap as evidence of dropout, and explains that
+  predictions use each respondent's inferred route and loop counts.
 * Added runnable `@examples` to all exported functions using the shipped
   demo fixture (`demo_travel_survey.qsf`).
 * Switched `burden_report()` and `calculation_certainty()` examples from

@@ -1,10 +1,16 @@
 #' Realised response burden from observed responses
 #'
-#' Scores the questions each respondent actually answered, using the GfS+
-#' scheme and the survey's structure from the QSF. Unlike [respondent_burden()],
-#' which predicts burden from structural paths, this function measures it from
-#' data: every respondent gets a unique score reflecting their actual route
-#' through the survey.
+#' An answer-based GfS+ estimate for each respondent, from their response
+#' data and the survey's structure in the QSF. Unlike [respondent_burden()],
+#' which predicts burden from structural paths, this function scores what
+#' respondents answered.
+#'
+#' **Operational definition.** A question counts as answered when at least
+#' one of its mapped response columns is non-blank, and then its full GfS+
+#' score is added -- separately for each detected Loop & Merge iteration.
+#' A partly answered matrix therefore scores in full. Realised burden does
+#' not measure exposure (questions shown but left blank score 0), reading
+#' time, or the share of a question completed.
 #'
 #' @param qsf A `qsf_raw` object, a path to a `.qsf` file, or a survey id
 #'   accepted by [fetch_qsf()].
@@ -49,14 +55,19 @@
 #'       an unrecognised value), not that the respondent did not finish.}
 #'     \item{`furthest_block`}{Integer ordinal of the last block in which the
 #'       respondent answered at least one question.}
-#'     \item{`n_questions_answered`}{Count of distinct questions with at least
-#'       one non-blank response column.}
-#'     \item{`realised_points`}{Sum of GfS points for answered questions; loop
-#'       questions scored once per answered iteration.}
+#'     \item{`n_questions_answered`}{Count of answered question-iteration
+#'       pairs: a non-loop question counts once, a looped question once per
+#'       iteration with at least one non-blank response column. Not a count of
+#'       distinct questions.}
+#'     \item{`realised_points`}{Sum of the full GfS+ scores of answered
+#'       questions, once per answered iteration for looped questions (see the
+#'       operational definition above).}
 #'     \item{`realised_minutes`}{`realised_points / points_per_minute`.}
-#'     \item{`predicted_points`}{Structural-path prediction for comparison (from
-#'       [respondent_burden()] logic, using inferred loop counts and visit
-#'       flags).}
+#'     \item{`predicted_points`}{Structural prediction for comparison, from
+#'       [respondent_burden()]: the path matching the optional blocks the
+#'       respondent answered in, their loop counts inferred from the answered
+#'       iterations, and the path's model-weighted median display-logic
+#'       burden.}
 #'     \item{`predicted_minutes`}{`predicted_points / points_per_minute`.}
 #'     \item{`words_per_line`}{The words-per-line value used for each
 #'       respondent's descriptive-text scoring.}

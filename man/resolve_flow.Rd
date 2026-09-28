@@ -25,14 +25,14 @@ condition taken.}
 }
 }
 \description{
-Walks the \code{SurveyFlow}, forking at every \code{Branch} into a condition-true and a
-condition-false path. Branch conditions are not evaluated: they depend on
-embedded data or prior answers that are unknown ex ante, so both outcomes are
-kept at every branch. The result is the \emph{structural path space} -- every
-block sequence the flow allows -- without any assumption about branch
-probabilities. Because conditions are never checked against each other, two
-branches that no respondent could both take are still combined, so a path
-here is not guaranteed to be one a real respondent can follow.
+Walks the \code{SurveyFlow}, forking at every \code{Branch} into feasible outcomes.
+When consecutive branches test the same embedded-data field for equality
+against different values, they are recognised as mutually exclusive and
+enumerated as one-of-k (plus a "none matches" fallback) instead of 2^k
+independent binary decisions. All other branches are still forked into a
+condition-true and a condition-false path. The result is the \emph{structural
+path space} -- every block sequence a respondent could encounter -- without
+any assumption about branch probabilities.
 }
 \details{
 Within-block display logic (whether an individual question is shown) is \emph{not}

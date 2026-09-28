@@ -7,7 +7,7 @@
 summary_line(x, ...)
 }
 \arguments{
-\item{x}{A \code{\link[=respondent_burden]{respondent_burden()}} table (the no-routes form).}
+\item{x}{A \code{\link[=respondent_burden]{respondent_burden()}} table or a \code{\link[=burden_report]{burden_report()}} object.}
 
 \item{...}{Unused.}
 }

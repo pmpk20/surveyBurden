@@ -210,11 +210,23 @@ match_routes <- function(path_opt, desired_opt, heavy_i) {
 
 #' One-sentence summary of a burden object
 #'
-#' @param x A [respondent_burden()] table (the no-routes form).
+#' @param x A [respondent_burden()] table or a [burden_report()] object.
 #' @param ... Unused.
 #' @return A single character string.
 #' @export
 summary_line <- function(x, ...) UseMethod("summary_line")
+
+#' @export
+summary_line.burden_report <- function(x, ...) {
+  ppm <- attr(x, "points_per_minute") %||% 12
+  bm  <- attr(x, "benchmark")
+  pop_med <- if (!is.null(x$population))
+    x$population$points[x$population$statistic == "median"] else NULL
+  paste(burden_verdict_line(x$burden, ppm, bm$median_points,
+                            x$instrument$n_complete_paths,
+                            population_median = pop_med),
+        collapse = " ")
+}
 
 #' @export
 summary_line.respondent_burden <- function(x, ...) {

@@ -25,6 +25,25 @@ test_that("summary_line() produces a sentence with points and minutes", {
   expect_match(s, "min")
 })
 
+test_that("summary_line() works on a burden_report object", {
+  r <- burden_report(demo_qsf(), certainty = FALSE)
+  s <- summary_line(r)
+  expect_type(s, "character")
+  expect_length(s, 1L)
+  expect_match(s, "GfS\\+ points")
+  expect_match(s, "min")
+  expect_match(s, "benchmark")
+})
+
+test_that("summary_line() works on a naive burden_report", {
+  r <- burden_report(demo_qsf(), profile = FALSE, certainty = FALSE)
+  s <- summary_line(r)
+  expect_type(s, "character")
+  expect_length(s, 1L)
+  expect_match(s, "points")
+  expect_match(s, "min")
+})
+
 test_that("respondent_burden() with routes predicts per respondent using real loop counts", {
   routes <- data.frame(
     id = 1:3,

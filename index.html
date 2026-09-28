@@ -63,32 +63,7 @@
 <div class="page-header"><h1 id="surveyburden">surveyBurden<a class="anchor" aria-label="anchor" href="#surveyburden"></a>
 </h1></div>
 <p><a href="https://github.com/pmpk20/surveyBurden/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/pmpk20/surveyBurden/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a> <a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a> <a href="https://opensource.org/licenses/MIT" class="external-link"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a> <a href="https://orcid.org/0000-0001-8550-466X" class="external-link"><img src="https://img.shields.io/badge/ORCID-0000--0001--8550--466X-A6CE39?logo=orcid" alt="ORCID"></a> <a href="https://app.codecov.io/gh/pmpk20/surveyBurden" class="external-link"><img src="https://codecov.io/gh/pmpk20/surveyBurden/graph/badge.svg" alt="Codecov test coverage"></a></p>
-<p>surveyBurden estimates how much response effort a survey instrument requires. It scores every question with the GfS+ point scheme (extending Heimgartner &amp; Axhausen 2024). It can read a Qualtrics file directly and follows its display logic to show how burden varies across the paths through the survey. If you have response data, the package can also tell you the burden per-respondent. surveyBurden is an independent project with no affiliation with Qualtrics or any other survey platform, and no platform provides support for it.</p>
-<div class="section level2">
-<h2 id="platform-support">Platform support<a class="anchor" aria-label="anchor" href="#platform-support"></a>
-</h2>
-<table class="table">
-<colgroup>
-<col width="30%">
-<col width="70%">
-</colgroup>
-<thead><tr>
-<th>Your survey</th>
-<th>What surveyBurden gives you</th>
-</tr></thead>
-<tbody>
-<tr>
-<td><strong>Any platform</strong></td>
-<td>Per-question GfS+ scores and a survey total, from a simple table of your questions (<code><a href="reference/validate_catalogue.html">validate_catalogue()</a></code> then <code><a href="reference/score_burden.html">score_burden()</a></code>); a burden range per path if you also list which questions each path shows (<code><a href="reference/path_burden.html">path_burden()</a></code>)</td>
-</tr>
-<tr>
-<td>
-<strong>Qualtrics</strong> (<code>.qsf</code> file or API)</td>
-<td>All of the above, worked out automatically, plus the full report: routing and skip logic, burden across paths, respondent-level predictions, and analysis of response data and completion times</td>
-</tr>
-</tbody>
-</table>
-</div>
+<p>surveyBurden estimates how much response effort a survey instrument requires. It scores every question with the GfS+ point scheme (extending Heimgartner &amp; Axhausen 2024). It can read a survey and follow its display logic to show how burden varies across the paths through the survey. If you have response data, the package can also tell you the burden per-respondent. For any platform, surveyBurden can give you the per-question GfS+ scores and a survey total, from a simple table of your questions (<code><a href="reference/validate_catalogue.html">validate_catalogue()</a></code> then <code><a href="reference/score_burden.html">score_burden()</a></code>); a burden range per path if you also list which questions each path shows (<code><a href="reference/path_burden.html">path_burden()</a></code>). The package works best with Qualtrics (either .qsf export in JSON or through the API), and can do all of the above, worked out automatically, plus the full report: routing and skip logic, burden across paths, respondent-level predictions, and analysis of response data and completion times. surveyBurden is an independent project with no affiliation with Qualtrics or any other survey platform, and no platform provides support for it.</p>
 <div class="section level2">
 <h2 id="where-to-start">Where to start<a class="anchor" aria-label="anchor" href="#where-to-start"></a>
 </h2>

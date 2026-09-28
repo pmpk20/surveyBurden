@@ -1,9 +1,3 @@
----
-editor_options: 
-  markdown: 
-    wrap: 72
----
-
 # surveyBurden
 
 [![R-CMD-check](https://github.com/pmpk20/surveyBurden/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/pmpk20/surveyBurden/actions/workflows/R-CMD-check.yaml)
@@ -17,19 +11,14 @@ coverage](https://codecov.io/gh/pmpk20/surveyBurden/graph/badge.svg)](https://ap
 
 surveyBurden estimates how much response effort a survey instrument
 requires. It scores every question with the GfS+ point scheme (extending
-Heimgartner & Axhausen 2024). It can read a Qualtrics file directly and
-follows its display logic to show how burden varies across the paths
+Heimgartner & Axhausen 2024). It can read a survey and
+follow its display logic to show how burden varies across the paths
 through the survey. If you have response data, the package can also
-tell you the burden per-respondent. surveyBurden is an independent
+tell you the burden per-respondent. 
+For any platform, surveyBurden can give you the per-question GfS+ scores and a survey total, from a simple table of your questions (`validate_catalogue()` then `score_burden()`); a burden range per path if you also list which questions each path shows (`path_burden()`). The package works best with Qualtrics (either .qsf export in JSON or through the API), and can do all of the above, worked out automatically, plus the full report: routing and skip logic, burden across paths, respondent-level predictions, and analysis of response data and completion times. surveyBurden is an independent
 project with no affiliation with Qualtrics or any other survey platform,
 and no platform provides support for it.
 
-## Platform support
-
-| Your survey                        | What surveyBurden gives you                                                                                                                                                                                                     |
-|---------------------|-------------------------------------------------|
-| **Any platform**                   | Per-question GfS+ scores and a survey total, from a simple table of your questions (`validate_catalogue()` then `score_burden()`); a burden range per path if you also list which questions each path shows (`path_burden()`) |
-| **Qualtrics** (`.qsf` file or API) | All of the above, worked out automatically, plus the full report: routing and skip logic, burden across paths, respondent-level predictions, and analysis of response data and completion times                                 |
 
 ## Where to start
 

@@ -1,5 +1,18 @@
 # Changelog
 
+## surveyBurden (development version)
+
+- [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md)
+  now detects consecutive branches that test the same embedded-data
+  field for equality and treats them as mutually exclusive (one-of-k)
+  instead of independent binary decisions. For surveys that route
+  respondents by an assignment field (e.g. stated-choice module
+  selection), this can reduce the path count from 2^k to k+1 per group.
+- [`summary_line()`](https://pmpk20.github.io/surveyBurden/reference/summary_line.md)
+  now works on `burden_report` objects, returning the same verdict line
+  as [`print()`](https://rdrr.io/r/base/print.html) and
+  [`summary()`](https://rdrr.io/r/base/summary.html).
+
 ## surveyBurden 0.2.0
 
 ### New features

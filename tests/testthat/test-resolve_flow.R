@@ -126,6 +126,150 @@ test_that("path explosion is capped with a clear error", {
   expect_error(enumerate_paths(many, max_paths = 500), "path space")
 })
 
+# --- mutually exclusive branch detection ---
+n_ebranch <- function(id, field, value, ...) {
+  list(
+    Type = "Branch", FlowID = id,
+    BranchLogic = list(
+      Type = "BooleanExpression", inPage = FALSE,
+      "0" = list(
+        Type = "If",
+        "0" = list(
+          Type = "Expression",
+          LogicType = "EmbeddedField",
+          Operator = "EqualTo",
+          LeftOperand = field,
+          RightOperand = value
+        )
+      )
+    ),
+    Flow = list(...)
+  )
+}
+
+test_that("extract_branch_key returns field for simple EmbeddedField EqualTo", {
+  b <- n_ebranch("B1", "mode", "car")
+  k <- extract_branch_key(b)
+  expect_equal(k$field, "mode")
+})
+
+test_that("extract_branch_key returns NULL for Question-based or compound branches", {
+  expect_null(extract_branch_key(n_branch("BR1", n_block("X"))))
+  compound <- list(
+    Type = "Branch", FlowID = "BR2",
+    BranchLogic = list(
+      Type = "BooleanExpression",
+      "0" = list(
+        Type = "If",
+        "0" = list(Type = "Expression", LogicType = "EmbeddedField",
+                   Operator = "EqualTo", LeftOperand = "f", RightOperand = "1"),
+        "1" = list(Type = "Expression", LogicType = "EmbeddedField",
+                   Operator = "EqualTo", LeftOperand = "f", RightOperand = "2",
+                   Conjuction = "And")
+      )
+    ),
+    Flow = list()
+  )
+  expect_null(extract_branch_key(compound))
+  noteq <- n_ebranch("B3", "f", "1")
+  noteq$BranchLogic[["0"]][["0"]]$Operator <- "NotEqualTo"
+  expect_null(extract_branch_key(noteq))
+  expect_null(extract_branch_key(list(Type = "Branch", FlowID = "BR4")))
+})
+
+test_that("consecutive EmbeddedField branches on same field are grouped as one-of-k", {
+  paths <- suppressMessages(enumerate_paths(list(
+    n_block("A"),
+    n_ebranch("B1", "mode", "car",  n_block("CAR")),
+    n_ebranch("B2", "mode", "bus",  n_block("BUS")),
+    n_ebranch("B3", "mode", "rail", n_block("RAIL")),
+    n_block("Z")
+  )))
+  # 3 branches on same field -> 3 + 1 (none) = 4 outcomes
+  expect_equal(nrow(paths), 4L)
+  seqs <- vapply(paths$block_ids, paste, "", collapse = ">")
+  expect_true("A>CAR>Z"  %in% seqs)
+  expect_true("A>BUS>Z"  %in% seqs)
+  expect_true("A>RAIL>Z" %in% seqs)
+  expect_true("A>Z"      %in% seqs)  # none matches
+})
+
+test_that("exclusive group decisions record exactly one TRUE per group", {
+  paths <- suppressMessages(enumerate_paths(list(
+    n_ebranch("B1", "mode", "car",  n_block("CAR")),
+    n_ebranch("B2", "mode", "bus",  n_block("BUS")),
+    n_block("Z")
+  )))
+  for (i in seq_len(nrow(paths))) {
+    d <- paths$decisions[[i]]
+    true_count <- sum(d[c("B1", "B2")])
+    expect_lte(true_count, 1L)
+  }
+})
+
+test_that("branches on different fields are separate groups", {
+  paths <- suppressMessages(enumerate_paths(list(
+    n_ebranch("B1", "mode", "car",  n_block("CAR")),
+    n_ebranch("B2", "mode", "bus",  n_block("BUS")),
+    n_ebranch("B3", "route", "A",   n_block("RA")),
+    n_ebranch("B4", "route", "B",   n_block("RB")),
+    n_block("Z")
+  )))
+  # mode: 2+1=3, route: 2+1=3, cross product: 3*3=9
+  expect_equal(nrow(paths), 9L)
+})
+
+test_that("a non-consecutive branch breaks the group", {
+  paths <- suppressMessages(enumerate_paths(list(
+    n_ebranch("B1", "mode", "car", n_block("CAR")),
+    n_block("MID"),
+    n_ebranch("B2", "mode", "bus", n_block("BUS")),
+    n_block("Z")
+  )))
+  # B1 and B2 separated by a block -> not grouped -> 2 * 2 = 4 paths
+  expect_equal(nrow(paths), 4L)
+})
+
+test_that("a single EmbeddedField branch is not grouped", {
+  paths <- suppressMessages(enumerate_paths(list(
+    n_ebranch("B1", "mode", "car", n_block("CAR")),
+    n_block("Z")
+  )))
+  # single branch -> not grouped -> 2 paths (taken/not)
+  expect_equal(nrow(paths), 2L)
+})
+
+test_that("ungroupable branch in the middle breaks the run into two groups", {
+  qbranch <- n_branch("Q1", n_block("QX"))
+  paths <- suppressMessages(enumerate_paths(list(
+    n_ebranch("B1", "mode", "car",  n_block("CAR")),
+    n_ebranch("B2", "mode", "bus",  n_block("BUS")),
+    qbranch,
+    n_ebranch("B3", "mode", "rail", n_block("RAIL")),
+    n_ebranch("B4", "mode", "walk", n_block("WALK")),
+    n_block("Z")
+  )))
+  # first group: mode {car,bus} -> 3 outcomes
+  # Q1: 2 outcomes
+  # second group: mode {rail,walk} -> 3 outcomes (same field but separated)
+  expect_equal(nrow(paths), 3L * 2L * 3L)
+})
+
+# --- integration: Zeitkostenstudie ---
+test_that("Zeitkostenstudie SP gets 525 paths with exclusive branch detection", {
+  skip_on_cran()
+  qsf_file <- file.path(
+    "C:/Users/earpkin/OneDrive - University of Leeds/Careers/surveyBurden",
+    "misc/qualtrics_files/Zeitkostenstudie_2020_SP.qsf"
+  )
+  skip_if_not(file.exists(qsf_file), "Zeitkostenstudie QSF not available")
+  qsf <- read_qsf(qsf_file)
+  paths <- suppressMessages(resolve_flow(qsf))
+  # 4 groups: SP_05(6), SP_67(2), SP_8(4), SP_9(4) -> (6+1)*(2+1)*(4+1)*(4+1)
+  expect_equal(nrow(paths), 525L)
+  expect_equal(sum(paths$terminates_early), 0L)
+})
+
 # --- integration: the demo travel survey flow ---
 test_that("resolve_flow enumerates plausible paths for the demo survey", {
   qsf <- read_qsf(demo_qsf())

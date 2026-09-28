@@ -14,7 +14,9 @@ summary_line(x, ...)
 
   A
   [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
-  table (the no-routes form).
+  table or a
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
+  object.
 
 - ...:
 

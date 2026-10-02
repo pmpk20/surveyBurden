@@ -5,6 +5,18 @@
   (one-of-k) instead of independent binary decisions. For surveys that
   route respondents by an assignment field (e.g. stated-choice module
   selection), this can reduce the path count from 2^k to k+1 per group.
+* `resolve_flow()` now evaluates consecutive branches on the same
+  embedded-data field jointly for any single comparison (`=`, `!=`, `>`,
+  `>=`, `<`, `<=`), enumerating only the combinations of outcomes some value
+  of the field can produce. Complementary gates such as `> 0` and `= 0` can
+  no longer both be taken, which removes impossible paths (e.g. a respondent
+  shown both the owner and the non-owner blocks).
+* Field values stay unrestricted, so the enumeration is an upper bound: a
+  "neither" outcome (e.g. a negative or empty field under `> 0` / `= 0`) is
+  kept. `resolve_flow()` now reports branch fields that question JavaScript
+  assigns with `setEmbeddedData()`, naming the field and question, since that
+  code may limit the field's values and make some enumerated paths
+  impossible in practice. The check is textual and informational only.
 * `summary_line()` now works on `burden_report` objects, returning the
   same verdict line as `print()` and `summary()`.
 

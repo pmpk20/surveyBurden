@@ -26,15 +26,26 @@ condition taken.}
 }
 \description{
 Walks the \code{SurveyFlow}, forking at every \code{Branch} into feasible outcomes.
-When consecutive branches test the same embedded-data field for equality
-against different values, they are recognised as mutually exclusive and
-enumerated as one-of-k (plus a "none matches" fallback) instead of 2^k
-independent binary decisions. All other branches are still forked into a
+When consecutive branches each test the same embedded-data field with one
+comparison (\code{=}, \code{!=}, \code{>}, \code{>=}, \code{<}, \code{<=}), they are evaluated jointly:
+only combinations of outcomes that some value of the field can produce are
+enumerated. Equality tests against different values become one-of-k plus a
+"none matches" fallback; complementary tests such as \verb{> 0} and \verb{= 0} can no
+longer both be taken. All other branches are still forked into a
 condition-true and a condition-false path. The result is the \emph{structural
 path space} -- every block sequence a respondent could encounter -- without
 any assumption about branch probabilities.
 }
 \details{
+Field values are unrestricted: a field may hold any value or be empty, so
+an outcome such as "neither \verb{> 0} nor \verb{= 0}" (a negative or empty field) is
+kept. The enumeration is therefore an upper bound under unrestricted field
+values. Where a survey's own code limits a field's values (for example,
+question JavaScript that always writes a count), some enumerated paths may
+be impossible in practice. \code{resolve_flow()} reports branch fields it finds
+assigned in question JavaScript, so these cases can be checked; it does not
+interpret the code, and it may not detect every assignment.
+
 Within-block display logic (whether an individual question is shown) is \emph{not}
 resolved here; that is a separate step. Paths are at block granularity.
 }

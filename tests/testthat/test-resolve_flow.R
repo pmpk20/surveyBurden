@@ -171,9 +171,9 @@ test_that("extract_branch_key returns NULL for Question-based or compound branch
     Flow = list()
   )
   expect_null(extract_branch_key(compound))
-  noteq <- n_ebranch("B3", "f", "1")
-  noteq$BranchLogic[["0"]][["0"]]$Operator <- "NotEqualTo"
-  expect_null(extract_branch_key(noteq))
+  unsupported <- n_ebranch("B3", "f", "1")
+  unsupported$BranchLogic[["0"]][["0"]]$Operator <- "Contains"
+  expect_null(extract_branch_key(unsupported))
   expect_null(extract_branch_key(list(Type = "Branch", FlowID = "BR4")))
 })
 
@@ -255,6 +255,58 @@ test_that("ungroupable branch in the middle breaks the run into two groups", {
   expect_equal(nrow(paths), 3L * 2L * 3L)
 })
 
+# --- joint evaluation of comparisons on one field ---
+n_cbranch <- function(id, field, op, value, ...) {
+  b <- n_ebranch(id, field, value, ...)
+  b$BranchLogic[["0"]][["0"]]$Operator <- op
+  b
+}
+
+test_that("extract_branch_key returns field, operator and value for comparisons", {
+  k <- extract_branch_key(n_cbranch("B1", "n", "GreaterThan", "0"))
+  expect_equal(k, list(field = "n", op = "GreaterThan", value = "0"))
+})
+
+test_that("complementary > 0 and = 0 branches are never both taken", {
+  flow <- list(
+    n_block("A"),
+    n_cbranch("OWN", "n", "GreaterThan", "0", n_block("OWNER")),
+    n_cbranch("NON", "n", "EqualTo",     "0", n_block("NONOWNER")),
+    n_block("Z")
+  )
+  paths <- suppressMessages(enumerate_paths(flow))
+  seqs <- vapply(paths$block_ids, paste, "", collapse = ">")
+  # any value: > 0, = 0, or negative/empty (neither) -> 3, never both
+  expect_setequal(seqs, c("A>OWNER>Z", "A>NONOWNER>Z", "A>Z"))
+  for (d in paths$decisions) expect_false(all(d[c("OWN", "NON")]))
+})
+
+test_that("overlapping thresholds can both be taken, in flow order", {
+  flow <- list(
+    n_cbranch("B1", "x", "GreaterThan", "1", n_block("GT1")),
+    n_cbranch("B2", "x", "GreaterThan", "5", n_block("GT5")),
+    n_block("Z")
+  )
+  paths <- suppressMessages(enumerate_paths(flow))
+  seqs <- vapply(paths$block_ids, paste, "", collapse = ">")
+  # x <= 1, 1 < x <= 5, x > 5; "only > 5" is impossible
+  expect_setequal(seqs, c("Z", "GT1>Z", "GT1>GT5>Z"))
+})
+
+test_that("branch fields assigned in question JavaScript are reported", {
+  qsf <- read_qsf(demo_qsf())
+  flow <- list(list(Type = "Branch", FlowID = "B", Flow = list(),
+                    BranchLogic = list("0" = list("0" = list(LogicType = "EmbeddedField",
+                      LeftOperand = "n_cars", Operator = "GreaterThan", RightOperand = "0")))))
+  qsf$SurveyElements <- c(qsf$SurveyElements, list(list(
+    Element = "SQ", PrimaryAttribute = "QIDX",
+    Payload = list(QuestionJS = "Qualtrics.SurveyEngine.setEmbeddedData('n_cars', 2);"))))
+  js <- js_assigned_branch_fields(qsf, flow)
+  expect_equal(js$field, "n_cars")
+  expect_equal(js$questions, "QIDX")
+  expect_equal(nrow(js_assigned_branch_fields(qsf, list())), 0L)
+})
+
 # --- integration: Zeitkostenstudie ---
 test_that("Zeitkostenstudie SP gets 525 paths with exclusive branch detection", {
   skip_on_cran()
@@ -268,6 +320,25 @@ test_that("Zeitkostenstudie SP gets 525 paths with exclusive branch detection", 
   # 4 groups: SP_05(6), SP_67(2), SP_8(4), SP_9(4) -> (6+1)*(2+1)*(4+1)*(4+1)
   expect_equal(nrow(paths), 525L)
   expect_equal(sum(paths$terminates_early), 0L)
+})
+
+# --- integration: INFUZE Part A (owner / non-owner gates on a vehicle count) ---
+test_that("INFUZE Part A: owner and non-owner blocks are never both on a path", {
+  skip_on_cran()
+  qsf_file <- file.path(
+    "C:/Users/earpkin/OneDrive - University of Leeds/Careers/surveyBurden",
+    "misc/INFUZE_CORE_SURVEY_April_2026_Part_A (3).qsf"
+  )
+  skip_if_not(file.exists(qsf_file), "INFUZE Part A QSF not available")
+  qsf <- read_qsf(qsf_file)
+  paths <- suppressMessages(resolve_flow(qsf))
+  expect_equal(nrow(paths), 52L)
+  expect_equal(sum(!paths$terminates_early), 24L)
+  # no path shows both the owner and the non-owner blocks
+  ids <- c("BL_bJC1A4335LeSSb4", "BL_9FhvpgzsEDuYw3Y")
+  expect_false(any(vapply(paths$block_ids, function(b) all(ids %in% b), logical(1))))
+  # the vehicle count is written by QID45's JavaScript, and is reported
+  expect_message(resolve_flow(qsf), "TotalVehiclesLoop (QID45)", fixed = TRUE)
 })
 
 # --- integration: the demo travel survey flow ---

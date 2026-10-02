@@ -1,13 +1,24 @@
 #' Enumerate the structural paths through the survey flow
 #'
 #' Walks the `SurveyFlow`, forking at every `Branch` into feasible outcomes.
-#' When consecutive branches test the same embedded-data field for equality
-#' against different values, they are recognised as mutually exclusive and
-#' enumerated as one-of-k (plus a "none matches" fallback) instead of 2^k
-#' independent binary decisions. All other branches are still forked into a
+#' When consecutive branches each test the same embedded-data field with one
+#' comparison (`=`, `!=`, `>`, `>=`, `<`, `<=`), they are evaluated jointly:
+#' only combinations of outcomes that some value of the field can produce are
+#' enumerated. Equality tests against different values become one-of-k plus a
+#' "none matches" fallback; complementary tests such as `> 0` and `= 0` can no
+#' longer both be taken. All other branches are still forked into a
 #' condition-true and a condition-false path. The result is the *structural
 #' path space* -- every block sequence a respondent could encounter -- without
 #' any assumption about branch probabilities.
+#'
+#' Field values are unrestricted: a field may hold any value or be empty, so
+#' an outcome such as "neither `> 0` nor `= 0`" (a negative or empty field) is
+#' kept. The enumeration is therefore an upper bound under unrestricted field
+#' values. Where a survey's own code limits a field's values (for example,
+#' question JavaScript that always writes a count), some enumerated paths may
+#' be impossible in practice. `resolve_flow()` reports branch fields it finds
+#' assigned in question JavaScript, so these cases can be checked; it does not
+#' interpret the code, and it may not detect every assignment.
 #'
 #' Within-block display logic (whether an individual question is shown) is *not*
 #' resolved here; that is a separate step. Paths are at block granularity.
@@ -38,11 +49,66 @@ resolve_flow <- function(qsf, max_paths = 10000L) {
   if (!inherits(qsf, "qsf_raw")) {
     cli::cli_abort("{.arg qsf} must be a {.cls qsf_raw} object from {.fn read_qsf}.")
   }
-  enumerate_paths(qsf_flow(qsf)[["Flow"]], max_paths = max_paths)
+  nodes <- qsf_flow(qsf)[["Flow"]]
+  js <- js_assigned_branch_fields(qsf, nodes)
+  if (nrow(js)) {
+    where <- paste(sprintf("%s (%s)", js$field, js$questions), collapse = "; ")
+    cli::cli_inform(c(
+      i = paste("Branch field(s) assigned in question JavaScript: {where}.",
+                "Their possible values were not inferred; enumerated paths may",
+                "include outcomes excluded by that code.")
+    ))
+  }
+  enumerate_paths(nodes, max_paths = max_paths)
 }
 
+#' Embedded-data fields tested by any branch in the flow
+#' @noRd
+branch_fields <- function(nodes) {
+  out <- character(0)
+  grab <- function(x) {
+    if (!is.list(x)) return(invisible())
+    if (identical(x[["LogicType"]], "EmbeddedField") && is.character(x[["LeftOperand"]])) {
+      out <<- c(out, x[["LeftOperand"]])
+    }
+    for (el in x) if (is.list(el)) grab(el)
+  }
+  flow_walk(nodes, function(n) if (identical(n$Type, "Branch")) grab(n[["BranchLogic"]]))
+  unique(out)
+}
+
+#' Branch fields that question JavaScript assigns with
+#' `setEmbeddedData("<field>", ...)`: a data frame of each field and the
+#' questions that assign it. Detection is textual. It finds literal field
+#' names only, and does not establish that the code runs or what it writes.
+#' @noRd
+js_assigned_branch_fields <- function(qsf, nodes) {
+  empty <- data.frame(field = character(0), questions = character(0))
+  fields <- branch_fields(nodes)
+  if (!length(fields)) return(empty)
+  pat <- "setEmbeddedData\\(\\s*[\"']([^\"']+)[\"']"
+  hits <- list()
+  for (el in qsf$SurveyElements) {
+    js <- el$Payload$QuestionJS
+    if (!identical(el$Element, "SQ") || !is.character(js) || !nzchar(js)) next
+    m <- regmatches(js, gregexpr(pat, js))[[1]]
+    f <- unique(sub(paste0("^", pat, "$"), "\\1", m))
+    for (x in intersect(f, fields)) hits[[length(hits) + 1L]] <- c(x, el$PrimaryAttribute %||% "?")
+  }
+  if (!length(hits)) return(empty)
+  h <- as.data.frame(do.call(rbind, hits), stringsAsFactors = FALSE)
+  names(h) <- c("field", "question")
+  agg <- tapply(h$question, h$field, function(q) paste(unique(q), collapse = ", "))
+  data.frame(field = names(agg), questions = unname(agg))
+}
+
+#' Comparison operators that can be evaluated jointly on one field
+#' @noRd
+branch_ops <- c("EqualTo", "NotEqualTo", "GreaterThan", "GreaterThanOrEqual",
+                "LessThan", "LessThanOrEqual")
+
 #' Extract the grouping key from a Branch node, if it is a simple single-literal
-#' EmbeddedField equality check. Returns `list(field = <LeftOperand>)` or NULL.
+#' EmbeddedField comparison. Returns `list(field, op, value)` or NULL.
 #' @noRd
 extract_branch_key <- function(node) {
   bl <- node[["BranchLogic"]]
@@ -54,15 +120,48 @@ extract_branch_key <- function(node) {
   if (length(lit_keys) != 1L) return(NULL)
   lit <- g[[lit_keys[1]]]
   if (!identical(lit[["LogicType"]] %||% "", "EmbeddedField")) return(NULL)
-  if (!identical(lit[["Operator"]] %||% "", "EqualTo")) return(NULL)
+  op <- lit[["Operator"]] %||% ""
+  if (!op %in% branch_ops) return(NULL)
   field <- lit[["LeftOperand"]] %||% ""
   if (nchar(field) == 0L) return(NULL)
-  list(field = field)
+  list(field = field, op = op, value = as.character(lit[["RightOperand"]] %||% ""))
 }
 
-#' Replace runs of consecutive mutually exclusive Branch nodes with a single
+#' Evaluate one Qualtrics comparison. `x` is a candidate field value
+#' (NA = empty). Numeric when both sides parse as numbers, else string.
+#' @noRd
+eval_branch_op <- function(op, x, rhs) {
+  if (is.na(x)) return(identical(op, "NotEqualTo"))
+  xn <- suppressWarnings(as.numeric(x)); rn <- suppressWarnings(as.numeric(rhs))
+  num <- !is.na(xn) && !is.na(rn)
+  switch(op,
+    EqualTo            = if (num) xn == rn else identical(as.character(x), rhs),
+    NotEqualTo         = if (num) xn != rn else !identical(as.character(x), rhs),
+    GreaterThan        = num && xn >  rn,
+    GreaterThanOrEqual = num && xn >= rn,
+    LessThan           = num && xn <  rn,
+    LessThanOrEqual    = num && xn <= rn,
+    FALSE)
+}
+
+#' The distinct outcome vectors (one logical per branch) that some value of
+#' the field can produce. Candidate values cover every region the thresholds
+#' define, each tested string, an unmatched string, and an empty field.
+#' @noRd
+feasible_outcomes <- function(ops, values) {
+  nums <- suppressWarnings(as.numeric(values))
+  nums <- sort(unique(nums[!is.na(nums)]))
+  mids <- if (length(nums) > 1L) (utils::head(nums, -1) + utils::tail(nums, -1)) / 2 else numeric(0)
+  cand <- c(as.character(c(nums, mids, if (length(nums)) c(min(nums) - 1, max(nums) + 1))),
+            unique(values), "other", NA)
+  vecs <- lapply(cand, function(x) vapply(seq_along(ops), function(i)
+    eval_branch_op(ops[[i]], x, values[[i]]), logical(1)))
+  vecs[!duplicated(vapply(vecs, paste, "", collapse = ""))]
+}
+
+#' Replace runs of consecutive Branch nodes on one field with a single
 #' synthetic ExclusiveBranchGroup node. A run qualifies when every Branch in
-#' it is a simple single-literal EmbeddedField EqualTo check on the same field.
+#' it is a simple single-literal EmbeddedField comparison on the same field.
 #' Recurses into Group, Authenticator, and BlockRandomizer child flows.
 #' @noRd
 collapse_exclusive_branches <- function(nodes) {
@@ -102,10 +201,13 @@ collapse_exclusive_branches <- function(nodes) {
     }
     if (length(run) >= 2L) {
       fids <- vapply(run, function(b) b[["FlowID"]] %||% "branch", character(1))
+      keys <- lapply(run, extract_branch_key)
       out[[length(out) + 1L]] <- list(
         Type     = "ExclusiveBranchGroup",
         branches = run,
         field    = key$field,
+        ops      = vapply(keys, `[[`, "", "op"),
+        values   = vapply(keys, `[[`, "", "value"),
         FlowID   = paste0("XG:", paste(fids, collapse = "+"))
       )
     } else {
@@ -127,6 +229,7 @@ collapse_exclusive_branches <- function(nodes) {
 enumerate_paths <- function(nodes, max_paths = 10000L) {
   nodes <- collapse_exclusive_branches(nodes)
   exclusive_fields <- character(0)
+  joint_notes <- character(0)
 
   memo <- new.env(parent = emptyenv())
   randomisers <- character(0)   # collected, warned about once (see below)
@@ -175,25 +278,20 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
     } else if (type == "ExclusiveBranchGroup") {
       branches <- node$branches
       exclusive_fields <<- c(exclusive_fields, node$field)
+      vecs <- feasible_outcomes(node$ops, node$values)
+      joint_notes <<- c(joint_notes, sprintf("%s: %d of %d", node$field,
+                                             length(vecs), 2L^length(branches)))
       all_outs <- list()
-      for (bi in seq_along(branches)) {
-        b <- branches[[bi]]
-        fid <- b[["FlowID"]] %||% "branch"
-        outs <- annotate(outcomes(c(b[["Flow"]] %||% list(), rest)), fid, TRUE)
-        for (oi in seq_along(branches)) {
-          if (oi == bi) next
-          ofid <- branches[[oi]][["FlowID"]] %||% "branch"
-          outs <- annotate(outs, ofid, FALSE)
+      for (v in vecs) {
+        # taken branches run in flow order, then the rest of the flow
+        sub  <- do.call(c, c(list(list()), lapply(branches[v], function(b) b[["Flow"]] %||% list())))
+        outs <- outcomes(c(sub, rest))
+        for (bi in rev(seq_along(branches))) {
+          outs <- annotate(outs, branches[[bi]][["FlowID"]] %||% "branch", v[[bi]])
         }
         all_outs <- c(all_outs, outs)
       }
-      # "none fires" fallback: all branches FALSE
-      none <- outcomes(rest)
-      for (b in branches) {
-        fid <- b[["FlowID"]] %||% "branch"
-        none <- annotate(none, fid, FALSE)
-      }
-      c(all_outs, none)
+      all_outs
     } else if (type == "Branch") {
       fid <- node$FlowID %||% "branch"
       taken <- annotate(outcomes(c(node[["Flow"]] %||% list(), rest)), fid, TRUE)
@@ -227,10 +325,9 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
 
   exclusive_fields <- unique(exclusive_fields)
   if (length(exclusive_fields)) {
+    joint_notes <- paste(unique(joint_notes), collapse = "; ")
     cli::cli_inform(c(
-      i = paste("Mutually exclusive branches detected on embedded",
-                "field{?s} {.val {exclusive_fields}}; enumerating one-of-k",
-                "instead of 2^k.")
+      i = "Branches on the same embedded field evaluated jointly (feasible of 2^k outcomes): {joint_notes}."
     ))
   }
 

@@ -48,6 +48,9 @@
 <ul><li>
 <code><a href="../reference/resolve_flow.html">resolve_flow()</a></code> now detects consecutive branches that test the same embedded-data field for equality and treats them as mutually exclusive (one-of-k) instead of independent binary decisions. For surveys that route respondents by an assignment field (e.g. stated-choice module selection), this can reduce the path count from 2^k to k+1 per group.</li>
 <li>
+<code><a href="../reference/resolve_flow.html">resolve_flow()</a></code> now evaluates consecutive branches on the same embedded-data field jointly for any single comparison (<code>=</code>, <code>!=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, <code>&lt;=</code>), enumerating only the combinations of outcomes some value of the field can produce. Complementary gates such as <code>&gt; 0</code> and <code>= 0</code> can no longer both be taken, which removes impossible paths (e.g. a respondent shown both the owner and the non-owner blocks).</li>
+<li>Field values stay unrestricted, so the enumeration is an upper bound: a “neither” outcome (e.g. a negative or empty field under <code>&gt; 0</code> / <code>= 0</code>) is kept. <code><a href="../reference/resolve_flow.html">resolve_flow()</a></code> now reports branch fields that question JavaScript assigns with <code>setEmbeddedData()</code>, naming the field and question, since that code may limit the field’s values and make some enumerated paths impossible in practice. The check is textual and informational only.</li>
+<li>
 <code><a href="../reference/summary_line.html">summary_line()</a></code> now works on <code>burden_report</code> objects, returning the same verdict line as <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>.</li>
 </ul></div>
     <div class="section level2">

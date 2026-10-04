@@ -1,0 +1,739 @@
+{
+  "SurveyEntry": {
+    "SurveyID": "SV_exposure",
+    "SurveyName": "Exposure fixture",
+    "SurveyLanguage": "EN",
+    "SurveyStatus": "Inactive"
+  },
+  "SurveyElements": [
+    {
+      "SurveyID": "SV_exposure",
+      "Element": "BL",
+      "PrimaryAttribute": "Survey Blocks",
+      "SecondaryAttribute": "",
+      "Payload": {
+        "0": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Intro",
+          "ID": "BL1",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID1"
+            }
+          ]
+        },
+        "1": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Household",
+          "ID": "BL2",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID2"
+            },
+            {
+              "Type": "Page Break"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID3"
+            },
+            {
+              "Type": "Page Break"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID4"
+            }
+          ]
+        },
+        "2": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Other adults",
+          "ID": "BL3",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID5"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID6"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID7"
+            }
+          ],
+          "Options": {
+            "Looping": "Question",
+            "LoopingOptions": {
+              "Locator": "q://QID2/LoopAndMerge/MergeOnNumericResponse?v=3",
+              "QID": "QID2",
+              "ChoiceGroupLocator": "q://QID2/LoopAndMerge/MergeOnNumericResponse",
+              "Static": {
+                "1": [],
+                "2": [],
+                "3": []
+              },
+              "Randomization": "None"
+            }
+          }
+        },
+        "3": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Web extras",
+          "ID": "BL4",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID8"
+            }
+          ]
+        },
+        "4": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Driving",
+          "ID": "BL5",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID9"
+            },
+            {
+              "Type": "Question",
+              "QuestionID": "QID10"
+            }
+          ]
+        },
+        "5": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Decline reasons",
+          "ID": "BL6",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID11"
+            }
+          ]
+        },
+        "6": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Parking",
+          "ID": "BL7",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID12"
+            }
+          ]
+        },
+        "7": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Closing",
+          "ID": "BL8",
+          "BlockElements": [
+            {
+              "Type": "Question",
+              "QuestionID": "QID13"
+            }
+          ]
+        },
+        "8": {
+          "Type": "Standard",
+          "SubType": "",
+          "Description": "Unused",
+          "ID": "BL9",
+          "BlockElements": []
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_exposure",
+      "Element": "FL",
+      "PrimaryAttribute": "Survey Flow",
+      "SecondaryAttribute": "",
+      "Payload": {
+        "Type": "Root",
+        "FlowID": "FL_root",
+        "Flow": [
+          {
+            "Type": "EmbeddedData",
+            "FlowID": "FL_ed",
+            "EmbeddedData": [
+              {
+                "Description": "Mode",
+                "Type": "Recipient",
+                "Field": "Mode",
+                "VariableType": "String"
+              },
+              {
+                "Description": "Wave",
+                "Type": "Custom",
+                "Field": "Wave",
+                "VariableType": "String",
+                "Value": "2"
+              }
+            ]
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL1",
+            "FlowID": "FL_1"
+          },
+          {
+            "Type": "Branch",
+            "FlowID": "FL_b_decline",
+            "Description": "declined",
+            "BranchLogic": {
+              "0": {
+                "0": {
+                  "LogicType": "Question",
+                  "QuestionID": "QID1",
+                  "Operator": "Selected",
+                  "LeftOperand": "q://QID1/SelectableChoice/2",
+                  "ChoiceLocator": "q://QID1/SelectableChoice/2",
+                  "Type": "Expression"
+                },
+                "Type": "If"
+              },
+              "Type": "BooleanExpression",
+              "inPage": false
+            },
+            "Flow": [
+              {
+                "Type": "EndSurvey",
+                "FlowID": "FL_end_decline"
+              }
+            ]
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL2",
+            "FlowID": "FL_2"
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL3",
+            "FlowID": "FL_3"
+          },
+          {
+            "Type": "Branch",
+            "FlowID": "FL_b_web",
+            "Description": "web mode",
+            "BranchLogic": {
+              "0": {
+                "0": {
+                  "LogicType": "EmbeddedField",
+                  "LeftOperand": "Mode",
+                  "Operator": "EqualTo",
+                  "RightOperand": "web",
+                  "Type": "Expression"
+                },
+                "Type": "If"
+              },
+              "Type": "BooleanExpression",
+              "inPage": false
+            },
+            "Flow": [
+              {
+                "Type": "Standard",
+                "ID": "BL4",
+                "FlowID": "FL_4"
+              }
+            ]
+          },
+          {
+            "Type": "Branch",
+            "FlowID": "FL_b_wave",
+            "Description": "wave 2",
+            "BranchLogic": {
+              "0": {
+                "0": {
+                  "LogicType": "EmbeddedField",
+                  "LeftOperand": "Wave",
+                  "Operator": "EqualTo",
+                  "RightOperand": "2",
+                  "Type": "Expression"
+                },
+                "Type": "If"
+              },
+              "Type": "BooleanExpression",
+              "inPage": false
+            },
+            "Flow": [
+              {
+                "Type": "Standard",
+                "ID": "BL5",
+                "FlowID": "FL_5"
+              }
+            ]
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL6",
+            "FlowID": "FL_6"
+          },
+          {
+            "Type": "Branch",
+            "FlowID": "FL_b_car",
+            "Description": "car flag set by JavaScript",
+            "BranchLogic": {
+              "0": {
+                "0": {
+                  "LogicType": "EmbeddedField",
+                  "LeftOperand": "CarFlag",
+                  "Operator": "GreaterThan",
+                  "RightOperand": "0",
+                  "Type": "Expression"
+                },
+                "Type": "If"
+              },
+              "Type": "BooleanExpression",
+              "inPage": false
+            },
+            "Flow": [
+              {
+                "Type": "Standard",
+                "ID": "BL7",
+                "FlowID": "FL_7"
+              }
+            ]
+          },
+          {
+            "Type": "Standard",
+            "ID": "BL8",
+            "FlowID": "FL_8"
+          }
+        ]
+      }
+    },
+    {
+      "SurveyID": "SV_exposure",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID1",
+      "SecondaryAttribute": "Do you agree to take part?",
+      "Payload": {
+        "QuestionID": "QID1",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "TX",
+        "QuestionText": "Do you agree to take part?",
+        "DataExportTag": "QID1",
+        "QuestionDescription": "Do you agree to take part?",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_exposure",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID2",
+      "SecondaryAttribute": "How many other adults live with you?",
+      "Payload": {
+        "QuestionID": "QID2",
+        "QuestionType": "MC",
+        "Selector": "DL",
+        "SubSelector": "TX",
+        "QuestionText": "How many other adults live with you?",
+        "DataExportTag": "QID2",
+        "QuestionDescription": "How many other adults live with you?",
+        "Choices": {
+          "1": {
+            "Display": "None"
+          },
+          "2": {
+            "Display": "One"
+          },
+          "3": {
+            "Display": "Two"
+          },
+          "4": {
+            "Display": "Three"
+          }
+        },
+        "RecodeValues": {
+          "1": "0",
+          "2": "1",
+          "3": "2",
+          "4": "3"
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_exposure",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID3",
+      "SecondaryAttribute": "Which of these does your household have?",
+      "Payload": {
+        "QuestionID": "QID3",
+        "QuestionType": "MC",
+        "Selector": "MAVR",
+        "SubSelector": "",
+        "QuestionText": "Which of these does your household have?",
+        "DataExportTag": "QID3",
+        "QuestionDescription": "Which of these does your household have?",
+        "Choices": {
+          "1": {
+            "Display": "A car"
+          },
+          "2": {
+            "Display": "A bicycle"
+          },
+          "3": {
+            "Display": "Neither"
+          }
+        },
+        "QuestionJS": "Qualtrics.SurveyEngine.addOnPageSubmit(function(){ Qualtrics.SurveyEngine.setEmbeddedData('CarFlag', 1); });"
+      }
+    },
+    {
+      "SurveyID": "SV_exposure",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID4",
+      "SecondaryAttribute": "Do you drive the car yourself?",
+      "Payload": {
+        "QuestionID": "QID4",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "TX",
+        "QuestionText": "Do you drive the car yourself?",
+        "DataExportTag": "QID4",
+        "QuestionDescription": "Do you drive the car yourself?",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID3",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID3/SelectableChoice/1",
+              "ChoiceLocator": "q://QID3/SelectableChoice/1",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_exposure",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID5",
+      "SecondaryAttribute": "How is this adult related to you?",
+      "Payload": {
+        "QuestionID": "QID5",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "TX",
+        "QuestionText": "How is this adult related to you?",
+        "DataExportTag": "QID5",
+        "QuestionDescription": "How is this adult related to you?",
+        "Choices": {
+          "1": {
+            "Display": "Partner"
+          },
+          "2": {
+            "Display": "Child"
+          },
+          "3": {
+            "Display": "Other"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_exposure",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID6",
+      "SecondaryAttribute": "How old is this adult?",
+      "Payload": {
+        "QuestionID": "QID6",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "TX",
+        "QuestionText": "How old is this adult?",
+        "DataExportTag": "QID6",
+        "QuestionDescription": "How old is this adult?",
+        "Choices": {
+          "1": {
+            "Display": "16-29"
+          },
+          "2": {
+            "Display": "30-59"
+          },
+          "3": {
+            "Display": "60+"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID5",
+              "Operator": "NotSelected",
+              "LeftOperand": "q://QID5/SelectableChoice/2",
+              "ChoiceLocator": "q://QID5/SelectableChoice/2",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_exposure",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID7",
+      "SecondaryAttribute": "Is everyone in the household listed?",
+      "Payload": {
+        "QuestionID": "QID7",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "TX",
+        "QuestionText": "Is everyone in the household listed?",
+        "DataExportTag": "QID7",
+        "QuestionDescription": "Is everyone in the household listed?",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "LoopAndMerge",
+              "LeftOperand": "BL3,1",
+              "Operator": "EqualTo",
+              "RightOperand": "lm://CurrentLoop",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_exposure",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID8",
+      "SecondaryAttribute": "How did you hear about this web survey?",
+      "Payload": {
+        "QuestionID": "QID8",
+        "QuestionType": "TE",
+        "Selector": "SL",
+        "SubSelector": "",
+        "QuestionText": "How did you hear about this web survey?",
+        "DataExportTag": "QID8",
+        "QuestionDescription": "How did you hear about this web survey?"
+      }
+    },
+    {
+      "SurveyID": "SV_exposure",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID9",
+      "SecondaryAttribute": "How many miles do you drive each week?",
+      "Payload": {
+        "QuestionID": "QID9",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "TX",
+        "QuestionText": "How many miles do you drive each week?",
+        "DataExportTag": "QID9",
+        "QuestionDescription": "How many miles do you drive each week?",
+        "Choices": {
+          "1": {
+            "Display": "Under 50"
+          },
+          "2": {
+            "Display": "50-150"
+          },
+          "3": {
+            "Display": "Over 150"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID4",
+              "Operator": "Displayed",
+              "LeftOperand": "q://QID4/QuestionDisplayed",
+              "Type": "Expression"
+            },
+            "1": {
+              "LogicType": "Question",
+              "QuestionID": "QID4",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID4/SelectableChoice/1",
+              "ChoiceLocator": "q://QID4/SelectableChoice/1",
+              "Type": "Expression",
+              "Conjuction": "And"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_exposure",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID10",
+      "SecondaryAttribute": "Would you take part in a follow-up drivi",
+      "Payload": {
+        "QuestionID": "QID10",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "TX",
+        "QuestionText": "Would you take part in a follow-up driving study?",
+        "DataExportTag": "QID10",
+        "QuestionDescription": "Would you take part in a follow-up drivi",
+        "Choices": {
+          "1": {
+            "Display": "Yes"
+          },
+          "2": {
+            "Display": "No"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Quota",
+              "QuotaID": "QO_1",
+              "Operator": "QuotaMet",
+              "LeftOperand": "qo://QO_1/QuotaMet",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_exposure",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID11",
+      "SecondaryAttribute": "Why did you decline?",
+      "Payload": {
+        "QuestionID": "QID11",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "TX",
+        "QuestionText": "Why did you decline?",
+        "DataExportTag": "QID11",
+        "QuestionDescription": "Why did you decline?",
+        "Choices": {
+          "1": {
+            "Display": "No time"
+          },
+          "2": {
+            "Display": "Not interested"
+          }
+        },
+        "DisplayLogic": {
+          "0": {
+            "0": {
+              "LogicType": "Question",
+              "QuestionID": "QID1",
+              "Operator": "Selected",
+              "LeftOperand": "q://QID1/SelectableChoice/2",
+              "ChoiceLocator": "q://QID1/SelectableChoice/2",
+              "Type": "Expression"
+            },
+            "Type": "If"
+          },
+          "Type": "BooleanExpression",
+          "inPage": false
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_exposure",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID12",
+      "SecondaryAttribute": "Where do you park the car?",
+      "Payload": {
+        "QuestionID": "QID12",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "TX",
+        "QuestionText": "Where do you park the car?",
+        "DataExportTag": "QID12",
+        "QuestionDescription": "Where do you park the car?",
+        "Choices": {
+          "1": {
+            "Display": "Driveway"
+          },
+          "2": {
+            "Display": "Street"
+          },
+          "3": {
+            "Display": "Garage"
+          }
+        }
+      }
+    },
+    {
+      "SurveyID": "SV_exposure",
+      "Element": "SQ",
+      "PrimaryAttribute": "QID13",
+      "SecondaryAttribute": "How easy was this survey?",
+      "Payload": {
+        "QuestionID": "QID13",
+        "QuestionType": "MC",
+        "Selector": "SAVR",
+        "SubSelector": "TX",
+        "QuestionText": "How easy was this survey?",
+        "DataExportTag": "QID13",
+        "QuestionDescription": "How easy was this survey?",
+        "Choices": {
+          "1": {
+            "Display": "Easy"
+          },
+          "2": {
+            "Display": "Neither"
+          },
+          "3": {
+            "Display": "Hard"
+          }
+        }
+      }
+    }
+  ]
+}

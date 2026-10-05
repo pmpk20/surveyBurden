@@ -86,10 +86,14 @@ falls back to <code>loop_typical</code>.</p></dd>
 <dt><code>visit_&lt;block_id&gt;</code></dt>
 <dd><p><code>TRUE</code> to include a branch-gated optional block
 (e.g. <code>visit_BL11</code>). Read with <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">as.logical()</a></code>: <code>TRUE</code>, <code>1</code> or <code>"TRUE"</code>
-include it; absent, <code>FALSE</code>, <code>NA</code> or any other value excludes it.</p></dd>
+include it; <code>FALSE</code>, <code>NA</code> or any other value excludes it. When
+some optional blocks have a <code>visit_</code> column and others do not, the
+others are unknown: routes are matched on the blocks that have one,
+taking the matching path with the fewest optional blocks. With no
+<code>visit_</code> columns at all, every route is matched as visiting none.</p></dd>
 
 
-</dl><p>Missing columns are treated as absent/zero.</p></dd>
+</dl><p>Missing loop columns fall back as described above.</p></dd>
 
 
 <dt id="arg-scheme">scheme<a class="anchor" aria-label="anchor" href="#arg-scheme"></a></dt>

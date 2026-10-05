@@ -35,8 +35,9 @@ realised_exposure(
 
 - responses:
 
-  A data frame of response data. Columns must be mappable to question
-  ids via one of these strategies (tried in order):
+  A data frame of response data, or the path to a raw Qualtrics CSV
+  export. Columns must be mappable to question ids via one of these
+  strategies (tried in order):
 
   1.  A `col_map` attribute on the data frame: a named list, one entry
       per column, each either a QID string or
@@ -45,19 +46,28 @@ realised_exposure(
       iteration comes from an `N_` prefix on the column name (`2_mycol`
       is iteration 2), else 0.
 
-  2.  Column names match question ids directly (`QID15`, `QID15_1`, or
+  2.  The ImportId row of a raw Qualtrics CSV export, which names each
+      column's question whatever the column is called. Where present it
+      decides alone.
+
+  3.  Column names match question ids directly (`QID15`, `QID15_1`, or
       `2_QID15` for loop iteration 2).
 
-  3.  Column names match `DataExportTag` values from the QSF (`Q15`,
+  4.  Column names match `DataExportTag` values from the QSF (`Q15`,
       `travel_mode_1`), exactly or ignoring case.
+
+  Columns Qualtrics fills automatically – display order (`_DO`),
+  page-timing clicks and browser meta data – never count as answers.
 
   Leading label and ImportId rows from a raw Qualtrics CSV export are
   removed, with a message, when recognisable (an ImportId JSON cell, or
   a system column holding its own label such as `ResponseId` = "Response
   ID"); other rows are always kept.
 
-  The recommended way to obtain this data frame is
-  `qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE, add_column_map = FALSE)`.
+  The simplest input is the raw CSV export itself (with its header
+  rows).
+  `qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE, add_column_map = FALSE)`
+  also works, through the column names.
 
 - scheme:
 

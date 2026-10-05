@@ -41,10 +41,14 @@ respondent_burden(
   :   `TRUE` to include a branch-gated optional block (e.g.
       `visit_BL11`). Read with
       [`as.logical()`](https://rdrr.io/r/base/logical.html): `TRUE`, `1`
-      or `"TRUE"` include it; absent, `FALSE`, `NA` or any other value
-      excludes it.
+      or `"TRUE"` include it; `FALSE`, `NA` or any other value excludes
+      it. When some optional blocks have a `visit_` column and others do
+      not, the others are unknown: routes are matched on the blocks that
+      have one, taking the matching path with the fewest optional
+      blocks. With no `visit_` columns at all, every route is matched as
+      visiting none.
 
-  Missing columns are treated as absent/zero.
+  Missing loop columns fall back as described above.
 
 - scheme:
 

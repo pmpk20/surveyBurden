@@ -78,22 +78,28 @@ accepted by <code><a href="fetch_qsf.html">fetch_qsf()</a></code>.</p></dd>
 
 
 <dt id="arg-responses">responses<a class="anchor" aria-label="anchor" href="#arg-responses"></a></dt>
-<dd><p>A data frame of response data. Columns must be mappable to
-question ids via one of these strategies (tried in order):</p><ol><li><p>A <code>col_map</code> attribute on the data frame: a named list, one entry per
+<dd><p>A data frame of response data, or the path to a raw
+Qualtrics CSV export. Columns must be mappable to question ids via one of
+these strategies (tried in order):</p><ol><li><p>A <code>col_map</code> attribute on the data frame: a named list, one entry per
 column, each either a QID string or <code>list(qid = , iteration = )</code>. It
 overrides the automatic strategies for the columns it names. With a
 bare QID, the loop iteration comes from an <code>N_</code> prefix on the column
 name (<code>2_mycol</code> is iteration 2), else 0.</p></li>
+<li><p>The ImportId row of a raw Qualtrics CSV export, which names each
+column's question whatever the column is called. Where present it
+decides alone.</p></li>
 <li><p>Column names match question ids directly (<code>QID15</code>, <code>QID15_1</code>, or
 <code>2_QID15</code> for loop iteration 2).</p></li>
 <li><p>Column names match <code>DataExportTag</code> values from the QSF (<code>Q15</code>,
 <code>travel_mode_1</code>), exactly or ignoring case.</p></li>
-</ol><p>Leading label and ImportId rows from a raw Qualtrics CSV export are
+</ol><p>Columns Qualtrics fills automatically – display order (<code>_DO</code>),
+page-timing clicks and browser meta data – never count as answers.</p>
+<p>Leading label and ImportId rows from a raw Qualtrics CSV export are
 removed, with a message, when recognisable (an ImportId JSON cell, or a
 system column holding its own label such as <code>ResponseId</code> =
 "Response ID"); other rows are always kept.</p>
-<p>The recommended way to obtain this data frame is
-<code>qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE, add_column_map = FALSE)</code>.</p></dd>
+<p>The simplest input is the raw CSV export itself (with its header rows).
+<code>qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE, add_column_map = FALSE)</code> also works, through the column names.</p></dd>
 
 
 <dt id="arg-scheme">scheme<a class="anchor" aria-label="anchor" href="#arg-scheme"></a></dt>
@@ -161,7 +167,9 @@ respondent's descriptive-text scoring.</p></dd>
 
 <dt><code>n_unmapped_cols</code></dt>
 <dd><p>Number of response columns that could not be
-mapped to any question in the QSF.</p></dd>
+mapped to any live question in the QSF. With an ImportId row only
+question columns are counted; embedded data, metadata and automatic
+columns (display order, timing, meta) are expected and left out.</p></dd>
 
 
 </dl></div>
@@ -178,19 +186,19 @@ time, or the share of a question completed.</p>
     <h2 id="recommended-qualtrics-export">Recommended Qualtrics export<a class="anchor" aria-label="anchor" href="#recommended-qualtrics-export"></a></h2>
 
 
-<p>Via the API (cleanest):</p>
+<p>The raw CSV download (Data &amp; Analysis &gt; Export &amp; Import &gt; Export Data &gt; CSV,
+"Use numeric values"), passed as a path: <code>realised_burden(qsf, "file.csv")</code>. Its ImportId row maps every column to its question, whatever
+the column is called.</p>
+<p>Via the API:</p>
 <p></p><div class="sourceCode"><pre><code><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>responses <span class="ot">&lt;-</span> qualtRics<span class="sc">::</span><span class="fu">fetch_survey</span>(</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>  <span class="at">surveyID   =</span> <span class="st">"SV_..."</span>,</span>
 <span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  <span class="at">label      =</span> <span class="cn">FALSE</span>,    <span class="co"># numeric recode values, not choice text</span></span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  <span class="at">convert    =</span> <span class="cn">FALSE</span>,    <span class="co"># keep raw strings, don't coerce</span></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  <span class="at">force_request =</span> <span class="cn">TRUE</span>   <span class="co"># bypass cache</span></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>)</span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>qsf <span class="ot">&lt;-</span> <span class="fu">fetch_qsf</span>(<span class="st">"SV_..."</span>)</span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>rb  <span class="ot">&lt;-</span> <span class="fu">realised_burden</span>(qsf, responses)</span></code></pre><p></p></div>
-<p>Via CSV download: Data &amp; Analysis &gt; Export &amp; Import &gt; Export Data &gt; CSV.
-Tick "Use numeric values". Read with
-<code>read.csv("file.csv", check.names = FALSE)</code> and pass directly. The column
-names will be the question export tags; the function maps them via the QSF.</p>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>  <span class="at">import_id  =</span> <span class="cn">TRUE</span>,     <span class="co"># name columns by question id</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  <span class="at">force_request =</span> <span class="cn">TRUE</span>   <span class="co"># bypass cache</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>)</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>qsf <span class="ot">&lt;-</span> <span class="fu">fetch_qsf</span>(<span class="st">"SV_..."</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>rb  <span class="ot">&lt;-</span> <span class="fu">realised_burden</span>(qsf, responses)</span></code></pre><p></p></div>
     </div>
 
     <div class="section level2">

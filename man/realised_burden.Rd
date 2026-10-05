@@ -16,27 +16,34 @@ realised_burden(
 \item{qsf}{A \code{qsf_raw} object, a path to a \code{.qsf} file, or a survey id
 accepted by \code{\link[=fetch_qsf]{fetch_qsf()}}.}
 
-\item{responses}{A data frame of response data. Columns must be mappable to
-question ids via one of these strategies (tried in order):
+\item{responses}{A data frame of response data, or the path to a raw
+Qualtrics CSV export. Columns must be mappable to question ids via one of
+these strategies (tried in order):
 \enumerate{
 \item A \code{col_map} attribute on the data frame: a named list, one entry per
 column, each either a QID string or \code{list(qid = , iteration = )}. It
 overrides the automatic strategies for the columns it names. With a
 bare QID, the loop iteration comes from an \code{N_} prefix on the column
 name (\verb{2_mycol} is iteration 2), else 0.
+\item The ImportId row of a raw Qualtrics CSV export, which names each
+column's question whatever the column is called. Where present it
+decides alone.
 \item Column names match question ids directly (\code{QID15}, \code{QID15_1}, or
 \verb{2_QID15} for loop iteration 2).
 \item Column names match \code{DataExportTag} values from the QSF (\code{Q15},
 \code{travel_mode_1}), exactly or ignoring case.
 }
 
+Columns Qualtrics fills automatically -- display order (\verb{_DO}),
+page-timing clicks and browser meta data -- never count as answers.
+
 Leading label and ImportId rows from a raw Qualtrics CSV export are
 removed, with a message, when recognisable (an ImportId JSON cell, or a
 system column holding its own label such as \code{ResponseId} =
 "Response ID"); other rows are always kept.
 
-The recommended way to obtain this data frame is
-\code{qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE, add_column_map = FALSE)}.}
+The simplest input is the raw CSV export itself (with its header rows).
+\code{qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE, add_column_map = FALSE)} also works, through the column names.}
 
 \item{scheme}{A \code{\link[=gfs_scheme]{gfs_scheme()}} list.}
 
@@ -79,7 +86,9 @@ burden.}
 \item{\code{words_per_line}}{The words-per-line value used for each
 respondent's descriptive-text scoring.}
 \item{\code{n_unmapped_cols}}{Number of response columns that could not be
-mapped to any question in the QSF.}
+mapped to any live question in the QSF. With an ImportId row only
+question columns are counted; embedded data, metadata and automatic
+columns (display order, timing, meta) are expected and left out.}
 }
 }
 \description{
@@ -98,22 +107,22 @@ time, or the share of a question completed.
 }
 \section{Recommended Qualtrics export}{
 
-Via the API (cleanest):
+The raw CSV download (Data & Analysis > Export & Import > Export Data > CSV,
+"Use numeric values"), passed as a path: \code{realised_burden(qsf, "file.csv")}. Its ImportId row maps every column to its question, whatever
+the column is called.
+
+Via the API:
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{responses <- qualtRics::fetch_survey(
   surveyID   = "SV_...",
   label      = FALSE,    # numeric recode values, not choice text
   convert    = FALSE,    # keep raw strings, don't coerce
+  import_id  = TRUE,     # name columns by question id
   force_request = TRUE   # bypass cache
 )
 qsf <- fetch_qsf("SV_...")
 rb  <- realised_burden(qsf, responses)
 }\if{html}{\out{</div>}}
-
-Via CSV download: Data & Analysis > Export & Import > Export Data > CSV.
-Tick "Use numeric values". Read with
-\code{read.csv("file.csv", check.names = FALSE)} and pass directly. The column
-names will be the question export tags; the function maps them via the QSF.
 }
 
 \examples{

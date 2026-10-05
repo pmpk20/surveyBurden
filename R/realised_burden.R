@@ -14,26 +14,33 @@
 #'
 #' @param qsf A `qsf_raw` object, a path to a `.qsf` file, or a survey id
 #'   accepted by [fetch_qsf()].
-#' @param responses A data frame of response data. Columns must be mappable to
-#'   question ids via one of these strategies (tried in order):
+#' @param responses A data frame of response data, or the path to a raw
+#'   Qualtrics CSV export. Columns must be mappable to question ids via one of
+#'   these strategies (tried in order):
 #'   1. A `col_map` attribute on the data frame: a named list, one entry per
 #'      column, each either a QID string or `list(qid = , iteration = )`. It
 #'      overrides the automatic strategies for the columns it names. With a
 #'      bare QID, the loop iteration comes from an `N_` prefix on the column
 #'      name (`2_mycol` is iteration 2), else 0.
-#'   2. Column names match question ids directly (`QID15`, `QID15_1`, or
+#'   2. The ImportId row of a raw Qualtrics CSV export, which names each
+#'      column's question whatever the column is called. Where present it
+#'      decides alone.
+#'   3. Column names match question ids directly (`QID15`, `QID15_1`, or
 #'      `2_QID15` for loop iteration 2).
-#'   3. Column names match `DataExportTag` values from the QSF (`Q15`,
+#'   4. Column names match `DataExportTag` values from the QSF (`Q15`,
 #'      `travel_mode_1`), exactly or ignoring case.
+#'
+#'   Columns Qualtrics fills automatically -- display order (`_DO`),
+#'   page-timing clicks and browser meta data -- never count as answers.
 #'
 #'   Leading label and ImportId rows from a raw Qualtrics CSV export are
 #'   removed, with a message, when recognisable (an ImportId JSON cell, or a
 #'   system column holding its own label such as `ResponseId` =
 #'   "Response ID"); other rows are always kept.
 #'
-#'   The recommended way to obtain this data frame is
+#'   The simplest input is the raw CSV export itself (with its header rows).
 #'   `qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE,
-#'   add_column_map = FALSE)`.
+#'   add_column_map = FALSE)` also works, through the column names.
 #' @param scheme A [gfs_scheme()] list.
 #' @param words_per_line How many words fit on one rendered line, used only when
 #'   scoring descriptive-text questions. `NULL` (default) uses
@@ -72,26 +79,30 @@
 #'     \item{`words_per_line`}{The words-per-line value used for each
 #'       respondent's descriptive-text scoring.}
 #'     \item{`n_unmapped_cols`}{Number of response columns that could not be
-#'       mapped to any question in the QSF.}
+#'       mapped to any live question in the QSF. With an ImportId row only
+#'       question columns are counted; embedded data, metadata and automatic
+#'       columns (display order, timing, meta) are expected and left out.}
 #'   }
 #'
 #' @section Recommended Qualtrics export:
-#' Via the API (cleanest):
+#' The raw CSV download (Data & Analysis > Export & Import > Export Data > CSV,
+#' "Use numeric values"), passed as a path: `realised_burden(qsf,
+#' "file.csv")`. Its ImportId row maps every column to its question, whatever
+#' the column is called.
+#'
+#' Via the API:
 #' ```
 #' responses <- qualtRics::fetch_survey(
 #'   surveyID   = "SV_...",
 #'   label      = FALSE,    # numeric recode values, not choice text
 #'   convert    = FALSE,    # keep raw strings, don't coerce
+#'   import_id  = TRUE,     # name columns by question id
 #'   force_request = TRUE   # bypass cache
 #' )
 #' qsf <- fetch_qsf("SV_...")
 #' rb  <- realised_burden(qsf, responses)
 #' ```
 #'
-#' Via CSV download: Data & Analysis > Export & Import > Export Data > CSV.
-#' Tick "Use numeric values". Read with
-#' `read.csv("file.csv", check.names = FALSE)` and pass directly. The column
-#' names will be the question export tags; the function maps them via the QSF.
 #'
 #' @examples
 #' \donttest{
@@ -115,6 +126,7 @@ realised_burden <- function(qsf, responses, scheme = gfs_scheme(),
                             words_per_line = NULL, id_col = NULL) {
   if (!inherits(qsf, "qsf_raw")) qsf <- read_qsf(qsf)
 
+  responses <- read_responses(responses)
   # raw CSV exports carry label / ImportId rows under the header
   hdr <- drop_qualtrics_header_rows(responses)
   if (hdr$n_dropped > 0L && length(words_per_line) == nrow(responses)) {
@@ -245,6 +257,20 @@ realised_burden <- function(qsf, responses, scheme = gfs_scheme(),
 # Qualtrics export header rows
 # ==============================================================================
 
+#' Read response data given as a CSV path; a data frame passes through.
+#' Columns are read as text with their names unchanged, so a raw Qualtrics
+#' export keeps its header rows for [drop_qualtrics_header_rows()].
+#' @noRd
+read_responses <- function(x, arg = "responses") {
+  if (is.data.frame(x)) return(x)
+  if (is.character(x) && length(x) == 1L) {
+    if (!file.exists(x)) cli::cli_abort("{.arg {arg}} file not found: {.file {x}}.")
+    return(utils::read.csv(x, check.names = FALSE, stringsAsFactors = FALSE,
+                           colClasses = "character", encoding = "UTF-8"))
+  }
+  cli::cli_abort("{.arg {arg}} must be a data frame or the path to a CSV file.")
+}
+
 #' Drop the label and ImportId rows a raw Qualtrics CSV export carries.
 #'
 #' Removes only leading rows that are recognisably Qualtrics metadata: a cell
@@ -275,6 +301,19 @@ drop_qualtrics_header_rows <- function(responses, quiet = FALSE) {
   keep <- setdiff(names(attributes(responses)), c("names", "row.names", "class"))
   out  <- responses[-seq_len(n), , drop = FALSE]
   for (a in keep) attr(out, a) <- attr(responses, a)
+  # keep the ImportId row: it names each column's QID whatever the column is
+  # called (custom export tags, choice export tags), see build_col_map()
+  for (i in seq_len(n)) {
+    row <- vapply(responses[i, , drop = FALSE],
+                  function(v) trimws(as.character(v)), character(1))
+    is_imp <- grepl('^\\{"ImportId":"', row)
+    if (any(is_imp)) {
+      ids <- rep(NA_character_, length(row))
+      ids[is_imp] <- sub('^\\{"ImportId":"([^"]*)".*$', "\\1", row[is_imp])
+      attr(out, "import_ids") <- stats::setNames(ids, names(responses))
+      break
+    }
+  }
   if (!quiet) {
     cli::cli_inform(
       "Removed {n} Qualtrics header row{?s} (question labels / ImportId) from the top of {.arg responses}."
@@ -290,10 +329,17 @@ drop_qualtrics_header_rows <- function(responses, quiet = FALSE) {
 
 #' Map response data columns to question ids
 #'
-#' Tries three strategies in order:
+#' Tries these strategies in order:
 #' 1. A `col_map` attribute on the data frame (see [user_col_mapping()])
-#' 2. Direct QID-based column names (`QID15`, `QID15_1`)
-#' 3. ExportTag-based names from the QSF (`Q15`, `travel_mode_1`)
+#' 2. The ImportId row of a raw Qualtrics CSV export (kept by
+#'    [drop_qualtrics_header_rows()] as the `import_ids` attribute). When a
+#'    column has an ImportId it decides alone: `QID15_1` and `2_QID15` map,
+#'    anything else (embedded data, metadata) does not.
+#' 3. Direct QID-based column names (`QID15`, `QID15_1`)
+#' 4. ExportTag-based names from the QSF (`Q15`, `travel_mode_1`)
+#'
+#' Columns Qualtrics fills automatically -- display order (`_DO`), page-timing
+#' clicks and browser meta data -- are never mapped: they are not answers.
 #'
 #' @return A named list: each element is named by a response column and contains
 #'   `list(qid, iteration)` where `iteration` is 0L for non-loop questions.
@@ -315,6 +361,7 @@ build_col_map <- function(qsf, responses, all_qids) {
 
   # check for user-supplied col_map attribute
   user_map <- attr(responses, "col_map")
+  import_ids <- attr(responses, "import_ids")
 
   result <- list()
   mapped <- 0L
@@ -338,12 +385,29 @@ build_col_map <- function(qsf, responses, all_qids) {
       mapping <- user_col_mapping(col, user_map[[col]], all_qids)
     }
 
-    # strategy 2: QID-based column name
+    # strategy 2: the export's ImportId row, authoritative where present
+    imp <- if (is.null(mapping) && !is.null(import_ids) && col %in% names(import_ids))
+      import_ids[[col]] else NA_character_
+    if (!is.na(imp)) {
+      mapping <- parse_import_id(imp, all_qids)
+      if (!is.null(mapping)) {
+        result[[col]] <- mapping
+        mapped <- mapped + 1L
+      } else if (is_question_import_id(imp)) {
+        # a question column whose QID is not a live question of this survey;
+        # embedded data, metadata and automatic columns are expected, not counted
+        unmapped <- unmapped + 1L
+      }
+      next
+    }
+    if (is.null(mapping) && is_auto_column_name(col)) next
+
+    # strategy 3: QID-based column name
     if (is.null(mapping)) {
       mapping <- parse_qid_column(col, all_qids)
     }
 
-    # strategy 3: ExportTag-based column name (exact then case-insensitive)
+    # strategy 4: ExportTag-based column name (exact then case-insensitive)
     if (is.null(mapping)) {
       mapping <- parse_tag_column(col, tag_to_qid, all_qids)
     }
@@ -363,7 +427,7 @@ build_col_map <- function(qsf, responses, all_qids) {
     cli::cli_abort(c(
       "No response columns could be mapped to question ids in the QSF.",
       i = "Column names should match QIDs ({.code QID15}, {.code QID15_1}) or export tags ({.code Q15}).",
-      i = "Use {.code qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE)} for clean column names."
+      i = "Pass the raw Qualtrics CSV export (its ImportId row maps the columns), or use {.code qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE, import_id = TRUE)}."
     ))
   }
 
@@ -394,6 +458,38 @@ user_col_mapping <- function(col, entry, all_qids) {
   list(qid = qid, iteration = as.integer(iter))
 }
 
+
+#' Suffixes of columns Qualtrics fills automatically (not answers): display
+#' order, page-timing clicks and browser meta data.
+#' @noRd
+auto_suffix_re <- "^_(DO(_.*)?|FIRST_CLICK|LAST_CLICK|PAGE_SUBMIT|CLICK_COUNT|BROWSER|VERSION|OS|RESOLUTION)$"
+
+#' Map one ImportId (`QID15`, `QID15_1_TEXT`, `2_QID15_3`) to
+#' `list(qid, iteration)`; NULL for a non-question id, an automatic column
+#' (see `auto_suffix_re`) or a QID not in the survey.
+#' @noRd
+parse_import_id <- function(id, all_qids) {
+  m <- regmatches(id, regexec("^(([0-9]+)_)?(QID[0-9]+)(.*)$", id))[[1]]
+  if (length(m) != 5L || !m[4] %in% all_qids) return(NULL)
+  if (grepl(auto_suffix_re, m[5])) return(NULL)
+  list(qid = m[4], iteration = if (nzchar(m[3])) as.integer(m[3]) else 0L)
+}
+
+#' Does an ImportId name a question's answer column (not an automatic one)?
+#' @noRd
+is_question_import_id <- function(id) {
+  m <- regmatches(id, regexec("^(([0-9]+)_)?(QID[0-9]+)(.*)$", id))[[1]]
+  length(m) == 5L && !grepl(auto_suffix_re, m[5])
+}
+
+#' An automatic column by name, for exports without an ImportId row: display
+#' order (`Q5_DO`, `Q5_DO_2`), or a QID-named automatic column
+#' (`QID5_FIRST_CLICK`, as `fetch_survey(import_id = TRUE)` names it).
+#' @noRd
+is_auto_column_name <- function(col) {
+  grepl("_DO(_[0-9]+)?$", col) ||
+    (grepl("^([0-9]+_)?QID[0-9]+", col) && !is_question_import_id(col))
+}
 
 #' Try to parse a column name as QID-based: QID15, QID15_1, QID15_1_TEXT, etc.
 #' For loop iterations: pattern is #iter_QID or QID_iter_suffix

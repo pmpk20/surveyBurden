@@ -16,9 +16,13 @@
 #'       falls back to `loop_typical`.}
 #'     \item{`visit_<block_id>`}{`TRUE` to include a branch-gated optional block
 #'       (e.g. `visit_BL11`). Read with `as.logical()`: `TRUE`, `1` or `"TRUE"`
-#'       include it; absent, `FALSE`, `NA` or any other value excludes it.}
+#'       include it; `FALSE`, `NA` or any other value excludes it. When
+#'       some optional blocks have a `visit_` column and others do not, the
+#'       others are unknown: routes are matched on the blocks that have one,
+#'       taking the matching path with the fewest optional blocks. With no
+#'       `visit_` columns at all, every route is matched as visiting none.}
 #'   }
-#'   Missing columns are treated as absent/zero.
+#'   Missing loop columns fall back as described above.
 #' @param scheme A [gfs_scheme()] list.
 #' @param loop_typical Loop iterations to assume for the `typical_pts` column,
 #'   and for a route whose loop count is not supplied.
@@ -65,7 +69,9 @@ respondent_burden <- function(qsf, routes = NULL, scheme = gfs_scheme(),
   # loop block -> driving question id, straight from the flow model
   loop_qid <- stats::setNames(e$blocks$loop_on_qid, e$blocks$block_id)
   loop_qid <- loop_qid[!is.na(loop_qid)]
-  loop_order <- e$blocks$block_id[!is.na(e$blocks$loop_on_qid)]  # flow order
+  # every loop block, in flow order, including loops over a fixed list (no
+  # driving question)
+  loop_order <- e$blocks$block_id[e$blocks$in_loop %in% TRUE]
 
   # branch-gated blocks: any block not present on every complete path
   full_block_sets <- e$paths$block_ids[full_i]
@@ -144,10 +150,14 @@ respondent_burden <- function(qsf, routes = NULL, scheme = gfs_scheme(),
     optional_blocks[keep]
   })
 
+  # an optional block with no visit_ column (e.g. text only, so no answers
+  # show the visit) is unknown, not "not visited": match on the others
+  observable <- optional_blocks[paste0("visit_", optional_blocks) %in% names(routes)]
   m <- match_routes(
     path_opt    = lapply(info, `[[`, "opt_blocks"),
     desired_opt = desired_opt,
-    heavy_i     = which.max(vapply(info, function(x) x$base + x$disp[3], numeric(1)))
+    heavy_i     = which.max(vapply(info, function(x) x$base + x$disp[3], numeric(1))),
+    observable  = if (length(observable)) observable else NULL
   )
   idx     <- m$idx
   matched <- m$matched
@@ -155,7 +165,7 @@ respondent_burden <- function(qsf, routes = NULL, scheme = gfs_scheme(),
   pred <- vapply(seq_len(n_r), function(r) {
     x <- info[[idx[r]]]
     lp <- sum(vapply(x$loops, function(l) {
-      cnt <- loop_counts[[l$block_id]][r]
+      cnt <- (loop_counts[[l$block_id]] %||% NA_real_)[r]
       if (is.na(cnt)) cnt <- loop_typical
       mult <- if (cnt <= 0) 0 else min(cnt, l$n)
       l$per_iter * mult
@@ -169,8 +179,8 @@ respondent_burden <- function(qsf, routes = NULL, scheme = gfs_scheme(),
   out$pred_pts <- pred
   out$pred_min <- pred / ppm
   if (!all(matched)) {
-    n_plain <- sum(m$fallback == "plain")
-    n_heavy <- sum(m$fallback == "heaviest")
+    n_plain <- sum(m$fallback == "plain", na.rm = TRUE)
+    n_heavy <- sum(m$fallback == "heaviest", na.rm = TRUE)
     cli::cli_warn(c(
       "{sum(!matched)} of {length(matched)} respondent route(s) did not match any of the {length(full_i)} enumerated complete flow paths ({.field matched} = FALSE).",
       i = "Their predictions fell back to another path: {n_plain} to the path with no optional blocks, {n_heavy} to the heaviest path.",
@@ -192,11 +202,15 @@ respondent_burden <- function(qsf, routes = NULL, scheme = gfs_scheme(),
 #' @return list(idx, matched, fallback), where `fallback` is `NA`, `"plain"`
 #'   or `"heaviest"` per respondent.
 #' @noRd
-match_routes <- function(path_opt, desired_opt, heavy_i) {
+match_routes <- function(path_opt, desired_opt, heavy_i, observable = NULL) {
   sig_of   <- function(v) paste(sort(unique(v)), collapse = "|")
+  plain_i  <- which(lengths(path_opt) == 0L)
+  # compare only the blocks whose visits can be observed; among paths that
+  # then look alike, take the one with the fewest optional blocks
+  by_size  <- order(lengths(path_opt))
+  if (!is.null(observable)) path_opt <- lapply(path_opt, intersect, observable)
   path_sig <- vapply(path_opt, sig_of, character(1))
-  plain_i  <- which(path_sig == "")
-  hit      <- match(vapply(desired_opt, sig_of, character(1)), path_sig)
+  hit      <- by_size[match(vapply(desired_opt, sig_of, character(1)), path_sig[by_size])]
 
   n <- length(desired_opt)
   fallback <- rep(NA_character_, n)

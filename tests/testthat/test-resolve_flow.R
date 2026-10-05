@@ -359,3 +359,26 @@ test_that("resolve_flow enumerates plausible paths for the demo survey", {
   lens <- lengths(paths$block_ids)
   expect_gt(max(lens), min(lens))
 })
+
+test_that("a randomiser of embedded-data assignments only does not warn", {
+  ed   <- function(id) list(Type = "EmbeddedData", FlowID = id, EmbeddedData = list())
+  rand <- list(Type = "BlockRandomizer", FlowID = "F_rn", SubSet = 1L,
+               Flow = list(ed("F_e1"), ed("F_e2"), ed("F_e3")))
+  expect_no_warning(paths <- enumerate_paths(list(n_block("A"), rand, n_block("B"))))
+  expect_identical(paths$block_ids[[1]], c("A", "B"))
+
+  # one that holds a block still warns
+  rand_b <- list(Type = "BlockRandomizer", FlowID = "F_rb", Flow = list(n_block("C")))
+  expect_warning(enumerate_paths(list(n_block("A"), rand_b)), "BlockRandomizer")
+})
+
+test_that("a web-service call shows nothing and is noted only when it sets fields", {
+  ping <- list(Type = "WebService", FlowID = "F_ws", URL = "https://example.org",
+               FireAndForget = TRUE, ResponseMap = list())
+  expect_no_warning(expect_no_message(
+    paths <- enumerate_paths(list(n_block("A"), ping, n_block("B")))))
+  expect_identical(paths$block_ids[[1]], c("A", "B"))
+
+  setter <- ping; setter$ResponseMap <- list(list(key = "score", value = "$.score"))
+  expect_message(enumerate_paths(list(n_block("A"), setter)), "web-service call")
+})

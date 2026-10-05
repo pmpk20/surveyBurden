@@ -159,6 +159,17 @@ feasible_outcomes <- function(ops, values) {
   vecs[!duplicated(vapply(vecs, paste, "", collapse = ""))]
 }
 
+#' Does a flow (list of nodes) show any block, at any depth?
+#' @noRd
+flow_has_blocks <- function(nodes) {
+  for (n in nodes) {
+    if (!is.list(n)) next
+    if ((n[["Type"]] %||% "") %in% c("Standard", "Block")) return(TRUE)
+    if (is.list(n[["Flow"]]) && flow_has_blocks(n[["Flow"]])) return(TRUE)
+  }
+  FALSE
+}
+
 #' Replace runs of consecutive Branch nodes on one field with a single
 #' synthetic ExclusiveBranchGroup node. A run qualifies when every Branch in
 #' it is a simple single-literal EmbeddedField comparison on the same field.
@@ -233,6 +244,7 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
 
   memo <- new.env(parent = emptyenv())
   randomisers <- character(0)   # collected, warned about once (see below)
+  web_services <- character(0)  # likewise, noted once
 
   key_of <- function(remaining) {
     paste(vapply(remaining, function(n) n$FlowID %||% n$Type %||% "?", character(1)),
@@ -302,8 +314,19 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
       # failed authentication never yields a response, so only that flow counts
       outcomes(c(node[["Flow"]] %||% list(), rest))
     } else if (type == "BlockRandomizer") {
-      randomisers <<- c(randomisers, node$FlowID %||% node$ID %||% "BlockRandomizer")
+      # a randomiser holding only embedded-data assignments (random condition
+      # assignment) shows no blocks, so it cannot change burden: no warning
+      if (flow_has_blocks(node[["Flow"]] %||% list())) {
+        randomisers <<- c(randomisers, node$FlowID %||% node$ID %||% "BlockRandomizer")
+      }
       outcomes(c(node[["Flow"]] %||% list(), rest))
+    } else if (type == "WebService") {
+      # a web-service call shows nothing; it can set embedded fields, which
+      # branches then treat like any other field (both outcomes enumerated)
+      if (length(node$ResponseMap)) {
+        web_services <<- c(web_services, node$FlowID %||% "WebService")
+      }
+      outcomes(rest)
     } else {
       cli::cli_warn("Unhandled flow node type {.val {type}}; skipping.")
       outcomes(rest)
@@ -328,6 +351,15 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
     joint_notes <- paste(unique(joint_notes), collapse = "; ")
     cli::cli_inform(c(
       i = "Branches on the same embedded field evaluated jointly (feasible of 2^k outcomes): {joint_notes}."
+    ))
+  }
+
+  web_services <- unique(web_services)
+  if (length(web_services)) {
+    cli::cli_inform(c(
+      i = paste("{length(web_services)} web-service call{?s} in the flow set embedded",
+                "fields from an external response; branches on those fields are enumerated both ways."),
+      i = "Flow node{?s}: {.val {web_services}}"
     ))
   }
 

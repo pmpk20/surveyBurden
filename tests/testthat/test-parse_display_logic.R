@@ -66,17 +66,30 @@ test_that("an ElseIf group ORs with the running result", {
   expect_false(p$predicate(list(QID9 = "2", QID12 = "2")))  # neither
 })
 
-test_that("If / ElseIf / AndIf fold left-associatively: (G0 OR G1) AND G2", {
-  # matches a (statusA OR statusB) AND (not fully-remote) commute gate
+test_that("If / ElseIf / AndIf: AndIf binds first, G0 OR (G1 AND G2)", {
   p <- parse_display_logic(dl_of(
     grp(lit_q("QID9", "1")),
     grp(lit_q("QID9", "2"), type = "ElseIf"),
     grp(lit_q("QID12", "1"), type = "AndIf")
   ))
-  expect_true(p$predicate(list(QID9 = "1", QID12 = "1")))   # (T or F) and T
-  expect_true(p$predicate(list(QID9 = "2", QID12 = "1")))   # (F or T) and T
-  expect_false(p$predicate(list(QID9 = "1", QID12 = "2")))  # (T or F) and F
-  expect_false(p$predicate(list(QID9 = "3", QID12 = "1")))  # (F or F) and T
+  expect_true(p$predicate(list(QID9 = "1", QID12 = "1")))   # T or (F and T)
+  expect_true(p$predicate(list(QID9 = "2", QID12 = "1")))   # F or (T and T)
+  expect_true(p$predicate(list(QID9 = "1", QID12 = "2")))   # T or (F and F)
+  expect_false(p$predicate(list(QID9 = "2", QID12 = "2")))  # F or (T and F)
+  expect_false(p$predicate(list(QID9 = "3", QID12 = "1")))  # F or (F and T)
+  # reachability uses the same precedence. With QID12 off the path C is
+  # false: A | (B & C) can still hold through A, where (A | B) & C could not.
+  expect_true(p$possible("QID12"))
+  # with QID9 off the path A and B are false: never shown
+  expect_false(p$possible("QID9"))
+})
+
+test_that("combine_groups chains several ElseIf terms each with AndIf parts", {
+  v <- list(FALSE, TRUE, FALSE, TRUE, TRUE)
+  t <- c("If", "ElseIf", "AndIf", "ElseIf", "AndIf")
+  expect_true(combine_groups(v, t))                  # F | (T & F) | (T & T)
+  expect_identical(combine_groups(list(NA, FALSE), c("If", "AndIf")), FALSE)
+  expect_identical(combine_groups(list(NA, TRUE), c("If", "ElseIf")), TRUE)
 })
 
 test_that("missing group Type falls back to AND (pre-2026-09 behaviour)", {

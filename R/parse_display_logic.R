@@ -2,10 +2,10 @@
 #'
 #' The tree has numbered groups, each holding numbered literals combined
 #' left-to-right by their `Conjuction` field ("And"/"Or"; first literal has
-#' none). Groups are combined left-to-right by their `Type` field: the first
-#' group is the base, then each `"ElseIf"` group ORs with the running result
-#' and each `"AndIf"` group ANDs with it (` ((G0 op1 G1) op2 G2) ... `). A
-#' group whose `Type` is missing falls back to AND. This parser produces the
+#' none). Groups are combined by their `Type` field, with `"AndIf"` binding
+#' before `"ElseIf"`: `If G0 / ElseIf G1 / AndIf G2` is `G0 OR (G1 AND G2)`
+#' (see [combine_groups()]). A group whose `Type` is missing joins as AND.
+#' This parser produces the
 #' set of gate variables the logic reads and a function that evaluates the
 #' logic against an assignment of those variables.
 #'
@@ -26,9 +26,9 @@
 #' @noRd
 parse_display_logic <- function(dl) {
   group_keys <- setdiff(names(dl), c("Type", "inPage"))
-  # how each group combines with the running result (see predicate): "AndIf" or
-  # a missing type -> AND; "ElseIf" (or anything else) -> OR. Index 1 is the
-  # base and is never consulted.
+  # how each group joins the ones before it (see combine_groups()): "AndIf"
+  # or a missing type -> AND; "ElseIf" (or anything else) -> OR. Index 1 is
+  # the base and is never consulted.
   group_types <- unname(vapply(group_keys,
                                function(gk) dl[[gk]]$Type %||% NA_character_,
                                character(1)))
@@ -65,13 +65,7 @@ parse_display_logic <- function(dl) {
       }
       acc
     }, logical(1))
-    if (length(group_vals) == 1L) return(isTRUE(group_vals[1]))
-    acc <- group_vals[1]
-    for (k in seq_along(group_vals)[-1]) {
-      and_k <- is.na(group_types[k]) || identical(group_types[k], "AndIf")
-      acc <- if (and_k) acc && group_vals[k] else acc || group_vals[k]
-    }
-    isTRUE(acc)
+    isTRUE(combine_groups(as.list(group_vals), group_types))
   }
 
   # Can the logic be TRUE on a path where the questions in `off_path` are never
@@ -93,12 +87,7 @@ parse_display_logic <- function(dl) {
       }
       acc
     }, logical(1))
-    acc <- group_vals[1]
-    for (k in seq_along(group_vals)[-1]) {
-      and_k <- is.na(group_types[k]) || identical(group_types[k], "AndIf")
-      acc <- if (and_k) acc & group_vals[k] else acc | group_vals[k]
-    }
-    !isFALSE(acc)
+    !isFALSE(combine_groups(as.list(group_vals), group_types))
   }
 
   displayed <- unlist(lapply(parsed_groups, function(lits)
@@ -144,4 +133,24 @@ parse_literal <- function(lit) {
   # EmbeddedField / LoopAndMerge / anything else -> free binary gate
   fv <- paste0("@", lit$LeftOperand %||% "field")
   list(var = fv, conj = conj, eval = function(state, shown) isTRUE(state[[fv]]))
+}
+
+#' Combine display-logic group values the way Qualtrics does: groups joined
+#' by "AndIf" (or with no type) bind before groups joined by "ElseIf", so
+#' `If G0 / ElseIf G1 / AndIf G2` is `G0 | (G1 & G2)`. On a large Qualtrics
+#' export this reading matched which questions respondents answered (99.7%);
+#' left-to-right evaluation, `(G0 | G1) & G2`, did not (60%).
+#' `vals` is a list of logical vectors (NA allowed: three-valued `&` / `|`);
+#' `types[k]` is group k's `Type` (the first is ignored).
+#' @noRd
+combine_groups <- function(vals, types) {
+  terms <- list(vals[[1]])
+  for (k in seq_along(vals)[-1]) {
+    if (is.na(types[k]) || identical(types[k], "AndIf")) {
+      terms[[length(terms)]] <- terms[[length(terms)]] & vals[[k]]
+    } else {
+      terms[[length(terms) + 1L]] <- vals[[k]]
+    }
+  }
+  Reduce(`|`, terms)
 }

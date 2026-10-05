@@ -31,11 +31,12 @@
   person-period data for a discrete-time hazard model of break-off: the
   blocks each respondent was at risk in, the burden shown before each, and
   the block's design score.
-* `realised_exposure()` evaluates display-logic groups joined by "And If"
-  before groups joined by "Else If" (`If A / Else If B / And If C` is
-  `A or (B and C)`), which matched observed answering on a large Qualtrics
-  export. `path_burden_profile()` and `burden_report()` still combine
-  groups left to right.
+* Display-logic groups joined by "And If" are now evaluated before groups
+  joined by "Else If": `If A / Else If B / And If C` is `A or (B and C)`,
+  not `(A or B) and C`. On a large Qualtrics export this reading matched
+  which questions respondents answered (99.7%, against 60% for left to
+  right). This changes burden profiles for surveys that mix the two; the
+  demo survey's 75th percentile moves from 129 to 130 points.
 
 # surveyBurden 0.2.0
 

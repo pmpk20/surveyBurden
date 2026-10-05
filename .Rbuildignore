@@ -26,3 +26,6 @@
 ^\.claude$
 ^outputs$
 ^~WRL.*\.tmp$
+^cc_.*\.md$
+^misc$
+^Papers$

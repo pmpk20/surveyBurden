@@ -44,17 +44,17 @@ The recommended way to obtain this data frame is
 
 \item{scheme}{A \code{\link[=gfs_scheme]{gfs_scheme()}} list.}
 
-\item{id_col}{Name of the respondent-id column. Auto-detected from
-\code{"ResponseId"}, \code{"response_id"}, or the first column whose values are all
-unique. Pass explicitly to override.}
+\item{id_col}{Name of the respondent-id column (see \code{\link[=realised_burden]{realised_burden()}}).
+Its values must be unique and not missing; Qualtrics' \code{ResponseId} is.}
 
 \item{furthest}{How to find the furthest block a respondent reached:
 \code{"answered"} (default) uses the last block with an answer; \code{"column"}
 reads \code{furthest_col}.}
 
 \item{furthest_col}{Name of a column holding, per respondent, the last block
-reached, as a block ordinal (\code{flow_order} from \code{\link[=resolve_live_blocks]{resolve_live_blocks()}}),
-a block id, a block name, or a question id (its block is used). Blank or
+reached: a block id, a block name, a question id (its block is used) or
+a whole-number block ordinal (\code{flow_order} from \code{\link[=resolve_live_blocks]{resolve_live_blocks()}}),
+matched in that order, so a block named \code{"2"} is that block. Blank or
 unrecognised values fall back to \code{"answered"}.}
 
 \item{loop_iterations}{\code{"driver"} (default) or \code{"observed"}; see Loops.}
@@ -79,9 +79,11 @@ question (Qualtrics skips a block whose questions are all hidden).}
 blocks.}
 \item{\code{shown_points}}{GfS+ points of the questions shown (each loop
 iteration counted).}
-\item{\code{shown_items}, \code{shown_response_items}}{Questions shown, and those
-of them that take a response (not descriptive text, timing or
-metadata).}
+\item{\code{shown_items}, \code{shown_response_items}}{Visible questions shown,
+and those of them that take a response (not descriptive text).}
+\item{\code{shown_hidden_items}}{Items the respondent passed that are never
+visible (hidden by injected CSS/JS, page timing, metadata). They score
+0 points and are not in \code{shown_items}; reported for completeness.}
 \item{\code{shown_pages}}{Pages shown: a page counts when a visible question
 on it is shown.}
 \item{\code{design_points}}{The block's design score (its questions scored
@@ -94,7 +96,9 @@ logic could not settle and that fell back to answered/not answered.}
 Shown counts are \code{NA} where \code{routed_in} is \code{NA}, and 0 where it is
 \code{FALSE}. The attribute \code{respondents} holds one row per respondent:
 \code{response_id}, \code{finished}, \code{outcome}, \code{furthest_order},
-\code{n_unresolved_items}, \code{n_unresolved_branches}, \code{n_routing_conflicts}.
+\code{n_unresolved_items}, \code{n_unresolved_branches}, \code{unresolved_loops}
+(\code{TRUE} if a loop's iterations could not be recovered), and
+\code{n_routing_conflicts}.
 }
 \description{
 For every respondent, including those who broke off or were screened out,
@@ -116,7 +120,11 @@ matrix cells, via the QSF \code{RecodeValues}), \code{Displayed} / \code{NotDisp
 value, embedded-data comparisons, and the Loop & Merge "current loop"
 test. Embedded fields are read from a response column of the same name
 (matched exactly, then ignoring case, then ignoring case and
-punctuation), or from a fixed value set in the flow.
+punctuation), or from a fixed value set in the flow. A fixed value set in
+the flow holds from that point on, so a field set more than once is read
+as it stood at each branch. A cell holding several choice codes joined by
+commas (\code{"1,4"}) is split only when every piece is one of the question's
+choice codes, so a choice label containing a comma is never split.
 
 \strong{What cannot be evaluated} (an unsupported literal such as a quota test,
 an embedded field with no column and no fixed value -- typically one set by
@@ -136,14 +144,23 @@ without answering is therefore attributed to the previous block; supply a
 last-seen block or question in \code{furthest_col} to avoid this. Respondents
 marked finished reached every block the flow routed them into. Blocks after
 the exit have \code{routed_in = NA}: the flow beyond that point depends on
-answers that were never given.
+answers that were never given. Qualtrics records a screened-out response as
+finished, so a respondent marked unfinished is a break-off, never a
+screen-out.
 
 \strong{Loops.} The iterations a Loop & Merge block ran are taken from the
 question driving the loop (the numeric response, or the selected choices)
 when that answer is available, else from the iterations with any answer
 (\code{loop_iterations = "observed"} forces the latter). Iterations with answers
 are always counted. In the exit block of a break-off, only iterations up to
-the last one answered are counted.
+the last one answered are counted. Export columns number a choice-driven
+loop by the choice's position, so iteration \code{j} is the driving question's
+\code{j}-th choice. A randomised loop is not shown in export order: at a
+break-off only the iterations answered count, and where the driver cannot
+settle the iterations, or the loop presents only a subset of them, they
+come from the answers alone. Those respondents are flagged in
+\code{unresolved_loops}, as are respondents in loops whose size the QSF does not
+give.
 
 Answers that contradict the evaluated flow (answers in a block the flow
 did not route the respondent into) are trusted: the block counts as routed

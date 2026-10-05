@@ -19,7 +19,11 @@
 #' value, embedded-data comparisons, and the Loop & Merge "current loop"
 #' test. Embedded fields are read from a response column of the same name
 #' (matched exactly, then ignoring case, then ignoring case and
-#' punctuation), or from a fixed value set in the flow.
+#' punctuation), or from a fixed value set in the flow. A fixed value set in
+#' the flow holds from that point on, so a field set more than once is read
+#' as it stood at each branch. A cell holding several choice codes joined by
+#' commas (`"1,4"`) is split only when every piece is one of the question's
+#' choice codes, so a choice label containing a comma is never split.
 #'
 #' **What cannot be evaluated** (an unsupported literal such as a quota test,
 #' an embedded field with no column and no fixed value -- typically one set by
@@ -39,14 +43,23 @@
 #' last-seen block or question in `furthest_col` to avoid this. Respondents
 #' marked finished reached every block the flow routed them into. Blocks after
 #' the exit have `routed_in = NA`: the flow beyond that point depends on
-#' answers that were never given.
+#' answers that were never given. Qualtrics records a screened-out response as
+#' finished, so a respondent marked unfinished is a break-off, never a
+#' screen-out.
 #'
 #' **Loops.** The iterations a Loop & Merge block ran are taken from the
 #' question driving the loop (the numeric response, or the selected choices)
 #' when that answer is available, else from the iterations with any answer
 #' (`loop_iterations = "observed"` forces the latter). Iterations with answers
 #' are always counted. In the exit block of a break-off, only iterations up to
-#' the last one answered are counted.
+#' the last one answered are counted. Export columns number a choice-driven
+#' loop by the choice's position, so iteration `j` is the driving question's
+#' `j`-th choice. A randomised loop is not shown in export order: at a
+#' break-off only the iterations answered count, and where the driver cannot
+#' settle the iterations, or the loop presents only a subset of them, they
+#' come from the answers alone. Those respondents are flagged in
+#' `unresolved_loops`, as are respondents in loops whose size the QSF does not
+#' give.
 #'
 #' Answers that contradict the evaluated flow (answers in a block the flow
 #' did not route the respondent into) are trusted: the block counts as routed
@@ -57,9 +70,12 @@
 #'   `"answered"` (default) uses the last block with an answer; `"column"`
 #'   reads `furthest_col`.
 #' @param furthest_col Name of a column holding, per respondent, the last block
-#'   reached, as a block ordinal (`flow_order` from [resolve_live_blocks()]),
-#'   a block id, a block name, or a question id (its block is used). Blank or
+#'   reached: a block id, a block name, a question id (its block is used) or
+#'   a whole-number block ordinal (`flow_order` from [resolve_live_blocks()]),
+#'   matched in that order, so a block named `"2"` is that block. Blank or
 #'   unrecognised values fall back to `"answered"`.
+#' @param id_col Name of the respondent-id column (see [realised_burden()]).
+#'   Its values must be unique and not missing; Qualtrics' `ResponseId` is.
 #' @param loop_iterations `"driver"` (default) or `"observed"`; see Loops.
 #' @param embedded Optional named character vector mapping embedded-data field
 #'   names to response columns, e.g. `c(TotalVehicles = "total_vehicles")`.
@@ -80,9 +96,11 @@
 #'       blocks.}
 #'     \item{`shown_points`}{GfS+ points of the questions shown (each loop
 #'       iteration counted).}
-#'     \item{`shown_items`, `shown_response_items`}{Questions shown, and those
-#'       of them that take a response (not descriptive text, timing or
-#'       metadata).}
+#'     \item{`shown_items`, `shown_response_items`}{Visible questions shown,
+#'       and those of them that take a response (not descriptive text).}
+#'     \item{`shown_hidden_items`}{Items the respondent passed that are never
+#'       visible (hidden by injected CSS/JS, page timing, metadata). They score
+#'       0 points and are not in `shown_items`; reported for completeness.}
 #'     \item{`shown_pages`}{Pages shown: a page counts when a visible question
 #'       on it is shown.}
 #'     \item{`design_points`}{The block's design score (its questions scored
@@ -95,7 +113,9 @@
 #'   Shown counts are `NA` where `routed_in` is `NA`, and 0 where it is
 #'   `FALSE`. The attribute `respondents` holds one row per respondent:
 #'   `response_id`, `finished`, `outcome`, `furthest_order`,
-#'   `n_unresolved_items`, `n_unresolved_branches`, `n_routing_conflicts`.
+#'   `n_unresolved_items`, `n_unresolved_branches`, `unresolved_loops`
+#'   (`TRUE` if a loop's iterations could not be recovered), and
+#'   `n_routing_conflicts`.
 #'
 #' @seealso [exposure_person_period()] to turn the result into hazard data;
 #'   [realised_burden()] for the answer-based total.
@@ -137,6 +157,7 @@ realised_exposure <- function(qsf, responses, scheme = gfs_scheme(), id_col = NU
   }
   responses <- drop_qualtrics_header_rows(responses)$data
   n <- nrow(responses)
+  if (n == 0L) cli::cli_abort("{.arg responses} has no respondents.")
 
   catalogue <- parse_qsf(qsf)
   blocks    <- resolve_live_blocks(qsf)
@@ -160,6 +181,15 @@ realised_exposure <- function(qsf, responses, scheme = gfs_scheme(), id_col = NU
   cols <- exposure_columns(qsf, responses, scored$question_id)
   id_col  <- resolve_id_col(responses, id_col)
   resp_id <- if (!is.null(id_col)) responses[[id_col]] else seq_len(n)
+  if (is.factor(resp_id)) resp_id <- as.character(resp_id)
+  n_na <- sum(is.na(resp_id)); n_dup <- sum(duplicated(resp_id) & !is.na(resp_id))
+  if (n_na + n_dup > 0L) {
+    cli::cli_abort(c(
+      "Respondent ids must be unique and not missing.",
+      x = "{.field {id_col}} has {n_na} missing and {n_dup} duplicated value{?s}.",
+      i = "Name the unique respondent column with {.arg id_col} (in Qualtrics exports, {.field ResponseId})."
+    ))
+  }
   fin     <- detect_finished(responses)
 
   ctx <- exposure_context(responses, cols, payloads, blocks, q, n)
@@ -181,6 +211,7 @@ realised_exposure <- function(qsf, responses, scheme = gfs_scheme(), id_col = NU
     }
     furthest_ord[use] <- fc[use]
   }
+  furthest_obs <- furthest_ord        # before completes are set to Inf
   furthest_ord[fin %in% TRUE] <- Inf
 
   # ---- walk the flow -------------------------------------------------------
@@ -188,7 +219,15 @@ realised_exposure <- function(qsf, responses, scheme = gfs_scheme(), id_col = NU
                         loop_iterations, furthest_ord)
 
   # ---- outcome ---------------------------------------------------------------
-  screened <- walk$ended_early & !(last_ans > walk$end_pos)
+  # Screened out: the flow ended the survey early at a point the respondent
+  # reached, with no answers after it. Qualtrics marks a screened-out
+  # response finished, so an unfinished respondent is a break-off whatever
+  # the flow says beyond their exit (that part is evaluated on answers never
+  # given). With completion unknown, the end must come no later than their
+  # furthest block.
+  end_reached <- walk$ended &
+    (fin %in% TRUE | (is.na(fin) & walk$end_pos <= furthest_obs))
+  screened <- walk$ended_early & end_reached & !(last_ans > walk$end_pos)
   outcome <- ifelse(fin %in% TRUE, "complete", "breakoff")
   unknown <- is.na(fin)
   if (any(unknown)) {
@@ -204,16 +243,19 @@ realised_exposure <- function(qsf, responses, scheme = gfs_scheme(), id_col = NU
   design <- tapply(scored$gfs_points, scored$block_id, sum, na.rm = TRUE)
   rows <- vector("list", nb)
   exit_cand <- matrix(FALSE, n, nb)
+  unres_loop <- rep(FALSE, n)
   for (k in seq_len(nb)) {
     bid <- blocks$block_id[k]
     routed_in <- walk$routed[, k]
-    routed_in[k > furthest_ord & !walk$ended & !routed_in] <- NA
+    routed_in[k > furthest_ord & !end_reached & !routed_in] <- NA
     routed_in[k > furthest_ord & routed_in %in% TRUE] <- NA
     rr <- routed_in %in% TRUE
-    a <- assemble_block(k, blocks, walk, q, pages, rr, outcome, furthest_ord, ctx, n)
+    unres_loop <- unres_loop | (walk$unres_loop[, k] & rr)
+    a <- lapply(assemble_block(k, blocks, walk, q, pages, rr, outcome, furthest_ord, ctx, n),
+                unname)
     na <- is.na(routed_in)
     for (nm in c("shown_points", "shown_items", "shown_response_items", "shown_pages",
-                 "unresolved_items", "iterations")) {
+                 "unresolved_items", "iterations", "shown_hidden_items")) {
       if (length(a[[nm]]) == n) a[[nm]][na] <- NA
     }
     displayed <- a$shown_pages > 0
@@ -226,6 +268,7 @@ realised_exposure <- function(qsf, responses, scheme = gfs_scheme(), id_col = NU
       shown_points = a$shown_points, shown_items = a$shown_items,
       shown_response_items = a$shown_response_items, shown_pages = a$shown_pages,
       design_points = as.numeric(design[bid] %||% 0),
+      shown_hidden_items = a$shown_hidden_items,
       exit_block = FALSE, unresolved_items = a$unresolved_items
     )
   }
@@ -239,17 +282,20 @@ realised_exposure <- function(qsf, responses, scheme = gfs_scheme(), id_col = NU
 
   out <- do.call(rbind, rows)
   out <- out[order(out$.row, out$flow_order), ]
+  rand_k <- which(vapply(blocks$block_id, function(b) isTRUE(walk$loop_random[[b]]), TRUE))
+  exit_random <- outcome == "breakoff" & is.finite(furthest_ord) & furthest_ord %in% rand_k
+  unres_items <- tapply(out$unresolved_items, factor(out$.row, seq_len(n)),
+                        function(v) sum(v, na.rm = TRUE))
   out$.row <- NULL
 
-  unres_items <- tapply(out$unresolved_items, factor(out$response_id, unique(resp_id)),
-                        function(v) sum(v, na.rm = TRUE))
   respondents <- tibble::tibble(
     response_id           = resp_id,
     finished              = fin,
     outcome               = outcome,
     furthest_order        = ifelse(is.finite(furthest_ord), furthest_ord, NA_real_),
-    n_unresolved_items    = as.integer(unres_items[as.character(resp_id)]),
+    n_unresolved_items    = as.integer(unres_items),
     n_unresolved_branches = as.integer(walk$unres_branch),
+    unresolved_loops      = unres_loop | exit_random,
     n_routing_conflicts   = as.integer(walk$conflicts)
   )
   if (sum(respondents$n_unresolved_items) + sum(respondents$n_unresolved_branches) > 0L) {
@@ -450,6 +496,27 @@ exposure_context <- function(responses, cols, payloads, blocks, q, n) {
     z <- unname(inv[v])
     ifelse(is.na(z), v, z)
   }
+  valid_codes <- function(qid) {
+    p <- payloads[[qid]]
+    unique(c(names(p$Choices), names(p$Answers),
+             unlist(p$RecodeValues, use.names = FALSE)))
+  }
+  # Does each cell hold choice `code`? A cell may hold several codes joined
+  # by commas (a multiple-answer question exported to one column). It is
+  # split only when every piece is one of the question's choice codes, so a
+  # label that itself contains a comma ("this, and that") is never split.
+  has_code <- function(qid, v, code) {
+    hit <- !is.na(v) & to_choice(qid, v) == code
+    multi <- !is.na(v) & !hit & grepl(",", v, fixed = TRUE)
+    if (any(multi)) {
+      valid <- valid_codes(qid)
+      hit[multi] <- vapply(v[multi], function(cell) {
+        tk <- trimws(strsplit(cell, ",", fixed = TRUE)[[1]])
+        all(tk %in% valid) && code %in% to_choice(qid, tk)
+      }, logical(1), USE.NAMES = FALSE)
+    }
+    hit
+  }
 
   answered <- function(qid, iter = NULL) {
     key <- paste("a", qid, if (is.null(iter)) "*" else iter)
@@ -495,7 +562,7 @@ exposure_context <- function(responses, cols, payloads, blocks, q, n) {
     parts <- strsplit(tail, "/", fixed = TRUE)[[1]]
     if (identical(parts[1], "SelectableAnswer") && length(parts) == 2L) {
       return(Reduce(`|`, lapply(main$col, function(cc) {
-        x <- to_choice(qid, val(cc)); !is.na(x) & x == parts[2]
+        has_code(qid, val(cc), parts[2])
       })))
     }
     rinv <- row_inv(qid)
@@ -504,10 +571,14 @@ exposure_context <- function(responses, cols, payloads, blocks, q, n) {
       c1 <- parts[1]
       if (c1 %in% sfx) return(Reduce(`|`, lapply(main$col[sfx == c1], is_on)))
       single <- main$col[sfx == ""]
-      if (!length(single) && nrow(main) == 1L) single <- main$col
+      # a lone column holds the answer itself, unless its suffix names a
+      # choice (one exported column of a multiple-answer question)
+      if (!length(single) && nrow(main) == 1L && !sfx %in% valid_codes(qid)) {
+        single <- main$col
+      }
       if (!length(single)) return(rep(FALSE, n))
       return(Reduce(`|`, lapply(single, function(cc) {
-        x <- to_choice(qid, val(cc)); !is.na(x) & x == c1
+        has_code(qid, val(cc), c1)
       })))
     }
     r <- parts[1]; a <- parts[2]
@@ -516,7 +587,7 @@ exposure_context <- function(responses, cols, payloads, blocks, q, n) {
     rowc <- main$col[sfx == r]
     if (!length(rowc)) return(rep(FALSE, n))
     Reduce(`|`, lapply(rowc, function(cc) {
-      x <- to_choice(qid, val(cc)); !is.na(x) & x == a
+      has_code(qid, val(cc), a)
     }))
   }
 
@@ -559,13 +630,14 @@ exposure_context <- function(responses, cols, payloads, blocks, q, n) {
 furthest_from_column <- function(v, blocks, q_block) {
   v <- trimws(as.character(v))
   out <- rep(NA_real_, length(v))
+  fill <- function(m) { i <- is.na(out) & !is.na(m); out[i] <<- m[i] }
+  # exact identifiers first, so a block named "2" is that block, not block 2
+  fill(match(v, blocks$block_id))
+  fill(match(v, blocks$block_name))
+  fill(match(unname(q_block[v]), blocks$block_id))
   num <- suppressWarnings(as.numeric(v))
-  ok <- !is.na(num) & num >= 1 & num <= nrow(blocks)
-  out[ok] <- floor(num[ok])
-  m <- match(v, blocks$block_id); out[is.na(out) & !is.na(m)] <- m[is.na(out) & !is.na(m)]
-  m <- match(v, blocks$block_name); out[is.na(out) & !is.na(m)] <- m[is.na(out) & !is.na(m)]
-  qb <- match(unname(q_block[v]), blocks$block_id)
-  out[is.na(out) & !is.na(qb)] <- qb[is.na(out) & !is.na(qb)]
+  ok <- !is.na(num) & num == round(num) & num >= 1 & num <= nrow(blocks)
+  fill(ifelse(ok, num, NA_real_))
   out
 }
 
@@ -604,30 +676,21 @@ eval_logic_vec <- function(lg, env) {
   n <- env$ctx$n
   gkeys <- setdiff(names(lg), c("Type", "inPage"))
   if (!length(gkeys)) return(rep(TRUE, n))
-  # Groups joined by "AndIf" bind before groups joined by "ElseIf":
-  # If A / ElseIf B / AndIf C is A | (B & C). On a large Qualtrics export
-  # this reading matched which questions respondents answered (99.7%) where
-  # left-to-right evaluation, (A | B) & C, did not (60%).
-  terms <- list()
+  vals <- vector("list", length(gkeys))
   for (gi in seq_along(gkeys)) {
     g <- lg[[gkeys[gi]]]
-    lkeys <- setdiff(names(g), "Type")
     gv <- NULL
-    for (lk in lkeys) {
+    for (lk in setdiff(names(g), "Type")) {
       lit <- g[[lk]]
       v <- eval_literal_vec(lit, env)
       gv <- if (is.null(gv)) v
             else if (identical(lit$Conjuction, "Or")) gv | v else gv & v
     }
-    if (is.null(gv)) gv <- rep(TRUE, n)
-    gt <- g$Type %||% NA_character_
-    if (gi > 1L && (is.na(gt) || identical(gt, "AndIf"))) {
-      terms[[length(terms)]] <- terms[[length(terms)]] & gv
-    } else {
-      terms[[length(terms) + 1L]] <- gv
-    }
+    vals[[gi]] <- gv %||% rep(TRUE, n)
   }
-  Reduce(`|`, terms)
+  types <- vapply(gkeys, function(k) lg[[k]]$Type %||% NA_character_, character(1))
+  # "AndIf" groups bind before "ElseIf" groups (see combine_groups())
+  combine_groups(vals, unname(types))
 }
 
 #' @noRd
@@ -707,11 +770,23 @@ loop_spec <- function(qsf, blocks, k) {
           else if (grepl("DisplayedChoices", loc)) "displayed"
           else "static"
   lmax <- blocks$loop_max[k]
+  # Export columns number loops by position in the loop field (1, 2, ...),
+  # not by choice id, so a choice-driven loop keeps both: iteration j is
+  # the j-th choice of the driving question.
+  choice_ids <- if (kind %in% c("selected", "unselected", "displayed") && !is.na(driver))
+                  names(qsf_elements_payload(qsf, driver)$Choices %||% list())
+                else character(0)
   ids_all <- if (identical(kind, "numeric") && !is.na(lmax)) as.character(seq_len(lmax))
-             else if (kind %in% c("selected", "unselected", "displayed") && !is.na(driver))
-               names(qsf_elements_payload(qsf, driver)$Choices %||% list())
-             else names(lo$Static %||% list())
-  list(kind = kind, driver = driver, ids = ids_all, max = lmax)
+             else if (length(choice_ids)) as.character(seq_along(choice_ids))
+             else as.character(seq_along(lo$Static %||% list()))
+  rnd <- lo$Randomization %||% "None"
+  randomised <- !(is.character(rnd) && rnd %in% c("None", ""))
+  # a randomised loop may present only a subset of its eligible iterations
+  lim <- lo[grepl("subset|limit|present", names(lo), ignore.case = TRUE)]
+  limited <- randomised &&
+    any(!is.na(suppressWarnings(as.numeric(unlist(lim, use.names = FALSE)))))
+  list(kind = kind, driver = driver, ids = ids_all, max = lmax, choice_ids = choice_ids,
+       randomised = randomised, limited = limited)
 }
 
 #' @noRd
@@ -733,16 +808,20 @@ exposure_walk <- function(qsf, blocks, ctx, emb, ans_block, last_ans, fin,
   st$end_pos <- rep(Inf, n)
   st$routed <- matrix(FALSE, n, nb)
   st$unres_branch <- integer(n)
+  # per respondent and block: loop iterations not recoverable (see
+  # enter_block); counted later only for blocks the respondent reached
+  st$unres_loop <- matrix(FALSE, n, nb)
   st$conflicts <- integer(n)
   st$pos <- 0L
   st$shown <- list()       # qid -> logical vector, or matrix n x iteration ids
   st$unres <- list()       # qid -> logical vector / matrix: fell back to answered
   st$iters <- list()       # block id -> logical matrix n x iteration ids
-  st$iter_src <- list()
+  st$loop_random <- list()
   st$warned_rand <- FALSE
   # embedded values: column values where the export has the field
   st$emb_val <- lapply(emb, identity)
   st$emb_known <- lapply(emb, function(v) rep(TRUE, n))
+  st$emb_col <- emb                # exported (final) values, kept for restores
   st$emb_has_col <- names(emb)
 
   env <- list(ctx = ctx, loop = NULL, iter = NULL)
@@ -794,38 +873,55 @@ exposure_walk <- function(qsf, blocks, ctx, emb, ans_block, last_ans, fin,
       return(invisible())
     }
     sp <- loop_spec(qsf, blocks, k)
-    ids <- union(sp$ids, as.character(setdiff(ctx$iters_of(qs), 0L)))
+    ids <- sp$ids
+    extra <- setdiff(as.character(setdiff(ctx$iters_of(qs), 0L)), ids)
+    ids <- c(ids, extra[order(as.integer(extra))])
+    if (!length(ids)) {
+      # no loop size in the QSF and no iteration columns: nothing to count
+      st$unres_loop[, k] <- st$unres_loop[, k] | act
+      none <- matrix(FALSE, n, 0L)
+      merge_iters(bid, none)
+      for (qid in qs) merge_q(qid, none, none)
+      return(invisible())
+    }
     obs <- vapply(ids, function(j) {
       Reduce(`|`, lapply(qs, function(x) ctx$answered(x, as.integer(j))), init = rep(FALSE, n))
     }, logical(n))
     if (is.null(dim(obs))) obs <- matrix(obs, nrow = n, dimnames = list(NULL, ids))
-    # observed: every iteration up to the last one answered
+    # observed: every iteration up to the last one answered. A randomised
+    # loop is not shown in export order, so only answered iterations count.
     last_obs <- apply(obs, 1, function(r) if (any(r)) max(which(r)) else 0L)
-    obs_fill <- outer(last_obs, seq_along(ids), `>=`)
+    obs_fill <- if (sp$randomised) obs else outer(last_obs, seq_along(ids), `>=`)
     drv <- matrix(NA, n, length(ids), dimnames = list(NULL, ids))
-    if (identical(loop_iterations, "driver") && !is.na(sp$driver) && ctx$has_cols(sp$driver)) {
+    # the driver gives the eligible iterations; a randomised loop that shows
+    # only a subset of them presents an unknown number, so it is left to the
+    # answers
+    use_driver <- identical(loop_iterations, "driver") && !sp$limited
+    if (use_driver && !is.na(sp$driver) && ctx$has_cols(sp$driver)) {
       if (identical(sp$kind, "numeric")) {
         cnt <- floor(ctx$numeric_answer(sp$driver))
         cnt <- pmin(pmax(cnt, 0), length(ids))
         for (j in seq_along(ids)) drv[, j] <- ifelse(is.na(cnt), NA, j <= cnt)
       } else if (sp$kind %in% c("selected", "unselected")) {
         any_ans <- ctx$answered(sp$driver, 0L)
-        for (j in seq_along(ids)) {
-          s <- ctx$selected(sp$driver, ids[j], 0L)
+        for (j in seq_along(sp$choice_ids)) {
+          s <- ctx$selected(sp$driver, sp$choice_ids[j], 0L)
           if (identical(sp$kind, "unselected")) s <- !s
           drv[, j] <- ifelse(any_ans, s, NA)
         }
       }
     }
-    if (identical(sp$kind, "static") && is.na(sp$driver) && identical(loop_iterations, "driver")) {
+    if (identical(sp$kind, "static") && is.na(sp$driver) && !sp$randomised &&
+        identical(loop_iterations, "driver")) {
       drv[, ] <- TRUE
     }
-    from_driver <- !is.na(drv[, 1L, drop = TRUE]) & identical(loop_iterations, "driver")
+    if (sp$randomised) st$unres_loop[, k] <- st$unres_loop[, k] | (act & is.na(drv[, 1L]))
+    if (sp$limited) st$unres_loop[, k] <- st$unres_loop[, k] | act
     inm <- ifelse(is.na(drv), obs_fill, drv | obs)
     inm <- matrix(as.logical(inm), n, length(ids), dimnames = list(NULL, ids))
     inm <- inm & act
-    st$iters[[bid]] <- inm
-    st$iter_src[[bid]] <- ifelse(from_driver, "driver", "observed")
+    merge_iters(bid, inm)
+    st$loop_random[[bid]] <- sp$randomised
     for (qid in qs) {
       sh <- matrix(FALSE, n, length(ids), dimnames = list(NULL, ids))
       un <- sh
@@ -836,19 +932,43 @@ exposure_walk <- function(qsf, blocks, ctx, emb, ans_block, last_ans, fin,
         r <- eval_q(qid, m, e)
         sh[, j] <- r$shown; un[, j] <- r$unres
       }
-      st$shown[[qid]] <- sh
-      st$unres[[qid]] <- un
+      # stored at once, so a later question's Displayed() sees this one
+      merge_q(qid, sh, un)
     }
+  }
+
+  # A block can appear more than once in the flow: occurrences are combined,
+  # so a later (untaken) one never overwrites an earlier one.
+  or_m <- function(a, b) if (is.null(a) || !identical(dim(a), dim(b))) b else a | b
+  merge_iters <- function(bid, inm) st$iters[[bid]] <- or_m(st$iters[[bid]], inm)
+  merge_q <- function(qid, sh, un) {
+    st$shown[[qid]] <- or_m(st$shown[[qid]], sh)
+    st$unres[[qid]] <- or_m(st$unres[[qid]], un)
   }
 
   set_embedded <- function(nd, mask) {
     act <- mask & st$alive
     for (e in nd$EmbeddedData %||% list()) {
       f <- e$Field %||% ""
-      if (!nzchar(f) || f %in% st$emb_has_col) next
+      if (!nzchar(f)) next
       val <- e$Value %||% ""
-      if (!is.character(val) || grepl("${", val, fixed = TRUE)) {
-        if (!is.null(st$emb_val[[f]])) st$emb_known[[f]][act] <- FALSE
+      has_col <- f %in% st$emb_has_col
+      # Assignments apply in flow order, from this point on. A field the
+      # export has starts at its column (its final value), so a field set
+      # more than once is read as it stood at each branch:
+      # - a fixed value (Custom, including an empty one) sets that value;
+      # - a piped or computed value (${...}, $e{...}) cannot be evaluated: an
+      #   exported field goes back to its column value, any other field
+      #   becomes unknown;
+      # - a declaration with no value (set from a panel or URL) changes
+      #   nothing.
+      if (!is.character(val) || grepl("\\$[A-Za-z]*\\{", val)) {
+        if (has_col) {
+          st$emb_val[[f]][act] <- st$emb_col[[f]][act]
+          st$emb_known[[f]][act] <- TRUE
+        } else if (!is.null(st$emb_val[[f]])) {
+          st$emb_known[[f]][act] <- FALSE
+        }
         next
       }
       if (!nzchar(val) && !identical(e$Type, "Custom")) next
@@ -916,6 +1036,7 @@ assemble_block <- function(k, blocks, walk, q, pages, rr, outcome, furthest_ord,
   qs <- blocks$question_ids[[k]]
   bid <- blocks$block_id[k]
   pts <- numeric(n); items <- integer(n); ritems <- integer(n); unres <- integer(n)
+  hid <- integer(n)
   pg_list <- list()
   add_page <- function(key, s) {
     pg_list[[key]] <<- if (is.null(pg_list[[key]])) s else pg_list[[key]] | s
@@ -924,30 +1045,39 @@ assemble_block <- function(k, blocks, walk, q, pages, rr, outcome, furthest_ord,
     for (qid in qs) {
       s <- (walk$shown[[qid]] %||% rep(FALSE, n)) & rr
       pts <- pts + q$gfs[[qid]] * s
-      items <- items + as.integer(s)
-      ritems <- ritems + as.integer(s) * q$responsive[[qid]]
+      vis <- q$visible[[qid]]
+      items <- items + as.integer(s) * vis
+      ritems <- ritems + as.integer(s) * q$responsive[[qid]] * vis
+      hid <- hid + as.integer(s) * !vis
       unres <- unres + as.integer((walk$unres[[qid]] %||% rep(FALSE, n)) & rr)
       if (isTRUE(q$visible[[qid]])) add_page(pages[[qid]] %||% "1", s)
     }
     npg <- if (length(pg_list)) as.integer(Reduce(`+`, lapply(pg_list, as.integer))) else integer(n)
     return(list(shown_points = pts, shown_items = items, shown_response_items = ritems,
-                shown_pages = npg, unresolved_items = unres, iterations = NA_integer_))
+                shown_pages = npg, unresolved_items = unres, iterations = NA_integer_,
+                shown_hidden_items = hid))
   }
   inm <- walk$iters[[bid]]
   if (is.null(inm)) {
     z <- integer(n)
     return(list(shown_points = numeric(n), shown_items = z, shown_response_items = z,
-                shown_pages = z, unresolved_items = z, iterations = z))
+                shown_pages = z, unresolved_items = z, iterations = z,
+                shown_hidden_items = z))
   }
   ids <- colnames(inm)
-  # exit block of a break-off: iterations up to the last one answered
+  # exit block of a break-off: iterations up to the last one answered (a
+  # randomised loop: only the iterations answered, as its order is unknown)
   exit_here <- outcome == "breakoff" & is.finite(furthest_ord) & furthest_ord == k
-  if (any(exit_here)) {
+  if (any(exit_here) && length(ids)) {
     obs <- vapply(ids, function(j) Reduce(`|`, lapply(qs, function(x)
       ctx$answered(x, as.integer(j))), init = rep(FALSE, n)), logical(n))
     if (is.null(dim(obs))) obs <- matrix(obs, nrow = n)
-    last_obs <- apply(obs, 1, function(r) if (any(r)) max(which(r)) else 1L)
-    lim <- outer(last_obs, seq_along(ids), `>=`)
+    if (isTRUE(walk$loop_random[[bid]])) {
+      lim <- obs
+    } else {
+      last_obs <- apply(obs, 1, function(r) if (any(r)) max(which(r)) else 1L)
+      lim <- outer(last_obs, seq_along(ids), `>=`)
+    }
     inm[exit_here, ] <- inm[exit_here, , drop = FALSE] & lim[exit_here, , drop = FALSE]
   }
   inm <- inm & rr
@@ -957,8 +1087,10 @@ assemble_block <- function(k, blocks, walk, q, pages, rr, outcome, furthest_ord,
     for (qid in qs) {
       s <- walk$shown[[qid]][, j] & inm[, j]
       pts <- pts + q$gfs[[qid]] * s
-      items <- items + as.integer(s)
-      ritems <- ritems + as.integer(s) * q$responsive[[qid]]
+      vis <- q$visible[[qid]]
+      items <- items + as.integer(s) * vis
+      ritems <- ritems + as.integer(s) * q$responsive[[qid]] * vis
+      hid <- hid + as.integer(s) * !vis
       unres <- unres + as.integer(walk$unres[[qid]][, j] & inm[, j])
       if (isTRUE(q$visible[[qid]])) add_page(pages[[qid]] %||% "1", s)
     }
@@ -966,5 +1098,5 @@ assemble_block <- function(k, blocks, walk, q, pages, rr, outcome, furthest_ord,
   }
   list(shown_points = pts, shown_items = items, shown_response_items = ritems,
        shown_pages = npg, unresolved_items = unres,
-       iterations = as.integer(rowSums(inm)))
+       iterations = as.integer(rowSums(inm)), shown_hidden_items = hid)
 }

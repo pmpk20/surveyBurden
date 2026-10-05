@@ -377,10 +377,13 @@ sim <- as.data.frame(do.call(rbind, lapply(rows, function(r)
 blocks <- resolve_live_blocks(qsf)
 q_block <- setNames(rep(blocks$flow_order, lengths(blocks$question_ids)),
                     unlist(blocks$question_ids))
-col_block <- q_block[sub("^[0-9]+_", "", sub("_.*$", "", cols))]
+col_block <- q_block[sub("_.*$", "", sub("^[0-9]+_", "", cols))]
 quit_at <- ifelse(runif(400) < 0.3, sample(4:12, 400, replace = TRUE), Inf)
 for (k in which(!is.na(col_block)))
   sim[[cols[k]]][quit_at < col_block[k]] <- NA
+stopifnot(!anyNA(col_block[grepl("QID", cols)]))   # every answer has a block
+stopifnot(all(vapply(which(!is.na(col_block)), function(k)
+  all(is.na(sim[[cols[k]]][quit_at < col_block[k]])), logical(1))))
 screened <- is.na(sim$QID4)
 sim$Finished <- as.integer(is.infinite(quit_at) | screened)
 ```

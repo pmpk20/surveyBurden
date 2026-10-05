@@ -53,6 +53,8 @@ reference:
     desc: Score each respondent's actual burden from their response data.
     contents:
       - realised_burden
+      - realised_exposure
+      - exposure_person_period
   - title: Diagnostics
     desc: Check where the calculation is exact and calibrate points to minutes.
     contents:

@@ -19,6 +19,24 @@
   impossible in practice. The check is textual and informational only.
 * `summary_line()` now works on `burden_report` objects, returning the
   same verdict line as `print()` and `summary()`.
+* New `realised_exposure()` returns, for every respondent including those
+  who broke off or were screened out, the blocks the survey flow routed
+  them into and the GfS+ points, items and pages they were **shown** in
+  each block. Branch logic and display logic are evaluated against each
+  respondent's own answers, in flow order. Logic the data cannot settle
+  (an unsupported literal, or an embedded field absent from the export,
+  such as one set by question JavaScript) falls back to whether the
+  respondent answered, and is counted per respondent rather than hidden.
+* New `exposure_person_period()` turns `realised_exposure()` output into
+  person-period data for a discrete-time hazard model of break-off: the
+  blocks each respondent was at risk in, the burden shown before each, and
+  the block's design score.
+* Display-logic groups joined by "And If" are now evaluated before groups
+  joined by "Else If": `If A / Else If B / And If C` is `A or (B and C)`,
+  not `(A or B) and C`. On a large Qualtrics export this reading matched
+  which questions respondents answered (99.7%, against 60% for left to
+  right). This changes burden profiles for surveys that mix the two; the
+  demo survey's 75th percentile moves from 129 to 130 points.
 
 # surveyBurden 0.2.0
 

@@ -65,7 +65,9 @@ test_that("$burden matches the pre-refactor structural range (value parity)", {
   expect_equal(bstat(r, "min"), 106)
   expect_equal(bstat(r, "p25"), 117)
   expect_equal(bstat(r, "median"), 123)
-  expect_equal(bstat(r, "p75"), 129)
+  # 130 (was 129) since And If binds before Else If: the demo's QID22
+  # (If employed / Else If self-employed / And If not fully remote) shows more
+  expect_equal(bstat(r, "p75"), 130)
   expect_equal(bstat(r, "max"), 143)
 })
 

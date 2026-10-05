@@ -76,7 +76,7 @@ test_that("burden_report output is unchanged by the internal single-pass wiring"
   q <- q_fx()
   r <- burden_report(q, certainty = TRUE, quiet = TRUE)
   expect_equal(r$burden$points,
-               c(106, 117, 123, 129, 143), tolerance = 1e-8)
+               c(106, 117, 123, 130, 143), tolerance = 1e-8)
   expect_equal(nrow(r$paths), 4L)
   expect_equal(r$certainty$paths$n_full, 2L)
 })

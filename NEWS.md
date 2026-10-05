@@ -1,5 +1,11 @@
 # surveyBurden (development version)
 
+* `validate_times()` gains `basis = "shown"`: each respondent's burden is
+  the GfS+ points of every item displayed to them (summed `shown_points`
+  from `realised_exposure()`), i.e. the respondent burden on their route,
+  including descriptive text and questions left blank. Recommended when the
+  export allows the flow to be replayed; `"auto"` is unchanged.
+
 * `realised_burden()` and `realised_exposure()` now map response columns
   through the ImportId row of a raw Qualtrics CSV export, so columns with
   custom export tags (e.g. `w4_q19x1`) are found. Display-order, page-timing

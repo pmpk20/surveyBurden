@@ -109,3 +109,58 @@ test_that("a constant prediction gives cor NA without a warning, and prints", {
   expect_true(any(grepl("Observed minutes", out)))
   expect_true(any(grepl("same prediction", out)))
 })
+
+# respondents on the bundled demo survey: complete, break-off, screen-out and
+# a finisher who leaves displayed questions blank
+shown_fixture <- function() {
+  data.frame(
+    ResponseId = c("R_1", "R_2", "R_3", "R_4"),
+    Finished   = c(1, 0, 1, 1),
+    completion_mins = c(30, 12, 5, 25),
+    QID2 = c("1", "1", "2", "1"), QID3 = c(NA, "1", NA, "1"),
+    QID4 = c("2", "3", NA, "2"), QID6 = c("1", "4", NA, "1"),
+    QID9 = c("2", NA, NA, NA), QID10 = c("1", NA, NA, "1"),
+    `1_QID11` = c("2", NA, NA, "1"), QID19_1 = c("3", NA, NA, NA),
+    QID22 = c("3", NA, NA, "2"), QID26 = c("1", NA, NA, "1"),
+    check.names = FALSE
+  )
+}
+
+test_that("basis = 'shown' uses each respondent's summed shown points", {
+  qsf <- read_qsf(demo_qsf())
+  obs <- shown_fixture()
+  v <- validate_times(qsf, obs, basis = "shown", finished_only = FALSE)
+  expect_identical(v$basis, "shown")
+  ex <- suppressMessages(realised_exposure(qsf, obs))
+  expected <- vapply(obs$ResponseId,
+                     # blocks never reached have NA shown points
+                     function(id) sum(ex$shown_points[ex$response_id == id], na.rm = TRUE),
+                     numeric(1), USE.NAMES = FALSE)
+  expect_equal(v$predicted_burden, expected)
+  out <- cli::cli_fmt(print(v))
+  expect_true(any(grepl("every item displayed", out)))
+})
+
+test_that("shown burden is at least the realised burden for every respondent", {
+  qsf <- read_qsf(demo_qsf())
+  obs <- shown_fixture()
+  shown    <- validate_times(qsf, obs, basis = "shown",    finished_only = FALSE)
+  realised <- validate_times(qsf, obs, basis = "realised", finished_only = FALSE)
+  expect_true(all(shown$predicted_burden >= realised$predicted_burden))
+  expect_true(any(shown$predicted_burden > realised$predicted_burden))
+})
+
+test_that("basis = 'shown' keeps respondent order after row filtering", {
+  qsf <- read_qsf(demo_qsf())
+  obs <- shown_fixture()
+  all_rows <- validate_times(qsf, obs, basis = "shown", finished_only = FALSE)
+  fin_rows <- validate_times(qsf, obs, basis = "shown")
+  expect_equal(fin_rows$predicted_burden, all_rows$predicted_burden[obs$Finished == 1])
+})
+
+test_that("basis = 'shown' propagates realised_exposure() errors", {
+  qsf <- read_qsf(demo_qsf())
+  obs <- shown_fixture()
+  obs$ResponseId[2] <- "R_1"   # duplicated id
+  expect_error(validate_times(qsf, obs, basis = "shown"), "unique")
+})

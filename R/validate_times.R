@@ -5,8 +5,14 @@
 #' predicted and observed distributions, their correlation, and the
 #' points-per-minute rate the data imply.
 #'
-#' Each respondent's burden comes from one of two bases (`basis`):
+#' Each respondent's burden comes from one of three bases (`basis`):
 #' \describe{
+#'   \item{`"shown"`}{[realised_exposure()]: the GfS+ points of every item
+#'     displayed to the respondent, summed over blocks -- including
+#'     descriptive text and questions left blank. This is the respondent
+#'     burden \eqn{B_i} (every item on the respondent's route) and is the
+#'     recommended basis when the export allows the flow to be replayed.
+#'     Errors from [realised_exposure()] are not caught.}
 #'   \item{`"realised"`}{[realised_burden()]: the points of the questions the
 #'     respondent actually answered. Needs response columns that map to the
 #'     survey's questions, as in a raw Qualtrics CSV export.}
@@ -16,7 +22,8 @@
 #'     Without such columns every respondent gets the same prediction.}
 #' }
 #' `"auto"` (default) uses `"realised"` when the response columns map to
-#' questions and `"route"` otherwise.
+#' questions and `"route"` otherwise; it never picks `"shown"`, which must be
+#' asked for.
 #'
 #' The observed data need a completion time -- `completion_mins`,
 #' `completion_seconds`, or Qualtrics' own `Duration (in seconds)` column
@@ -31,8 +38,9 @@
 #' @param trim Length-2 numeric: the completion-time range to keep, in
 #'   minutes. Rows outside it, or with a missing or non-finite time, are
 #'   dropped.
-#' @param basis `"auto"`, `"realised"` or `"route"`: where each respondent's
-#'   burden comes from (see Details).
+#' @param basis `"auto"`, `"realised"`, `"route"` or `"shown"`: where each
+#'   respondent's burden comes from (see Details). `"shown"` is recommended
+#'   when the export allows replaying the flow.
 #' @param finished_only If `TRUE` (default) and `observed` has a `Finished`
 #'   column, keep only respondents who finished. A break-off's duration does
 #'   not measure the time to complete the survey.
@@ -40,7 +48,7 @@
 #' @return A `burden_time_validation` list (printed as a short summary):
 #'   \describe{
 #'     \item{n}{Rows kept after `finished_only` and `trim`.}
-#'     \item{basis}{The basis used: `"realised"` or `"route"`.}
+#'     \item{basis}{The basis used: `"shown"`, `"realised"` or `"route"`.}
 #'     \item{observed, predicted}{Quantile vectors (minutes).}
 #'     \item{ratio}{Predicted median / observed median.}
 #'     \item{cor}{Pearson correlation of predicted points and observed
@@ -68,7 +76,7 @@
 #'
 #' @export
 validate_times <- function(qsf, observed, scheme = gfs_scheme(), trim = c(3, 180),
-                           basis = c("auto", "realised", "route"),
+                           basis = c("auto", "realised", "route", "shown"),
                            finished_only = TRUE) {
   basis <- match.arg(basis)
   if (!inherits(qsf, "qsf_raw")) qsf <- read_qsf(qsf)
@@ -79,7 +87,9 @@ validate_times <- function(qsf, observed, scheme = gfs_scheme(), trim = c(3, 180
   # realised burden is computed on the full data: row subsetting would drop
   # the ImportId attribute the column mapping uses
   realised <- NULL
-  if (!identical(basis, "route")) {
+  if (identical(basis, "shown")) {
+    realised <- shown_points_per_respondent(qsf, observed, scheme)
+  } else if (!identical(basis, "route")) {
     # realised_burden() also predicts each route; that prediction is not used
     # here, so its route-matching warning is muffled
     realised <- tryCatch(
@@ -91,8 +101,8 @@ validate_times <- function(qsf, observed, scheme = gfs_scheme(), trim = c(3, 180
           }
         }),
       error = function(e) if (identical(basis, "realised")) stop(e) else NULL)
+    basis <- if (is.null(realised)) "route" else "realised"
   }
-  basis <- if (is.null(realised)) "route" else "realised"
 
   mins <- completion_minutes(observed)
   keep <- is.finite(mins) & mins >= trim[1] & mins <= trim[2]
@@ -103,7 +113,7 @@ validate_times <- function(qsf, observed, scheme = gfs_scheme(), trim = c(3, 180
   o <- observed[keep, , drop = FALSE]
   o$completion_mins <- mins[keep]
 
-  if (identical(basis, "realised")) {
+  if (!identical(basis, "route")) {
     o$pred_pts <- realised[keep]
   } else {
     o$pred_pts <- respondent_burden(qsf, routes = o, scheme = scheme)$pred_pts
@@ -131,9 +141,10 @@ validate_times <- function(qsf, observed, scheme = gfs_scheme(), trim = c(3, 180
 
 #' @export
 print.burden_time_validation <- function(x, ...) {
-  basis_txt <- if (identical(x$basis, "realised"))
-    "realised burden (questions each respondent answered)" else
-    "route prediction (respondent_burden())"
+  basis_txt <- switch(x$basis,
+    shown    = "shown burden (every item displayed to each respondent)",
+    realised = "realised burden (questions each respondent answered)",
+    "route prediction (respondent_burden())")
   tab <- rbind(
     c("", "10%", "25%", "50%", "75%", "90%"),
     c("Observed minutes",  sprintf("%.1f", x$observed)),
@@ -145,6 +156,22 @@ print.burden_time_validation <- function(x, ...) {
   cli::cli_text("Correlation (points vs minutes): {if (is.na(x$cor)) 'NA (every respondent has the same prediction)' else sprintf('%.2f', x$cor)}")
   cli::cli_text("Implied points per minute: {sprintf('%.1f', x$implied_points_per_minute)}")
   invisible(x)
+}
+
+#' Shown points per respondent, in the row order of `observed`: the sum of
+#' `shown_points` over reached blocks from [realised_exposure()], matched on the same
+#' id column it uses (or row position when there is none). Respondents absent
+#' from the exposure table get NA. Errors from realised_exposure() propagate.
+#' @noRd
+shown_points_per_respondent <- function(qsf, observed, scheme) {
+  ex <- suppressMessages(realised_exposure(qsf, observed, scheme = scheme))
+  id_col <- resolve_id_col(observed, NULL)
+  ids <- if (!is.null(id_col)) observed[[id_col]] else seq_len(nrow(observed))
+  # blocks a respondent never reached have NA shown points: they add nothing,
+  # but a respondent with no reached block at all stays NA
+  sums <- tapply(ex$shown_points, as.character(ex$response_id), function(p)
+    if (all(is.na(p))) NA_real_ else sum(p, na.rm = TRUE))
+  unname(as.numeric(sums[match(as.character(ids), names(sums))]))
 }
 
 #' Completion time in minutes from the first duration column found:

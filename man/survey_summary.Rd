@@ -13,8 +13,11 @@ survey_summary(qsf, blocks = NULL)
 \code{qsf} (internal reuse; \code{NULL} computes it here).}
 }
 \value{
-A list: \code{survey_name}, \code{n_questions}, \code{n_blocks}, \code{n_branches},
-\code{n_randomisers}, \code{n_loop_blocks}, \code{n_end_points}.
+A list: \code{survey_name}, \code{n_questions}, \code{n_pages}, \code{n_blocks},
+\code{n_branches}, \code{n_randomisers}, \code{n_loop_blocks}, \code{n_end_points}.
+\code{n_pages} counts the pages of the live blocks that hold at least one
+question: each block starts a page and each page break adds one. Like
+\code{n_questions}, it counts a Loop & Merge block once, not once per pass.
 }
 \description{
 Structural summary of a survey

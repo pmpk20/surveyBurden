@@ -58,7 +58,7 @@
 #'   names. Print it for the formatted summary, or read its components:
 #'   \describe{
 #'     \item{survey}{One-row tibble of structural counts: `survey_name`,
-#'       `n_questions`, `n_blocks`, `n_branches`, `n_randomisers`,
+#'       `n_questions`, `n_pages`, `n_blocks`, `n_branches`, `n_randomisers`,
 #'       `n_loop_blocks`, `n_end_points`, `n_paths`, `n_complete_paths`,
 #'       `n_screenout_paths`.}
 #'     \item{burden}{Five-row tibble, one row per statistic (`min`, `p25`,
@@ -164,6 +164,7 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
   survey <- tibble::tibble(
     survey_name       = isum$survey_name,
     n_questions       = as.integer(isum$n_questions),
+    n_pages           = as.integer(isum$n_pages),
     n_blocks          = as.integer(isum$n_blocks),
     n_branches        = as.integer(isum$n_branches),
     n_randomisers     = as.integer(isum$n_randomisers),
@@ -409,20 +410,24 @@ burden_verdict_line <- function(burden, ppm, benchmark_median, n_complete,
   mn_m <- round(pt("min") / ppm); mx_m <- round(pt("max") / ppm)
 
   if (identical(basis, "naive")) {
-    return(sprintf(
-      "Path burden runs %d-%d points (~%d-%d min) across %d completing path%s (naive band; median not computed).",
-      mn, mx, mn_m, mx_m, n_complete, pl))
+    return(c(
+      sprintf("Burden range: %d-%d GfS+ points across %d completing path%s (naive band; median not computed).",
+              mn, mx, n_complete, pl),
+      sprintf("Expected minutes: ~%d-%d.", mn_m, mx_m)))
   }
 
   med   <- round(pt("median"))
   med_m <- round(pt("median") / ppm)
   ratio <- sprintf("%.1f", pt("median") / benchmark_median)
-  line1 <- sprintf(
-    "Median completing path: %d GfS+ points, ~%d min - %sx the benchmark median of %d. Path burden ranges %d-%d points (%d-%d min) across %d completing path%s.",
-    med, med_m, ratio, round(benchmark_median), mn, mx, mn_m, mx_m, n_complete, pl)
+  lines <- c(
+    sprintf("Median burden: %d GfS+ points (range %d-%d across %d completing path%s).",
+            med, mn, mx, n_complete, pl),
+    sprintf("Expected minutes: ~%d (range %d-%d).", med_m, mn_m, mx_m),
+    sprintf("Relative to benchmark: %sx the median of %d points.",
+            ratio, round(benchmark_median)))
 
-  if (is.null(population_median)) return(line1)
-  c(line1, sprintf(
+  if (is.null(population_median)) return(lines)
+  c(lines, sprintf(
     "Population-weighted median: %d points (~%d min) across the supplied routes.",
     round(population_median), round(population_median / ppm)))
 }
@@ -447,6 +452,7 @@ print_burden_report_body <- function(x) {
   cli::cli_verbatim(render_table(rbind(
     c("", ""),
     c("Questions (live)",    ins$n_questions),
+    c("Pages",               ins$n_pages %||% NA),
     c("Blocks",              ins$n_blocks),
     c("Branch points",       ins$n_branches),
     c("Randomisers",         ins$n_randomisers),
@@ -470,7 +476,7 @@ print_burden_report_body <- function(x) {
   } else {
     if (identical(attr(b, "basis"), "naive")) b <- b[b$statistic %in% c("min", "max"), ]
     cli::cli_verbatim(render_table(rbind(
-      c("Statistic", "Points", "~Min", "Index"),
+      c("Statistic", "Points", "Expected Minutes", "Index"),
       cbind(labs[as.character(b$statistic)],
             formatC(b$points,  format = "f", digits = 0),
             formatC(b$minutes, format = "f", digits = 0),
@@ -483,7 +489,7 @@ print_burden_report_body <- function(x) {
     p <- x$population
     cli::cli_h2("Population-weighted burden (from your respondent routes)")
     cli::cli_verbatim(render_table(rbind(
-      c("Statistic", "Points", "~Min", "Index"),
+      c("Statistic", "Points", "Expected Minutes", "Index"),
       cbind(labs[as.character(p$statistic)],
             formatC(p$points,  format = "f", digits = 0),
             formatC(p$minutes, format = "f", digits = 0),
@@ -550,12 +556,11 @@ format.summary.burden_report <- function(x, ...) {
   ins <- x$survey
   cli::cli_fmt({
     cli::cli_h1("{ins$survey_name}")
-    cli::cli_text("{ins$n_questions} question{?s}, {ins$n_blocks} block{?s}, {ins$n_paths} structural path{?s} ({ins$n_complete_paths} complete).")
+    cli::cli_text("{ins$n_questions} question{?s}, {ins$n_pages} page{?s}, {ins$n_blocks} block{?s}, {ins$n_paths} structural path{?s} ({ins$n_complete_paths} complete).")
     for (ln in burden_verdict_line(x$burden, x$ppm, x$benchmark$median_points,
                                    ins$n_complete_paths)) {
       cli::cli_text(ln)
     }
-    cli::cli_text("Benchmark: median {x$benchmark$median_points} points across {x$benchmark$n_waves} GfS-scored waves.")
   }, collapse = FALSE)
 }
 

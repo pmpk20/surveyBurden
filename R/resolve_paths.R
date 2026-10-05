@@ -154,8 +154,11 @@ reachability_split <- function(qids, has_dl, refs, path_qids, parsed = NULL) {
 #' @param qsf A `qsf_raw` object from [read_qsf()].
 #' @param blocks Optional precomputed [resolve_live_blocks()] result for this
 #'   `qsf` (internal reuse; `NULL` computes it here).
-#' @return A list: `survey_name`, `n_questions`, `n_blocks`, `n_branches`,
-#'   `n_randomisers`, `n_loop_blocks`, `n_end_points`.
+#' @return A list: `survey_name`, `n_questions`, `n_pages`, `n_blocks`,
+#'   `n_branches`, `n_randomisers`, `n_loop_blocks`, `n_end_points`.
+#'   `n_pages` counts the pages of the live blocks that hold at least one
+#'   question: each block starts a page and each page break adds one. Like
+#'   `n_questions`, it counts a Loop & Merge block once, not once per pass.
 #'
 #' @examples
 #' qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
@@ -166,6 +169,8 @@ reachability_split <- function(qids, has_dl, refs, path_qids, parsed = NULL) {
 survey_summary <- function(qsf, blocks = NULL) {
   if (is.null(blocks)) blocks <- resolve_live_blocks(qsf)
   nodes  <- qsf_flow(qsf)[["Flow"]]
+  defs   <- qsf_block_defs(qsf)
+  names(defs) <- vapply(defs, function(b) b$ID %||% NA_character_, character(1))
 
   counts <- c(Branch = 0L, BlockRandomizer = 0L, EndSurvey = 0L)
   flow_walk(nodes, function(node) {
@@ -176,10 +181,23 @@ survey_summary <- function(qsf, blocks = NULL) {
   list(
     survey_name   = qsf$SurveyEntry$SurveyName %||% NA_character_,
     n_questions   = sum(lengths(blocks$question_ids)),
+    n_pages       = sum(vapply(defs[blocks$block_id], block_n_pages, integer(1))),
     n_blocks      = nrow(blocks),
     n_branches    = counts[["Branch"]],
     n_randomisers = counts[["BlockRandomizer"]],
     n_loop_blocks = sum(blocks$in_loop),
     n_end_points  = counts[["EndSurvey"]]
   )
+}
+
+#' Number of pages in a block that hold at least one question (a block starts
+#' on page 1; each page break adds one; empty pages are not counted)
+#' @noRd
+block_n_pages <- function(b) {
+  pg <- 1L; with_q <- integer(0)
+  for (el in b$BlockElements %||% list()) {
+    if (identical(el$Type, "Page Break")) pg <- pg + 1L
+    else if (identical(el$Type, "Question")) with_q <- c(with_q, pg)
+  }
+  length(unique(with_q))
 }

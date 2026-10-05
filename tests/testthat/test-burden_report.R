@@ -231,7 +231,7 @@ test_that("summary(burden_report) returns a short headline object", {
 test_that("the summary counts line singularises for a one-question, one-path survey", {
   fake <- structure(list(
     survey = tibble::tibble(
-      survey_name = "Tiny", n_questions = 1L, n_blocks = 1L,
+      survey_name = "Tiny", n_questions = 1L, n_pages = 1L, n_blocks = 1L,
       n_paths = 1L, n_complete_paths = 1L),
     burden = structure(
       tibble::tibble(statistic = factor(c("min", "p25", "median", "p75", "max"),
@@ -241,7 +241,7 @@ test_that("the summary counts line singularises for a one-question, one-path sur
     benchmark = list(median_points = 399, n_waves = 79L), ppm = 12
   ), class = "summary.burden_report")
   out <- paste(format(fake), collapse = " ")
-  expect_match(out, "1 question, 1 block, 1 structural path \\(")
+  expect_match(out, "1 question, 1 page, 1 block, 1 structural path \\(")
   expect_false(grepl("1 structural paths", out))
   expect_false(grepl("1 questions", out))
 })
@@ -287,7 +287,7 @@ test_that("burden_report is silent under quiet = TRUE", {
 
 test_that("print() opens with a verdict line before the Survey section", {
   out <- format(report_full())
-  verdict_i <- grep("Median completing path", out)
+  verdict_i <- grep("Median burden", out)
   instr_i   <- grep("Survey[^A-Za-z]*$", out)[1]   # the h2, not the title
   expect_length(verdict_i, 1L)
   expect_lt(verdict_i, instr_i)
@@ -297,9 +297,9 @@ test_that("the structural verdict states median, minutes, benchmark ratio and ra
   v <- paste(burden_verdict_line(
     report_full()$burden, 12, 399, report_full()$survey$n_complete_paths),
     collapse = " ")
-  expect_match(v, "Median completing path: 123 GfS\\+ points, ~10 min")
-  expect_match(v, "0[.]3x the benchmark median of 399")
-  expect_match(v, "ranges 106-143 points [(]9-12 min[)] across 2 completing paths")
+  expect_match(v, "Median burden: 123 GfS\\+ points [(]range 106-143 across 2 completing paths[)]")
+  expect_match(v, "Expected minutes: ~10 [(]range 9-12[)]")
+  expect_match(v, "Relative to benchmark: 0[.]3x the median of 399 points")
 })
 
 test_that("the verdict benchmark ratio is median / benchmark to one decimal", {
@@ -307,14 +307,15 @@ test_that("the verdict benchmark ratio is median / benchmark to one decimal", {
   v <- paste(burden_verdict_line(r$burden, attr(r, "points_per_minute"),
                                  attr(r, "benchmark")$median_points,
                                  r$survey$n_complete_paths), collapse = " ")
-  expect_match(v, sprintf("%.1fx the benchmark", bstat(r, "median") / 399), fixed = TRUE)
+  expect_match(v, sprintf("%.1fx the median", bstat(r, "median") / 399), fixed = TRUE)
 })
 
 test_that("the naive verdict gives a range, no median, no benchmark ratio", {
   r <- report_naive()
   v <- paste(burden_verdict_line(r$burden, 12, 399, r$survey$n_complete_paths),
              collapse = " ")
-  expect_match(v, "Path burden runs 103-145 points")
+  expect_match(v, "Burden range: 103-145 GfS\\+ points")
+  expect_match(v, "Expected minutes: ~9-12")
   expect_match(v, "naive band")
   expect_false(grepl("benchmark", v))
 })

@@ -158,3 +158,20 @@ test_that("survey_summary counts the structural features", {
   expect_equal(s$n_randomisers, 0L)
   expect_equal(s$n_loop_blocks, 2L)
 })
+
+test_that("block_n_pages counts pages that hold at least one question", {
+  q  <- function(id) list(Type = "Question", QuestionID = id)
+  pb <- list(Type = "Page Break")
+  expect_equal(block_n_pages(list(BlockElements = list(q("QID1"), pb, q("QID2")))), 2L)
+  expect_equal(block_n_pages(list(BlockElements = list(q("QID1"), pb))), 1L)       # trailing break
+  expect_equal(block_n_pages(list(BlockElements = list(pb, pb, q("QID1")))), 1L)   # leading breaks
+  expect_equal(block_n_pages(list(BlockElements = list())), 0L)
+})
+
+test_that("survey_summary counts pages across live blocks", {
+  qsf <- read_qsf(system.file("extdata", "demo_travel_survey.qsf", package = "surveyBurden"))
+  s <- survey_summary(qsf)
+  expect_true("n_pages" %in% names(s))
+  expect_gte(s$n_pages, s$n_blocks)
+  expect_lte(s$n_pages, s$n_questions)
+})

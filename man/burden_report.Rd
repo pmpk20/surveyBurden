@@ -79,7 +79,7 @@ An object of class \code{burden_report}: a list of tibbles under stable
 names. Print it for the formatted summary, or read its components:
 \describe{
 \item{survey}{One-row tibble of structural counts: \code{survey_name},
-\code{n_questions}, \code{n_blocks}, \code{n_branches}, \code{n_randomisers},
+\code{n_questions}, \code{n_pages}, \code{n_blocks}, \code{n_branches}, \code{n_randomisers},
 \code{n_loop_blocks}, \code{n_end_points}, \code{n_paths}, \code{n_complete_paths},
 \code{n_screenout_paths}.}
 \item{burden}{Five-row tibble, one row per statistic (\code{min}, \code{p25},

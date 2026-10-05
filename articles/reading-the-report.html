@@ -104,12 +104,14 @@ produced see <code><a href="../articles/gfs-scoring.html">vignette("gfs-scoring"
 <span><span class="va">report</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Burden Report: Neighbourhood Travel Survey (demo)</span> <span style="color: #00BBBB;">────────────────────</span></span></span>
-<span><span class="co">#&gt; Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of</span></span>
-<span><span class="co">#&gt; 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.</span></span>
+<span><span class="co">#&gt; Median burden: 123 GfS+ points (range 106-143 across 2 completing paths).</span></span>
+<span><span class="co">#&gt; Expected minutes: ~10 (range 9-12).</span></span>
+<span><span class="co">#&gt; Relative to benchmark: 0.3x the median of 399 points.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Survey</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Questions (live)     26</span></span>
+<span><span class="co">#&gt; Pages                12</span></span>
 <span><span class="co">#&gt; Blocks               12</span></span>
 <span><span class="co">#&gt; Branch points         3</span></span>
 <span><span class="co">#&gt; Randomisers           0</span></span>
@@ -123,13 +125,13 @@ produced see <code><a href="../articles/gfs-scoring.html">vignette("gfs-scoring"
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Burden (12 GfS+ points ~ 1 minute; index = points / 1500)</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Statistic        Points  ~Min  Index</span></span>
-<span><span class="co">#&gt; ------------------------------------</span></span>
-<span><span class="co">#&gt; Minimum             106     9   0.07</span></span>
-<span><span class="co">#&gt; 25th percentile     117    10   0.08</span></span>
-<span><span class="co">#&gt; Median              123    10   0.08</span></span>
-<span><span class="co">#&gt; 75th percentile     130    11   0.09</span></span>
-<span><span class="co">#&gt; Maximum             143    12   0.10</span></span>
+<span><span class="co">#&gt; Statistic        Points  Expected Minutes  Index</span></span>
+<span><span class="co">#&gt; ------------------------------------------------</span></span>
+<span><span class="co">#&gt; Minimum             106                 9   0.07</span></span>
+<span><span class="co">#&gt; 25th percentile     117                10   0.08</span></span>
+<span><span class="co">#&gt; Median              123                10   0.08</span></span>
+<span><span class="co">#&gt; 75th percentile     130                11   0.09</span></span>
+<span><span class="co">#&gt; Maximum             143                12   0.10</span></span>
 <span><span class="co">#&gt; Benchmark: median 399 points across 79 GfS-scored waves (Heimgartner &amp; Axhausen</span></span>
 <span><span class="co">#&gt; 2024).</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -193,11 +195,11 @@ structural counts and nothing else.</p>
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">report</span><span class="op">$</span><span class="va">survey</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 10</span></span></span>
-<span><span class="co">#&gt;   survey_name        n_questions n_blocks n_branches n_randomisers n_loop_blocks</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Neighbourhood Tra…          26       12          3             0             2</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: n_end_points &lt;int&gt;, n_paths &lt;int&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 11</span></span></span>
+<span><span class="co">#&gt;   survey_name              n_questions n_pages n_blocks n_branches n_randomisers</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Neighbourhood Travel Su…          26      12       12          3             0</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: n_loop_blocks &lt;int&gt;, n_end_points &lt;int&gt;, n_paths &lt;int&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   n_complete_paths &lt;int&gt;, n_screenout_paths &lt;int&gt;</span></span></span></code></pre></div>
 <p>Structural counts read straight from the survey (editing URL or QSF):
 live questions, blocks, branch points, block randomisers, Loop &amp;

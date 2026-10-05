@@ -124,7 +124,7 @@ names. Print it for the formatted summary, or read its components:
 - survey:
 
   One-row tibble of structural counts: `survey_name`, `n_questions`,
-  `n_blocks`, `n_branches`, `n_randomisers`, `n_loop_blocks`,
+  `n_pages`, `n_blocks`, `n_branches`, `n_randomisers`, `n_loop_blocks`,
   `n_end_points`, `n_paths`, `n_complete_paths`, `n_screenout_paths`.
 
 - burden:
@@ -222,10 +222,10 @@ br <- burden_report(qsf_path)
 #> ✔ Reading survey [9ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [112ms]
+#> ✔ Scoring questions and resolving paths [106ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [33ms]
+#> ✔ Checking calculation certainty [31ms]
 #> 
 #> ℹ Enumerating display-logic combinations
 #> ✔ Enumerating display-logic combinations [19ms]
@@ -233,12 +233,14 @@ br <- burden_report(qsf_path)
 br
 #> 
 #> ── Survey Burden Report: Neighbourhood Travel Survey (demo) ────────────────────
-#> Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of
-#> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.
+#> Median burden: 123 GfS+ points (range 106-143 across 2 completing paths).
+#> Expected minutes: ~10 (range 9-12).
+#> Relative to benchmark: 0.3x the median of 399 points.
 #> 
 #> ── Survey ──
 #> 
 #> Questions (live)     26
+#> Pages                12
 #> Blocks               12
 #> Branch points         3
 #> Randomisers           0
@@ -252,13 +254,13 @@ br
 #> 
 #> ── Burden (12 GfS+ points ~ 1 minute; index = points / 1500) ──
 #> 
-#> Statistic        Points  ~Min  Index
-#> ------------------------------------
-#> Minimum             106     9   0.07
-#> 25th percentile     117    10   0.08
-#> Median              123    10   0.08
-#> 75th percentile     130    11   0.09
-#> Maximum             143    12   0.10
+#> Statistic        Points  Expected Minutes  Index
+#> ------------------------------------------------
+#> Minimum             106                 9   0.07
+#> 25th percentile     117                10   0.08
+#> Median              123                10   0.08
+#> 75th percentile     130                11   0.09
+#> Maximum             143                12   0.10
 #> Benchmark: median 399 points across 79 GfS-scored waves (Heimgartner & Axhausen
 #> 2024).
 #> 
@@ -308,10 +310,10 @@ br
 summary(br)
 #> 
 #> ── Neighbourhood Travel Survey (demo) ──────────────────────────────────────────
-#> 26 questions, 12 blocks, 4 structural paths (2 complete).
-#> Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of
-#> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.
-#> Benchmark: median 399 points across 79 GfS-scored waves.
+#> 26 questions, 12 pages, 12 blocks, 4 structural paths (2 complete).
+#> Median burden: 123 GfS+ points (range 106-143 across 2 completing paths).
+#> Expected minutes: ~10 (range 9-12).
+#> Relative to benchmark: 0.3x the median of 399 points.
 br$burden
 #> # A tibble: 5 × 4
 #>   statistic points minutes  index

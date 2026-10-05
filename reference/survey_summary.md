@@ -23,8 +23,11 @@ survey_summary(qsf, blocks = NULL)
 
 ## Value
 
-A list: `survey_name`, `n_questions`, `n_blocks`, `n_branches`,
-`n_randomisers`, `n_loop_blocks`, `n_end_points`.
+A list: `survey_name`, `n_questions`, `n_pages`, `n_blocks`,
+`n_branches`, `n_randomisers`, `n_loop_blocks`, `n_end_points`.
+`n_pages` counts the pages of the live blocks that hold at least one
+question: each block starts a page and each page break adds one. Like
+`n_questions`, it counts a Loop & Merge block once, not once per pass.
 
 ## Examples
 
@@ -37,6 +40,9 @@ survey_summary(read_qsf(qsf_path))
 #> 
 #> $n_questions
 #> [1] 26
+#> 
+#> $n_pages
+#> [1] 12
 #> 
 #> $n_blocks
 #> [1] 12

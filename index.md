@@ -79,8 +79,9 @@ report
 ```
 
     #> ── Survey Burden Report: Neighbourhood Travel Survey (demo) ────────────────────
-    #> Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of
-    #> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.
+    #> Median burden: 123 GfS+ points (range 106-143 across 2 completing paths).
+    #> Expected minutes: ~10 (range 9-12).
+    #> Relative to benchmark: 0.3x the median of 399 points.
     #> ...
 
 The full printout adds the survey counts, the burden quantiles, burden
@@ -95,10 +96,10 @@ walks through every section.
 
 summary(report)
 #> ── Neighbourhood Travel Survey (demo) ──────────────────────────────────────────
-#> 26 questions, 12 blocks, 4 structural paths (2 complete).
-#> Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of
-#> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.
-#> Benchmark: median 399 points across 79 GfS+-scored waves.
+#> 26 questions, 12 pages, 12 blocks, 4 structural paths (2 complete).
+#> Median burden: 123 GfS+ points (range 106-143 across 2 completing paths).
+#> Expected minutes: ~10 (range 9-12).
+#> Relative to benchmark: 0.3x the median of 399 points.
 ```
 
 ## Reading the report

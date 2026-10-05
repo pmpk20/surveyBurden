@@ -2,6 +2,15 @@
 
 ## surveyBurden (development version)
 
+- [`survey_summary()`](https://pmpk20.github.io/surveyBurden/reference/survey_summary.md),
+  `burden_report()$survey` and both printouts now report the number of
+  pages (`n_pages`): each live block starts a page and each page break
+  adds one; empty pages are not counted.
+
+- The report headline is split into three lines: “Median burden” (points
+  and range), “Expected minutes” and “Relative to benchmark”. The burden
+  table’s `~Min` column is now “Expected Minutes”.
+
 - **Breaking:** “instrument” is now “survey” throughout.
   `instrument_summary()` is renamed
   [`survey_summary()`](https://pmpk20.github.io/surveyBurden/reference/survey_summary.md),

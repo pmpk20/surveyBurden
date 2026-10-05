@@ -89,12 +89,14 @@ report <- burden_report(demo, quiet = TRUE)
 report
 #> 
 #> ── Survey Burden Report: Neighbourhood Travel Survey (demo) ────────────────────
-#> Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of
-#> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.
+#> Median burden: 123 GfS+ points (range 106-143 across 2 completing paths).
+#> Expected minutes: ~10 (range 9-12).
+#> Relative to benchmark: 0.3x the median of 399 points.
 #> 
 #> ── Survey ──
 #> 
 #> Questions (live)     26
+#> Pages                12
 #> Blocks               12
 #> Branch points         3
 #> Randomisers           0
@@ -108,13 +110,13 @@ report
 #> 
 #> ── Burden (12 GfS+ points ~ 1 minute; index = points / 1500) ──
 #> 
-#> Statistic        Points  ~Min  Index
-#> ------------------------------------
-#> Minimum             106     9   0.07
-#> 25th percentile     117    10   0.08
-#> Median              123    10   0.08
-#> 75th percentile     130    11   0.09
-#> Maximum             143    12   0.10
+#> Statistic        Points  Expected Minutes  Index
+#> ------------------------------------------------
+#> Minimum             106                 9   0.07
+#> 25th percentile     117                10   0.08
+#> Median              123                10   0.08
+#> 75th percentile     130                11   0.09
+#> Maximum             143                12   0.10
 #> Benchmark: median 399 points across 79 GfS-scored waves (Heimgartner & Axhausen
 #> 2024).
 #> 
@@ -240,10 +242,10 @@ Scalars such as the points-per-minute rate live on attributes:
 summary(report)
 #> 
 #> ── Neighbourhood Travel Survey (demo) ──────────────────────────────────────────
-#> 26 questions, 12 blocks, 4 structural paths (2 complete).
-#> Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of
-#> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.
-#> Benchmark: median 399 points across 79 GfS-scored waves.
+#> 26 questions, 12 pages, 12 blocks, 4 structural paths (2 complete).
+#> Median burden: 123 GfS+ points (range 106-143 across 2 completing paths).
+#> Expected minutes: ~10 (range 9-12).
+#> Relative to benchmark: 0.3x the median of 399 points.
 ```
 
 ## A short worked example

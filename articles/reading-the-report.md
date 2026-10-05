@@ -41,12 +41,14 @@ report <- burden_report(demo, quiet = TRUE)
 report
 #> 
 #> ── Survey Burden Report: Neighbourhood Travel Survey (demo) ────────────────────
-#> Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of
-#> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.
+#> Median burden: 123 GfS+ points (range 106-143 across 2 completing paths).
+#> Expected minutes: ~10 (range 9-12).
+#> Relative to benchmark: 0.3x the median of 399 points.
 #> 
 #> ── Survey ──
 #> 
 #> Questions (live)     26
+#> Pages                12
 #> Blocks               12
 #> Branch points         3
 #> Randomisers           0
@@ -60,13 +62,13 @@ report
 #> 
 #> ── Burden (12 GfS+ points ~ 1 minute; index = points / 1500) ──
 #> 
-#> Statistic        Points  ~Min  Index
-#> ------------------------------------
-#> Minimum             106     9   0.07
-#> 25th percentile     117    10   0.08
-#> Median              123    10   0.08
-#> 75th percentile     130    11   0.09
-#> Maximum             143    12   0.10
+#> Statistic        Points  Expected Minutes  Index
+#> ------------------------------------------------
+#> Minimum             106                 9   0.07
+#> 25th percentile     117                10   0.08
+#> Median              123                10   0.08
+#> 75th percentile     130                11   0.09
+#> Maximum             143                12   0.10
 #> Benchmark: median 399 points across 79 GfS-scored waves (Heimgartner & Axhausen
 #> 2024).
 #> 
@@ -132,11 +134,11 @@ nothing else.
 ``` r
 
 report$survey
-#> # A tibble: 1 × 10
-#>   survey_name        n_questions n_blocks n_branches n_randomisers n_loop_blocks
-#>   <chr>                    <int>    <int>      <int>         <int>         <int>
-#> 1 Neighbourhood Tra…          26       12          3             0             2
-#> # ℹ 4 more variables: n_end_points <int>, n_paths <int>,
+#> # A tibble: 1 × 11
+#>   survey_name              n_questions n_pages n_blocks n_branches n_randomisers
+#>   <chr>                          <int>   <int>    <int>      <int>         <int>
+#> 1 Neighbourhood Travel Su…          26      12       12          3             0
+#> # ℹ 5 more variables: n_loop_blocks <int>, n_end_points <int>, n_paths <int>,
 #> #   n_complete_paths <int>, n_screenout_paths <int>
 ```
 

@@ -167,7 +167,7 @@ stages with <code><a href="https://cli.r-lib.org/reference/cli_progress_step.htm
     <p>An object of class <code>burden_report</code>: a list of tibbles under stable
 names. Print it for the formatted summary, or read its components:</p><dl><dt>survey</dt>
 <dd><p>One-row tibble of structural counts: <code>survey_name</code>,
-<code>n_questions</code>, <code>n_blocks</code>, <code>n_branches</code>, <code>n_randomisers</code>,
+<code>n_questions</code>, <code>n_pages</code>, <code>n_blocks</code>, <code>n_branches</code>, <code>n_randomisers</code>,
 <code>n_loop_blocks</code>, <code>n_end_points</code>, <code>n_paths</code>, <code>n_complete_paths</code>,
 <code>n_screenout_paths</code>.</p></dd>
 
@@ -251,10 +251,10 @@ enumerated.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Reading survey <span style="color: #B2B2B2;">[9ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Scoring questions and resolving paths</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Scoring questions and resolving paths <span style="color: #B2B2B2;">[112ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Scoring questions and resolving paths <span style="color: #B2B2B2;">[106ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Checking calculation certainty</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[33ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[31ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Enumerating display-logic combinations</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Enumerating display-logic combinations <span style="color: #B2B2B2;">[19ms]</span></span>
@@ -262,12 +262,14 @@ enumerated.</p>
 <span class="r-in"><span><span class="va">br</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Burden Report: Neighbourhood Travel Survey (demo)</span> <span style="color: #00BBBB;">────────────────────</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Median burden: 123 GfS+ points (range 106-143 across 2 completing paths).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Expected minutes: ~10 (range 9-12).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Relative to benchmark: 0.3x the median of 399 points.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Survey</span> ──</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Questions (live)     26</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pages                12</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Blocks               12</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Branch points         3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Randomisers           0</span>
@@ -281,13 +283,13 @@ enumerated.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Burden (12 GfS+ points ~ 1 minute; index = points / 1500)</span> ──</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Statistic        Points  ~Min  Index</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ------------------------------------</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Minimum             106     9   0.07</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 25th percentile     117    10   0.08</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Median              123    10   0.08</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 75th percentile     130    11   0.09</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Maximum             143    12   0.10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Statistic        Points  Expected Minutes  Index</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ------------------------------------------------</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Minimum             106                 9   0.07</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25th percentile     117                10   0.08</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Median              123                10   0.08</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 75th percentile     130                11   0.09</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Maximum             143                12   0.10</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Benchmark: median 399 points across 79 GfS-scored waves (Heimgartner &amp; Axhausen</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2024).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -337,10 +339,10 @@ enumerated.</p>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">br</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Neighbourhood Travel Survey (demo)</span> <span style="color: #00BBBB;">──────────────────────────────────────────</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 26 questions, 12 blocks, 4 structural paths (2 complete).</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Benchmark: median 399 points across 79 GfS-scored waves.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26 questions, 12 pages, 12 blocks, 4 structural paths (2 complete).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Median burden: 123 GfS+ points (range 106-143 across 2 completing paths).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Expected minutes: ~10 (range 9-12).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Relative to benchmark: 0.3x the median of 399 points.</span>
 <span class="r-in"><span><span class="va">br</span><span class="op">$</span><span class="va">burden</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 5 × 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   statistic points minutes  index</span>

@@ -2,12 +2,21 @@
 
 ## surveyBurden (development version)
 
+- Display logic now applies And before Or among the conditions inside
+  one group, as Qualtrics documents: `A Or B And C` is read as
+  `A | (B & C)`, not left to right as `(A | B) & C`. This affects
+  [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md),
+  the “never shown” check and
+  [`realised_exposure()`](https://pmpk20.github.io/surveyBurden/reference/realised_exposure.md).
+  Path profiles for the bundled demo surveys are unchanged.
+
 - [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md)
   now detects consecutive branches that test the same embedded-data
   field for equality and treats them as mutually exclusive (one-of-k)
   instead of independent binary decisions. For surveys that route
   respondents by an assignment field (e.g. stated-choice module
   selection), this can reduce the path count from 2^k to k+1 per group.
+
 - [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md)
   now evaluates consecutive branches on the same embedded-data field
   jointly for any single comparison (`=`, `!=`, `>`, `>=`, `<`, `<=`),
@@ -15,6 +24,7 @@
   can produce. Complementary gates such as `> 0` and `= 0` can no longer
   both be taken, which removes impossible paths (e.g. a respondent shown
   both the owner and the non-owner blocks).
+
 - Field values stay unrestricted, so the enumeration is an upper bound:
   a “neither” outcome (e.g. a negative or empty field under `> 0` /
   `= 0`) is kept.
@@ -23,10 +33,12 @@
   `setEmbeddedData()`, naming the field and question, since that code
   may limit the field’s values and make some enumerated paths impossible
   in practice. The check is textual and informational only.
+
 - [`summary_line()`](https://pmpk20.github.io/surveyBurden/reference/summary_line.md)
   now works on `burden_report` objects, returning the same verdict line
   as [`print()`](https://rdrr.io/r/base/print.html) and
   [`summary()`](https://rdrr.io/r/base/summary.html).
+
 - New
   [`realised_exposure()`](https://pmpk20.github.io/surveyBurden/reference/realised_exposure.md)
   returns, for every respondent including those who broke off or were
@@ -37,6 +49,7 @@
   literal, or an embedded field absent from the export, such as one set
   by question JavaScript) falls back to whether the respondent answered,
   and is counted per respondent rather than hidden.
+
 - New
   [`exposure_person_period()`](https://pmpk20.github.io/surveyBurden/reference/exposure_person_period.md)
   turns
@@ -44,6 +57,7 @@
   output into person-period data for a discrete-time hazard model of
   break-off: the blocks each respondent was at risk in, the burden shown
   before each, and the block’s design score.
+
 - Display-logic groups joined by “And If” are now evaluated before
   groups joined by “Else If”: `If A / Else If B / And If C` is
   `A or (B and C)`, not `(A or B) and C`. On a large Qualtrics export

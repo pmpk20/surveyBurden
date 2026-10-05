@@ -1,8 +1,12 @@
+# Title and version are read from DESCRIPTION, so they stay current.
+year <- meta$`Date/Publication`
+year <- if (is.null(year)) format(Sys.Date(), "%Y") else substr(year, 1, 4)
+
 bibentry(
   bibtype  = "Manual",
-  title    = "surveyBurden: Ex-Ante Path-Aware Survey Instrument Burden Assessment",
+  title    = paste0("surveyBurden: ", meta$Title),
   author   = person("Peter", "King"),
-  year     = "2026",
-  note     = "R package version 0.2.0",
+  year     = year,
+  note     = paste("R package version", meta$Version),
   url      = "https://github.com/pmpk20/surveyBurden"
 )

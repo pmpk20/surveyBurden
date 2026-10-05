@@ -18,7 +18,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
 **What you need.** A report from `burden_report()` on your survey's `.qsf`.
 
-**What it cannot establish.** The report describes the modelled burden of the instrument. It does not predict completion time, dropout or data quality, and its median is not the burden half of respondents face.
+**What it cannot establish.** The report describes the modelled burden of the survey. It does not predict completion time, dropout or data quality, and its median is not the burden half of respondents face.
 
 This article walks the printed `burden_report()` output section by
 section: what each shows, how to read it, and when it is telling you
@@ -44,16 +44,16 @@ population-weighted median (see
 `summary(report)` prints the same verdict with the structural counts and
 nothing else.
 
-## Instrument
+## Survey
 
-```{r instrument}
-report$instrument
+```{r survey}
+report$survey
 ```
 
 Structural counts read straight from the survey (editing URL or QSF): live
 questions, blocks, branch points, block randomisers, Loop & Merge
 blocks, and early-exit (`EndSurvey`) points. These describe the
-programmed instrument, not any respondent. A high branch or early-exit
+programmed survey, not any respondent. A high branch or early-exit
 count means the survey routes people quite differently, so a single
 burden figure would describe few of them.
 

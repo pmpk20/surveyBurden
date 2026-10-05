@@ -223,7 +223,7 @@ summary_line.burden_report <- function(x, ...) {
   pop_med <- if (!is.null(x$population))
     x$population$points[x$population$statistic == "median"] else NULL
   paste(burden_verdict_line(x$burden, ppm, bm$median_points,
-                            x$instrument$n_complete_paths,
+                            x$survey$n_complete_paths,
                             population_median = pop_med),
         collapse = " ")
 }

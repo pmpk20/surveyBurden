@@ -12,10 +12,10 @@ test_that("resolve_paths output is identical with precomputed catalogue + blocks
   expect_identical(a, b)
 })
 
-test_that("instrument_summary output is identical with a precomputed blocks table", {
+test_that("survey_summary output is identical with a precomputed blocks table", {
   q <- q_fx()
-  expect_identical(instrument_summary(q),
-                   instrument_summary(q, blocks = resolve_live_blocks(q)))
+  expect_identical(survey_summary(q),
+                   survey_summary(q, blocks = resolve_live_blocks(q)))
 })
 
 test_that("path_burden output is identical with precomputed paths + scored", {

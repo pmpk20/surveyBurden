@@ -14,14 +14,14 @@ editor_options:
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-`surveyBurden` estimates **ex-ante instrument burden**: the response
-effort a programmed Qualtrics survey demands, worked out before fielding
-from the instrument alone. It reads the survey, scores every question
+`surveyBurden` estimates **survey burden**: the response
+effort a programmed Qualtrics survey demands, worked out before fieldwork
+from the survey alone. It reads the survey, scores every question
 with the GfS+ point scheme (extending Heimgartner and Axhausen 2024), reconstructs the paths
 the flow and display logic allow, and reports how burden varies across
 those paths.
 
-In the terms of Yan and Williams (2022) this is the *instrument* side of
+In the terms of Yan and Williams (2022) this is the *survey* side of
 respondent burden -- length, difficulty, and the effort the design
 requires. It is not the *perceived* burden a particular respondent
 reports feeling, and it is not a completion-time predictor.
@@ -87,7 +87,7 @@ The printout opens with a one-line **verdict**: the median
 completing-path burden in points and minutes, its ratio to the 399-point
 GfS benchmark, and the range across completing paths. Below it:
 
-- **Instrument** -- structural counts (questions, blocks, branch points,
+- **Survey** -- structural counts (questions, blocks, branch points,
   loop blocks, early exits).
 - **Paths** -- how many distinct paths the flow allows, and how many
   complete rather than screen out.
@@ -125,7 +125,7 @@ head(report$items[order(-report$items$gfs_points),
                   c("question_id", "std_type", "gfs_points", "score_flag")])
 ```
 
-Other components: `report$instrument` (the structural counts),
+Other components: `report$survey` (the structural counts),
 `report$paths` (one row per structural path), `report$blocks` (burden by
 block), `report$readability`, `report$certainty` and `report$warnings`.
 Scalars such as the points-per-minute rate live on attributes:

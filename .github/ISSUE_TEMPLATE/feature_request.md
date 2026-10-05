@@ -14,7 +14,7 @@ assignees: ''
 
 **Scope note**
 
-<!-- surveyBurden scores burden from a programmed instrument using the GfS /
+<!-- surveyBurden scores burden from a programmed survey using the GfS /
 Axhausen scheme. It does not model respondent behaviour and does not implement
 alternative burden schemes. Requests that change that scope are welcome to
 discuss but may not be adopted. -->

@@ -148,9 +148,9 @@ test_that("resolve_paths returns flow paths with per-path question reachability"
   expect_gt(max(ceilings), min(ceilings))
 })
 
-test_that("instrument_summary counts the structural features", {
+test_that("survey_summary counts the structural features", {
   qsf <- read_qsf(demo_qsf())
-  s <- instrument_summary(qsf)
+  s <- survey_summary(qsf)
 
   expect_equal(s$n_questions, 26L)
   expect_equal(s$n_blocks, 12L)

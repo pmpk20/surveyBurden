@@ -38,7 +38,7 @@
 #'     \item{branches}{One row per flow `Branch`, with the trigger variable(s).
 #'       Both outcomes of every branch are always enumerated, so a branch is not
 #'       an approximation -- but which outcome a given respondent takes is
-#'       unknown ex ante.}
+#'       unknown before fieldwork.}
 #'     \item{display_logic}{`n_conditional` questions gated by an unresolved
 #'       condition on some full path; `n_exact` scored by exact joint
 #'       enumeration of their gate states; `n_approx` scored with the
@@ -182,7 +182,7 @@ print_calculation_certainty_body <- function(x) {
   cli::cli_h2("Paths")
   cli::cli_text("{p$n_exact} of {p$n_full} complete paths have no unresolved display-logic question; {p$n_with_unresolved} carry at least one.")
   if (nrow(x$branches) > 0) {
-    cli::cli_text("{nrow(x$branches)} flow branches; both outcomes of each are enumerated, but which one a given respondent takes is unknown ex ante:")
+    cli::cli_text("{nrow(x$branches)} flow branches; both outcomes of each are enumerated, but which one a given respondent takes is unknown before fieldwork:")
     for (i in seq_len(nrow(x$branches))) {
       cli::cli_text("  {x$branches$flow_id[i]}: trigger {x$branches$trigger[i]}")
     }

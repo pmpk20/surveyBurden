@@ -1,5 +1,14 @@
 # surveyBurden (development version)
 
+* **Breaking:** "instrument" is now "survey" throughout. `instrument_summary()`
+  is renamed `survey_summary()`, and the `burden_report()` element
+  `$instrument` is now `$survey` (printed under "Survey").
+* `library(surveyBurden)` now prints a short banner with the version, the
+  package title and how to cite it (silence with
+  `suppressPackageStartupMessages()`).
+* `citation("surveyBurden")` now takes its title and version from
+  DESCRIPTION.
+
 * Display logic now applies And before Or among the conditions inside one
   group, as Qualtrics documents: `A Or B And C` is read as `A | (B & C)`, not
   left to right as `(A | B) & C`. This affects `path_burden_profile()`, the

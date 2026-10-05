@@ -1,10 +1,10 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
-title: "surveyBurden: Ex-Ante Path-Aware Survey Instrument Burden Assessment"
+title: "surveyBurden: An R package for assessing the response-burden of web surveys"
 version: 0.2.0
 abstract: >-
   An R package that estimates the response burden of a Qualtrics survey
-  instrument before it is fielded. It parses a '.qsf' export (or fetches a
+  survey before fieldwork. It parses a '.qsf' export (or fetches a
   live survey through the Qualtrics API), reconstructs the respondent paths
   the survey's flow and display logic allow, scores every question with the
   published GfS / Axhausen burden weights, and reports the burden across

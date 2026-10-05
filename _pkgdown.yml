@@ -60,4 +60,4 @@ reference:
     contents:
       - calculation_certainty
       - validate_times
-      - instrument_summary
+      - survey_summary

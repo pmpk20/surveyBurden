@@ -679,14 +679,11 @@ eval_logic_vec <- function(lg, env) {
   vals <- vector("list", length(gkeys))
   for (gi in seq_along(gkeys)) {
     g <- lg[[gkeys[gi]]]
-    gv <- NULL
-    for (lk in setdiff(names(g), "Type")) {
-      lit <- g[[lk]]
-      v <- eval_literal_vec(lit, env)
-      gv <- if (is.null(gv)) v
-            else if (identical(lit$Conjuction, "Or")) gv | v else gv & v
-    }
-    vals[[gi]] <- gv %||% rep(TRUE, n)
+    lits <- lapply(setdiff(names(g), "Type"), function(lk) g[[lk]])
+    # And binds before Or within a group (see combine_literals())
+    vals[[gi]] <- if (!length(lits)) rep(TRUE, n) else combine_literals(
+      lapply(lits, eval_literal_vec, env = env),
+      vapply(lits, function(l) l$Conjuction %||% NA_character_, character(1)))
   }
   types <- vapply(gkeys, function(k) lg[[k]]$Type %||% NA_character_, character(1))
   # "AndIf" groups bind before "ElseIf" groups (see combine_groups())

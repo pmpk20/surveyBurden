@@ -1,8 +1,9 @@
 #' Parse a Qualtrics DisplayLogic tree into an evaluable predicate
 #'
-#' The tree has numbered groups, each holding numbered literals combined
-#' left-to-right by their `Conjuction` field ("And"/"Or"; first literal has
-#' none). Groups are combined by their `Type` field, with `"AndIf"` binding
+#' The tree has numbered groups, each holding numbered literals combined by
+#' their `Conjuction` field ("And"/"Or"; first literal has none), with And
+#' binding before Or: `A Or B And C` is `A | (B & C)` (see
+#' [combine_literals()]). Groups are combined by their `Type` field, with `"AndIf"` binding
 #' before `"ElseIf"`: `If G0 / ElseIf G1 / AndIf G2` is `G0 OR (G1 AND G2)`
 #' (see [combine_groups()]). A group whose `Type` is missing joins as AND.
 #' This parser produces the
@@ -58,12 +59,7 @@ parse_display_logic <- function(dl) {
       pl$eval(state, shown)
     }
     group_vals <- vapply(parsed_groups, function(lits) {
-      acc <- lit_val(lits[[1]])
-      for (k in seq_along(lits)[-1]) {
-        v <- lit_val(lits[[k]])
-        acc <- if (identical(lits[[k]]$conj, "Or")) acc || v else acc && v
-      }
-      acc
+      combine_literals(lapply(lits, lit_val), lit_conjs(lits))
     }, logical(1))
     isTRUE(combine_groups(as.list(group_vals), group_types))
   }
@@ -80,12 +76,7 @@ parse_display_logic <- function(dl) {
       pl$eval(list(), c())
     }
     group_vals <- vapply(parsed_groups, function(lits) {
-      acc <- lit_val(lits[[1]])
-      for (k in seq_along(lits)[-1]) {
-        v <- lit_val(lits[[k]])
-        acc <- if (identical(lits[[k]]$conj, "Or")) acc | v else acc & v
-      }
-      acc
+      combine_literals(lapply(lits, lit_val), lit_conjs(lits))
     }, logical(1))
     !isFALSE(combine_groups(as.list(group_vals), group_types))
   }
@@ -133,6 +124,34 @@ parse_literal <- function(lit) {
   # EmbeddedField / LoopAndMerge / anything else -> free binary gate
   fv <- paste0("@", lit$LeftOperand %||% "field")
   list(var = fv, conj = conj, eval = function(state, shown) isTRUE(state[[fv]]))
+}
+
+#' Conjunctions of parsed literals, `NA` for one without (the first)
+#' @noRd
+lit_conjs <- function(lits) {
+  vapply(lits, function(pl) pl$conj %||% NA_character_, character(1))
+}
+
+#' Combine the literal values of one display-logic group the way Qualtrics
+#' does: And binds before Or, so `A Or B And C` is `A | (B & C)`. Each "Or"
+#' literal starts a new term; any other conjunction ANDs onto the current
+#' one. Qualtrics documents this order ("conditions linked by AND are
+#' evaluated first, followed by conditions linked by OR"), and on a large
+#' export it removed the answered-but-predicted-hidden items that
+#' left-to-right evaluation left on questions mixing the two.
+#' `vals` is a list of logical vectors (NA allowed: three-valued `&` / `|`);
+#' `conjs[k]` is literal k's `Conjuction` (the first is ignored).
+#' @noRd
+combine_literals <- function(vals, conjs) {
+  terms <- list(vals[[1]])
+  for (k in seq_along(vals)[-1]) {
+    if (identical(conjs[k], "Or")) {
+      terms[[length(terms) + 1L]] <- vals[[k]]
+    } else {
+      terms[[length(terms)]] <- terms[[length(terms)]] & vals[[k]]
+    }
+  }
+  Reduce(`|`, terms)
 }
 
 #' Combine display-logic group values the way Qualtrics does: groups joined

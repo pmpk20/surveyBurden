@@ -126,3 +126,30 @@ test_that("matrix choice locators keep their statement/scale tail", {
   expect_true(p$predicate(list(QID121 = character(0))))
   expect_false(p$predicate(list(QID121 = "1/16")))
 })
+
+test_that("within a group And binds before Or: A Or B And C is A | (B & C)", {
+  p <- parse_display_logic(dl_of(grp(
+    lit_q("QID1", "1"),
+    lit_q("QID2", "1", conj = "Or"),
+    lit_q("QID3", "1", conj = "And")
+  )))
+  st <- function(a, b, c) list(QID1 = if (a) "1" else "2",
+                               QID2 = if (b) "1" else "2",
+                               QID3 = if (c) "1" else "2")
+  expect_true(p$predicate(st(TRUE, TRUE, FALSE)))    # left-to-right gave FALSE
+  expect_false(p$predicate(st(FALSE, TRUE, FALSE)))
+  expect_true(p$predicate(st(FALSE, TRUE, TRUE)))
+  expect_false(p$predicate(st(FALSE, FALSE, TRUE)))
+  # reachability: with QID3 off the path C is false, but A can still hold
+  expect_true(p$possible("QID3"))
+  expect_false(p$possible(c("QID1", "QID3")))
+})
+
+test_that("combine_literals splits at Or and ANDs each run, three-valued", {
+  expect_true(combine_literals(list(TRUE, TRUE, FALSE), c(NA, "Or", "And")))
+  expect_false(combine_literals(list(FALSE, TRUE, FALSE), c(NA, "Or", "And")))
+  expect_identical(combine_literals(list(NA, FALSE, TRUE), c(NA, "And", "Or")), TRUE)
+  expect_identical(combine_literals(list(NA, TRUE), c(NA, "And")), NA)
+  expect_identical(combine_literals(list(c(TRUE, FALSE), c(FALSE, TRUE), c(FALSE, TRUE)),
+                                    c(NA, "Or", "And")), c(TRUE, TRUE))
+})

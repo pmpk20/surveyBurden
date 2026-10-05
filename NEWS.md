@@ -1,5 +1,11 @@
 # surveyBurden (development version)
 
+* Display logic now applies And before Or among the conditions inside one
+  group, as Qualtrics documents: `A Or B And C` is read as `A | (B & C)`, not
+  left to right as `(A | B) & C`. This affects `path_burden_profile()`, the
+  "never shown" check and `realised_exposure()`. Path profiles for the
+  bundled demo surveys are unchanged.
+
 * `resolve_flow()` now detects consecutive branches that test the same
   embedded-data field for equality and treats them as mutually exclusive
   (one-of-k) instead of independent binary decisions. For surveys that

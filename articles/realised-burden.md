@@ -178,9 +178,9 @@ rb[, c("response_id", "finished", "n_questions_answered",
 #> # A tibble: 6 × 5
 #>   response_id finished n_questions_answered realised_points predicted_points
 #>   <chr>       <lgl>                   <int>           <dbl>            <dbl>
-#> 1 R_1         TRUE                       38             135              130
-#> 2 R_2         TRUE                       26             113              108
-#> 3 R_3         TRUE                       20             102               97
+#> 1 R_1         TRUE                       38             135              132
+#> 2 R_2         TRUE                       26             113              110
+#> 3 R_3         TRUE                       20             102               99
 #> 4 R_4         FALSE                      10              32               95
 #> 5 R_5         FALSE                       5              17               95
 #> 6 R_6         FALSE                       0               0               95
@@ -260,9 +260,9 @@ rb[, c("response_id", "finished", "realised_points",
 #> # A tibble: 6 × 5
 #>   response_id finished realised_points predicted_points   gap
 #>   <chr>       <lgl>              <dbl>            <dbl> <dbl>
-#> 1 R_1         TRUE                 135              130    -5
-#> 2 R_2         TRUE                 113              108    -5
-#> 3 R_3         TRUE                 102               97    -5
+#> 1 R_1         TRUE                 135              132    -3
+#> 2 R_2         TRUE                 113              110    -3
+#> 3 R_3         TRUE                 102               99    -3
 #> 4 R_4         FALSE                 32               95    63
 #> 5 R_5         FALSE                 17               95    78
 #> 6 R_6         FALSE                  0               95    95
@@ -352,6 +352,177 @@ status.](realised-burden_files/figure-html/burden-distribution-1.png)
 With a fielded survey with thousands of respondents, this gives the full
 empirical distribution of burden – useful for reporting in papers and
 for calibrating future survey designs.
+
+## Exposure: what each respondent was shown
+
+[`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
+scores what was answered, so a question shown but left blank scores 0.
+That understates exactly the block a respondent broke off in.
+[`realised_exposure()`](https://pmpk20.github.io/surveyBurden/reference/realised_exposure.md)
+answers a different question: which blocks did the survey flow route
+each respondent into, and how much burden was each of them **shown**
+there? It evaluates the flow’s branch logic and every question’s display
+logic against the respondent’s own answers, in flow order, and returns
+one row per respondent per block.
+
+The example below simulates 400 respondents to the demo survey. Each
+answers every question the survey would show them, and some break off
+part-way through.
+
+``` r
+
+`%||%` <- function(a, b) if (is.null(a)) b else a
+sq <- surveyBurden:::index_questions(qsf)
+simulate_respondent <- function(i) {
+  a <- list(ResponseId = sprintf("R_%03d", i))
+  pick <- function(qid) sample(names(sq[[qid]]$Choices), 1)
+  for (qid in c("QID2", "QID3", "QID4", "QID5", "QID6", "QID10", "QID26"))
+    a[[qid]] <- pick(qid)
+  a$QID2 <- sample(c("1", "2"), 1, prob = c(0.95, 0.05))   # consent
+  a$QID3 <- sample(c("1", "2"), 1, prob = c(0.9, 0.1))     # in study area
+  for (r in names(sq$QID7$Choices)) a[[paste0("QID7_", r)]] <- pick("QID7")
+  a$QID9 <- sample(c("1", "2", "3"), 1)                      # adults: loop count
+  for (j in seq_len(as.integer(a$QID9))) {
+    for (qid in c("QID11", "QID12")) a[[paste0(j, "_", qid)]] <- pick(qid)
+    if (a[[paste0(j, "_QID11")]] != "6") a[[paste0(j, "_QID13")]] <- pick("QID13")
+  }
+  car <- runif(1) < 0.7
+  a$QID14_1 <- if (car) "1" else NA
+  a$QID14_4 <- if (runif(1) < 0.4) "1" else NA
+  if (car) {
+    a$QID15 <- sample(c("1", "2"), 1)   # export value (recode): vehicles
+    for (j in seq_len(as.integer(a$QID15))) {
+      a[[paste0(j, "_QID16")]] <- pick("QID16")
+      if (a[[paste0(j, "_QID16")]] != "9") a[[paste0(j, "_QID17")]] <- pick("QID17")
+      a[[paste0(j, "_QID18")]] <- "text"
+    }
+  }
+  for (qid in c("QID19", "QID20", "QID21"))
+    for (r in names(sq[[qid]]$Choices)) a[[paste0(qid, "_", r)]] <- pick(qid)
+  if (a$QID6 %in% c("1", "2")) {                            # employed: Commuting
+    a$QID23 <- pick("QID23")
+    if (a$QID6 == "1" || a$QID23 != "1") a$QID22 <- pick("QID22")
+    if (!is.null(a$QID22) && a$QID23 == "2") a$QID24 <- pick("QID24")
+  }
+  a$QID25 <- "text"
+  # screened out: declined consent or outside the study area
+  if (a$QID2 == "2") a <- a[c("ResponseId", "QID2")]
+  else if (a$QID3 == "2") a <- a[c("ResponseId", "QID2", "QID3")]
+  a
+}
+set.seed(1)
+rows <- lapply(1:400, simulate_respondent)
+cols <- unique(unlist(lapply(rows, names)))
+sim <- as.data.frame(do.call(rbind, lapply(rows, function(r)
+  vapply(cols, function(cc) as.character(r[[cc]] %||% NA), character(1)))))
+
+# break-off: blank every answer after a randomly chosen block
+blocks <- resolve_live_blocks(qsf)
+q_block <- setNames(rep(blocks$flow_order, lengths(blocks$question_ids)),
+                    unlist(blocks$question_ids))
+col_block <- q_block[sub("_.*$", "", sub("^[0-9]+_", "", cols))]
+quit_at <- ifelse(runif(400) < 0.3, sample(4:12, 400, replace = TRUE), Inf)
+for (k in which(!is.na(col_block)))
+  sim[[cols[k]]][quit_at < col_block[k]] <- NA
+stopifnot(!anyNA(col_block[grepl("QID", cols)]))   # every answer has a block
+stopifnot(all(vapply(which(!is.na(col_block)), function(k)
+  all(is.na(sim[[cols[k]]][quit_at < col_block[k]])), logical(1))))
+screened <- is.na(sim$QID4)
+sim$Finished <- as.integer(is.infinite(quit_at) | screened)
+```
+
+``` r
+
+ex <- realised_exposure(qsf, sim)
+ex[ex$response_id == "R_001",
+   c("block_name", "routed_in", "displayed", "iterations", "shown_points")]
+#> # A tibble: 12 × 5
+#>    block_name      routed_in displayed iterations shown_points
+#>    <chr>           <lgl>     <lgl>          <int>        <dbl>
+#>  1 Welcome         TRUE      TRUE              NA           11
+#>  2 Consent         TRUE      TRUE              NA            1
+#>  3 Area check      TRUE      TRUE              NA            2
+#>  4 About you       TRUE      TRUE              NA           15
+#>  5 Household       TRUE      TRUE              NA            3
+#>  6 Other adults    TRUE      TRUE               1            5
+#>  7 Vehicles        TRUE      TRUE              NA           13
+#>  8 Vehicle details TRUE      TRUE               1            6
+#>  9 Travel          TRUE      TRUE              NA           26
+#> 10 Attitudes       TRUE      TRUE              NA           18
+#> 11 Commuting       FALSE     FALSE             NA            0
+#> 12 Closing         TRUE      TRUE              NA            7
+```
+
+`routed_in` is `FALSE` for a block the flow skipped and `NA` for blocks
+after a respondent’s exit, where the routing depends on answers that
+were never given. `displayed` is `FALSE` for a block routed into whose
+every question was hidden: Qualtrics skips such a block, so nobody can
+break off in it. `attr(ex, "respondents")` holds each respondent’s
+outcome and counts of any logic the data could not settle (an
+unsupported literal, or an embedded field set by question JavaScript and
+absent from the export), which fall back to whether the respondent
+answered.
+
+## Modelling break-off
+
+[`exposure_person_period()`](https://pmpk20.github.io/surveyBurden/reference/exposure_person_period.md)
+keeps the blocks each respondent was at risk in (routed in and
+displayed, plus the block they left in) and adds the burden already
+shown before each block. Two discrete-time hazard models then follow in
+a few lines: does a block’s own burden predict leaving in it, and,
+comparing respondents in the same block, does the burden accumulated so
+far?
+
+``` r
+
+pp <- exposure_person_period(ex)
+pp[pp$response_id == "R_001",
+   c("block_name", "period", "event", "points_before", "block_points")]
+#> # A tibble: 11 × 5
+#>    block_name      period event points_before block_points
+#>    <chr>            <int> <int>         <dbl>        <dbl>
+#>  1 Welcome              1     0             0           11
+#>  2 Consent              2     0            11            1
+#>  3 Area check           3     0            12            2
+#>  4 About you            4     0            14           15
+#>  5 Household            5     0            29            3
+#>  6 Other adults         6     0            32            5
+#>  7 Vehicles             7     0            37           13
+#>  8 Vehicle details      8     0            50            6
+#>  9 Travel               9     0            56           26
+#> 10 Attitudes           10     0            82           18
+#> 11 Closing             11     0           100            7
+
+m_block <- glm(event ~ I(block_points / 10), family = binomial, data = pp)
+m_accum <- glm(event ~ I(points_before / 100) + factor(block_name),
+               family = binomial, data = pp)
+round(coef(summary(m_block)), 3)
+#>                    Estimate Std. Error z value Pr(>|z|)
+#> (Intercept)          -4.035      0.174 -23.179        0
+#> I(block_points/10)    0.588      0.117   5.045        0
+round(coef(summary(m_accum))[2, , drop = FALSE], 3)
+#>                      Estimate Std. Error z value Pr(>|z|)
+#> I(points_before/100)   -0.016      1.923  -0.008    0.993
+```
+
+The simulated respondents left at a block drawn at random, not in
+response to burden, so these estimates illustrate the workflow and say
+nothing about burden itself. With a fielded survey, cluster the standard
+errors by respondent, and keep in mind how few blocks there are when
+reading block-level effects.
+
+Some decisions are reported rather than hidden:
+
+- **Exit block.** By default the exit is the last block with an answer,
+  so someone who leaves on a newly displayed page without answering is
+  attributed to the previous block. Pass a last-seen block or question
+  column (`furthest = "column"`, `furthest_col = ...`) when the export
+  has one.
+- **Loop iterations** come from the question driving the loop when it
+  was answered, else from the iterations with answers
+  (`loop_iterations = "observed"` forces the latter).
+- **Answers contradicting the flow** (answers in a block the flow
+  skipped) are trusted and counted in `n_routing_conflicts`.
 
 ## Next
 

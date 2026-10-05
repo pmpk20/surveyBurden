@@ -132,7 +132,7 @@ pbp[, c("path_id", "terminates_early", "burden_min",
 #>     <int> <lgl>                 <dbl>         <dbl>      <dbl>
 #> 1       1 TRUE                     12            12         12
 #> 2       2 TRUE                     14            14         14
-#> 3       3 FALSE                   106           124        143
+#> 3       3 FALSE                   106           125        143
 #> 4       4 FALSE                   106           122        139
 nrow(pbp$profile[[3]])   # distinct modelled burden values on complete path 3
 #> [1] 36
@@ -302,9 +302,9 @@ pr[, c("ResponseId", "path_id", "matched", "pred_pts")]
 #> # A tibble: 4 × 4
 #>   ResponseId path_id matched pred_pts
 #>   <chr>        <int> <lgl>      <dbl>
-#> 1 R_1              3 TRUE         119
-#> 2 R_2              3 TRUE         108
-#> 3 R_3              3 TRUE          97
+#> 1 R_1              3 TRUE         121
+#> 2 R_2              3 TRUE         110
+#> 3 R_3              3 TRUE          99
 #> 4 R_4              4 TRUE          95
 table(pr$matched)
 #> 
@@ -332,7 +332,7 @@ turns it into a sentence:
 ``` r
 
 summary_line(respondent_burden(demo))
-#> [1] "Typical respondent burden is about 118 GfS+ points (~10 min). The lightest complete path is ~117 pts (~10 min); with the Loop & Merge sections fully repeated it reaches ~143 pts (~12 min)."
+#> [1] "Typical respondent burden is about 119 GfS+ points (~10 min). The lightest complete path is ~117 pts (~10 min); with the Loop & Merge sections fully repeated it reaches ~143 pts (~12 min)."
 ```
 
 ## Next

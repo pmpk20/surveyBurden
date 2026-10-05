@@ -38,6 +38,7 @@ provides support for it.
 | A Qualtrics survey (`.qsf` or API) | `burden_report(qsf)` | a model-based structural burden profile across the survey’s paths | [`vignette("reading-the-report")`](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md) |
 | That, plus respondent routes and loop counts | `burden_report(qsf, routes = routes)` | a distribution of respondent-level predicted burden | [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md) |
 | A Qualtrics response export | `realised_burden(qsf, responses)` | answer-based burden per respondent | [`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md) |
+| A response export, to model break-off | `realised_exposure(qsf, responses)` | per respondent and block: routed in, and the burden shown | [`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md) |
 | Completion times | `validate_times(qsf, observed)` | a check of predicted against observed time, and a survey-specific rate | [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md) |
 | A draft you want to make lighter | score it before and after an edit | where the burden is, why, and how much a change removes | [`vignette("survey-revision")`](https://pmpk20.github.io/surveyBurden/articles/survey-revision.md) |
 
@@ -147,6 +148,7 @@ distinction: a **path** is a possibility in the survey’s design; a
 | **predicted respondent burden** | one respondent’s predicted burden: the burden of the path matching their route, with their own loop counts (`pred_pts`). |
 | **population-weighted respondent burden** | predicted respondent burden summarised across respondents, so each path counts as often as respondents took it. Produced only when `routes` are supplied. |
 | **realised burden** | the burden of the questions a respondent actually answered, from response data ([`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)). |
+| **realised exposure** | the burden of the questions a respondent was shown, block by block, including in the block they left in ([`realised_exposure()`](https://pmpk20.github.io/surveyBurden/reference/realised_exposure.md)). |
 | **calculation certainty** | counts, for a given survey, of the parts of the calculation that are enumerated in full within the model and the parts that rest on documented approximations. A modelling diagnostic, not a check against the live survey. |
 | **readability diagnostics** | counts of long question stems, long matrix labels, and long grids. Reading-load signals, reported separately, never folded into the GfS+ score. |
 
@@ -270,6 +272,8 @@ runs the whole pipeline. The lower-level functions expose each step.
 | `calculation_certainty(qsf, scheme, max_paths)` | which parts of the calculation are enumerated in full within the model and which are approximated |
 | `burden_report(x, scheme, profile, routes, max_paths, ...)` | the structured report object |
 | `realised_burden(qsf, responses)` | per-respondent ex-post burden from response data |
+| `realised_exposure(qsf, responses)` | per respondent and block: routing and the burden shown, including break-offs |
+| `exposure_person_period(x)` | person-period data for a discrete-time hazard model of break-off |
 | `validate_catalogue(catalogue)` | check and coerce a hand-built question catalogue |
 | `validate_times(qsf, observed, scheme, trim)` | a points-per-minute rate fitted to your completion-time data |
 

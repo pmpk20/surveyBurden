@@ -53,7 +53,7 @@ report
 #> Minimum             106     9   0.07
 #> 25th percentile     117    10   0.08
 #> Median              123    10   0.08
-#> 75th percentile     129    11   0.09
+#> 75th percentile     130    11   0.09
 #> Maximum             143    12   0.10
 #> Benchmark: median 399 points across 79 GfS-scored waves (Heimgartner & Axhausen
 #> 2024).
@@ -175,7 +175,7 @@ report$burden
 #> 1 min          106    8.83 0.0707
 #> 2 p25          117    9.75 0.078 
 #> 3 median       123   10.2  0.082 
-#> 4 p75          129   10.8  0.086 
+#> 4 p75          130   10.8  0.0867
 #> 5 max          143   11.9  0.0953
 attr(report$burden, "basis")
 #> [1] "structural"
@@ -214,7 +214,7 @@ report$paths[, c("path_id", "status", "burden_min",
 #>     <int> <fct>           <dbl>         <dbl>      <dbl>
 #> 1       1 screen_out         12            12         12
 #> 2       2 screen_out         14            14         14
-#> 3       3 complete          106           124        143
+#> 3       3 complete          106           125        143
 #> 4       4 complete          106           122        139
 ```
 

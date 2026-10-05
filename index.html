@@ -69,10 +69,10 @@
 </h2>
 <table class="table">
 <colgroup>
-<col width="25%">
-<col width="25%">
-<col width="25%">
-<col width="25%">
+<col width="24%">
+<col width="22%">
+<col width="34%">
+<col width="18%">
 </colgroup>
 <thead><tr>
 <th>What you have</th>
@@ -103,6 +103,12 @@
 <td>A Qualtrics response export</td>
 <td><code>realised_burden(qsf, responses)</code></td>
 <td>answer-based burden per respondent</td>
+<td><code><a href="articles/realised-burden.html">vignette("realised-burden")</a></code></td>
+</tr>
+<tr>
+<td>A response export, to model break-off</td>
+<td><code>realised_exposure(qsf, responses)</code></td>
+<td>per respondent and block: routed in, and the burden shown</td>
 <td><code><a href="articles/realised-burden.html">vignette("realised-burden")</a></code></td>
 </tr>
 <tr>
@@ -189,8 +195,8 @@
 <p>The documentation uses these terms with fixed meanings. The key distinction: a <strong>path</strong> is a possibility in the survey’s design; a <strong>route</strong> is what one respondent actually did.</p>
 <table class="table">
 <colgroup>
-<col width="50%">
-<col width="50%">
+<col width="16%">
+<col width="83%">
 </colgroup>
 <thead><tr>
 <th>term</th>
@@ -228,6 +234,10 @@
 <tr>
 <td><strong>realised burden</strong></td>
 <td>the burden of the questions a respondent actually answered, from response data (<code><a href="reference/realised_burden.html">realised_burden()</a></code>).</td>
+</tr>
+<tr>
+<td><strong>realised exposure</strong></td>
+<td>the burden of the questions a respondent was shown, block by block, including in the block they left in (<code><a href="reference/realised_exposure.html">realised_exposure()</a></code>).</td>
 </tr>
 <tr>
 <td><strong>calculation certainty</strong></td>
@@ -283,8 +293,8 @@
 <p><code><a href="reference/burden_report.html">burden_report()</a></code> runs the whole pipeline. The lower-level functions expose each step.</p>
 <table class="table">
 <colgroup>
-<col width="50%">
-<col width="50%">
+<col width="38%">
+<col width="61%">
 </colgroup>
 <thead><tr>
 <th>function</th>
@@ -355,6 +365,14 @@
 <tr>
 <td><code>realised_burden(qsf, responses)</code></td>
 <td>per-respondent ex-post burden from response data</td>
+</tr>
+<tr>
+<td><code>realised_exposure(qsf, responses)</code></td>
+<td>per respondent and block: routing and the burden shown, including break-offs</td>
+</tr>
+<tr>
+<td><code>exposure_person_period(x)</code></td>
+<td>person-period data for a discrete-time hazard model of break-off</td>
 </tr>
 <tr>
 <td><code>validate_catalogue(catalogue)</code></td>

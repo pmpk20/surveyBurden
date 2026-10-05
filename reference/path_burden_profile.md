@@ -107,7 +107,7 @@ pbp[, c("path_id", "burden_min", "burden_median", "burden_max")]
 #>     <int>      <dbl>         <dbl>      <dbl>
 #> 1       1         12            12         12
 #> 2       2         14            14         14
-#> 3       3        106           124        143
+#> 3       3        106           125        143
 #> 4       4        106           122        139
 # }
 ```

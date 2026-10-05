@@ -61,7 +61,7 @@ burden_report(demo, scheme = w, quiet = TRUE)$burden[, c("statistic", "minutes")
 #> 1 min          7.07
 #> 2 p25          7.8 
 #> 3 median       8.2 
-#> 4 p75          8.6 
+#> 4 p75          8.67
 #> 5 max          9.53
 ```
 
@@ -148,7 +148,7 @@ burden_report(demo, scheme = w, quiet = TRUE)$burden[, c("statistic", "minutes")
 #> 1 min          10.4
 #> 2 p25          11.5
 #> 3 median       12.0
-#> 4 p75          12.6
+#> 4 p75          12.7
 #> 5 max          14.0
 ```
 

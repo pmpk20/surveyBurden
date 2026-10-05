@@ -187,7 +187,7 @@ the rest held permissive.</li>
 <span><span class="co">#&gt;     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       1 TRUE                     12            12         12</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>       2 TRUE                     14            14         14</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>       3 FALSE                   106           124        143</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>       3 FALSE                   106           125        143</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>       4 FALSE                   106           122        139</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">pbp</span><span class="op">$</span><span class="va">profile</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>   <span class="co"># distinct modelled burden values on complete path 3</span></span>
 <span><span class="co">#&gt; [1] 36</span></span></code></pre></div>
@@ -384,9 +384,9 @@ not counted.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 4</span></span></span>
 <span><span class="co">#&gt;   ResponseId path_id matched pred_pts</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> R_1              3 TRUE         119</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> R_2              3 TRUE         108</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> R_3              3 TRUE          97</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> R_1              3 TRUE         121</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> R_2              3 TRUE         110</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> R_3              3 TRUE          99</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> R_4              4 TRUE          95</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">pr</span><span class="op">$</span><span class="va">matched</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -408,7 +408,7 @@ per-path table and <code><a href="../reference/summary_line.html">summary_line()
 sentence:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/summary_line.html">summary_line</a></span><span class="op">(</span><span class="fu"><a href="../reference/respondent_burden.html">respondent_burden</a></span><span class="op">(</span><span class="va">demo</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "Typical respondent burden is about 118 GfS+ points (~10 min). The lightest complete path is ~117 pts (~10 min); with the Loop &amp; Merge sections fully repeated it reaches ~143 pts (~12 min)."</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "Typical respondent burden is about 119 GfS+ points (~10 min). The lightest complete path is ~117 pts (~10 min); with the Loop &amp; Merge sections fully repeated it reaches ~143 pts (~12 min)."</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">

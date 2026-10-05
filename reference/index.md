@@ -78,6 +78,11 @@ Score each respondent’s actual burden from their response data.
 
 - [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
   : Realised response burden from observed responses
+- [`realised_exposure()`](https://pmpk20.github.io/surveyBurden/reference/realised_exposure.md)
+  : Realised exposure: the blocks each respondent was routed into and
+  the burden they were shown there
+- [`exposure_person_period()`](https://pmpk20.github.io/surveyBurden/reference/exposure_person_period.md)
+  : Person-period (hazard) data from realised exposure
 
 ## Diagnostics
 

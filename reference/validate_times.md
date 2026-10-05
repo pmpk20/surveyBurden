@@ -13,7 +13,7 @@ validate_times(
   observed,
   scheme = gfs_scheme(),
   trim = c(3, 180),
-  basis = c("auto", "realised", "route"),
+  basis = c("auto", "realised", "route", "shown"),
   finished_only = TRUE
 )
 ```
@@ -41,8 +41,9 @@ validate_times(
 
 - basis:
 
-  `"auto"`, `"realised"` or `"route"`: where each respondent's burden
-  comes from (see Details).
+  `"auto"`, `"realised"`, `"route"` or `"shown"`: where each
+  respondent's burden comes from (see Details). `"shown"` is recommended
+  when the export allows replaying the flow.
 
 - finished_only:
 
@@ -60,7 +61,7 @@ A `burden_time_validation` list (printed as a short summary):
 
 - basis:
 
-  The basis used: `"realised"` or `"route"`.
+  The basis used: `"shown"`, `"realised"` or `"route"`.
 
 - observed, predicted:
 
@@ -100,7 +101,18 @@ A `burden_time_validation` list (printed as a short summary):
 
 ## Details
 
-Each respondent's burden comes from one of two bases (`basis`):
+Each respondent's burden comes from one of three bases (`basis`):
+
+- `"shown"`:
+
+  [`realised_exposure()`](https://pmpk20.github.io/surveyBurden/reference/realised_exposure.md):
+  the GfS+ points of every item displayed to the respondent, summed over
+  blocks – including descriptive text and questions left blank. This is
+  the respondent burden \\B_i\\ (every item on the respondent's route)
+  and is the recommended basis when the export allows the flow to be
+  replayed. Errors from
+  [`realised_exposure()`](https://pmpk20.github.io/surveyBurden/reference/realised_exposure.md)
+  are not caught.
 
 - `"realised"`:
 
@@ -118,7 +130,8 @@ Each respondent's burden comes from one of two bases (`basis`):
   respondent gets the same prediction.
 
 `"auto"` (default) uses `"realised"` when the response columns map to
-questions and `"route"` otherwise.
+questions and `"route"` otherwise; it never picks `"shown"`, which must
+be asked for.
 
 The observed data need a completion time – `completion_mins`,
 `completion_seconds`, or Qualtrics' own `Duration (in seconds)` column

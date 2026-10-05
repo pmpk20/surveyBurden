@@ -64,7 +64,7 @@ points-per-minute rate the data imply.</p>
 <span>  <span class="va">observed</span>,</span>
 <span>  scheme <span class="op">=</span> <span class="fu"><a href="gfs_scheme.html">gfs_scheme</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  trim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">180</span><span class="op">)</span>,</span>
-<span>  basis <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"realised"</span>, <span class="st">"route"</span><span class="op">)</span>,</span>
+<span>  basis <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"realised"</span>, <span class="st">"route"</span>, <span class="st">"shown"</span><span class="op">)</span>,</span>
 <span>  finished_only <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -93,8 +93,9 @@ dropped.</p></dd>
 
 
 <dt id="arg-basis">basis<a class="anchor" aria-label="anchor" href="#arg-basis"></a></dt>
-<dd><p><code>"auto"</code>, <code>"realised"</code> or <code>"route"</code>: where each respondent's
-burden comes from (see Details).</p></dd>
+<dd><p><code>"auto"</code>, <code>"realised"</code>, <code>"route"</code> or <code>"shown"</code>: where each
+respondent's burden comes from (see Details). <code>"shown"</code> is recommended
+when the export allows replaying the flow.</p></dd>
 
 
 <dt id="arg-finished-only">finished_only<a class="anchor" aria-label="anchor" href="#arg-finished-only"></a></dt>
@@ -109,7 +110,7 @@ not measure the time to complete the survey.</p></dd>
 <dd><p>Rows kept after <code>finished_only</code> and <code>trim</code>.</p></dd>
 
 <dt>basis</dt>
-<dd><p>The basis used: <code>"realised"</code> or <code>"route"</code>.</p></dd>
+<dd><p>The basis used: <code>"shown"</code>, <code>"realised"</code> or <code>"route"</code>.</p></dd>
 
 <dt>observed, predicted</dt>
 <dd><p>Quantile vectors (minutes).</p></dd>
@@ -144,7 +145,15 @@ estimate from a dedicated calibration on real completion times.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Each respondent's burden comes from one of two bases (<code>basis</code>):</p><dl><dt><code>"realised"</code></dt>
+    <p>Each respondent's burden comes from one of three bases (<code>basis</code>):</p><dl><dt><code>"shown"</code></dt>
+<dd><p><code><a href="realised_exposure.html">realised_exposure()</a></code>: the GfS+ points of every item
+displayed to the respondent, summed over blocks – including
+descriptive text and questions left blank. This is the respondent
+burden \(B_i\) (every item on the respondent's route) and is the
+recommended basis when the export allows the flow to be replayed.
+Errors from <code><a href="realised_exposure.html">realised_exposure()</a></code> are not caught.</p></dd>
+
+<dt><code>"realised"</code></dt>
 <dd><p><code><a href="realised_burden.html">realised_burden()</a></code>: the points of the questions the
 respondent actually answered. Needs response columns that map to the
 survey's questions, as in a raw Qualtrics CSV export.</p></dd>
@@ -157,7 +166,8 @@ Without such columns every respondent gets the same prediction.</p></dd>
 
 
 </dl><p><code>"auto"</code> (default) uses <code>"realised"</code> when the response columns map to
-questions and <code>"route"</code> otherwise.</p>
+questions and <code>"route"</code> otherwise; it never picks <code>"shown"</code>, which must be
+asked for.</p>
 <p>The observed data need a completion time – <code>completion_mins</code>,
 <code>completion_seconds</code>, or Qualtrics' own <code>Duration (in seconds)</code> column
 (first found wins; text values are converted to numbers). The label and

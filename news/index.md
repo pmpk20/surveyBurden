@@ -2,6 +2,14 @@
 
 ## surveyBurden (development version)
 
+- [`validate_times()`](https://pmpk20.github.io/surveyBurden/reference/validate_times.md)
+  gains `basis = "shown"`: each respondent’s burden is the GfS+ points
+  of every item displayed to them (summed `shown_points` from
+  [`realised_exposure()`](https://pmpk20.github.io/surveyBurden/reference/realised_exposure.md)),
+  i.e. the respondent burden on their route, including descriptive text
+  and questions left blank. Recommended when the export allows the flow
+  to be replayed; `"auto"` is unchanged.
+
 - [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
   and
   [`realised_exposure()`](https://pmpk20.github.io/surveyBurden/reference/realised_exposure.md)

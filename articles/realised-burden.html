@@ -83,10 +83,22 @@ answer-based: it does not measure exposure, reading time or partial
 completion, and a predicted-minus-realised gap does not by itself
 identify dropout.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/pmpk20/surveyBurden" class="external-link">surveyBurden</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/pmpk20/surveyBurden" class="external-link">surveyBurden</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;                   .-- Q2 -- Q3 --.</span></span>
+<span><span class="co">#&gt;   survey -- Q1 --+               +-- Burden 0.2.0</span></span>
+<span><span class="co">#&gt;                   '-- Q4 --------'</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; An R package for assessing the response-burden of web surveys</span></span>
+<span><span class="co">#&gt; Docs: https://pmpk20.github.io/surveyBurden/</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Please cite: King P (2026). surveyBurden: An R package for assessing</span></span>
+<span><span class="co">#&gt; the response-burden of web surveys. R package version 0.2.0,</span></span>
+<span><span class="co">#&gt; https://github.com/pmpk20/surveyBurden.</span></span>
+<span><span class="co">#&gt; Use citation("surveyBurden") for BibTeX.</span></span></code></pre></div>
 <p>The function <code><a href="../reference/respondent_burden.html">respondent_burden()</a></code> can estimate burden
-<strong>ex ante</strong> from the survey alone. Once responses are
-collected, however, you can also compute the <strong>realised
+<strong>before fieldwork</strong> from the survey alone. Once responses
+are collected, however, you can also compute the <strong>realised
 burden</strong>: an answer-based GfS+ estimate for each respondent.</p>
 <p>Its operational definition matters for interpretation. A question
 counts as answered when at least one of its mapped response columns is
@@ -110,10 +122,10 @@ the structural prediction for comparison.</p>
 </h2>
 <table class="table">
 <colgroup>
-<col width="28%">
-<col width="25%">
-<col width="32%">
-<col width="13%">
+<col width="26%">
+<col width="23%">
+<col width="29%">
+<col width="20%">
 </colgroup>
 <thead><tr class="header">
 <th>Function</th>
@@ -126,18 +138,18 @@ the structural prediction for comparison.</p>
 <td><code><a href="../reference/respondent_burden.html">respondent_burden()</a></code></td>
 <td>QSF only</td>
 <td>Predicted burden by path</td>
-<td><em>ex ante</em></td>
+<td>before fieldwork</td>
 </tr>
 <tr class="even">
 <td><code><a href="../reference/realised_burden.html">realised_burden()</a></code></td>
 <td>QSF + response data</td>
 <td>Per-respondent answer-based burden</td>
-<td><em>ex post</em></td>
+<td>after fieldwork</td>
 </tr>
 </tbody>
 </table>
 <p>Use <code><a href="../reference/respondent_burden.html">respondent_burden()</a></code> to evaluate a draft survey
-before fielding. Use <code><a href="../reference/realised_burden.html">realised_burden()</a></code> after fielding to
+before fieldwork. Use <code><a href="../reference/realised_burden.html">realised_burden()</a></code> after fielding to
 see how answer-based burden was distributed across respondents.</p>
 </div>
 <div class="section level2">
@@ -334,7 +346,7 @@ in the map:</p>
 <div class="section level2">
 <h2 id="comparing-predicted-and-realised-burden">Comparing predicted and realised burden<a class="anchor" aria-label="anchor" href="#comparing-predicted-and-realised-burden"></a>
 </h2>
-<p>The <code>predicted_points</code> column lets you compare the ex-ante
+<p>The <code>predicted_points</code> column lets you compare the
 structural prediction against the realised score for each
 respondent:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">

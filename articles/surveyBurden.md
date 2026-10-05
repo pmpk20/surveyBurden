@@ -1,13 +1,13 @@
 # Get started with surveyBurden
 
-`surveyBurden` estimates **ex-ante instrument burden**: the response
-effort a programmed Qualtrics survey demands, worked out before fielding
-from the instrument alone. It reads the survey, scores every question
-with the GfS+ point scheme (extending Heimgartner and Axhausen 2024),
+`surveyBurden` estimates **survey burden**: the response effort a
+programmed Qualtrics survey demands, worked out before fieldwork from
+the survey alone. It reads the survey, scores every question with the
+GfS+ point scheme (extending Heimgartner and Axhausen 2024),
 reconstructs the paths the flow and display logic allow, and reports how
 burden varies across those paths.
 
-In the terms of Yan and Williams (2022) this is the *instrument* side of
+In the terms of Yan and Williams (2022) this is the *survey* side of
 respondent burden – length, difficulty, and the effort the design
 requires. It is not the *perceived* burden a particular respondent
 reports feeling, and it is not a completion-time predictor.
@@ -59,6 +59,18 @@ pak::pak("pmpk20/surveyBurden")
 ``` r
 
 library(surveyBurden)
+#> 
+#>                   .-- Q2 -- Q3 --.
+#>   survey -- Q1 --+               +-- Burden 0.2.0
+#>                   '-- Q4 --------'
+#> 
+#> An R package for assessing the response-burden of web surveys
+#> Docs: https://pmpk20.github.io/surveyBurden/
+#> 
+#> Please cite: King P (2026). surveyBurden: An R package for assessing
+#> the response-burden of web surveys. R package version 0.2.0,
+#> https://github.com/pmpk20/surveyBurden.
+#> Use citation("surveyBurden") for BibTeX.
 demo <- system.file("extdata", "demo_travel_survey.qsf", package = "surveyBurden")
 ```
 
@@ -80,7 +92,7 @@ report
 #> Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of
 #> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.
 #> 
-#> ── Instrument ──
+#> ── Survey ──
 #> 
 #> Questions (live)     26
 #> Blocks               12
@@ -155,8 +167,8 @@ The printout opens with a one-line **verdict**: the median
 completing-path burden in points and minutes, its ratio to the 399-point
 GfS benchmark, and the range across completing paths. Below it:
 
-- **Instrument** – structural counts (questions, blocks, branch points,
-  loop blocks, early exits).
+- **Survey** – structural counts (questions, blocks, branch points, loop
+  blocks, early exits).
 - **Paths** – how many distinct paths the flow allows, and how many
   complete rather than screen out.
 - **Burden** – the headline spread of path burden, in points, minutes
@@ -215,7 +227,7 @@ head(report$items[order(-report$items$gfs_points),
 #> 6 QID7        matrix                8 auto
 ```
 
-Other components: `report$instrument` (the structural counts),
+Other components: `report$survey` (the structural counts),
 `report$paths` (one row per structural path), `report$blocks` (burden by
 block), `report$readability`, `report$certainty` and `report$warnings`.
 Scalars such as the points-per-minute rate live on attributes:

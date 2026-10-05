@@ -23,6 +23,18 @@ for the printed output see
 ``` r
 
 library(surveyBurden)
+#> 
+#>                   .-- Q2 -- Q3 --.
+#>   survey -- Q1 --+               +-- Burden 0.2.0
+#>                   '-- Q4 --------'
+#> 
+#> An R package for assessing the response-burden of web surveys
+#> Docs: https://pmpk20.github.io/surveyBurden/
+#> 
+#> Please cite: King P (2026). surveyBurden: An R package for assessing
+#> the response-burden of web surveys. R package version 0.2.0,
+#> https://github.com/pmpk20/surveyBurden.
+#> Use citation("surveyBurden") for BibTeX.
 demo <- system.file("extdata", "demo_travel_survey.qsf", package = "surveyBurden")
 qsf <- read_qsf(demo)
 report <- burden_report(demo, quiet = TRUE)
@@ -35,7 +47,7 @@ Contemporary web surveys are not a fixed sequence.
 walks the `SurveyFlow`, forking at every `Branch` into a condition-true
 and a condition-false continuation, and at every `EndSurvey` into a
 screen-out. Branch conditions are **not evaluated** – they depend on
-embedded data or prior answers that are unknown before fielding – so
+embedded data or prior answers that are unknown before fieldwork – so
 both outcomes are always kept. The result is every block sequence a
 respondent could encounter.
 
@@ -71,9 +83,9 @@ raises an error rather than a partial answer.
 Within a path,
 [`resolve_paths()`](https://pmpk20.github.io/surveyBurden/reference/resolve_paths.md)
 partitions the questions into three sets: **always shown**, **may be
-shown** (gated by a condition that cannot be evaluated before fielding),
-and **never shown on this path** (the gate’s trigger question is not on
-the path).
+shown** (gated by a condition that cannot be evaluated before
+fieldwork), and **never shown on this path** (the gate’s trigger
+question is not on the path).
 
 ``` r
 

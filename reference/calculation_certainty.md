@@ -65,7 +65,7 @@ An object of class `calculation_certainty` (list):
   One row per flow `Branch`, with the trigger variable(s). Both outcomes
   of every branch are always enumerated, so a branch is not an
   approximation – but which outcome a given respondent takes is unknown
-  ex ante.
+  before fieldwork.
 
 - display_logic:
 
@@ -118,7 +118,7 @@ calculation_certainty(qsf_path)
 #> 0 of 2 complete paths have no unresolved display-logic question; 2 carry at
 #> least one.
 #> 3 flow branches; both outcomes of each are enumerated, but which one a given
-#> respondent takes is unknown ex ante:
+#> respondent takes is unknown before fieldwork:
 #> FL_b_consent: trigger QID2
 #> FL_b_area: trigger QID3
 #> FL_b_work: trigger QID6

@@ -63,7 +63,7 @@
 <div class="page-header"><h1 id="surveyburden">surveyBurden<a class="anchor" aria-label="anchor" href="#surveyburden"></a>
 </h1></div>
 <p><a href="https://github.com/pmpk20/surveyBurden/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/pmpk20/surveyBurden/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a> <a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a> <a href="https://opensource.org/licenses/MIT" class="external-link"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a> <a href="https://orcid.org/0000-0001-8550-466X" class="external-link"><img src="https://img.shields.io/badge/ORCID-0000--0001--8550--466X-A6CE39?logo=orcid" alt="ORCID"></a> <a href="https://app.codecov.io/gh/pmpk20/surveyBurden" class="external-link"><img src="https://codecov.io/gh/pmpk20/surveyBurden/graph/badge.svg" alt="Codecov test coverage"></a></p>
-<p>surveyBurden estimates how much response effort a survey instrument requires. It scores every question with the GfS+ point scheme (extending Heimgartner &amp; Axhausen 2024). It can read a survey and follow its display logic to show how burden varies across the paths through the survey. If you have response data, the package can also tell you the burden per-respondent. For any platform, surveyBurden can give you the per-question GfS+ scores and a survey total, from a simple table of your questions (<code><a href="reference/validate_catalogue.html">validate_catalogue()</a></code> then <code><a href="reference/score_burden.html">score_burden()</a></code>); a burden range per path if you also list which questions each path shows (<code><a href="reference/path_burden.html">path_burden()</a></code>). The package works best with Qualtrics (either .qsf export in JSON or through the API), and can do all of the above, worked out automatically, plus the full report: routing and skip logic, burden across paths, respondent-level predictions, and analysis of response data and completion times. surveyBurden is an independent project with no affiliation with Qualtrics or any other survey platform, and no platform provides support for it.</p>
+<p>surveyBurden estimates how much response effort a survey requires. It scores every question with the GfS+ point scheme (extending Heimgartner &amp; Axhausen 2024). It can read a survey and follow its display logic to show how burden varies across the paths through the survey. If you have response data, the package can also tell you the burden per-respondent. For any platform, surveyBurden can give you the per-question GfS+ scores and a survey total, from a simple table of your questions (<code><a href="reference/validate_catalogue.html">validate_catalogue()</a></code> then <code><a href="reference/score_burden.html">score_burden()</a></code>); a burden range per path if you also list which questions each path shows (<code><a href="reference/path_burden.html">path_burden()</a></code>). The package works best with Qualtrics (either .qsf export in JSON or through the API), and can do all of the above, worked out automatically, plus the full report: routing and skip logic, burden across paths, respondent-level predictions, and analysis of response data and completion times. surveyBurden is an independent project with no affiliation with Qualtrics or any other survey platform, and no platform provides support for it.</p>
 <div class="section level2">
 <h2 id="where-to-start">Where to start<a class="anchor" aria-label="anchor" href="#where-to-start"></a>
 </h2>
@@ -154,7 +154,7 @@
 <span><span class="co">#&gt; Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of</span></span>
 <span><span class="co">#&gt; 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.</span></span>
 <span><span class="co">#&gt; ...</span></span></code></pre>
-<p>The full printout adds the instrument counts, the burden quantiles, burden by block, the heaviest questions, readability diagnostics, calculation certainty and QC warnings. <code><a href="articles/reading-the-report.html">vignette("reading-the-report")</a></code> walks through every section.</p>
+<p>The full printout adds the survey counts, the burden quantiles, burden by block, the heaviest questions, readability diagnostics, calculation certainty and QC warnings. <code><a href="articles/reading-the-report.html">vignette("reading-the-report")</a></code> walks through every section.</p>
 <p><code>summary(report)</code> prints just the headline:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">report</span><span class="op">)</span></span>
@@ -169,14 +169,14 @@
 </h2>
 <p><code>report</code> is a structured object, not printed text. Pull out each part:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">report</span><span class="op">$</span><span class="va">instrument</span>  <span class="co"># one-row tibble of the survey's structural counts</span></span>
+<code class="sourceCode R"><span><span class="va">report</span><span class="op">$</span><span class="va">survey</span>  <span class="co"># one-row tibble of the survey's structural counts</span></span>
 <span><span class="va">report</span><span class="op">$</span><span class="va">burden</span>      <span class="co"># min / p25 / median / p75 / max, in points, minutes and index</span></span>
 <span><span class="va">report</span><span class="op">$</span><span class="va">items</span>       <span class="co"># one row per question, with its GfS+ score and the rule used</span></span>
 <span><span class="va">report</span><span class="op">$</span><span class="va">paths</span>       <span class="co"># one row per structural path, with its burden floor and ceiling</span></span>
 <span><span class="va">report</span><span class="op">$</span><span class="va">blocks</span>      <span class="co"># burden totalled by block, in survey order</span></span></code></pre></div>
 <ul>
 <li>
-<code>report$instrument</code> — questions, blocks, branch points, Loop &amp; Merge blocks and structural paths.</li>
+<code>report$survey</code> — questions, blocks, branch points, Loop &amp; Merge blocks and structural paths.</li>
 <li>
 <code>report$burden</code> — the headline spread of <strong>path burden</strong> across the survey.</li>
 <li>
@@ -264,7 +264,7 @@
     report --&gt; out["verdict line +&lt;br&gt;8 report sections"]</code></pre>
 <p>Both ways in score questions with the same rules. For a Qualtrics survey, <code><a href="reference/burden_report.html">burden_report()</a></code> runs the whole pipeline; the lower-level functions expose each step for inspection or reuse (see the reference table below).</p>
 <p>surveyBurden scores every question with the GfS+ point scheme (extending Heimgartner &amp; Axhausen 2024, Table 1), then follows the survey’s flow and display logic to work out which questions can appear together and how burden varies across the structural paths the flow allows. The score for one question is its <strong>question burden</strong>; the total along one path is a <strong>path burden</strong>. The default result is a <strong>structural burden profile</strong>: each complete path carries equal weight, and within a path each modelled display-logic state does, so the reported “median” is the middle value of that model-weighted distribution, not the burden half of respondents exceed. Branch conditions are not checked against each other, so the extremes are not guaranteed to be reachable by a real respondent. Given real respondent route data, the report instead reports a <strong>population-weighted respondent burden</strong>.</p>
-<p>The package describes the instrument, not the respondent: it does not claim that burden causes dropout, satisficing or slower responses. The methodology is set out in <code><a href="articles/gfs-scoring.html">vignette("gfs-scoring")</a></code> and <code><a href="articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code>.</p>
+<p>The package describes the survey, not the respondent: it does not claim that burden causes dropout, satisficing or slower responses. The methodology is set out in <code><a href="articles/gfs-scoring.html">vignette("gfs-scoring")</a></code> and <code><a href="articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="fetching-from-qualtrics">Fetching from Qualtrics<a class="anchor" aria-label="anchor" href="#fetching-from-qualtrics"></a>
@@ -364,7 +364,7 @@
 </tr>
 <tr>
 <td><code>realised_burden(qsf, responses)</code></td>
-<td>per-respondent ex-post burden from response data</td>
+<td>per-respondent burden after fieldwork from response data</td>
 </tr>
 <tr>
 <td><code>realised_exposure(qsf, responses)</code></td>

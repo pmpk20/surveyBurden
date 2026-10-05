@@ -5,8 +5,9 @@ Combines
 (block-level routing) with a within-block display-logic reachability
 analysis. For each flow path it partitions the questions into those
 always shown, those that *may* be shown (a display-logic condition we
-cannot evaluate ex ante), and those whose display logic is shown to be
-false on that path because of the questions the path does not show (see
+cannot evaluate before fieldwork), and those whose display logic is
+shown to be false on that path because of the questions the path does
+not show (see
 [`classify_reachability()`](https://pmpk20.github.io/surveyBurden/reference/classify_reachability.md)
 for the rule).
 
@@ -36,9 +37,8 @@ resolve_paths(qsf, max_paths = 10000L, catalogue = NULL, blocks = NULL)
   [`resolve_live_blocks()`](https://pmpk20.github.io/surveyBurden/reference/resolve_live_blocks.md)
   results for this `qsf`. Internal: lets
   [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
-  parse and resolve the instrument once and reuse it. When `NULL`
-  (default) they are computed here, so the public behaviour is
-  unchanged.
+  parse and resolve the survey once and reuse it. When `NULL` (default)
+  they are computed here, so the public behaviour is unchanged.
 
 ## Value
 
@@ -62,10 +62,10 @@ columns plus:
 ## Details
 
 Interior enumeration of the display-logic state space is **not**
-performed: a large instrument can carry dozens of root display-logic
-gates with choice-level mutual exclusivity, which needs a constraint
-solver. The honest output is the structural band per path (floor =
-always, ceiling = always + maybe); see
+performed: a large survey can carry dozens of root display-logic gates
+with choice-level mutual exclusivity, which needs a constraint solver.
+The honest output is the structural band per path (floor = always,
+ceiling = always + maybe); see
 [`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md).
 
 ## Examples

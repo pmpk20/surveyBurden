@@ -41,7 +41,7 @@ package’s MIT licence.
 
 ## Scope
 
-`surveyBurden` scores burden from a programmed instrument using the
+`surveyBurden` scores burden from a programmed survey using the
 published GfS / Axhausen scheme. It deliberately does not model
 respondent behaviour, and it does not implement alternative burden
 schemes; proposals that change that scope should be discussed in an

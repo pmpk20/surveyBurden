@@ -90,6 +90,18 @@ per-question scoring see <code><a href="../articles/gfs-scoring.html">vignette("
 printed output see <code><a href="../articles/reading-the-report.html">vignette("reading-the-report")</a></code>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/pmpk20/surveyBurden" class="external-link">surveyBurden</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;                   .-- Q2 -- Q3 --.</span></span>
+<span><span class="co">#&gt;   survey -- Q1 --+               +-- Burden 0.2.0</span></span>
+<span><span class="co">#&gt;                   '-- Q4 --------'</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; An R package for assessing the response-burden of web surveys</span></span>
+<span><span class="co">#&gt; Docs: https://pmpk20.github.io/surveyBurden/</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Please cite: King P (2026). surveyBurden: An R package for assessing</span></span>
+<span><span class="co">#&gt; the response-burden of web surveys. R package version 0.2.0,</span></span>
+<span><span class="co">#&gt; https://github.com/pmpk20/surveyBurden.</span></span>
+<span><span class="co">#&gt; Use citation("surveyBurden") for BibTeX.</span></span>
 <span><span class="va">demo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"demo_travel_survey.qsf"</span>, package <span class="op">=</span> <span class="st">"surveyBurden"</span><span class="op">)</span></span>
 <span><span class="va">qsf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_qsf.html">read_qsf</a></span><span class="op">(</span><span class="va">demo</span><span class="op">)</span></span>
 <span><span class="va">report</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">demo</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
@@ -101,7 +113,7 @@ printed output see <code><a href="../articles/reading-the-report.html">vignette(
 at every <code>Branch</code> into a condition-true and a condition-false
 continuation, and at every <code>EndSurvey</code> into a screen-out.
 Branch conditions are <strong>not evaluated</strong> – they depend on
-embedded data or prior answers that are unknown before fielding – so
+embedded data or prior answers that are unknown before fieldwork – so
 both outcomes are always kept. The result is every block sequence a
 respondent could encounter.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -131,7 +143,7 @@ produce more raises an error rather than a partial answer.</p>
 <p>Within a path, <code><a href="../reference/resolve_paths.html">resolve_paths()</a></code> partitions the questions
 into three sets: <strong>always shown</strong>, <strong>may be
 shown</strong> (gated by a condition that cannot be evaluated before
-fielding), and <strong>never shown on this path</strong> (the gate’s
+fieldwork), and <strong>never shown on this path</strong> (the gate’s
 trigger question is not on the path).</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/resolve_paths.html">resolve_paths</a></span><span class="op">(</span><span class="va">qsf</span><span class="op">)</span></span>

@@ -87,6 +87,18 @@ and points-to-minutes – and the limitations of the approach as a whole.
 For the scoring rules see <code><a href="../articles/gfs-scoring.html">vignette("gfs-scoring")</a></code>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/pmpk20/surveyBurden" class="external-link">surveyBurden</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;                   .-- Q2 -- Q3 --.</span></span>
+<span><span class="co">#&gt;   survey -- Q1 --+               +-- Burden 0.2.0</span></span>
+<span><span class="co">#&gt;                   '-- Q4 --------'</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; An R package for assessing the response-burden of web surveys</span></span>
+<span><span class="co">#&gt; Docs: https://pmpk20.github.io/surveyBurden/</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Please cite: King P (2026). surveyBurden: An R package for assessing</span></span>
+<span><span class="co">#&gt; the response-burden of web surveys. R package version 0.2.0,</span></span>
+<span><span class="co">#&gt; https://github.com/pmpk20/surveyBurden.</span></span>
+<span><span class="co">#&gt; Use citation("surveyBurden") for BibTeX.</span></span>
 <span><span class="va">demo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"demo_travel_survey.qsf"</span>, package <span class="op">=</span> <span class="st">"surveyBurden"</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="words_per_line">words_per_line<a class="anchor" aria-label="anchor" href="#words_per_line"></a>
@@ -126,8 +138,8 @@ weights object:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> median       8.2 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> p75          8.67</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> max          9.53</span></span></code></pre></div>
-<p>Alternatively, if you are calculating burden ex post then you can use
-the completion-time data of your survey to calculate
+<p>Alternatively, if you are calculating burden after fieldwork then you
+can use the completion-time data of your survey to calculate
 <code><a href="../reference/validate_times.html">validate_times()</a></code> and use the rate it returns.</p>
 <div class="section level3">
 <h3 id="validating-against-completion-times">Validating against completion times<a class="anchor" aria-label="anchor" href="#validating-against-completion-times"></a>

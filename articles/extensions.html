@@ -81,7 +81,19 @@ survey (schema below).</p>
 display-logic information, a catalogue gives per-question scores and a
 single-pass total, not a burden range or profile.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/pmpk20/surveyBurden" class="external-link">surveyBurden</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/pmpk20/surveyBurden" class="external-link">surveyBurden</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;                   .-- Q2 -- Q3 --.</span></span>
+<span><span class="co">#&gt;   survey -- Q1 --+               +-- Burden 0.2.0</span></span>
+<span><span class="co">#&gt;                   '-- Q4 --------'</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; An R package for assessing the response-burden of web surveys</span></span>
+<span><span class="co">#&gt; Docs: https://pmpk20.github.io/surveyBurden/</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Please cite: King P (2026). surveyBurden: An R package for assessing</span></span>
+<span><span class="co">#&gt; the response-burden of web surveys. R package version 0.2.0,</span></span>
+<span><span class="co">#&gt; https://github.com/pmpk20/surveyBurden.</span></span>
+<span><span class="co">#&gt; Use citation("surveyBurden") for BibTeX.</span></span></code></pre></div>
 <p>surveyBurden reads Qualtrics <code>.qsf</code> files, but many
 surveys are built on other platforms (LimeSurvey, SurveyEngine, REDCap,
 and so on). This vignette documents where the Qualtrics-specific code
@@ -524,7 +536,7 @@ path. That currently requires a Qualtrics survey.</li>
 currently require a Qualtrics survey as well as response data.</li>
 </ul>
 <p>The total from a hand-built catalogue is a defensible measure of
-instrument burden for any survey that can be expressed as a list of
+survey burden for any survey that can be expressed as a list of
 questions with their types and option counts. It applies the same
 published GfS+ point scheme (Heimgartner and Axhausen, 2024) as the full
 Qualtrics pipeline.</p>

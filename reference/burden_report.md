@@ -1,10 +1,10 @@
-# Ex-ante instrument burden report
+# Survey burden report
 
 The user-facing entry point. Parses a Qualtrics `.qsf`, resolves its
 flow and display logic, scores every question with the GfS+ burden-point
 scheme (extending Heimgartner and Axhausen 2024,
 [doi:10.32866/001c.125481](https://doi.org/10.32866/001c.125481) ), and
-summarises the burden across the instrument's structural path space.
+summarises the burden across the survey's structural path space.
 
 ## Usage
 
@@ -121,7 +121,7 @@ summary(object, ...)
 An object of class `burden_report`: a list of tibbles under stable
 names. Print it for the formatted summary, or read its components:
 
-- instrument:
+- survey:
 
   One-row tibble of structural counts: `survey_name`, `n_questions`,
   `n_blocks`, `n_branches`, `n_randomisers`, `n_loop_blocks`,
@@ -219,16 +219,16 @@ qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
                          package = "surveyBurden")
 br <- burden_report(qsf_path)
 #> ℹ Reading survey
-#> ✔ Reading survey [9ms]
+#> ✔ Reading survey [5ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [112ms]
+#> ✔ Scoring questions and resolving paths [65ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [35ms]
+#> ✔ Checking calculation certainty [18ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [24ms]
+#> ✔ Enumerating display-logic combinations [10ms]
 #> 
 br
 #> 
@@ -236,7 +236,7 @@ br
 #> Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of
 #> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.
 #> 
-#> ── Instrument ──
+#> ── Survey ──
 #> 
 #> Questions (live)     26
 #> Blocks               12

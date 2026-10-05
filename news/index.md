@@ -2,6 +2,21 @@
 
 ## surveyBurden (development version)
 
+- **Breaking:** “instrument” is now “survey” throughout.
+  `instrument_summary()` is renamed
+  [`survey_summary()`](https://pmpk20.github.io/surveyBurden/reference/survey_summary.md),
+  and the
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
+  element `$instrument` is now `$survey` (printed under “Survey”).
+
+- [`library(surveyBurden)`](https://github.com/pmpk20/surveyBurden) now
+  prints a short banner with the version, the package title and how to
+  cite it (silence with
+  [`suppressPackageStartupMessages()`](https://rdrr.io/r/base/message.html)).
+
+- `citation("surveyBurden")` now takes its title and version from
+  DESCRIPTION.
+
 - Display logic now applies And before Or among the conditions inside
   one group, as Qualtrics documents: `A Or B And C` is read as
   `A | (B & C)`, not left to right as `(A | B) & C`. This affects

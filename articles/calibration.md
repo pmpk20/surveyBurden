@@ -19,6 +19,18 @@ For the scoring rules see
 ``` r
 
 library(surveyBurden)
+#> 
+#>                   .-- Q2 -- Q3 --.
+#>   survey -- Q1 --+               +-- Burden 0.2.0
+#>                   '-- Q4 --------'
+#> 
+#> An R package for assessing the response-burden of web surveys
+#> Docs: https://pmpk20.github.io/surveyBurden/
+#> 
+#> Please cite: King P (2026). surveyBurden: An R package for assessing
+#> the response-burden of web surveys. R package version 0.2.0,
+#> https://github.com/pmpk20/surveyBurden.
+#> Use citation("surveyBurden") for BibTeX.
 demo <- system.file("extdata", "demo_travel_survey.qsf", package = "surveyBurden")
 ```
 
@@ -65,8 +77,8 @@ burden_report(demo, scheme = w, quiet = TRUE)$burden[, c("statistic", "minutes")
 #> 5 max          9.53
 ```
 
-Alternatively, if you are calculating burden ex post then you can use
-the completion-time data of your survey to calculate
+Alternatively, if you are calculating burden after fieldwork then you
+can use the completion-time data of your survey to calculate
 [`validate_times()`](https://pmpk20.github.io/surveyBurden/reference/validate_times.md)
 and use the rate it returns.
 

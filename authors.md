@@ -10,12 +10,12 @@
 Source:
 [`inst/CITATION`](https://github.com/pmpk20/surveyBurden/blob/main/inst/CITATION)
 
-King P (2026). *surveyBurden: Ex-Ante Path-Aware Survey Instrument
-Burden Assessment*. R package version 0.2.0,
+King P (2026). *surveyBurden: An R package for assessing the
+response-burden of web surveys*. R package version 0.2.0,
 <https://github.com/pmpk20/surveyBurden>.
 
     @Manual{,
-      title = {surveyBurden: Ex-Ante Path-Aware Survey Instrument Burden Assessment},
+      title = {surveyBurden: An R package for assessing the response-burden of web surveys},
       author = {Peter King},
       year = {2026},
       note = {R package version 0.2.0},

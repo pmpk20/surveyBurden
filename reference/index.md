@@ -6,7 +6,7 @@ Run the whole analysis and get the structured report.
 
 - [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
   [`summary(`*`<burden_report>`*`)`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
-  : Ex-ante instrument burden report
+  : Survey burden report
 - [`summary_line()`](https://pmpk20.github.io/surveyBurden/reference/summary_line.md)
   : One-sentence summary of a burden object
 
@@ -41,7 +41,7 @@ Classify each question and apply the GfS / Axhausen point weights.
 - [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)
   : GfS+ burden-scoring scheme
 - [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
-  : Score per-question ex-ante burden
+  : Score per-question burden
 
 ## Resolve paths
 
@@ -93,5 +93,5 @@ Check where the calculation is exact and calibrate points to minutes.
   assumptions
 - [`validate_times()`](https://pmpk20.github.io/surveyBurden/reference/validate_times.md)
   : Validate predicted burden against observed completion times
-- [`instrument_summary()`](https://pmpk20.github.io/surveyBurden/reference/instrument_summary.md)
-  : Structural summary of an instrument
+- [`survey_summary()`](https://pmpk20.github.io/surveyBurden/reference/survey_summary.md)
+  : Structural summary of a survey

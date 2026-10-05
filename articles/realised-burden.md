@@ -14,13 +14,25 @@ predicted-minus-realised gap does not by itself identify dropout.
 ``` r
 
 library(surveyBurden)
+#> 
+#>                   .-- Q2 -- Q3 --.
+#>   survey -- Q1 --+               +-- Burden 0.2.0
+#>                   '-- Q4 --------'
+#> 
+#> An R package for assessing the response-burden of web surveys
+#> Docs: https://pmpk20.github.io/surveyBurden/
+#> 
+#> Please cite: King P (2026). surveyBurden: An R package for assessing
+#> the response-burden of web surveys. R package version 0.2.0,
+#> https://github.com/pmpk20/surveyBurden.
+#> Use citation("surveyBurden") for BibTeX.
 ```
 
 The function
 [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
-can estimate burden **ex ante** from the survey alone. Once responses
-are collected, however, you can also compute the **realised burden**: an
-answer-based GfS+ estimate for each respondent.
+can estimate burden **before fieldwork** from the survey alone. Once
+responses are collected, however, you can also compute the **realised
+burden**: an answer-based GfS+ estimate for each respondent.
 
 Its operational definition matters for interpretation. A question counts
 as answered when at least one of its mapped response columns is
@@ -44,12 +56,12 @@ for comparison.
 
 | Function | Input | Output | Timing |
 |----|----|----|----|
-| [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md) | QSF only | Predicted burden by path | *ex ante* |
-| [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md) | QSF + response data | Per-respondent answer-based burden | *ex post* |
+| [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md) | QSF only | Predicted burden by path | before fieldwork |
+| [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md) | QSF + response data | Per-respondent answer-based burden | after fieldwork |
 
 Use
 [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
-to evaluate a draft survey before fielding. Use
+to evaluate a draft survey before fieldwork. Use
 [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
 after fielding to see how answer-based burden was distributed across
 respondents.
@@ -249,8 +261,8 @@ attr(responses, "col_map") <- col_map
 
 ## Comparing predicted and realised burden
 
-The `predicted_points` column lets you compare the ex-ante structural
-prediction against the realised score for each respondent:
+The `predicted_points` column lets you compare the structural prediction
+against the realised score for each respondent:
 
 ``` r
 

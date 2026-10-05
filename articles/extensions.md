@@ -13,6 +13,18 @@ total, not a burden range or profile.
 ``` r
 
 library(surveyBurden)
+#> 
+#>                   .-- Q2 -- Q3 --.
+#>   survey -- Q1 --+               +-- Burden 0.2.0
+#>                   '-- Q4 --------'
+#> 
+#> An R package for assessing the response-burden of web surveys
+#> Docs: https://pmpk20.github.io/surveyBurden/
+#> 
+#> Please cite: King P (2026). surveyBurden: An R package for assessing
+#> the response-burden of web surveys. R package version 0.2.0,
+#> https://github.com/pmpk20/surveyBurden.
+#> Use citation("surveyBurden") for BibTeX.
 ```
 
 surveyBurden reads Qualtrics `.qsf` files, but many surveys are built on
@@ -267,11 +279,10 @@ It does **not** give you:
   [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
   currently require a Qualtrics survey as well as response data.
 
-The total from a hand-built catalogue is a defensible measure of
-instrument burden for any survey that can be expressed as a list of
-questions with their types and option counts. It applies the same
-published GfS+ point scheme (Heimgartner and Axhausen, 2024) as the full
-Qualtrics pipeline.
+The total from a hand-built catalogue is a defensible measure of survey
+burden for any survey that can be expressed as a list of questions with
+their types and option counts. It applies the same published GfS+ point
+scheme (Heimgartner and Axhausen, 2024) as the full Qualtrics pipeline.
 
 ## What a new parser must provide
 

@@ -72,17 +72,16 @@
 
     
     
-<p><code>surveyBurden</code> estimates <strong>ex-ante instrument
-burden</strong>: the response effort a programmed Qualtrics survey
-demands, worked out before fielding from the instrument alone. It reads
-the survey, scores every question with the GfS+ point scheme (extending
-Heimgartner and Axhausen 2024), reconstructs the paths the flow and
-display logic allow, and reports how burden varies across those
-paths.</p>
-<p>In the terms of Yan and Williams (2022) this is the
-<em>instrument</em> side of respondent burden – length, difficulty, and
-the effort the design requires. It is not the <em>perceived</em> burden
-a particular respondent reports feeling, and it is not a completion-time
+<p><code>surveyBurden</code> estimates <strong>survey burden</strong>:
+the response effort a programmed Qualtrics survey demands, worked out
+before fieldwork from the survey alone. It reads the survey, scores
+every question with the GfS+ point scheme (extending Heimgartner and
+Axhausen 2024), reconstructs the paths the flow and display logic allow,
+and reports how burden varies across those paths.</p>
+<p>In the terms of Yan and Williams (2022) this is the <em>survey</em>
+side of respondent burden – length, difficulty, and the effort the
+design requires. It is not the <em>perceived</em> burden a particular
+respondent reports feeling, and it is not a completion-time
 predictor.</p>
 <p>This article gets you to a first report. Which function you need
 depends on what you have:</p>
@@ -180,6 +179,18 @@ a QSF, and what full support for another platform would take.</li>
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/pmpk20/surveyBurden" class="external-link">surveyBurden</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;                   .-- Q2 -- Q3 --.</span></span>
+<span><span class="co">#&gt;   survey -- Q1 --+               +-- Burden 0.2.0</span></span>
+<span><span class="co">#&gt;                   '-- Q4 --------'</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; An R package for assessing the response-burden of web surveys</span></span>
+<span><span class="co">#&gt; Docs: https://pmpk20.github.io/surveyBurden/</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Please cite: King P (2026). surveyBurden: An R package for assessing</span></span>
+<span><span class="co">#&gt; the response-burden of web surveys. R package version 0.2.0,</span></span>
+<span><span class="co">#&gt; https://github.com/pmpk20/surveyBurden.</span></span>
+<span><span class="co">#&gt; Use citation("surveyBurden") for BibTeX.</span></span>
 <span><span class="va">demo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"demo_travel_survey.qsf"</span>, package <span class="op">=</span> <span class="st">"surveyBurden"</span><span class="op">)</span></span></code></pre></div>
 <p><code><a href="../reference/burden_report.html">burden_report()</a></code> runs the whole pipeline. Every code
 chunk in these articles runs against the small fictional “Neighbourhood
@@ -196,7 +207,7 @@ numbers the current package produces. To use your own survey, replace
 <span><span class="co">#&gt; Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of</span></span>
 <span><span class="co">#&gt; 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── <span style="font-weight: bold;">Instrument</span> ──</span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Survey</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Questions (live)     26</span></span>
 <span><span class="co">#&gt; Blocks               12</span></span>
@@ -271,7 +282,7 @@ median completing-path burden in points and minutes, its ratio to the
 it:</p>
 <ul>
 <li>
-<strong>Instrument</strong> – structural counts (questions, blocks,
+<strong>Survey</strong> – structural counts (questions, blocks,
 branch points, loop blocks, early exits).</li>
 <li>
 <strong>Paths</strong> – how many distinct paths the flow allows,
@@ -394,8 +405,8 @@ out each part:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> QID20       matrix               12 auto      </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> QID1        descriptive          11 inferred  </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> QID7        matrix                8 auto</span></span></code></pre></div>
-<p>Other components: <code>report$instrument</code> (the structural
-counts), <code>report$paths</code> (one row per structural path),
+<p>Other components: <code>report$survey</code> (the structural counts),
+<code>report$paths</code> (one row per structural path),
 <code>report$blocks</code> (burden by block),
 <code>report$readability</code>, <code>report$certainty</code> and
 <code>report$warnings</code>. Scalars such as the points-per-minute rate

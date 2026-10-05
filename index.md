@@ -9,14 +9,13 @@ MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.or
 [![Codecov test
 coverage](https://codecov.io/gh/pmpk20/surveyBurden/graph/badge.svg)](https://app.codecov.io/gh/pmpk20/surveyBurden)
 
-surveyBurden estimates how much response effort a survey instrument
-requires. It scores every question with the GfS+ point scheme (extending
-Heimgartner & Axhausen 2024). It can read a survey and follow its
-display logic to show how burden varies across the paths through the
-survey. If you have response data, the package can also tell you the
-burden per-respondent. For any platform, surveyBurden can give you the
-per-question GfS+ scores and a survey total, from a simple table of your
-questions
+surveyBurden estimates how much response effort a survey requires. It
+scores every question with the GfS+ point scheme (extending Heimgartner
+& Axhausen 2024). It can read a survey and follow its display logic to
+show how burden varies across the paths through the survey. If you have
+response data, the package can also tell you the burden per-respondent.
+For any platform, surveyBurden can give you the per-question GfS+ scores
+and a survey total, from a simple table of your questions
 ([`validate_catalogue()`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md)
 then
 [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md));
@@ -84,9 +83,9 @@ report
     #> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.
     #> ...
 
-The full printout adds the instrument counts, the burden quantiles,
-burden by block, the heaviest questions, readability diagnostics,
-calculation certainty and QC warnings.
+The full printout adds the survey counts, the burden quantiles, burden
+by block, the heaviest questions, readability diagnostics, calculation
+certainty and QC warnings.
 [`vignette("reading-the-report")`](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md)
 walks through every section.
 
@@ -108,14 +107,14 @@ summary(report)
 
 ``` r
 
-report$instrument  # one-row tibble of the survey's structural counts
+report$survey  # one-row tibble of the survey's structural counts
 report$burden      # min / p25 / median / p75 / max, in points, minutes and index
 report$items       # one row per question, with its GfS+ score and the rule used
 report$paths       # one row per structural path, with its burden floor and ceiling
 report$blocks      # burden totalled by block, in survey order
 ```
 
-- `report$instrument` — questions, blocks, branch points, Loop & Merge
+- `report$survey` — questions, blocks, branch points, Loop & Merge
   blocks and structural paths.
 - `report$burden` — the headline spread of **path burden** across the
   survey.
@@ -186,8 +185,8 @@ other, so the extremes are not guaranteed to be reachable by a real
 respondent. Given real respondent route data, the report instead reports
 a **population-weighted respondent burden**.
 
-The package describes the instrument, not the respondent: it does not
-claim that burden causes dropout, satisficing or slower responses. The
+The package describes the survey, not the respondent: it does not claim
+that burden causes dropout, satisficing or slower responses. The
 methodology is set out in
 [`vignette("gfs-scoring")`](https://pmpk20.github.io/surveyBurden/articles/gfs-scoring.md)
 and
@@ -271,7 +270,7 @@ runs the whole pipeline. The lower-level functions expose each step.
 | `summary_line(x, ...)` | a one-sentence burden summary |
 | `calculation_certainty(qsf, scheme, max_paths)` | which parts of the calculation are enumerated in full within the model and which are approximated |
 | `burden_report(x, scheme, profile, routes, max_paths, ...)` | the structured report object |
-| `realised_burden(qsf, responses)` | per-respondent ex-post burden from response data |
+| `realised_burden(qsf, responses)` | per-respondent burden after fieldwork from response data |
 | `realised_exposure(qsf, responses)` | per respondent and block: routing and the burden shown, including break-offs |
 | `exposure_person_period(x)` | person-period data for a discrete-time hazard model of break-off |
 | `validate_catalogue(catalogue)` | check and coerce a hand-built question catalogue |

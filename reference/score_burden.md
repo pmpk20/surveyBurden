@@ -1,4 +1,4 @@
-# Score per-question ex-ante burden
+# Score per-question burden
 
 Applies the GfS+ scoring rules (extending Heimgartner and Axhausen 2024,
 [doi:10.32866/001c.125481](https://doi.org/10.32866/001c.125481) ) via

@@ -9,7 +9,7 @@ output shows, and how to read it.
 on your survey’s `.qsf`.
 
 **What it cannot establish.** The report describes the modelled burden
-of the instrument. It does not predict completion time, dropout or data
+of the survey. It does not predict completion time, dropout or data
 quality, and its median is not the burden half of respondents face.
 
 This article walks the printed
@@ -24,6 +24,18 @@ and
 ``` r
 
 library(surveyBurden)
+#> 
+#>                   .-- Q2 -- Q3 --.
+#>   survey -- Q1 --+               +-- Burden 0.2.0
+#>                   '-- Q4 --------'
+#> 
+#> An R package for assessing the response-burden of web surveys
+#> Docs: https://pmpk20.github.io/surveyBurden/
+#> 
+#> Please cite: King P (2026). surveyBurden: An R package for assessing
+#> the response-burden of web surveys. R package version 0.2.0,
+#> https://github.com/pmpk20/surveyBurden.
+#> Use citation("surveyBurden") for BibTeX.
 demo <- system.file("extdata", "demo_travel_survey.qsf", package = "surveyBurden")
 report <- burden_report(demo, quiet = TRUE)
 report
@@ -32,7 +44,7 @@ report
 #> Median completing path: 123 GfS+ points, ~10 min - 0.3x the benchmark median of
 #> 399. Path burden ranges 106-143 points (9-12 min) across 2 completing paths.
 #> 
-#> ── Instrument ──
+#> ── Survey ──
 #> 
 #> Questions (live)     26
 #> Blocks               12
@@ -115,11 +127,11 @@ population-weighted median (see
 `summary(report)` prints the same verdict with the structural counts and
 nothing else.
 
-## Instrument
+## Survey
 
 ``` r
 
-report$instrument
+report$survey
 #> # A tibble: 1 × 10
 #>   survey_name        n_questions n_blocks n_branches n_randomisers n_loop_blocks
 #>   <chr>                    <int>    <int>      <int>         <int>         <int>
@@ -131,9 +143,9 @@ report$instrument
 Structural counts read straight from the survey (editing URL or QSF):
 live questions, blocks, branch points, block randomisers, Loop & Merge
 blocks, and early-exit (`EndSurvey`) points. These describe the
-programmed instrument, not any respondent. A high branch or early-exit
-count means the survey routes people quite differently, so a single
-burden figure would describe few of them.
+programmed survey, not any respondent. A high branch or early-exit count
+means the survey routes people quite differently, so a single burden
+figure would describe few of them.
 
 ## Paths
 

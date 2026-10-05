@@ -240,7 +240,7 @@ It does **not** give you:
     response data.
 
 The total from a hand-built catalogue is a defensible measure of
-instrument burden for any survey that can be expressed as a list of
+survey burden for any survey that can be expressed as a list of
 questions with their types and option counts. It applies the same
 published GfS+ point scheme (Heimgartner and Axhausen, 2024) as the
 full Qualtrics pipeline.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/score_burden.R
 \name{score_burden}
 \alias{score_burden}
-\title{Score per-question ex-ante burden}
+\title{Score per-question burden}
 \usage{
 score_burden(catalogue, scheme = gfs_scheme())
 }

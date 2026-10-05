@@ -2,7 +2,7 @@
 #
 # A small synthetic Qualtrics survey exercising structures that do NOT appear in
 # the main demo fixture, so the parser / scorer / flow resolver are tested
-# beyond one instrument. Run from the package root:  Rscript data-raw/make_synthetic_qsf.R
+# beyond one survey. Run from the package root:  Rscript data-raw/make_synthetic_qsf.R
 #
 # Structures covered:
 #   - a zero-question block                              (BL_empty)

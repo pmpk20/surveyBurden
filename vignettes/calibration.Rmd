@@ -49,7 +49,7 @@ w$points_per_minute <- 15
 burden_report(demo, scheme = w, quiet = TRUE)$burden[, c("statistic", "minutes")]
 ```
 
-Alternatively, if you are calculating burden ex post then you can use the completion-time data of your survey to calculate `validate_times()` and use the rate it
+Alternatively, if you are calculating burden after fieldwork then you can use the completion-time data of your survey to calculate `validate_times()` and use the rate it
 returns.
 
 ### Validating against completion times

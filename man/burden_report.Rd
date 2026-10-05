@@ -3,7 +3,7 @@
 \name{burden_report}
 \alias{burden_report}
 \alias{summary.burden_report}
-\title{Ex-ante instrument burden report}
+\title{Survey burden report}
 \usage{
 burden_report(
   x,
@@ -78,7 +78,7 @@ stages with \code{\link[cli:cli_progress_step]{cli::cli_progress_step()}}. \code
 An object of class \code{burden_report}: a list of tibbles under stable
 names. Print it for the formatted summary, or read its components:
 \describe{
-\item{instrument}{One-row tibble of structural counts: \code{survey_name},
+\item{survey}{One-row tibble of structural counts: \code{survey_name},
 \code{n_questions}, \code{n_blocks}, \code{n_branches}, \code{n_randomisers},
 \code{n_loop_blocks}, \code{n_end_points}, \code{n_paths}, \code{n_complete_paths},
 \code{n_screenout_paths}.}
@@ -118,7 +118,7 @@ Scalars are attributes: \code{points_per_minute}, \code{rare_threshold}, \code{b
 The user-facing entry point. Parses a Qualtrics \code{.qsf}, resolves its flow and
 display logic, scores every question with the GfS+ burden-point scheme
 (extending Heimgartner and Axhausen 2024, \doi{10.32866/001c.125481}), and
-summarises the burden across the instrument's structural path space.
+summarises the burden across the survey's structural path space.
 }
 \details{
 \strong{Why two ranges exist.} \code{\link[=path_burden]{path_burden()}} (the fast, naive check) scores each

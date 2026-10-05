@@ -3,12 +3,12 @@
 #' Combines [resolve_flow()] (block-level routing) with a within-block
 #' display-logic reachability analysis. For each flow path it partitions the
 #' questions into those always shown, those that *may* be shown (a display-logic
-#' condition we cannot evaluate ex ante), and those whose display logic is
+#' condition we cannot evaluate before fieldwork), and those whose display logic is
 #' shown to be false on that path because of the questions the path does not
 #' show (see [classify_reachability()] for the rule).
 #'
 #' Interior enumeration of the display-logic state space is **not** performed:
-#' a large instrument can carry dozens of root display-logic gates with
+#' a large survey can carry dozens of root display-logic gates with
 #' choice-level mutual exclusivity, which needs a constraint solver. The honest
 #' output is the structural band per path (floor = always, ceiling = always +
 #' maybe); see [path_burden()].
@@ -17,7 +17,7 @@
 #' @param max_paths Passed to [resolve_flow()].
 #' @param catalogue,blocks Optional precomputed [parse_qsf()] and
 #'   [resolve_live_blocks()] results for this `qsf`. Internal: lets
-#'   [burden_report()] parse and resolve the instrument once and reuse it. When
+#'   [burden_report()] parse and resolve the survey once and reuse it. When
 #'   `NULL` (default) they are computed here, so the public behaviour is
 #'   unchanged.
 #'
@@ -149,7 +149,7 @@ reachability_split <- function(qids, has_dl, refs, path_qids, parsed = NULL) {
   list(always = qids[!dl], maybe = qids[dl & !gone], unreachable = qids[dl & gone])
 }
 
-#' Structural summary of an instrument
+#' Structural summary of a survey
 #'
 #' @param qsf A `qsf_raw` object from [read_qsf()].
 #' @param blocks Optional precomputed [resolve_live_blocks()] result for this
@@ -160,10 +160,10 @@ reachability_split <- function(qids, has_dl, refs, path_qids, parsed = NULL) {
 #' @examples
 #' qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
 #'                          package = "surveyBurden")
-#' instrument_summary(read_qsf(qsf_path))
+#' survey_summary(read_qsf(qsf_path))
 #'
 #' @export
-instrument_summary <- function(qsf, blocks = NULL) {
+survey_summary <- function(qsf, blocks = NULL) {
   if (is.null(blocks)) blocks <- resolve_live_blocks(qsf)
   nodes  <- qsf_flow(qsf)[["Flow"]]
 

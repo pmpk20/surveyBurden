@@ -1,9 +1,9 @@
-#' Ex-ante instrument burden report
+#' Survey burden report
 #'
 #' The user-facing entry point. Parses a Qualtrics `.qsf`, resolves its flow and
 #' display logic, scores every question with the GfS+ burden-point scheme
 #' (extending Heimgartner and Axhausen 2024, \doi{10.32866/001c.125481}), and
-#' summarises the burden across the instrument's structural path space.
+#' summarises the burden across the survey's structural path space.
 #'
 #' @param x A path to a `.qsf` file, or a `qsf_raw` object from [read_qsf()].
 #' @param scheme A [gfs_scheme()] list.
@@ -57,7 +57,7 @@
 #' @return An object of class `burden_report`: a list of tibbles under stable
 #'   names. Print it for the formatted summary, or read its components:
 #'   \describe{
-#'     \item{instrument}{One-row tibble of structural counts: `survey_name`,
+#'     \item{survey}{One-row tibble of structural counts: `survey_name`,
 #'       `n_questions`, `n_blocks`, `n_branches`, `n_randomisers`,
 #'       `n_loop_blocks`, `n_end_points`, `n_paths`, `n_complete_paths`,
 #'       `n_screenout_paths`.}
@@ -130,14 +130,14 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
   if (!is.null(words_per_line)) scheme$words_per_line <- words_per_line
 
   step("Scoring questions and resolving paths")
-  # Parse / score / resolve the instrument once here and thread the results
+  # Parse / score / resolve the survey once here and thread the results
   # through the pipeline; every function below accepts them precomputed and
   # falls back to computing its own when called directly.
   catalogue <- parse_qsf(qsf)
   scored    <- score_burden(catalogue, scheme = scheme)
   blocks    <- resolve_live_blocks(qsf)
   paths     <- resolve_paths(qsf, max_paths = max_paths, catalogue = catalogue, blocks = blocks)
-  isum      <- instrument_summary(qsf, blocks = blocks)
+  isum      <- survey_summary(qsf, blocks = blocks)
   pb        <- path_burden(qsf, scheme = scheme, paths = paths, scored = scored)
   ppm    <- scheme$points_per_minute
   full   <- pb[!pb$terminates_early, ]
@@ -160,8 +160,8 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
     calculation_certainty(qsf, scheme = scheme, paths = paths, scored = scored,
                           blocks = blocks, parsed_dl = parsed_dl) else NULL
 
-  # ---- $instrument -------------------------------------------------------
-  instrument <- tibble::tibble(
+  # ---- $survey -------------------------------------------------------
+  survey <- tibble::tibble(
     survey_name       = isum$survey_name,
     n_questions       = as.integer(isum$n_questions),
     n_blocks          = as.integer(isum$n_blocks),
@@ -345,7 +345,7 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
   scored <- scored[, c(intersect(lead, names(scored)), setdiff(names(scored), lead))]
 
   out <- list(
-    instrument  = instrument,
+    survey  = survey,
     burden      = burden_tbl,
     blocks      = tibble::as_tibble(blocks_tbl),
     items       = tibble::as_tibble(scored),
@@ -428,7 +428,7 @@ burden_verdict_line <- function(burden, ppm, benchmark_median, n_complete,
 }
 
 print_burden_report_body <- function(x) {
-  ins <- x$instrument
+  ins <- x$survey
   ppm <- attr(x, "points_per_minute")
   rt  <- attr(x, "rare_threshold")
   bm  <- attr(x, "benchmark")
@@ -443,7 +443,7 @@ print_burden_report_body <- function(x) {
       x$population$points[x$population$statistic == "median"] else NULL)
   for (ln in verdict) cli::cli_text(ln)
 
-  cli::cli_h2("Instrument")
+  cli::cli_h2("Survey")
   cli::cli_verbatim(render_table(rbind(
     c("", ""),
     c("Questions (live)",    ins$n_questions),
@@ -538,7 +538,7 @@ print_burden_report_body <- function(x) {
 #' @export
 summary.burden_report <- function(object, ...) {
   structure(list(
-    instrument = object$instrument,
+    survey = object$survey,
     burden     = object$burden,
     benchmark  = attr(object, "benchmark"),
     ppm        = attr(object, "points_per_minute")
@@ -547,7 +547,7 @@ summary.burden_report <- function(object, ...) {
 
 #' @export
 format.summary.burden_report <- function(x, ...) {
-  ins <- x$instrument
+  ins <- x$survey
   cli::cli_fmt({
     cli::cli_h1("{ins$survey_name}")
     cli::cli_text("{ins$n_questions} question{?s}, {ins$n_blocks} block{?s}, {ins$n_paths} structural path{?s} ({ins$n_complete_paths} complete).")

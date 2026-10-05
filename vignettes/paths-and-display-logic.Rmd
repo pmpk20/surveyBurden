@@ -39,7 +39,7 @@ Contemporary web surveys are not a fixed sequence. `resolve_flow()` walks
 the `SurveyFlow`, forking at every `Branch` into a condition-true and a
 condition-false continuation, and at every `EndSurvey` into a screen-out.
 Branch conditions are **not evaluated** -- they depend on embedded data
-or prior answers that are unknown before fielding -- so both outcomes are
+or prior answers that are unknown before fieldwork -- so both outcomes are
 always kept. The result is every block sequence a respondent could
 encounter.
 
@@ -62,7 +62,7 @@ raises an error rather than a partial answer.
 
 Within a path, `resolve_paths()` partitions the questions into three
 sets: **always shown**, **may be shown** (gated by a condition that
-cannot be evaluated before fielding), and **never shown on this path**
+cannot be evaluated before fieldwork), and **never shown on this path**
 (the gate's trigger question is not on the path).
 
 ```{r paths}

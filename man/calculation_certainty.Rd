@@ -34,7 +34,7 @@ An object of class \code{calculation_certainty} (list):
 \item{branches}{One row per flow \code{Branch}, with the trigger variable(s).
 Both outcomes of every branch are always enumerated, so a branch is not
 an approximation -- but which outcome a given respondent takes is
-unknown ex ante.}
+unknown before fieldwork.}
 \item{display_logic}{\code{n_conditional} questions gated by an unresolved
 condition on some full path; \code{n_exact} scored by exact joint
 enumeration of their gate states; \code{n_approx} scored with the

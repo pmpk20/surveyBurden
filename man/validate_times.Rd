@@ -9,7 +9,7 @@ validate_times(
   observed,
   scheme = gfs_scheme(),
   trim = c(3, 180),
-  basis = c("auto", "realised", "route"),
+  basis = c("auto", "realised", "route", "shown"),
   finished_only = TRUE
 )
 }
@@ -25,8 +25,9 @@ export).}
 minutes. Rows outside it, or with a missing or non-finite time, are
 dropped.}
 
-\item{basis}{\code{"auto"}, \code{"realised"} or \code{"route"}: where each respondent's
-burden comes from (see Details).}
+\item{basis}{\code{"auto"}, \code{"realised"}, \code{"route"} or \code{"shown"}: where each
+respondent's burden comes from (see Details). \code{"shown"} is recommended
+when the export allows replaying the flow.}
 
 \item{finished_only}{If \code{TRUE} (default) and \code{observed} has a \code{Finished}
 column, keep only respondents who finished. A break-off's duration does
@@ -36,7 +37,7 @@ not measure the time to complete the survey.}
 A \code{burden_time_validation} list (printed as a short summary):
 \describe{
 \item{n}{Rows kept after \code{finished_only} and \code{trim}.}
-\item{basis}{The basis used: \code{"realised"} or \code{"route"}.}
+\item{basis}{The basis used: \code{"shown"}, \code{"realised"} or \code{"route"}.}
 \item{observed, predicted}{Quantile vectors (minutes).}
 \item{ratio}{Predicted median / observed median.}
 \item{cor}{Pearson correlation of predicted points and observed
@@ -61,8 +62,14 @@ predicted and observed distributions, their correlation, and the
 points-per-minute rate the data imply.
 }
 \details{
-Each respondent's burden comes from one of two bases (\code{basis}):
+Each respondent's burden comes from one of three bases (\code{basis}):
 \describe{
+\item{\code{"shown"}}{\code{\link[=realised_exposure]{realised_exposure()}}: the GfS+ points of every item
+displayed to the respondent, summed over blocks -- including
+descriptive text and questions left blank. This is the respondent
+burden \eqn{B_i} (every item on the respondent's route) and is the
+recommended basis when the export allows the flow to be replayed.
+Errors from \code{\link[=realised_exposure]{realised_exposure()}} are not caught.}
 \item{\code{"realised"}}{\code{\link[=realised_burden]{realised_burden()}}: the points of the questions the
 respondent actually answered. Needs response columns that map to the
 survey's questions, as in a raw Qualtrics CSV export.}
@@ -72,7 +79,8 @@ respondent's route, using the Loop & Merge count columns it recognises
 Without such columns every respondent gets the same prediction.}
 }
 \code{"auto"} (default) uses \code{"realised"} when the response columns map to
-questions and \code{"route"} otherwise.
+questions and \code{"route"} otherwise; it never picks \code{"shown"}, which must be
+asked for.
 
 The observed data need a completion time -- \code{completion_mins},
 \code{completion_seconds}, or Qualtrics' own \verb{Duration (in seconds)} column

@@ -1,34 +1,51 @@
 #' Validate predicted burden against observed completion times
 #'
-#' A sanity check, not a calibration study. Predicts each respondent's burden
-#' from their route via [respondent_burden()] (using their real Loop & Merge
-#' counts), then compares the predicted distribution and a predicted-vs-observed
-#' regression against observed completion times.
+#' A sanity check, not a calibration study. Gives each respondent a burden in
+#' GfS+ points and compares it with their observed completion time: the
+#' predicted and observed distributions, their correlation, and the
+#' points-per-minute rate the data imply.
 #'
-#' The observed data frame needs a completion time -- `completion_mins`,
+#' Each respondent's burden comes from one of two bases (`basis`):
+#' \describe{
+#'   \item{`"realised"`}{[realised_burden()]: the points of the questions the
+#'     respondent actually answered. Needs response columns that map to the
+#'     survey's questions, as in a raw Qualtrics CSV export.}
+#'   \item{`"route"`}{[respondent_burden()]: the points predicted from the
+#'     respondent's route, using the Loop & Merge count columns it recognises
+#'     (`loop_<question id>`, `loop_<block id>`, or any `loop_*` column).
+#'     Without such columns every respondent gets the same prediction.}
+#' }
+#' `"auto"` (default) uses `"realised"` when the response columns map to
+#' questions and `"route"` otherwise.
+#'
+#' The observed data need a completion time -- `completion_mins`,
 #' `completion_seconds`, or Qualtrics' own `Duration (in seconds)` column
-#' (first found wins; text values are converted to numbers) -- and, where
-#' available, the Loop & Merge count columns that [respondent_burden()]
-#' recognises (`loop_<question id>`, `loop_<block id>`, or any `loop_*`
-#' column). The label and ImportId rows at the top of a raw Qualtrics CSV
-#' export are removed, with a message, when recognisable.
+#' (first found wins; text values are converted to numbers). The label and
+#' ImportId rows at the top of a raw Qualtrics CSV export are removed, with a
+#' message, when recognisable.
 #'
 #' @param qsf A `qsf_raw` object or path.
-#' @param observed A data frame, or a path to a CSV.
+#' @param observed A data frame, or the path to a CSV (e.g. the raw Qualtrics
+#'   export).
 #' @param scheme A [gfs_scheme()] list.
 #' @param trim Length-2 numeric: the completion-time range to keep, in
 #'   minutes. Rows outside it, or with a missing or non-finite time, are
-#'   dropped. This filters on duration only; it does not detect non-finishers,
-#'   so remove unfinished responses from `observed` before calling.
+#'   dropped.
+#' @param basis `"auto"`, `"realised"` or `"route"`: where each respondent's
+#'   burden comes from (see Details).
+#' @param finished_only If `TRUE` (default) and `observed` has a `Finished`
+#'   column, keep only respondents who finished. A break-off's duration does
+#'   not measure the time to complete the survey.
 #'
-#' @return A list:
+#' @return A `burden_time_validation` list (printed as a short summary):
 #'   \describe{
-#'     \item{n}{Rows kept after `trim`.}
+#'     \item{n}{Rows kept after `finished_only` and `trim`.}
+#'     \item{basis}{The basis used: `"realised"` or `"route"`.}
 #'     \item{observed, predicted}{Quantile vectors (minutes).}
 #'     \item{ratio}{Predicted median / observed median.}
-#'     \item{cor}{Pearson correlation of predicted points and observed minutes.
-#'       Route-level prediction cannot see within-path burden variation, so on a
-#'       real dataset this is typically small. This is the honest fit statistic.}
+#'     \item{cor}{Pearson correlation of predicted points and observed
+#'       minutes; `NA` when every respondent has the same prediction. This is
+#'       the honest fit statistic.}
 #'     \item{r_squared}{Ordinary \eqn{R^2} of `observed_min ~ predicted_points`
 #'       (with intercept). Do **not** quote the no-intercept model's `r.squared`
 #'       from `lm` below -- it is a through-origin pseudo-\eqn{R^2}, much larger
@@ -44,43 +61,90 @@
 #' @examples
 #' \dontrun{
 #' # Requires observed completion-time data
-#' vt <- validate_times("survey.qsf", "paradata.csv")
-#' vt$ratio
+#' vt <- validate_times("survey.qsf", "export.csv")
+#' vt
 #' vt$implied_points_per_minute
 #' }
 #'
 #' @export
-validate_times <- function(qsf, observed, scheme = gfs_scheme(), trim = c(3, 180)) {
+validate_times <- function(qsf, observed, scheme = gfs_scheme(), trim = c(3, 180),
+                           basis = c("auto", "realised", "route"),
+                           finished_only = TRUE) {
+  basis <- match.arg(basis)
   if (!inherits(qsf, "qsf_raw")) qsf <- read_qsf(qsf)
-  if (is.character(observed)) observed <- utils::read.csv(observed)
+  observed <- read_responses(observed, "observed")
   observed <- drop_qualtrics_header_rows(observed)$data
-
-  observed$completion_mins <- completion_minutes(observed)
-  o <- observed[is.finite(observed$completion_mins) &
-                  observed$completion_mins >= trim[1] &
-                  observed$completion_mins <= trim[2], , drop = FALSE]
-
   ppm <- scheme$points_per_minute
 
-  pr <- respondent_burden(qsf, routes = o, scheme = scheme)
-  o$pred_pts <- pr$pred_pts
-  o$pred_min <- pr$pred_min
+  # realised burden is computed on the full data: row subsetting would drop
+  # the ImportId attribute the column mapping uses
+  realised <- NULL
+  if (!identical(basis, "route")) {
+    # realised_burden() also predicts each route; that prediction is not used
+    # here, so its route-matching warning is muffled
+    realised <- tryCatch(
+      withCallingHandlers(
+        suppressMessages(realised_burden(qsf, observed, scheme = scheme))$realised_points,
+        warning = function(w) {
+          if (grepl("did not match any of the", conditionMessage(w), fixed = TRUE)) {
+            invokeRestart("muffleWarning")
+          }
+        }),
+      error = function(e) if (identical(basis, "realised")) stop(e) else NULL)
+  }
+  basis <- if (is.null(realised)) "route" else "realised"
+
+  mins <- completion_minutes(observed)
+  keep <- is.finite(mins) & mins >= trim[1] & mins <= trim[2]
+  if (finished_only) {
+    fin <- detect_finished(observed)
+    if (!all(is.na(fin))) keep <- keep & fin %in% TRUE
+  }
+  o <- observed[keep, , drop = FALSE]
+  o$completion_mins <- mins[keep]
+
+  if (identical(basis, "realised")) {
+    o$pred_pts <- realised[keep]
+  } else {
+    o$pred_pts <- respondent_burden(qsf, routes = o, scheme = scheme)$pred_pts
+  }
+  o$pred_min <- o$pred_pts / ppm
 
   probs <- c(.1, .25, .5, .75, .9)
   fit <- stats::lm(I(completion_mins * 60) ~ 0 + pred_pts, data = o)
   fit_int <- stats::lm(completion_mins ~ pred_pts, data = o)
+  varies <- isTRUE(stats::sd(o$pred_pts, na.rm = TRUE) > 0)
 
-  list(
+  structure(list(
     n = nrow(o),
+    basis = basis,
     observed  = stats::quantile(o$completion_mins, probs),
     predicted = stats::quantile(o$pred_min, probs, na.rm = TRUE),
     ratio = stats::median(o$pred_min, na.rm = TRUE) / stats::median(o$completion_mins),
-    cor = stats::cor(o$pred_pts, o$completion_mins),
+    cor = if (varies) stats::cor(o$pred_pts, o$completion_mins, use = "complete.obs") else NA_real_,
     r_squared = summary(fit_int)$r.squared,
     implied_points_per_minute = 60 / stats::coef(fit)[["pred_pts"]],
     lm = fit,
     predicted_burden = o$pred_pts
-  )
+  ), class = "burden_time_validation", points_per_minute = ppm)
+}
+
+#' @export
+print.burden_time_validation <- function(x, ...) {
+  basis_txt <- if (identical(x$basis, "realised"))
+    "realised burden (questions each respondent answered)" else
+    "route prediction (respondent_burden())"
+  tab <- rbind(
+    c("", "10%", "25%", "50%", "75%", "90%"),
+    c("Observed minutes",  sprintf("%.1f", x$observed)),
+    c("Predicted minutes", sprintf("%.1f", x$predicted)))
+  cli::cli_h2("Predicted vs observed completion time")
+  cli::cli_text("{x$n} respondent{?s}; burden from {basis_txt}, at {attr(x, 'points_per_minute')} points per minute.")
+  cli::cli_verbatim(render_table(tab))
+  cli::cli_text("Median ratio (predicted / observed): {sprintf('%.2f', x$ratio)}")
+  cli::cli_text("Correlation (points vs minutes): {if (is.na(x$cor)) 'NA (every respondent has the same prediction)' else sprintf('%.2f', x$cor)}")
+  cli::cli_text("Implied points per minute: {sprintf('%.1f', x$implied_points_per_minute)}")
+  invisible(x)
 }
 
 #' Completion time in minutes from the first duration column found:

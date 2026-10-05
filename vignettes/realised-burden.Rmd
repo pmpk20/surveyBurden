@@ -59,10 +59,13 @@ distributed across respondents.
 
 ## Getting the data
 
-`realised_burden()` needs two inputs: the QSF (survey definition) and a
-data frame of responses. Both can come from the Qualtrics API.
+`realised_burden()` needs two inputs: the QSF (survey definition) and the
+responses. The most reliable source for the responses is the raw CSV
+export: its ImportId row names each column's question, so columns are
+matched even when the survey uses custom export tags. Both can also come
+from the Qualtrics API.
 
-### Via the API (recommended)
+### Via the API
 
 ``` r
 library(surveyBurden)
@@ -75,6 +78,7 @@ responses <- qualtRics::fetch_survey(
   surveyID      = "SV_xxxxxxxxxx",
   label         = FALSE,    # numeric recode values, not choice text
   convert       = FALSE,    # keep raw strings
+  import_id     = TRUE,     # name columns by question id (QID5, QID5_1, ...)
   force_request = TRUE      # bypass qualtRics cache
 )
 
@@ -86,14 +90,15 @@ rb
 The `label = FALSE` and `convert = FALSE` arguments are important: they
 ensure column values are the raw numeric recodes Qualtrics stores rather
 than labelled factor levels, which lets the function detect non-blank
-answers reliably.
+answers reliably. `import_id = TRUE` names the columns by question id, so
+they match the QSF whatever export tags the survey uses.
 
 Both `fetch_qsf()` and `qualtRics::fetch_survey()` need a Qualtrics API
 token. Find yours in Qualtrics under **Profile \> Account Settings \>
 Qualtrics IDs** (the API token row). See `?fetch_qsf` and
 `vignette("qualtRics")` from the qualtRics package for setup.
 
-### Via CSV export
+### Via CSV export (recommended)
 
 You need two files: the response data (CSV) and the survey definition
 (QSF).
@@ -118,8 +123,7 @@ Then in R:
 
 ``` r
 qsf <- read_qsf("my_survey.qsf")
-responses <- read.csv("my_responses.csv", check.names = FALSE)
-rb <- realised_burden(qsf, responses)
+rb <- realised_burden(qsf, "my_responses.csv")   # the file path works directly
 #> Removed 2 Qualtrics header rows (question labels / ImportId) from the top
 #> of `responses`.
 nrow(rb)   # should equal your number of respondents

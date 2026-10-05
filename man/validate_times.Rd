@@ -4,29 +4,44 @@
 \alias{validate_times}
 \title{Validate predicted burden against observed completion times}
 \usage{
-validate_times(qsf, observed, scheme = gfs_scheme(), trim = c(3, 180))
+validate_times(
+  qsf,
+  observed,
+  scheme = gfs_scheme(),
+  trim = c(3, 180),
+  basis = c("auto", "realised", "route"),
+  finished_only = TRUE
+)
 }
 \arguments{
 \item{qsf}{A \code{qsf_raw} object or path.}
 
-\item{observed}{A data frame, or a path to a CSV.}
+\item{observed}{A data frame, or the path to a CSV (e.g. the raw Qualtrics
+export).}
 
 \item{scheme}{A \code{\link[=gfs_scheme]{gfs_scheme()}} list.}
 
 \item{trim}{Length-2 numeric: the completion-time range to keep, in
 minutes. Rows outside it, or with a missing or non-finite time, are
-dropped. This filters on duration only; it does not detect non-finishers,
-so remove unfinished responses from \code{observed} before calling.}
+dropped.}
+
+\item{basis}{\code{"auto"}, \code{"realised"} or \code{"route"}: where each respondent's
+burden comes from (see Details).}
+
+\item{finished_only}{If \code{TRUE} (default) and \code{observed} has a \code{Finished}
+column, keep only respondents who finished. A break-off's duration does
+not measure the time to complete the survey.}
 }
 \value{
-A list:
+A \code{burden_time_validation} list (printed as a short summary):
 \describe{
-\item{n}{Rows kept after \code{trim}.}
+\item{n}{Rows kept after \code{finished_only} and \code{trim}.}
+\item{basis}{The basis used: \code{"realised"} or \code{"route"}.}
 \item{observed, predicted}{Quantile vectors (minutes).}
 \item{ratio}{Predicted median / observed median.}
-\item{cor}{Pearson correlation of predicted points and observed minutes.
-Route-level prediction cannot see within-path burden variation, so on a
-real dataset this is typically small. This is the honest fit statistic.}
+\item{cor}{Pearson correlation of predicted points and observed
+minutes; \code{NA} when every respondent has the same prediction. This is
+the honest fit statistic.}
 \item{r_squared}{Ordinary \eqn{R^2} of \code{observed_min ~ predicted_points}
 (with intercept). Do \strong{not} quote the no-intercept model's \code{r.squared}
 from \code{lm} below -- it is a through-origin pseudo-\eqn{R^2}, much larger
@@ -40,25 +55,36 @@ estimate from a dedicated calibration on real completion times.}
 }
 }
 \description{
-A sanity check, not a calibration study. Predicts each respondent's burden
-from their route via \code{\link[=respondent_burden]{respondent_burden()}} (using their real Loop & Merge
-counts), then compares the predicted distribution and a predicted-vs-observed
-regression against observed completion times.
+A sanity check, not a calibration study. Gives each respondent a burden in
+GfS+ points and compares it with their observed completion time: the
+predicted and observed distributions, their correlation, and the
+points-per-minute rate the data imply.
 }
 \details{
-The observed data frame needs a completion time -- \code{completion_mins},
+Each respondent's burden comes from one of two bases (\code{basis}):
+\describe{
+\item{\code{"realised"}}{\code{\link[=realised_burden]{realised_burden()}}: the points of the questions the
+respondent actually answered. Needs response columns that map to the
+survey's questions, as in a raw Qualtrics CSV export.}
+\item{\code{"route"}}{\code{\link[=respondent_burden]{respondent_burden()}}: the points predicted from the
+respondent's route, using the Loop & Merge count columns it recognises
+(\verb{loop_<question id>}, \verb{loop_<block id>}, or any \verb{loop_*} column).
+Without such columns every respondent gets the same prediction.}
+}
+\code{"auto"} (default) uses \code{"realised"} when the response columns map to
+questions and \code{"route"} otherwise.
+
+The observed data need a completion time -- \code{completion_mins},
 \code{completion_seconds}, or Qualtrics' own \verb{Duration (in seconds)} column
-(first found wins; text values are converted to numbers) -- and, where
-available, the Loop & Merge count columns that \code{\link[=respondent_burden]{respondent_burden()}}
-recognises (\verb{loop_<question id>}, \verb{loop_<block id>}, or any \verb{loop_*}
-column). The label and ImportId rows at the top of a raw Qualtrics CSV
-export are removed, with a message, when recognisable.
+(first found wins; text values are converted to numbers). The label and
+ImportId rows at the top of a raw Qualtrics CSV export are removed, with a
+message, when recognisable.
 }
 \examples{
 \dontrun{
 # Requires observed completion-time data
-vt <- validate_times("survey.qsf", "paradata.csv")
-vt$ratio
+vt <- validate_times("survey.qsf", "export.csv")
+vt
 vt$implied_points_per_minute
 }
 

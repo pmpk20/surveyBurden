@@ -1,5 +1,35 @@
 # surveyBurden (development version)
 
+* `realised_burden()` and `realised_exposure()` now map response columns
+  through the ImportId row of a raw Qualtrics CSV export, so columns with
+  custom export tags (e.g. `w4_q19x1`) are found. Display-order, page-timing
+  and browser-meta columns no longer count as answers, and
+  `n_unmapped_cols` counts only question columns that could not be mapped.
+* `realised_burden()` and `realised_exposure()` accept the path to a CSV
+  export as well as a data frame.
+* `validate_times()` gains `basis`: by default it compares each
+  respondent's realised burden (what they answered) with their time, and
+  falls back to the route prediction only when the columns do not map. It
+  keeps finishers only (`finished_only = TRUE`), returns `cor = NA` without
+  a warning when every prediction is the same, and prints a short summary.
+* A `BlockRandomizer` that only assigns embedded data (random condition
+  assignment) no longer warns, and a fire-and-forget `WebService` flow
+  step is skipped silently; one that sets fields is noted.
+* The route-mismatch warning from `respondent_burden()` no longer shows
+  `NA` for its fallback counts.
+* `respondent_burden()` matches routes only on optional blocks that have a
+  `visit_` column; others (e.g. text-only blocks, whose visits leave no
+  answer) are unknown rather than "not visited". This fixes
+  `realised_burden()`'s `predicted_points`, which on a survey with
+  text-only optional blocks fell back to the plainest path for nearly every
+  respondent.
+* `respondent_burden()` no longer fails on a Loop & Merge block that loops
+  over a fixed list (no driving question).
+* QID-named timing and meta columns (`QID5_FIRST_CLICK`, as
+  `qualtRics::fetch_survey(import_id = TRUE)` names them) are no longer
+  counted as answers. The docs now recommend the raw CSV export, or
+  `fetch_survey(import_id = TRUE)`.
+
 * `survey_summary()`, `burden_report()$survey` and both printouts now report
   the number of pages (`n_pages`): each live block starts a page and each
   page break adds one; empty pages are not counted.

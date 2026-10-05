@@ -112,8 +112,37 @@ test_that("match_routes: only an exact optional-block set counts as matched", {
   expect_length(m0$idx, 0)
 })
 
+test_that("match_routes compares only observable blocks, preferring the plainest match", {
+  # T1 is a text-only block: its visit cannot be seen in the answers
+  paths <- list(c("T1", "B1"), "B1", c("T1", "B2"), character(0))
+  m <- match_routes(paths, desired_opt = list("B1", "B2", character(0)),
+                    heavy_i = 3L, observable = c("B1", "B2"))
+  expect_identical(m$matched, c(TRUE, TRUE, TRUE))
+  expect_identical(m$idx, c(2L, 3L, 4L))   # B1 -> plain "B1", not "T1,B1"
+
+  # without `observable` every optional block must match exactly, as before
+  m_all <- match_routes(paths, desired_opt = list("B2"), heavy_i = 3L)
+  expect_false(m_all$matched)
+})
+
 test_that("a minimal route matches cleanly with no warning", {
   routes <- data.frame(loop_QID9 = 0, loop_QID15 = 0)
   expect_no_warning(pr <- respondent_burden(qsf_fx(), routes = routes))
   expect_true(pr$matched)
+})
+
+test_that("a loop over a fixed list (no driving question) does not break prediction", {
+  q <- qsf_fx()
+  bl <- which(vapply(q$SurveyElements, function(e) identical(e$Element, "BL"), logical(1)))
+  pl <- q$SurveyElements[[bl]]$Payload
+  for (k in seq_along(pl)) {
+    if (!is.null(pl[[k]]$Options$Looping)) {
+      pl[[k]]$Options$LoopingOptions <- list(Static = list("1" = list(), "2" = list()))
+    }
+  }
+  q$SurveyElements[[bl]]$Payload <- pl
+  expect_true(any(is.na(resolve_live_blocks(q)$loop_on_qid[resolve_live_blocks(q)$in_loop])))
+
+  pr <- suppressWarnings(respondent_burden(q, routes = data.frame(id = 1:3)))
+  expect_false(anyNA(pr$pred_pts))
 })

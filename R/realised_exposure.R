@@ -150,6 +150,7 @@ realised_exposure <- function(qsf, responses, scheme = gfs_scheme(), id_col = NU
   furthest <- match.arg(furthest)
   loop_iterations <- match.arg(loop_iterations)
   if (!inherits(qsf, "qsf_raw")) qsf <- read_qsf(qsf)
+  responses <- read_responses(responses)
   if (identical(furthest, "column")) {
     if (is.null(furthest_col) || !furthest_col %in% names(responses)) {
       cli::cli_abort("{.arg furthest_col} must name a column of {.arg responses} when {.code furthest = \"column\"}.")
@@ -1014,7 +1015,7 @@ exposure_walk <- function(qsf, blocks, ctx, emb, ans_block, last_ans, fin,
       } else if (tp %in% c("Group", "Authenticator")) {
         walk(nd[["Flow"]] %||% list(), mask)
       } else if (identical(tp, "BlockRandomizer")) {
-        if (!st$warned_rand) {
+        if (!st$warned_rand && flow_has_blocks(nd[["Flow"]] %||% list())) {
           cli::cli_warn("BlockRandomizer in the flow: every sub-block is treated as shown, in survey order.")
           st$warned_rand <- TRUE
         }

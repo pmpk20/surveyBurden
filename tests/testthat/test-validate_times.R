@@ -73,3 +73,39 @@ test_that("validate_times says which duration columns it looks for", {
   expect_error(validate_times(qsf, data.frame(minutes = 20)),
                "completion_mins")
 })
+
+test_that("with answer columns, validate_times uses each respondent's realised burden", {
+  qsf  <- read_qsf(demo_qsf())
+  cat_ <- parse_qsf(qsf)
+  qids <- cat_$question_id[!cat_$in_loop]
+  set.seed(2)
+  n <- 60
+  obs <- data.frame(ResponseId = paste0("R_", seq_len(n)), Finished = "1",
+                    completion_mins = runif(n, 10, 40))
+  # respondents answer different numbers of questions
+  k <- sample(5:length(qids), n, TRUE)
+  for (j in seq_along(qids)) obs[[qids[j]]] <- ifelse(j <= k, "1", NA)
+
+  v <- validate_times(qsf, obs)
+  expect_identical(v$basis, "realised")
+  expect_equal(v$predicted_burden, realised_burden(qsf, obs)$realised_points)
+  expect_true(is.finite(v$cor))
+
+  expect_identical(validate_times(qsf, obs, basis = "route")$basis, "route")
+})
+
+test_that("validate_times keeps finishers only, unless asked not to", {
+  qsf <- read_qsf(demo_qsf())
+  obs <- data.frame(completion_mins = c(20, 25, 30, 35), Finished = c("1", "1", "0", "1"))
+  expect_equal(validate_times(qsf, obs)$n, 3L)
+  expect_equal(validate_times(qsf, obs, finished_only = FALSE)$n, 4L)
+})
+
+test_that("a constant prediction gives cor NA without a warning, and prints", {
+  qsf <- read_qsf(demo_qsf())
+  v <- expect_no_warning(validate_times(qsf, data.frame(completion_mins = c(20, 25, 30))))
+  expect_true(is.na(v$cor))
+  out <- cli::cli_fmt(print(v))
+  expect_true(any(grepl("Observed minutes", out)))
+  expect_true(any(grepl("same prediction", out)))
+})

@@ -113,14 +113,62 @@ test_that("col_map keeps loop iterations: explicit, or from an N_ column prefix"
 
 # A raw Qualtrics CSV export read with read.csv() has two extra rows under the
 # header: the question-text labels and the ImportId JSON.
-with_qualtrics_header_rows <- function(resp) {
+with_qualtrics_header_rows <- function(resp, ids = stats::setNames(names(resp), names(resp))) {
   lab <- stats::setNames(as.list(paste("Label for", names(resp))), names(resp))
   lab$ResponseId <- "Response ID"; lab$Finished <- "Finished"
-  imp <- stats::setNames(as.list(sprintf('{"ImportId":"%s"}', names(resp))), names(resp))
+  imp <- stats::setNames(as.list(sprintf('{"ImportId":"%s"}', ids[names(resp)])), names(resp))
   rbind(as.data.frame(lab, check.names = FALSE, stringsAsFactors = FALSE),
         as.data.frame(imp, check.names = FALSE, stringsAsFactors = FALSE),
         resp)
 }
+
+test_that("the ImportId row maps columns whose names match no QID or export tag", {
+  resp <- make_responses()
+  ref  <- realised_burden(qsf_fx(), resp)
+  qcols <- grep("QID", names(resp), value = TRUE)
+  ids <- stats::setNames(names(resp), names(resp))     # ImportId = true QID name
+  renamed <- resp
+  names(renamed)[match(qcols, names(renamed))] <- paste0("w4_col", seq_along(qcols))
+  names(ids)[match(qcols, names(ids))] <- paste0("w4_col", seq_along(qcols))
+  raw <- with_qualtrics_header_rows(renamed, ids)
+
+  rb <- suppressMessages(realised_burden(qsf_fx(), raw))
+  expect_identical(rb$realised_points, ref$realised_points)
+  expect_identical(rb$n_questions_answered, ref$n_questions_answered)
+  expect_equal(unique(rb$n_unmapped_cols), 0L)
+})
+
+test_that("display-order, timing and meta columns are not answers", {
+  resp <- make_responses()
+  ref  <- realised_burden(qsf_fx(), resp)
+  # respondent 4 answered nothing, but Qualtrics fills these automatically
+  auto <- c(QID1_DO = "QID1_DO", QID2_DO_1 = "QID2_DO",
+            t_first = "QID3_FIRST_CLICK", t_submit = "QID3_PAGE_SUBMIT",
+            m_browser = "QID4_BROWSER")
+  for (col in names(auto)) resp[[col]] <- "1"
+  ids <- c(stats::setNames(names(resp), names(resp)))
+  ids[names(auto)] <- auto
+
+  rb <- suppressMessages(realised_burden(qsf_fx(), with_qualtrics_header_rows(resp, ids)))
+  expect_identical(rb$realised_points, ref$realised_points)
+  expect_equal(rb$realised_points[4], 0)
+
+  # without an ImportId row, `_DO` and QID-named timing columns are not answers
+  resp$QID3_FIRST_CLICK <- "1.2"
+  rb2 <- realised_burden(qsf_fx(),
+                         resp[, c(names(make_responses()), "QID1_DO", "QID2_DO_1", "QID3_FIRST_CLICK")])
+  expect_identical(rb2$realised_points, ref$realised_points)
+})
+
+test_that("realised_burden() reads a CSV file path", {
+  resp <- make_responses()
+  ref  <- realised_burden(qsf_fx(), resp)
+  tmp  <- tempfile(fileext = ".csv")
+  on.exit(unlink(tmp))
+  utils::write.csv(with_qualtrics_header_rows(resp), tmp, row.names = FALSE, na = "")
+  rb <- suppressMessages(realised_burden(qsf_fx(), tmp))
+  expect_identical(rb$realised_points, ref$realised_points)
+})
 
 test_that("leading Qualtrics label and ImportId rows are removed, with a message", {
   resp <- make_responses()

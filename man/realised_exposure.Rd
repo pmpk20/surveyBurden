@@ -20,27 +20,34 @@ realised_exposure(
 \item{qsf}{A \code{qsf_raw} object, a path to a \code{.qsf} file, or a survey id
 accepted by \code{\link[=fetch_qsf]{fetch_qsf()}}.}
 
-\item{responses}{A data frame of response data. Columns must be mappable to
-question ids via one of these strategies (tried in order):
+\item{responses}{A data frame of response data, or the path to a raw
+Qualtrics CSV export. Columns must be mappable to question ids via one of
+these strategies (tried in order):
 \enumerate{
 \item A \code{col_map} attribute on the data frame: a named list, one entry per
 column, each either a QID string or \code{list(qid = , iteration = )}. It
 overrides the automatic strategies for the columns it names. With a
 bare QID, the loop iteration comes from an \code{N_} prefix on the column
 name (\verb{2_mycol} is iteration 2), else 0.
+\item The ImportId row of a raw Qualtrics CSV export, which names each
+column's question whatever the column is called. Where present it
+decides alone.
 \item Column names match question ids directly (\code{QID15}, \code{QID15_1}, or
 \verb{2_QID15} for loop iteration 2).
 \item Column names match \code{DataExportTag} values from the QSF (\code{Q15},
 \code{travel_mode_1}), exactly or ignoring case.
 }
 
+Columns Qualtrics fills automatically -- display order (\verb{_DO}),
+page-timing clicks and browser meta data -- never count as answers.
+
 Leading label and ImportId rows from a raw Qualtrics CSV export are
 removed, with a message, when recognisable (an ImportId JSON cell, or a
 system column holding its own label such as \code{ResponseId} =
 "Response ID"); other rows are always kept.
 
-The recommended way to obtain this data frame is
-\code{qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE, add_column_map = FALSE)}.}
+The simplest input is the raw CSV export itself (with its header rows).
+\code{qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE, add_column_map = FALSE)} also works, through the column names.}
 
 \item{scheme}{A \code{\link[=gfs_scheme]{gfs_scheme()}} list.}
 

@@ -26,9 +26,13 @@ count above the block's cap is capped; \code{NA}, like a missing column,
 falls back to \code{loop_typical}.}
 \item{\verb{visit_<block_id>}}{\code{TRUE} to include a branch-gated optional block
 (e.g. \code{visit_BL11}). Read with \code{as.logical()}: \code{TRUE}, \code{1} or \code{"TRUE"}
-include it; absent, \code{FALSE}, \code{NA} or any other value excludes it.}
+include it; \code{FALSE}, \code{NA} or any other value excludes it. When
+some optional blocks have a \code{visit_} column and others do not, the
+others are unknown: routes are matched on the blocks that have one,
+taking the matching path with the fewest optional blocks. With no
+\code{visit_} columns at all, every route is matched as visiting none.}
 }
-Missing columns are treated as absent/zero.}
+Missing loop columns fall back as described above.}
 
 \item{scheme}{A \code{\link[=gfs_scheme]{gfs_scheme()}} list.}
 

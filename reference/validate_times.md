@@ -13,7 +13,6 @@ validate_times(
   observed,
   scheme = gfs_scheme(),
   trim = c(3, 180),
-  basis = c("auto", "realised", "route", "shown"),
   finished_only = TRUE
 )
 ```
@@ -39,12 +38,6 @@ validate_times(
   Length-2 numeric: the completion-time range to keep, in minutes. Rows
   outside it, or with a missing or non-finite time, are dropped.
 
-- basis:
-
-  `"auto"`, `"realised"`, `"route"` or `"shown"`: where each
-  respondent's burden comes from (see Details). `"shown"` is recommended
-  when the export allows replaying the flow.
-
 - finished_only:
 
   If `TRUE` (default) and `observed` has a `Finished` column, keep only
@@ -58,10 +51,6 @@ A `burden_time_validation` list (printed as a short summary):
 - n:
 
   Rows kept after `finished_only` and `trim`.
-
-- basis:
-
-  The basis used: `"shown"`, `"realised"` or `"route"`.
 
 - observed, predicted:
 
@@ -101,37 +90,12 @@ A `burden_time_validation` list (printed as a short summary):
 
 ## Details
 
-Each respondent's burden comes from one of three bases (`basis`):
-
-- `"shown"`:
-
-  [`realised_exposure()`](https://pmpk20.github.io/surveyBurden/reference/realised_exposure.md):
-  the GfS+ points of every item displayed to the respondent, summed over
-  blocks – including descriptive text and questions left blank. This is
-  the respondent burden \\B_i\\ (every item on the respondent's route)
-  and is the recommended basis when the export allows the flow to be
-  replayed. Errors from
-  [`realised_exposure()`](https://pmpk20.github.io/surveyBurden/reference/realised_exposure.md)
-  are not caught.
-
-- `"realised"`:
-
-  [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md):
-  the points of the questions the respondent actually answered. Needs
-  response columns that map to the survey's questions, as in a raw
-  Qualtrics CSV export.
-
-- `"route"`:
-
-  [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md):
-  the points predicted from the respondent's route, using the Loop &
-  Merge count columns it recognises (`loop_<question id>`,
-  `loop_<block id>`, or any `loop_*` column). Without such columns every
-  respondent gets the same prediction.
-
-`"auto"` (default) uses `"realised"` when the response columns map to
-questions and `"route"` otherwise; it never picks `"shown"`, which must
-be asked for.
+Each respondent's burden is their
+[`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md):
+the GfS+ points of every item displayed to them, including descriptive
+text and questions left blank. Errors from
+[`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
+are not caught.
 
 The observed data need a completion time – `completion_mins`,
 `completion_seconds`, or Qualtrics' own `Duration (in seconds)` column

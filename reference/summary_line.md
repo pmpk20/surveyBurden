@@ -13,8 +13,6 @@ summary_line(x, ...)
 - x:
 
   A
-  [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
-  table or a
   [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
   object.
 

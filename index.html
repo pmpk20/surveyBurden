@@ -40,7 +40,7 @@
     <li><a class="dropdown-item" href="articles/survey-revision.html">Revising a survey to reduce burden</a></li>
     <li><a class="dropdown-item" href="articles/gfs-scoring.html">The GfS+ scoring method</a></li>
     <li><a class="dropdown-item" href="articles/paths-and-display-logic.html">Paths and display logic</a></li>
-    <li><a class="dropdown-item" href="articles/realised-burden.html">Realised burden from response data</a></li>
+    <li><a class="dropdown-item" href="articles/respondent-burden.html">Respondent burden from response data</a></li>
     <li><a class="dropdown-item" href="articles/calibration.html">Calibration and limitations</a></li>
     <li><a class="dropdown-item" href="articles/extensions.html">Extensions: scoring surveys without a QSF</a></li>
   </ul>
@@ -94,27 +94,21 @@
 <td><code><a href="articles/reading-the-report.html">vignette("reading-the-report")</a></code></td>
 </tr>
 <tr>
-<td>That, plus respondent routes and loop counts</td>
-<td><code>burden_report(qsf, routes = routes)</code></td>
-<td>a distribution of respondent-level predicted burden</td>
-<td><code><a href="articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code></td>
-</tr>
-<tr>
 <td>A Qualtrics response export</td>
-<td><code>realised_burden(qsf, responses)</code></td>
-<td>answer-based burden per respondent</td>
-<td><code><a href="articles/realised-burden.html">vignette("realised-burden")</a></code></td>
+<td><code>respondent_burden(qsf, responses)</code></td>
+<td>respondent burden: the GfS+ points displayed to each respondent</td>
+<td><code><a href="articles/respondent-burden.html">vignette("respondent-burden")</a></code></td>
 </tr>
 <tr>
 <td>A response export, to model break-off</td>
-<td><code>realised_exposure(qsf, responses)</code></td>
-<td>per respondent and block: routed in, and the burden shown</td>
-<td><code><a href="articles/realised-burden.html">vignette("realised-burden")</a></code></td>
+<td><code>respondent_burden(qsf, responses, by = "block")</code></td>
+<td>per respondent and block: routed in, and the burden displayed</td>
+<td><code><a href="articles/respondent-burden.html">vignette("respondent-burden")</a></code></td>
 </tr>
 <tr>
-<td>Completion times</td>
+<td>A response export with completion times</td>
 <td><code>validate_times(qsf, observed)</code></td>
-<td>a check of predicted against observed time, and a survey-specific rate</td>
+<td>a check of respondent burden against observed time, and a survey-specific rate</td>
 <td><code><a href="articles/calibration.html">vignette("calibration")</a></code></td>
 </tr>
 <tr>
@@ -193,7 +187,7 @@
 <div class="section level2">
 <h2 id="vocabulary">Vocabulary<a class="anchor" aria-label="anchor" href="#vocabulary"></a>
 </h2>
-<p>The documentation uses these terms with fixed meanings. The key distinction: a <strong>path</strong> is a possibility in the survey’s design; a <strong>route</strong> is what one respondent actually did.</p>
+<p>The documentation uses these terms with fixed meanings. The key distinction: a <strong>path</strong> is a possibility in the survey’s design; a <strong>respondent’s path</strong> is the one a respondent actually took.</p>
 <table class="table">
 <colgroup>
 <col width="16%">
@@ -209,10 +203,6 @@
 <td>one way through the survey that its flow allows: the blocks shown, given which branches are taken. Worked out from the survey design alone; no respondent is involved.</td>
 </tr>
 <tr>
-<td><strong>route</strong></td>
-<td>the way one respondent actually went: the optional blocks they entered and how many times they looped. Comes from response data (the <code>routes</code> argument). Many respondents’ routes can fall on the same path.</td>
-</tr>
-<tr>
 <td><strong>question burden</strong></td>
 <td>the GfS+ point score for one question, from its type and structure</td>
 </tr>
@@ -225,20 +215,8 @@
 <td>the burden values a path’s modelled display-logic states produce, with model weights (equal per state; each path’s weights sum to 1). Not a respondent probability distribution.</td>
 </tr>
 <tr>
-<td><strong>predicted respondent burden</strong></td>
-<td>one respondent’s predicted burden: the burden of the path matching their route, with their own loop counts (<code>pred_pts</code>).</td>
-</tr>
-<tr>
-<td><strong>population-weighted respondent burden</strong></td>
-<td>predicted respondent burden summarised across respondents, so each path counts as often as respondents took it. Produced only when <code>routes</code> are supplied.</td>
-</tr>
-<tr>
-<td><strong>realised burden</strong></td>
-<td>the burden of the questions a respondent actually answered, from response data (<code><a href="reference/realised_burden.html">realised_burden()</a></code>).</td>
-</tr>
-<tr>
-<td><strong>realised exposure</strong></td>
-<td>the burden of the questions a respondent was shown, block by block, including in the block they left in (<code><a href="reference/realised_exposure.html">realised_exposure()</a></code>).</td>
+<td><strong>respondent burden</strong></td>
+<td>the GfS+ points of every item displayed to one respondent, reconstructed from their responses: descriptive text and questions left blank included, each loop iteration counted (<code><a href="reference/respondent_burden.html">respondent_burden()</a></code>).</td>
 </tr>
 <tr>
 <td><strong>calculation certainty</strong></td>
@@ -264,7 +242,7 @@
     paths --&gt; report["burden_report()"]
     report --&gt; out["verdict line +&lt;br&gt;8 report sections"]</code></pre>
 <p>Both ways in score questions with the same rules. For a Qualtrics survey, <code><a href="reference/burden_report.html">burden_report()</a></code> runs the whole pipeline; the lower-level functions expose each step for inspection or reuse (see the reference table below).</p>
-<p>surveyBurden scores every question with the GfS+ point scheme (extending Heimgartner &amp; Axhausen 2024, Table 1), then follows the survey’s flow and display logic to work out which questions can appear together and how burden varies across the structural paths the flow allows. The score for one question is its <strong>question burden</strong>; the total along one path is a <strong>path burden</strong>. The default result is a <strong>structural burden profile</strong>: each complete path carries equal weight, and within a path each modelled display-logic state does, so the reported “median” is the middle value of that model-weighted distribution, not the burden half of respondents exceed. Branch conditions are not checked against each other, so the extremes are not guaranteed to be reachable by a real respondent. Given real respondent route data, the report instead reports a <strong>population-weighted respondent burden</strong>.</p>
+<p>surveyBurden scores every question with the GfS+ point scheme (extending Heimgartner &amp; Axhausen 2024, Table 1), then follows the survey’s flow and display logic to work out which questions can appear together and how burden varies across the structural paths the flow allows. The score for one question is its <strong>question burden</strong>; the total along one path is a <strong>path burden</strong>. The default result is a <strong>structural burden profile</strong>: each complete path carries equal weight, and within a path each modelled display-logic state does, so the reported “median” is the middle value of that model-weighted distribution, not the burden half of respondents exceed. Branch conditions are not checked against each other, so the extremes are not guaranteed to be reachable by a real respondent. Given response data, <code><a href="reference/respondent_burden.html">respondent_burden()</a></code> gives each respondent’s <strong>respondent burden</strong>, and the report adds its distribution over complete responses.</p>
 <p>The package describes the survey, not the respondent: it does not claim that burden causes dropout, satisficing or slower responses. The methodology is set out in <code><a href="articles/gfs-scoring.html">vignette("gfs-scoring")</a></code> and <code><a href="articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code>.</p>
 </div>
 <div class="section level2">
@@ -348,10 +326,6 @@
 <td>model-weighted burden values per path, from the enumerated display-logic states</td>
 </tr>
 <tr>
-<td><code>respondent_burden(qsf, routes, scheme, loop_typical)</code></td>
-<td>population-weighted burden from observed routes</td>
-</tr>
-<tr>
 <td><code>summary_line(x, ...)</code></td>
 <td>a one-sentence burden summary</td>
 </tr>
@@ -360,16 +334,12 @@
 <td>which parts of the calculation are enumerated in full within the model and which are approximated</td>
 </tr>
 <tr>
-<td><code>burden_report(x, scheme, profile, routes, max_paths, ...)</code></td>
+<td><code>burden_report(x, scheme, profile, responses, max_paths, ...)</code></td>
 <td>the structured report object</td>
 </tr>
 <tr>
-<td><code>realised_burden(qsf, responses)</code></td>
-<td>per-respondent burden after fieldwork from response data</td>
-</tr>
-<tr>
-<td><code>realised_exposure(qsf, responses)</code></td>
-<td>per respondent and block: routing and the burden shown, including break-offs</td>
+<td><code>respondent_burden(qsf, responses, by)</code></td>
+<td>respondent burden after fieldwork, per respondent or per respondent and block</td>
 </tr>
 <tr>
 <td><code>exposure_person_period(x)</code></td>
@@ -381,11 +351,11 @@
 </tr>
 <tr>
 <td><code>validate_times(qsf, observed, scheme, trim)</code></td>
-<td>a points-per-minute rate fitted to your completion-time data</td>
+<td>respondent burden against completion times, and a fitted points-per-minute rate</td>
 </tr>
 </tbody>
 </table>
-<p>Every function has a help page: <code><a href="reference/burden_report.html">?burden_report</a></code>, <code><a href="reference/score_burden.html">?score_burden</a></code>, and so on. The guides cover the workflow end to end — start with <code><a href="articles/surveyBurden.html">vignette("surveyBurden")</a></code>, then <code><a href="articles/reading-the-report.html">vignette("reading-the-report")</a></code>, <code><a href="articles/survey-revision.html">vignette("survey-revision")</a></code>, <code><a href="articles/gfs-scoring.html">vignette("gfs-scoring")</a></code>, <code><a href="articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code>, <code><a href="articles/calibration.html">vignette("calibration")</a></code>, <code><a href="articles/realised-burden.html">vignette("realised-burden")</a></code> and <code><a href="articles/extensions.html">vignette("extensions")</a></code>.</p>
+<p>Every function has a help page: <code><a href="reference/burden_report.html">?burden_report</a></code>, <code><a href="reference/score_burden.html">?score_burden</a></code>, and so on. The guides cover the workflow end to end — start with <code><a href="articles/surveyBurden.html">vignette("surveyBurden")</a></code>, then <code><a href="articles/reading-the-report.html">vignette("reading-the-report")</a></code>, <code><a href="articles/survey-revision.html">vignette("survey-revision")</a></code>, <code><a href="articles/gfs-scoring.html">vignette("gfs-scoring")</a></code>, <code><a href="articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code>, <code><a href="articles/calibration.html">vignette("calibration")</a></code>, <code><a href="articles/respondent-burden.html">vignette("respondent-burden")</a></code> and <code><a href="articles/extensions.html">vignette("extensions")</a></code>.</p>
 </div>
 <div class="section level2">
 <h2 id="limitations">Limitations<a class="anchor" aria-label="anchor" href="#limitations"></a>

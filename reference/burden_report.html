@@ -31,7 +31,7 @@ summarises the burden across the survey's structural path space."></head><body>
     <li><a class="dropdown-item" href="../articles/survey-revision.html">Revising a survey to reduce burden</a></li>
     <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS+ scoring method</a></li>
     <li><a class="dropdown-item" href="../articles/paths-and-display-logic.html">Paths and display logic</a></li>
-    <li><a class="dropdown-item" href="../articles/realised-burden.html">Realised burden from response data</a></li>
+    <li><a class="dropdown-item" href="../articles/respondent-burden.html">Respondent burden from response data</a></li>
     <li><a class="dropdown-item" href="../articles/calibration.html">Calibration and limitations</a></li>
     <li><a class="dropdown-item" href="../articles/extensions.html">Extensions: scoring surveys without a QSF</a></li>
   </ul></li>
@@ -66,7 +66,7 @@ summarises the burden across the survey's structural path space.</p>
 <span>  <span class="va">x</span>,</span>
 <span>  scheme <span class="op">=</span> <span class="fu"><a href="gfs_scheme.html">gfs_scheme</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  profile <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  routes <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  responses <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  rare_threshold <span class="op">=</span> <span class="fl">1500</span>,</span>
 <span>  stem_warning_threshold <span class="op">=</span> <span class="fl">40L</span>,</span>
 <span>  label_warning_threshold <span class="op">=</span> <span class="fl">10L</span>,</span>
@@ -101,12 +101,12 @@ that and falls back to a much faster but naive range (see Details): min/max
 only, no median, and the numbers can understate the true minimum.</p></dd>
 
 
-<dt id="arg-routes">routes<a class="anchor" aria-label="anchor" href="#arg-routes"></a></dt>
-<dd><p>Optional respondent data frame (see <code><a href="respondent_burden.html">respondent_burden()</a></code>).
-When supplied, the report adds <code>$population</code>: quantiles and the mean of
-one predicted burden per respondent, so each path counts as often as
-respondents took it. Unlike the structural profile, this summarises
-observed respondents.</p></dd>
+<dt id="arg-responses">responses<a class="anchor" aria-label="anchor" href="#arg-responses"></a></dt>
+<dd><p>Optional response data: a data frame or the path to a raw
+Qualtrics CSV export, as accepted by <code><a href="respondent_burden.html">respondent_burden()</a></code>. When
+supplied, the report adds <code>$respondents</code>: quantiles and the mean of
+respondent burden over complete responses, so each path counts as often
+as respondents took it.</p></dd>
 
 
 <dt id="arg-rare-threshold">rare_threshold<a class="anchor" aria-label="anchor" href="#arg-rare-threshold"></a></dt>
@@ -206,14 +206,14 @@ its <code>gfs_points</code>, <code>score_flag</code> and <code>score_basis</code
 <dt>warnings</dt>
 <dd><p>Character vector of QC flags, in plain language.</p></dd>
 
-<dt>population</dt>
-<dd><p>Present only when <code>routes</code> is supplied: an eight-row
-tibble with the same columns as <code>burden</code>, summarising per-respondent
-predictions as <code>min</code>, <code>p10</code>, <code>p25</code>, <code>median</code>, <code>mean</code>, <code>p75</code>, <code>p90</code>,
+<dt>respondents</dt>
+<dd><p>Present only when <code>responses</code> is supplied: an
+eight-row tibble with the same columns as <code>burden</code>, summarising
+<code><a href="respondent_burden.html">respondent_burden()</a></code> over complete responses as <code>min</code>, <code>p10</code>, <code>p25</code>, <code>median</code>, <code>mean</code>, <code>p75</code>, <code>p90</code>,
 <code>max</code>. Each respondent has equal weight. Quantiles use
 <code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">stats::quantile()</a></code> with its default <code>type = 7</code>; <code>mean</code> is the
-arithmetic mean. Missing predictions are excluded; all statistics
-are <code>NA</code> when no non-missing predictions are available.</p></dd>
+arithmetic mean. All statistics are <code>NA</code> when there are no complete
+responses.</p></dd>
 
 
 </dl><p>Scalars are attributes: <code>points_per_minute</code>, <code>rare_threshold</code>, <code>benchmark</code>
@@ -251,13 +251,13 @@ enumerated.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Reading survey <span style="color: #B2B2B2;">[9ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Scoring questions and resolving paths</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Scoring questions and resolving paths <span style="color: #B2B2B2;">[120ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Scoring questions and resolving paths <span style="color: #B2B2B2;">[109ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Checking calculation certainty</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[36ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[28ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Enumerating display-logic combinations</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Enumerating display-logic combinations <span style="color: #B2B2B2;">[21ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Enumerating display-logic combinations <span style="color: #B2B2B2;">[22ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="va">br</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

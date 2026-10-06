@@ -29,7 +29,7 @@ points-per-minute rate the data imply."></head><body>
     <li><a class="dropdown-item" href="../articles/survey-revision.html">Revising a survey to reduce burden</a></li>
     <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS+ scoring method</a></li>
     <li><a class="dropdown-item" href="../articles/paths-and-display-logic.html">Paths and display logic</a></li>
-    <li><a class="dropdown-item" href="../articles/realised-burden.html">Realised burden from response data</a></li>
+    <li><a class="dropdown-item" href="../articles/respondent-burden.html">Respondent burden from response data</a></li>
     <li><a class="dropdown-item" href="../articles/calibration.html">Calibration and limitations</a></li>
     <li><a class="dropdown-item" href="../articles/extensions.html">Extensions: scoring surveys without a QSF</a></li>
   </ul></li>
@@ -64,7 +64,6 @@ points-per-minute rate the data imply.</p>
 <span>  <span class="va">observed</span>,</span>
 <span>  scheme <span class="op">=</span> <span class="fu"><a href="gfs_scheme.html">gfs_scheme</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  trim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">180</span><span class="op">)</span>,</span>
-<span>  basis <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"auto"</span>, <span class="st">"realised"</span>, <span class="st">"route"</span>, <span class="st">"shown"</span><span class="op">)</span>,</span>
 <span>  finished_only <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -92,12 +91,6 @@ minutes. Rows outside it, or with a missing or non-finite time, are
 dropped.</p></dd>
 
 
-<dt id="arg-basis">basis<a class="anchor" aria-label="anchor" href="#arg-basis"></a></dt>
-<dd><p><code>"auto"</code>, <code>"realised"</code>, <code>"route"</code> or <code>"shown"</code>: where each
-respondent's burden comes from (see Details). <code>"shown"</code> is recommended
-when the export allows replaying the flow.</p></dd>
-
-
 <dt id="arg-finished-only">finished_only<a class="anchor" aria-label="anchor" href="#arg-finished-only"></a></dt>
 <dd><p>If <code>TRUE</code> (default) and <code>observed</code> has a <code>Finished</code>
 column, keep only respondents who finished. A break-off's duration does
@@ -108,9 +101,6 @@ not measure the time to complete the survey.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A <code>burden_time_validation</code> list (printed as a short summary):</p><dl><dt>n</dt>
 <dd><p>Rows kept after <code>finished_only</code> and <code>trim</code>.</p></dd>
-
-<dt>basis</dt>
-<dd><p>The basis used: <code>"shown"</code>, <code>"realised"</code> or <code>"route"</code>.</p></dd>
 
 <dt>observed, predicted</dt>
 <dd><p>Quantile vectors (minutes).</p></dd>
@@ -145,29 +135,9 @@ estimate from a dedicated calibration on real completion times.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Each respondent's burden comes from one of three bases (<code>basis</code>):</p><dl><dt><code>"shown"</code></dt>
-<dd><p><code><a href="realised_exposure.html">realised_exposure()</a></code>: the GfS+ points of every item
-displayed to the respondent, summed over blocks – including
-descriptive text and questions left blank. This is the respondent
-burden \(B_i\) (every item on the respondent's route) and is the
-recommended basis when the export allows the flow to be replayed.
-Errors from <code><a href="realised_exposure.html">realised_exposure()</a></code> are not caught.</p></dd>
-
-<dt><code>"realised"</code></dt>
-<dd><p><code><a href="realised_burden.html">realised_burden()</a></code>: the points of the questions the
-respondent actually answered. Needs response columns that map to the
-survey's questions, as in a raw Qualtrics CSV export.</p></dd>
-
-<dt><code>"route"</code></dt>
-<dd><p><code><a href="respondent_burden.html">respondent_burden()</a></code>: the points predicted from the
-respondent's route, using the Loop &amp; Merge count columns it recognises
-(<code>loop_&lt;question id&gt;</code>, <code>loop_&lt;block id&gt;</code>, or any <code>loop_*</code> column).
-Without such columns every respondent gets the same prediction.</p></dd>
-
-
-</dl><p><code>"auto"</code> (default) uses <code>"realised"</code> when the response columns map to
-questions and <code>"route"</code> otherwise; it never picks <code>"shown"</code>, which must be
-asked for.</p>
+    <p>Each respondent's burden is their <code><a href="respondent_burden.html">respondent_burden()</a></code>: the GfS+ points
+of every item displayed to them, including descriptive text and questions
+left blank. Errors from <code><a href="respondent_burden.html">respondent_burden()</a></code> are not caught.</p>
 <p>The observed data need a completion time – <code>completion_mins</code>,
 <code>completion_seconds</code>, or Qualtrics' own <code>Duration (in seconds)</code> column
 (first found wins; text values are converted to numbers). The label and

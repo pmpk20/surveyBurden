@@ -38,7 +38,7 @@
     <li><a class="dropdown-item" href="../articles/survey-revision.html">Revising a survey to reduce burden</a></li>
     <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS+ scoring method</a></li>
     <li><a class="dropdown-item" href="../articles/paths-and-display-logic.html">Paths and display logic</a></li>
-    <li><a class="dropdown-item" href="../articles/realised-burden.html">Realised burden from response data</a></li>
+    <li><a class="dropdown-item" href="../articles/respondent-burden.html">Respondent burden from response data</a></li>
     <li><a class="dropdown-item" href="../articles/calibration.html">Calibration and limitations</a></li>
     <li><a class="dropdown-item" href="../articles/extensions.html">Extensions: scoring surveys without a QSF</a></li>
   </ul>
@@ -107,32 +107,26 @@ paths</td>
 <td><code><a href="../articles/reading-the-report.html">vignette("reading-the-report")</a></code></td>
 </tr>
 <tr class="even">
-<td>That, plus respondent routes and loop counts</td>
-<td><code>burden_report(qsf, routes = routes)</code></td>
-<td>a distribution of respondent-level predicted burden</td>
-<td><code><a href="../articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code></td>
+<td>A response export</td>
+<td><code>respondent_burden(qsf, responses)</code></td>
+<td>respondent burden: the GfS+ points displayed to each respondent</td>
+<td><code><a href="../articles/respondent-burden.html">vignette("respondent-burden")</a></code></td>
 </tr>
 <tr class="odd">
-<td>A response export</td>
-<td><code>realised_burden(qsf, responses)</code></td>
-<td>answer-based burden per respondent</td>
-<td><code><a href="../articles/realised-burden.html">vignette("realised-burden")</a></code></td>
-</tr>
-<tr class="even">
-<td>Completion times</td>
+<td>A response export with completion times</td>
 <td><code>validate_times(qsf, observed)</code></td>
-<td>a check of predicted against observed time, and a survey-specific
-rate</td>
+<td>a check of respondent burden against observed time, and a
+survey-specific rate</td>
 <td><code><a href="../articles/calibration.html">vignette("calibration")</a></code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>A draft you want to make lighter</td>
 <td>
 <code><a href="../reference/burden_report.html">burden_report()</a></code> before and after an edit</td>
 <td>where the burden is, why, and how much a change removes</td>
 <td><code><a href="../articles/survey-revision.html">vignette("survey-revision")</a></code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>A survey from another platform</td>
 <td><code>score_burden(validate_catalogue(catalogue))</code></td>
 <td>per-question scores and a total</td>
@@ -154,15 +148,14 @@ becomes points, and what the automatic scorer does and does not
 apply.</li>
 <li>
 <code><a href="../articles/paths-and-display-logic.html">vignette("paths-and-display-logic")</a></code> – flow, skip logic,
-the structural-versus-population-weighted distinction, and building
-respondent routes.</li>
+and the structural-versus-respondent distinction.</li>
 <li>
 <code><a href="../articles/calibration.html">vignette("calibration")</a></code> – the
 <code>words_per_line</code> and points-per-minute assumptions,
 validating against completion times, and the limitations.</li>
 <li>
-<code><a href="../articles/realised-burden.html">vignette("realised-burden")</a></code> – answer-based burden from
-response data.</li>
+<code><a href="../articles/respondent-burden.html">vignette("respondent-burden")</a></code> – respondent burden from
+response data, and modelling break-off.</li>
 <li>
 <code><a href="../articles/extensions.html">vignette("extensions")</a></code> – what works for surveys without
 a QSF, and what full support for another platform would take.</li>
@@ -307,8 +300,8 @@ turn.</p>
 </h2>
 <p>These terms are used throughout, with fixed meanings. The key
 distinction: a <strong>path</strong> is a possibility in the survey’s
-design; a <strong>route</strong> is what one respondent actually
-did.</p>
+design; a <strong>respondent’s path</strong> is the one a respondent
+actually took.</p>
 <table class="table">
 <colgroup>
 <col width="50%">
@@ -326,53 +319,37 @@ given which branches are taken. Worked out from the survey design alone;
 no respondent is involved.</td>
 </tr>
 <tr class="even">
-<td><strong>route</strong></td>
-<td>the way one respondent actually went: the optional blocks they
-entered and how many times they looped. Comes from response data (the
-<code>routes</code> argument). Many respondents’ routes can fall on the
-same path.</td>
-</tr>
-<tr class="odd">
 <td><strong>question burden</strong></td>
 <td>the GfS+ point score for one question, from its type and
 structure</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><strong>path burden</strong></td>
 <td>the total question burden along one path. Display logic and loops
 can vary within a path, so a path has a spread of burdens rather than
 one number.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><strong>structural burden profile</strong></td>
 <td>the burden values a path’s modelled display-logic states produce,
 with model weights (equal per state; each path’s weights sum to 1). Not
 a respondent probability distribution.</td>
 </tr>
-<tr class="even">
-<td><strong>predicted respondent burden</strong></td>
-<td>one respondent’s predicted burden: the burden of the path matching
-their route, with their own loop counts (<code>pred_pts</code>).</td>
-</tr>
 <tr class="odd">
-<td><strong>population-weighted respondent burden</strong></td>
-<td>predicted respondent burden summarised across respondents, so each
-path counts as often as respondents took it. Produced only when
-<code>routes</code> are supplied.</td>
+<td><strong>respondent burden</strong></td>
+<td>the GfS+ points of every item displayed to one respondent,
+reconstructed from their responses: descriptive text and questions left
+blank included, each loop iteration counted
+(<code><a href="../reference/respondent_burden.html">respondent_burden()</a></code>).</td>
 </tr>
 <tr class="even">
-<td><strong>realised burden</strong></td>
-<td>the burden of the questions a respondent actually answered, from
-response data (<code><a href="../reference/realised_burden.html">realised_burden()</a></code>).</td>
-</tr>
-<tr class="odd">
 <td><strong>calculation certainty</strong></td>
 <td>counts, for a given survey, of the parts of the calculation that are
 enumerated in full within the model and the parts that rest on
 documented approximations. A modelling diagnostic, not a check against
 the live survey.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><strong>readability diagnostics</strong></td>
 <td>counts of long question stems, long matrix labels, and long grids.
 Reading-load signals, reported separately, never folded into the GfS+

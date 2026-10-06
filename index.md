@@ -35,10 +35,9 @@ provides support for it.
 |----|----|----|----|
 | A survey on any platform, as a list of questions | `score_burden(validate_catalogue(catalogue))` | per-question scores and a total | [`vignette("extensions")`](https://pmpk20.github.io/surveyBurden/articles/extensions.md) |
 | A Qualtrics survey (`.qsf` or API) | `burden_report(qsf)` | a model-based structural burden profile across the survey’s paths | [`vignette("reading-the-report")`](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md) |
-| That, plus respondent routes and loop counts | `burden_report(qsf, routes = routes)` | a distribution of respondent-level predicted burden | [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md) |
-| A Qualtrics response export | `realised_burden(qsf, responses)` | answer-based burden per respondent | [`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md) |
-| A response export, to model break-off | `realised_exposure(qsf, responses)` | per respondent and block: routed in, and the burden shown | [`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md) |
-| Completion times | `validate_times(qsf, observed)` | a check of predicted against observed time, and a survey-specific rate | [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md) |
+| A Qualtrics response export | `respondent_burden(qsf, responses)` | respondent burden: the GfS+ points displayed to each respondent | [`vignette("respondent-burden")`](https://pmpk20.github.io/surveyBurden/articles/respondent-burden.md) |
+| A response export, to model break-off | `respondent_burden(qsf, responses, by = "block")` | per respondent and block: routed in, and the burden displayed | [`vignette("respondent-burden")`](https://pmpk20.github.io/surveyBurden/articles/respondent-burden.md) |
+| A response export with completion times | `validate_times(qsf, observed)` | a check of respondent burden against observed time, and a survey-specific rate | [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md) |
 | A draft you want to make lighter | score it before and after an edit | where the burden is, why, and how much a change removes | [`vignette("survey-revision")`](https://pmpk20.github.io/surveyBurden/articles/survey-revision.md) |
 
 ## Installation
@@ -136,19 +135,15 @@ Each printed section is explained in
 
 The documentation uses these terms with fixed meanings. The key
 distinction: a **path** is a possibility in the survey’s design; a
-**route** is what one respondent actually did.
+**respondent’s path** is the one a respondent actually took.
 
 | term | meaning |
 |----|----|
 | **path** | one way through the survey that its flow allows: the blocks shown, given which branches are taken. Worked out from the survey design alone; no respondent is involved. |
-| **route** | the way one respondent actually went: the optional blocks they entered and how many times they looped. Comes from response data (the `routes` argument). Many respondents’ routes can fall on the same path. |
 | **question burden** | the GfS+ point score for one question, from its type and structure |
 | **path burden** | the total question burden along one path. Display logic and loops can vary within a path, so a path has a spread of burdens rather than one number. |
 | **structural burden profile** | the burden values a path’s modelled display-logic states produce, with model weights (equal per state; each path’s weights sum to 1). Not a respondent probability distribution. |
-| **predicted respondent burden** | one respondent’s predicted burden: the burden of the path matching their route, with their own loop counts (`pred_pts`). |
-| **population-weighted respondent burden** | predicted respondent burden summarised across respondents, so each path counts as often as respondents took it. Produced only when `routes` are supplied. |
-| **realised burden** | the burden of the questions a respondent actually answered, from response data ([`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)). |
-| **realised exposure** | the burden of the questions a respondent was shown, block by block, including in the block they left in ([`realised_exposure()`](https://pmpk20.github.io/surveyBurden/reference/realised_exposure.md)). |
+| **respondent burden** | the GfS+ points of every item displayed to one respondent, reconstructed from their responses: descriptive text and questions left blank included, each loop iteration counted ([`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)). |
 | **calculation certainty** | counts, for a given survey, of the parts of the calculation that are enumerated in full within the model and the parts that rest on documented approximations. A modelling diagnostic, not a check against the live survey. |
 | **readability diagnostics** | counts of long question stems, long matrix labels, and long grids. Reading-load signals, reported separately, never folded into the GfS+ score. |
 
@@ -183,8 +178,10 @@ each modelled display-logic state does, so the reported “median” is the
 middle value of that model-weighted distribution, not the burden half of
 respondents exceed. Branch conditions are not checked against each
 other, so the extremes are not guaranteed to be reachable by a real
-respondent. Given real respondent route data, the report instead reports
-a **population-weighted respondent burden**.
+respondent. Given response data,
+[`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
+gives each respondent’s **respondent burden**, and the report adds its
+distribution over complete responses.
 
 The package describes the survey, not the respondent: it does not claim
 that burden causes dropout, satisficing or slower responses. The
@@ -267,15 +264,13 @@ runs the whole pipeline. The lower-level functions expose each step.
 | `classify_reachability(catalogue, path_qids)` | reachability label for each question on a path |
 | `path_burden(qsf, scheme, max_paths)` | burden floor and ceiling per path |
 | `path_burden_profile(qsf, scheme, max_paths)` | model-weighted burden values per path, from the enumerated display-logic states |
-| `respondent_burden(qsf, routes, scheme, loop_typical)` | population-weighted burden from observed routes |
 | `summary_line(x, ...)` | a one-sentence burden summary |
 | `calculation_certainty(qsf, scheme, max_paths)` | which parts of the calculation are enumerated in full within the model and which are approximated |
-| `burden_report(x, scheme, profile, routes, max_paths, ...)` | the structured report object |
-| `realised_burden(qsf, responses)` | per-respondent burden after fieldwork from response data |
-| `realised_exposure(qsf, responses)` | per respondent and block: routing and the burden shown, including break-offs |
+| `burden_report(x, scheme, profile, responses, max_paths, ...)` | the structured report object |
+| `respondent_burden(qsf, responses, by)` | respondent burden after fieldwork, per respondent or per respondent and block |
 | `exposure_person_period(x)` | person-period data for a discrete-time hazard model of break-off |
 | `validate_catalogue(catalogue)` | check and coerce a hand-built question catalogue |
-| `validate_times(qsf, observed, scheme, trim)` | a points-per-minute rate fitted to your completion-time data |
+| `validate_times(qsf, observed, scheme, trim)` | respondent burden against completion times, and a fitted points-per-minute rate |
 
 Every function has a help page:
 [`?burden_report`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md),
@@ -288,7 +283,7 @@ then
 [`vignette("gfs-scoring")`](https://pmpk20.github.io/surveyBurden/articles/gfs-scoring.md),
 [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md),
 [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md),
-[`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md)
+[`vignette("respondent-burden")`](https://pmpk20.github.io/surveyBurden/articles/respondent-burden.md)
 and
 [`vignette("extensions")`](https://pmpk20.github.io/surveyBurden/articles/extensions.md).
 

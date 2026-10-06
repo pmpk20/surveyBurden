@@ -63,26 +63,21 @@ Walk the flow and display logic to the feasible respondent paths.
 
 ## Path burden
 
-Turn the resolved paths into per-path and population-weighted burden.
+Turn the resolved paths into per-path burden.
 
 - [`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md)
   : Burden per survey path
 - [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md)
   : Structural burden profile across a path's display-logic sub-states
+
+## Respondent burden
+
+The burden each respondent experienced, from their response data.
+
 - [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
-  : Expected burden by respondent route
-
-## Realised burden
-
-Score each respondent’s actual burden from their response data.
-
-- [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
-  : Realised response burden from observed responses
-- [`realised_exposure()`](https://pmpk20.github.io/surveyBurden/reference/realised_exposure.md)
-  : Realised exposure: the blocks each respondent was routed into and
-  the burden they were shown there
+  : Respondent burden from response data
 - [`exposure_person_period()`](https://pmpk20.github.io/surveyBurden/reference/exposure_person_period.md)
-  : Person-period (hazard) data from realised exposure
+  : Person-period (hazard) data from respondent burden
 
 ## Diagnostics
 

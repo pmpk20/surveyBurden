@@ -13,7 +13,7 @@ burden_report(
   x,
   scheme = gfs_scheme(),
   profile = TRUE,
-  routes = NULL,
+  responses = NULL,
   rare_threshold = 1500,
   stem_warning_threshold = 40L,
   label_warning_threshold = 10L,
@@ -51,14 +51,14 @@ summary(object, ...)
   (see Details): min/max only, no median, and the numbers can understate
   the true minimum.
 
-- routes:
+- responses:
 
-  Optional respondent data frame (see
-  [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)).
-  When supplied, the report adds `$population`: quantiles and the mean
-  of one predicted burden per respondent, so each path counts as often
-  as respondents took it. Unlike the structural profile, this summarises
-  observed respondents.
+  Optional response data: a data frame or the path to a raw Qualtrics
+  CSV export, as accepted by
+  [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md).
+  When supplied, the report adds `$respondents`: quantiles and the mean
+  of respondent burden over complete responses, so each path counts as
+  often as respondents took it.
 
 - rare_threshold:
 
@@ -171,16 +171,16 @@ names. Print it for the formatted summary, or read its components:
 
   Character vector of QC flags, in plain language.
 
-- population:
+- respondents:
 
-  Present only when `routes` is supplied: an eight-row tibble with the
-  same columns as `burden`, summarising per-respondent predictions as
-  `min`, `p10`, `p25`, `median`, `mean`, `p75`, `p90`, `max`. Each
-  respondent has equal weight. Quantiles use
+  Present only when `responses` is supplied: an eight-row tibble with
+  the same columns as `burden`, summarising
+  [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
+  over complete responses as `min`, `p10`, `p25`, `median`, `mean`,
+  `p75`, `p90`, `max`. Each respondent has equal weight. Quantiles use
   [`stats::quantile()`](https://rdrr.io/r/stats/quantile.html) with its
-  default `type = 7`; `mean` is the arithmetic mean. Missing predictions
-  are excluded; all statistics are `NA` when no non-missing predictions
-  are available.
+  default `type = 7`; `mean` is the arithmetic mean. All statistics are
+  `NA` when there are no complete responses.
 
 Scalars are attributes: `points_per_minute`, `rare_threshold`,
 `benchmark` (`list(median_points, n_waves)`) and `profile_used`.
@@ -222,13 +222,13 @@ br <- burden_report(qsf_path)
 #> ✔ Reading survey [9ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [120ms]
+#> ✔ Scoring questions and resolving paths [109ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [36ms]
+#> ✔ Checking calculation certainty [28ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [21ms]
+#> ✔ Enumerating display-logic combinations [22ms]
 #> 
 br
 #> 

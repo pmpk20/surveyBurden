@@ -12,8 +12,8 @@
   method](https://pmpk20.github.io/surveyBurden/articles/gfs-scoring.md):
 - [Paths and display
   logic](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md):
-- [Realised burden from response
-  data](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md):
+- [Respondent burden from response
+  data](https://pmpk20.github.io/surveyBurden/articles/respondent-burden.md):
 - [Calibration and
   limitations](https://pmpk20.github.io/surveyBurden/articles/calibration.md):
 - [Extensions: scoring surveys without a

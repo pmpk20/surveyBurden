@@ -122,9 +122,9 @@ report
 The first line under the title is a plain-language summary: the median
 completing-path burden in GfS+ points and in minutes, its ratio to the
 399-point GfS benchmark, and the point range across the survey’s
-completing paths. When you supply `routes` it also reports the
-population-weighted median (see
-[`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md)).
+completing paths. When you supply `responses` it also reports the median
+respondent burden over complete responses (see
+[`vignette("respondent-burden")`](https://pmpk20.github.io/surveyBurden/articles/respondent-burden.md)).
 
 `summary(report)` prints the same verdict with the structural counts and
 nothing else.

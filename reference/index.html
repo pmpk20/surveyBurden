@@ -23,7 +23,7 @@
     <li><a class="dropdown-item" href="../articles/survey-revision.html">Revising a survey to reduce burden</a></li>
     <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS+ scoring method</a></li>
     <li><a class="dropdown-item" href="../articles/paths-and-display-logic.html">Paths and display logic</a></li>
-    <li><a class="dropdown-item" href="../articles/realised-burden.html">Realised burden from response data</a></li>
+    <li><a class="dropdown-item" href="../articles/respondent-burden.html">Respondent burden from response data</a></li>
     <li><a class="dropdown-item" href="../articles/calibration.html">Calibration and limitations</a></li>
     <li><a class="dropdown-item" href="../articles/extensions.html">Extensions: scoring surveys without a QSF</a></li>
   </ul></li>
@@ -179,7 +179,7 @@
       </dl></div><div class="section level2">
       <h2 id="path-burden">Path burden<a class="anchor" aria-label="anchor" href="#path-burden"></a></h2>
 
-      <div class="section-desc"><p>Turn the resolved paths into per-path and population-weighted burden.</p></div>
+      <div class="section-desc"><p>Turn the resolved paths into per-path burden.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -199,17 +199,10 @@
 
         </dt>
         <dd>Structural burden profile across a path's display-logic sub-states</dd>
-
-        <dt>
-
-          <code><a href="respondent_burden.html">respondent_burden()</a></code>
-
-        </dt>
-        <dd>Expected burden by respondent route</dd>
       </dl></div><div class="section level2">
-      <h2 id="realised-burden">Realised burden<a class="anchor" aria-label="anchor" href="#realised-burden"></a></h2>
+      <h2 id="respondent-burden">Respondent burden<a class="anchor" aria-label="anchor" href="#respondent-burden"></a></h2>
 
-      <div class="section-desc"><p>Score each respondent’s actual burden from their response data.</p></div>
+      <div class="section-desc"><p>The burden each respondent experienced, from their response data.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -218,24 +211,17 @@
 
       <dl><dt>
 
-          <code><a href="realised_burden.html">realised_burden()</a></code>
+          <code><a href="respondent_burden.html">respondent_burden()</a></code>
 
         </dt>
-        <dd>Realised response burden from observed responses</dd>
-
-        <dt>
-
-          <code><a href="realised_exposure.html">realised_exposure()</a></code>
-
-        </dt>
-        <dd>Realised exposure: the blocks each respondent was routed into and the burden they were shown there</dd>
+        <dd>Respondent burden from response data</dd>
 
         <dt>
 
           <code><a href="exposure_person_period.html">exposure_person_period()</a></code>
 
         </dt>
-        <dd>Person-period (hazard) data from realised exposure</dd>
+        <dd>Person-period (hazard) data from respondent burden</dd>
       </dl></div><div class="section level2">
       <h2 id="diagnostics">Diagnostics<a class="anchor" aria-label="anchor" href="#diagnostics"></a></h2>
 

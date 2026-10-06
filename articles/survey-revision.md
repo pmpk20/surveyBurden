@@ -162,9 +162,9 @@ It does **not** establish:
 
 ## Next
 
-- Fielded the revision? Compare answer-based burden with
-  [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
-  ([`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md)),
+- Fielded the revision? Compare respondent burden with
+  [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
+  ([`vignette("respondent-burden")`](https://pmpk20.github.io/surveyBurden/articles/respondent-burden.md)),
   and check predicted against observed completion times with
   [`validate_times()`](https://pmpk20.github.io/surveyBurden/reference/validate_times.md)
   ([`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md)).

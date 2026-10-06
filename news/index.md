@@ -2,27 +2,49 @@
 
 ## surveyBurden (development version)
 
+- **Breaking: one respondent-level measure.**
+  `respondent_burden(qsf, responses)` now returns respondent burden: the
+  GfS+ points of every item displayed to each respondent, reconstructed
+  from their answers, with descriptive text and questions left blank
+  included and each loop iteration counted. `by = "block"` gives one row
+  per respondent per block, the input for
+  [`exposure_person_period()`](https://pmpk20.github.io/surveyBurden/reference/exposure_person_period.md).
+
+  - `realised_burden()` (answer-based points) and `realised_exposure()`
+    are removed. `realised_exposure(qsf, x)` is now
+    `respondent_burden(qsf, x, by = "block")`.
+  - The previous `respondent_burden(qsf, routes)` (median display-logic
+    burden of each respondent’s matched path) and its per-path table are
+    removed, with `summary_line.respondent_burden()`.
+  - Block-level columns drop the `shown_` prefix: `points`, `items`,
+    `response_items`, `pages`, `hidden_items`.
+  - [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
+    takes `responses` instead of `routes`, and reports `$respondents`
+    (respondent burden over complete responses) instead of
+    `$population`.
+  - [`validate_times()`](https://pmpk20.github.io/surveyBurden/reference/validate_times.md)
+    loses `basis`: it always uses respondent burden and needs response
+    columns that map to the survey’s questions.
+  - `words_per_line` carries over: `NULL`, one value, or one value per
+    respondent (for example by device).
+  - The vignette `realised-burden` is now `respondent-burden`.
+
 - [`validate_times()`](https://pmpk20.github.io/surveyBurden/reference/validate_times.md)
   gains `basis = "shown"`: each respondent’s burden is the GfS+ points
   of every item displayed to them (summed `shown_points` from
-  [`realised_exposure()`](https://pmpk20.github.io/surveyBurden/reference/realised_exposure.md)),
-  i.e. the respondent burden on their route, including descriptive text
-  and questions left blank. Recommended when the export allows the flow
-  to be replayed; `"auto"` is unchanged.
+  `realised_exposure()`), i.e. the respondent burden on their route,
+  including descriptive text and questions left blank. Recommended when
+  the export allows the flow to be replayed; `"auto"` is unchanged.
 
-- [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
-  and
-  [`realised_exposure()`](https://pmpk20.github.io/surveyBurden/reference/realised_exposure.md)
-  now map response columns through the ImportId row of a raw Qualtrics
-  CSV export, so columns with custom export tags (e.g. `w4_q19x1`) are
-  found. Display-order, page-timing and browser-meta columns no longer
-  count as answers, and `n_unmapped_cols` counts only question columns
-  that could not be mapped.
+- `realised_burden()` and `realised_exposure()` now map response columns
+  through the ImportId row of a raw Qualtrics CSV export, so columns
+  with custom export tags (e.g. `w4_q19x1`) are found. Display-order,
+  page-timing and browser-meta columns no longer count as answers, and
+  `n_unmapped_cols` counts only question columns that could not be
+  mapped.
 
-- [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
-  and
-  [`realised_exposure()`](https://pmpk20.github.io/surveyBurden/reference/realised_exposure.md)
-  accept the path to a CSV export as well as a data frame.
+- `realised_burden()` and `realised_exposure()` accept the path to a CSV
+  export as well as a data frame.
 
 - [`validate_times()`](https://pmpk20.github.io/surveyBurden/reference/validate_times.md)
   gains `basis`: by default it compares each respondent’s realised
@@ -42,8 +64,7 @@
 - [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
   matches routes only on optional blocks that have a `visit_` column;
   others (e.g. text-only blocks, whose visits leave no answer) are
-  unknown rather than “not visited”. This fixes
-  [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)’s
+  unknown rather than “not visited”. This fixes `realised_burden()`’s
   `predicted_points`, which on a survey with text-only optional blocks
   fell back to the plainest path for nearly every respondent.
 
@@ -84,9 +105,8 @@
   one group, as Qualtrics documents: `A Or B And C` is read as
   `A | (B & C)`, not left to right as `(A | B) & C`. This affects
   [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md),
-  the “never shown” check and
-  [`realised_exposure()`](https://pmpk20.github.io/surveyBurden/reference/realised_exposure.md).
-  Path profiles for the bundled demo surveys are unchanged.
+  the “never shown” check and `realised_exposure()`. Path profiles for
+  the bundled demo surveys are unchanged.
 
 - [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md)
   now detects consecutive branches that test the same embedded-data
@@ -117,24 +137,22 @@
   as [`print()`](https://rdrr.io/r/base/print.html) and
   [`summary()`](https://rdrr.io/r/base/summary.html).
 
-- New
-  [`realised_exposure()`](https://pmpk20.github.io/surveyBurden/reference/realised_exposure.md)
-  returns, for every respondent including those who broke off or were
-  screened out, the blocks the survey flow routed them into and the GfS+
-  points, items and pages they were **shown** in each block. Branch
-  logic and display logic are evaluated against each respondent’s own
-  answers, in flow order. Logic the data cannot settle (an unsupported
-  literal, or an embedded field absent from the export, such as one set
-  by question JavaScript) falls back to whether the respondent answered,
-  and is counted per respondent rather than hidden.
+- New `realised_exposure()` returns, for every respondent including
+  those who broke off or were screened out, the blocks the survey flow
+  routed them into and the GfS+ points, items and pages they were
+  **shown** in each block. Branch logic and display logic are evaluated
+  against each respondent’s own answers, in flow order. Logic the data
+  cannot settle (an unsupported literal, or an embedded field absent
+  from the export, such as one set by question JavaScript) falls back to
+  whether the respondent answered, and is counted per respondent rather
+  than hidden.
 
 - New
   [`exposure_person_period()`](https://pmpk20.github.io/surveyBurden/reference/exposure_person_period.md)
-  turns
-  [`realised_exposure()`](https://pmpk20.github.io/surveyBurden/reference/realised_exposure.md)
-  output into person-period data for a discrete-time hazard model of
-  break-off: the blocks each respondent was at risk in, the burden shown
-  before each, and the block’s design score.
+  turns `realised_exposure()` output into person-period data for a
+  discrete-time hazard model of break-off: the blocks each respondent
+  was at risk in, the burden shown before each, and the block’s design
+  score.
 
 - Display-logic groups joined by “And If” are now evaluated before
   groups joined by “Else If”: `If A / Else If B / And If C` is
@@ -148,10 +166,9 @@
 
 ### New features
 
-- New
-  [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
-  scores the questions each respondent actually answered, using exported
-  response data. Case-insensitive `ExportTag` matching.
+- New `realised_burden()` scores the questions each respondent actually
+  answered, using exported response data. Case-insensitive `ExportTag`
+  matching.
 - New
   [`validate_catalogue()`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md)
   checks and coerces a hand-built question catalogue, enabling
@@ -208,11 +225,11 @@
   [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md);
   it is treated as empty.
 - Vignettes updated from `weights =` to `scheme =` after the rename.
-- [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
-  now reads a `Finished` column coded `TRUE`/`FALSE` or yes/no (any
-  case) as well as `1`/`0`. Blank or unrecognised values are `NA`
-  (status unknown); previously `TRUE`/`FALSE` became `NA`, and values
-  such as `"2"` or `"0.5"` were misread as finished or not finished.
+- `realised_burden()` now reads a `Finished` column coded `TRUE`/`FALSE`
+  or yes/no (any case) as well as `1`/`0`. Blank or unrecognised values
+  are `NA` (status unknown); previously `TRUE`/`FALSE` became `NA`, and
+  values such as `"2"` or `"0.5"` were misread as finished or not
+  finished.
 - [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
   (and `burden_report(routes = ...)`) now sets `matched = TRUE` only
   when a respondent’s optional-block set matches an enumerated path
@@ -220,18 +237,17 @@
   were previously reported as matched; they are now `matched = FALSE`
   and the warning says which fallback path each group received.
   Predictions are unchanged.
-- [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md):
-  columns mapped through a `col_map` attribute now keep their Loop &
-  Merge iteration, from an `N_` column-name prefix or from a
-  `list(qid = , iteration = )` entry. Previously every mapped column was
-  treated as iteration 0, so answers from different iterations of a
-  looped question were merged and scored once. The help and vignette now
-  also state that `col_map` overrides automatic column matching.
-- [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
-  removes the question-label and ImportId rows at the top of a raw
-  Qualtrics CSV export, with a message, when it can recognise them.
-  Previously they were scored as respondents. Unrecognised rows are
-  always kept.
+- `realised_burden()`: columns mapped through a `col_map` attribute now
+  keep their Loop & Merge iteration, from an `N_` column-name prefix or
+  from a `list(qid = , iteration = )` entry. Previously every mapped
+  column was treated as iteration 0, so answers from different
+  iterations of a looped question were merged and scored once. The help
+  and vignette now also state that `col_map` overrides automatic column
+  matching.
+- `realised_burden()` removes the question-label and ImportId rows at
+  the top of a raw Qualtrics CSV export, with a message, when it can
+  recognise them. Previously they were scored as respondents.
+  Unrecognised rows are always kept.
 - [`validate_times()`](https://pmpk20.github.io/surveyBurden/reference/validate_times.md)
   reads Qualtrics’ `Duration (in seconds)` column directly (as exported,
   or as [`read.csv()`](https://rdrr.io/r/utils/read.table.html) renames
@@ -270,14 +286,14 @@
   explains that neither means the result matches the live survey. The
   `index` column is documented as `points / rare_threshold` (it can
   exceed 1).
-- [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
-  now has an explicit operational definition: a question’s full score
-  counts when at least one mapped response column is non-blank, per
-  detected loop iteration. It does not measure exposure, reading time or
-  partial completion, and `n_questions_answered` counts
-  question-iteration pairs. The vignette no longer presents a
-  predicted-minus-realised gap as evidence of dropout, and explains that
-  predictions use each respondent’s inferred route and loop counts.
+- `realised_burden()` now has an explicit operational definition: a
+  question’s full score counts when at least one mapped response column
+  is non-blank, per detected loop iteration. It does not measure
+  exposure, reading time or partial completion, and
+  `n_questions_answered` counts question-iteration pairs. The vignette
+  no longer presents a predicted-minus-realised gap as evidence of
+  dropout, and explains that predictions use each respondent’s inferred
+  route and loop counts.
 - The scoring vignette now lists the automatic rule for every question
   type and which
   [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)

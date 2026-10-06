@@ -1,11 +1,11 @@
-# Person-period (hazard) data from realised exposure
+# Person-period (hazard) data from respondent burden
 
 Turns
-[`realised_exposure()`](https://pmpk20.github.io/surveyBurden/reference/realised_exposure.md)
-output into one row per respondent per block at risk, ready for a
-discrete-time hazard model of break-off. A respondent is at risk in a
-block they were routed into and that displayed at least one question;
-the block they left in is always kept.
+[`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
+output with `by = "block"` into one row per respondent per block at
+risk, ready for a discrete-time hazard model of break-off. A respondent
+is at risk in a block they were routed into and that displayed at least
+one question; the block they left in is always kept.
 
 ## Usage
 
@@ -18,7 +18,8 @@ exposure_person_period(x)
 - x:
 
   Output of
-  [`realised_exposure()`](https://pmpk20.github.io/surveyBurden/reference/realised_exposure.md).
+  [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
+  with `by = "block"`.
 
 ## Value
 
@@ -26,8 +27,8 @@ A [tibble](https://tibble.tidyverse.org/reference/tibble.html) with the
 columns of `x` for the rows at risk, plus `period` (1, 2, ... within
 respondent), `event` (1 on the exit row of a break-off, else 0;
 screen-outs and completes are censored), `points_before` (GfS+ points
-shown in earlier blocks) and `block_points` (the block's design score,
-`design_points`).
+displayed in earlier blocks) and `block_points` (the block's design
+score, `design_points`).
 
 ## Examples
 
@@ -39,7 +40,7 @@ responses <- data.frame(
   QID2 = c("1", "1"), QID3 = c("1", "1"), QID4 = c("2", "3"),
   QID6 = c("1", "4"), QID9 = c("1", NA), QID26 = c("1", NA)
 )
-pp <- exposure_person_period(realised_exposure(qsf_path, responses))
+pp <- exposure_person_period(respondent_burden(qsf_path, responses, by = "block"))
 #> ℹ Logic not settled by the data for 1 respondent: 3 question decisions and 0
 #>   branch decisions fell back to whether they answered.
 #> ℹ See `attr(x, "respondents")`.

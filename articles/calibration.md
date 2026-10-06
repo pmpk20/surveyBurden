@@ -4,8 +4,8 @@
 line, points per minute) work, how to check predictions against observed
 completion times, and the limitations of the approach.
 
-**What you need.** A `.qsf`; for validation, completion times for your
-respondents (ideally with their routes).
+**What you need.** A `.qsf`; for validation, the response export, with
+completion times.
 
 **What it cannot establish.** An implied points-per-minute rate is
 rough, trim-sensitive and specific to one survey. Burden scores do not
@@ -85,26 +85,22 @@ and use the rate it returns.
 ### Validating against completion times
 
 [`validate_times()`](https://pmpk20.github.io/surveyBurden/reference/validate_times.md)
-predicts each respondent’s burden from their route (via
-[`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md))
-and compares it with their completion time. Prepare the data first; the
-function does little of this for you:
+takes each respondent’s burden from
+[`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
+and compares it with their completion time. It needs the response export
+itself, so that each respondent’s path can be reconstructed. Prepare the
+data first:
 
-1.  **Keep completed responses only.** `trim` filters on duration alone
-    and does not detect non-finishers, so filter on `Finished` yourself
-    (see
-    [`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md)
-    for its encodings).
+1.  **Keep completed responses.** With a `Finished` column, only
+    finishers are kept (`finished_only = TRUE`); without one, filter
+    yourself, since `trim` filters on duration alone.
 2.  **Provide a duration column.** Qualtrics’ own
     `Duration (in seconds)` is read directly (also as
     [`read.csv()`](https://rdrr.io/r/utils/read.table.html) renames it),
     as are `completion_seconds` and `completion_mins`; the first found
     wins. The two header rows of a raw CSV export are removed
     automatically when recognisable.
-3.  **Add route columns** (`loop_*`, `visit_*`) if you have them – see
-    [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md).
-    Without them every respondent is predicted at `loop_typical`.
-4.  **Choose the trim.** The default keeps 3 to 180 minutes, to drop
+3.  **Choose the trim.** The default keeps 3 to 180 minutes, to drop
     speeders and people who left the survey open. Report how many rows
     it removed (`n` against your row count); the implied rate is
     sensitive to it.
@@ -115,33 +111,34 @@ A simulated example:
 
 set.seed(2)
 n <- 120
-paradata <- data.frame(
+export <- data.frame(
   ResponseId = paste0("R_", seq_len(n)),
   Finished   = rbinom(n, 1, 0.9),                    # 1 = completed
   `Duration (in seconds)` = round(rlnorm(n, log(600), 0.5)),
-  loop_BL6   = rbinom(n, 5, 0.4),
-  loop_BL8   = rbinom(n, 3, 0.5),
   check.names = FALSE
 )
+# answers: each respondent answers a different number of the core questions
+cat_ <- parse_qsf(read_qsf(demo))
+core <- cat_$question_id[!cat_$in_loop]
+k <- sample(5:length(core), n, TRUE)
+for (j in seq_along(core)) export[[core[j]]] <- ifelse(j <= k, "1", NA)
 
-obs <- paradata[paradata$Finished == 1, ]            # step 1
-
-vt <- validate_times(demo, obs, trim = c(3, 180))    # steps 2 and 4
-c(rows = nrow(paradata), finished = nrow(obs), kept_after_trim = vt$n)
+vt <- validate_times(demo, export, trim = c(3, 180))
+c(rows = nrow(export), finished = sum(export$Finished), kept_after_trim = vt$n)
 #>            rows        finished kept_after_trim 
 #>             120             107             107
 round(c(ratio = vt$ratio, cor = vt$cor,
         implied_ppm = vt$implied_points_per_minute), 2)
 #>       ratio         cor implied_ppm 
-#>        0.97        0.15       10.22
+#>        0.92        0.03        9.41
 ```
 
 Reading the output:
 
 - `ratio` is the predicted median over the observed median, in minutes.
-- `cor` is the correlation of predicted points with observed minutes.
-  Route-level predictions cannot see within-path variation, so expect it
-  to be small on real data.
+- `cor` is the correlation of respondent burden with observed minutes.
+  Completion times vary for many reasons besides survey content, so
+  expect it to be small on real data.
 - `implied_points_per_minute` is `60 / b`, where `b` is the slope, in
   seconds per point, of a through-origin fit of observed seconds on
   predicted points. It is a rough, trim-sensitive rate for this survey,
@@ -157,11 +154,11 @@ burden_report(demo, scheme = w, quiet = TRUE)$burden[, c("statistic", "minutes")
 #> # A tibble: 5 × 2
 #>   statistic minutes
 #>   <fct>       <dbl>
-#> 1 min          10.4
-#> 2 p25          11.5
-#> 3 median       12.0
-#> 4 p75          12.7
-#> 5 max          14.0
+#> 1 min          11.3
+#> 2 p25          12.4
+#> 3 median       13.1
+#> 4 p75          13.8
+#> 5 max          15.2
 ```
 
 ## Limitations
@@ -177,11 +174,11 @@ burden_report(demo, scheme = w, quiet = TRUE)$burden[, c("statistic", "minutes")
 - Display-logic reconstruction depends on what the `.qsf` encodes. Logic
   controlled outside Qualtrics, or unusual constructs, may need manual
   interpretation.
-- The structural profile is not a respondent distribution. Without route
-  data, each complete path gets equal total weight and, within a path,
-  each modelled display-logic state and loop count gets equal weight.
-  “Median” means the median of that model-weighted distribution, not
-  across respondents.
+- The structural profile is not a respondent distribution. Without
+  response data, each complete path gets equal total weight and, within
+  a path, each modelled display-logic state and loop count gets equal
+  weight. “Median” means the median of that model-weighted distribution,
+  not across respondents.
 - Structural paths are the block sequences the flow allows. Branch
   conditions are not evaluated or checked against each other, so the
   minimum or maximum may not be reachable by a real respondent.
@@ -197,8 +194,8 @@ burden_report(demo, scheme = w, quiet = TRUE)$burden[, c("statistic", "minutes")
 
 - [`vignette("reading-the-report")`](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md)
   – reading the full report.
-- [`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md)
-  – answer-based burden after fielding.
+- [`vignette("respondent-burden")`](https://pmpk20.github.io/surveyBurden/articles/respondent-burden.md)
+  – respondent burden after fielding.
 
 ## References
 

@@ -63,7 +63,7 @@ count `1..max`) gets equal weight, a burden value produced by several
 states carries their combined weight, and each path's weights sum to 1.
 The quantiles are weighted by these model weights. They are not observed
 respondent frequencies, so they are not percentiles of a respondent
-population; for that, use observed routes with
+population; for that, use response data with
 [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md).
 [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
 pools the complete paths' profiles, so each complete path carries equal

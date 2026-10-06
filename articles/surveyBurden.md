@@ -18,9 +18,8 @@ on what you have:
 | What you have | Start with | What you get | Guide |
 |----|----|----|----|
 | A Qualtrics survey (`.qsf` or API) | `burden_report(qsf)` | a model-based structural burden profile across the survey’s paths | [`vignette("reading-the-report")`](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md) |
-| That, plus respondent routes and loop counts | `burden_report(qsf, routes = routes)` | a distribution of respondent-level predicted burden | [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md) |
-| A response export | `realised_burden(qsf, responses)` | answer-based burden per respondent | [`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md) |
-| Completion times | `validate_times(qsf, observed)` | a check of predicted against observed time, and a survey-specific rate | [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md) |
+| A response export | `respondent_burden(qsf, responses)` | respondent burden: the GfS+ points displayed to each respondent | [`vignette("respondent-burden")`](https://pmpk20.github.io/surveyBurden/articles/respondent-burden.md) |
+| A response export with completion times | `validate_times(qsf, observed)` | a check of respondent burden against observed time, and a survey-specific rate | [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md) |
 | A draft you want to make lighter | [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md) before and after an edit | where the burden is, why, and how much a change removes | [`vignette("survey-revision")`](https://pmpk20.github.io/surveyBurden/articles/survey-revision.md) |
 | A survey from another platform | `score_burden(validate_catalogue(catalogue))` | per-question scores and a total | [`vignette("extensions")`](https://pmpk20.github.io/surveyBurden/articles/extensions.md) |
 
@@ -35,13 +34,12 @@ The other articles go deeper:
   – how a Qualtrics widget becomes points, and what the automatic scorer
   does and does not apply.
 - [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md)
-  – flow, skip logic, the structural-versus-population-weighted
-  distinction, and building respondent routes.
+  – flow, skip logic, and the structural-versus-respondent distinction.
 - [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md)
   – the `words_per_line` and points-per-minute assumptions, validating
   against completion times, and the limitations.
-- [`vignette("realised-burden")`](https://pmpk20.github.io/surveyBurden/articles/realised-burden.md)
-  – answer-based burden from response data.
+- [`vignette("respondent-burden")`](https://pmpk20.github.io/surveyBurden/articles/respondent-burden.md)
+  – respondent burden from response data, and modelling break-off.
 - [`vignette("extensions")`](https://pmpk20.github.io/surveyBurden/articles/extensions.md)
   – what works for surveys without a QSF, and what full support for
   another platform would take.
@@ -186,18 +184,15 @@ walks each of these in turn.
 
 These terms are used throughout, with fixed meanings. The key
 distinction: a **path** is a possibility in the survey’s design; a
-**route** is what one respondent actually did.
+**respondent’s path** is the one a respondent actually took.
 
 | term | meaning |
 |----|----|
 | **path** | one way through the survey that its flow allows: the blocks shown, given which branches are taken. Worked out from the survey design alone; no respondent is involved. |
-| **route** | the way one respondent actually went: the optional blocks they entered and how many times they looped. Comes from response data (the `routes` argument). Many respondents’ routes can fall on the same path. |
 | **question burden** | the GfS+ point score for one question, from its type and structure |
 | **path burden** | the total question burden along one path. Display logic and loops can vary within a path, so a path has a spread of burdens rather than one number. |
 | **structural burden profile** | the burden values a path’s modelled display-logic states produce, with model weights (equal per state; each path’s weights sum to 1). Not a respondent probability distribution. |
-| **predicted respondent burden** | one respondent’s predicted burden: the burden of the path matching their route, with their own loop counts (`pred_pts`). |
-| **population-weighted respondent burden** | predicted respondent burden summarised across respondents, so each path counts as often as respondents took it. Produced only when `routes` are supplied. |
-| **realised burden** | the burden of the questions a respondent actually answered, from response data ([`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)). |
+| **respondent burden** | the GfS+ points of every item displayed to one respondent, reconstructed from their responses: descriptive text and questions left blank included, each loop iteration counted ([`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)). |
 | **calculation certainty** | counts, for a given survey, of the parts of the calculation that are enumerated in full within the model and the parts that rest on documented approximations. A modelling diagnostic, not a check against the live survey. |
 | **readability diagnostics** | counts of long question stems, long matrix labels, and long grids. Reading-load signals, reported separately, never folded into the GfS+ score. |
 

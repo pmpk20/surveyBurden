@@ -39,7 +39,7 @@ In short:
 |----|----|----|
 | **Working now** | Per-question GfS+ scores and a survey total for any survey you can describe as a list of questions | [`validate_catalogue()`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md) then [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md) |
 | **Requires an adapter** | A floor/ceiling burden band per path | build a paths table yourself, then `path_burden(NULL, paths = , scored = )` |
-| **Future interface work** | Display-logic profiles, [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md), respondent predictions, realised burden, calculation certainty | these currently need a Qualtrics `qsf_raw` object |
+| **Future interface work** | Display-logic profiles, [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md), respondent burden, calculation certainty | these currently need a Qualtrics `qsf_raw` object |
 
 ## Three-layer architecture
 
@@ -273,11 +273,9 @@ It does **not** give you:
   (see the adapter below).
 - A display-logic profile – the structural min/median/max within a path.
   That currently requires a Qualtrics survey.
-- A population-weighted or realised burden –
+- Respondent burden –
   [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
-  and
-  [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
-  currently require a Qualtrics survey as well as response data.
+  currently requires a Qualtrics survey as well as response data.
 
 The total from a hand-built catalogue is a defensible measure of survey
 burden for any survey that can be expressed as a list of questions with
@@ -332,10 +330,9 @@ Loop multiplication in the ceiling uses the catalogue’s `loop_max`.
 Everything beyond the band –
 [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md),
 [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md),
-[`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md),
-[`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md)
+[`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
 and
-[`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md)
+[`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md)
 – currently takes a `qsf_raw` object and reads its `SurveyFlow`, block
 and `DisplayLogic` elements directly. Supporting another platform there
 needs one of:
@@ -371,7 +368,7 @@ modelling it.
 | [`classify_reachability()`](https://pmpk20.github.io/surveyBurden/reference/classify_reachability.md) | 2-3 | Partly – catalogue fields, but ruling questions out needs Qualtrics-format `DisplayLogic` trees |
 | [`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md) | 3 | No, given a paths table and the scored catalogue |
 | [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md) | 3 | Yes, at present – its engine reads blocks and display logic from `qsf_raw` |
-| [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md), [`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md), [`realised_burden()`](https://pmpk20.github.io/surveyBurden/reference/realised_burden.md) | 3 | Yes, at present – take `qsf_raw` |
+| [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md), [`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md) | 3 | Yes, at present – take `qsf_raw` |
 | [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md) | 3 | Orchestrator – takes `qsf_raw` and threads it through Layers 1-2 |
 
 The boundary between platform-specific and platform-agnostic code

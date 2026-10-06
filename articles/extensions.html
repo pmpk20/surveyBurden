@@ -38,7 +38,7 @@
     <li><a class="dropdown-item" href="../articles/survey-revision.html">Revising a survey to reduce burden</a></li>
     <li><a class="dropdown-item" href="../articles/gfs-scoring.html">The GfS+ scoring method</a></li>
     <li><a class="dropdown-item" href="../articles/paths-and-display-logic.html">Paths and display logic</a></li>
-    <li><a class="dropdown-item" href="../articles/realised-burden.html">Realised burden from response data</a></li>
+    <li><a class="dropdown-item" href="../articles/respondent-burden.html">Respondent burden from response data</a></li>
     <li><a class="dropdown-item" href="../articles/calibration.html">Calibration and limitations</a></li>
     <li><a class="dropdown-item" href="../articles/extensions.html">Extensions: scoring surveys without a QSF</a></li>
   </ul>
@@ -131,7 +131,7 @@ describe as a list of questions</td>
 <tr class="odd">
 <td><strong>Future interface work</strong></td>
 <td>Display-logic profiles, <code><a href="../reference/burden_report.html">burden_report()</a></code>, respondent
-predictions, realised burden, calculation certainty</td>
+burden, calculation certainty</td>
 <td>these currently need a Qualtrics <code>qsf_raw</code> object</td>
 </tr>
 </tbody>
@@ -531,9 +531,8 @@ the score was reached.</li>
 paths table (see the adapter below).</li>
 <li>A display-logic profile – the structural min/median/max within a
 path. That currently requires a Qualtrics survey.</li>
-<li>A population-weighted or realised burden –
-<code><a href="../reference/respondent_burden.html">respondent_burden()</a></code> and <code><a href="../reference/realised_burden.html">realised_burden()</a></code>
-currently require a Qualtrics survey as well as response data.</li>
+<li>Respondent burden – <code><a href="../reference/respondent_burden.html">respondent_burden()</a></code> currently
+requires a Qualtrics survey as well as response data.</li>
 </ul>
 <p>The total from a hand-built catalogue is a defensible measure of
 survey burden for any survey that can be expressed as a list of
@@ -587,11 +586,11 @@ Loop multiplication in the ceiling uses the catalogue’s
 <h3 id="future-interface-work-routing-and-display-logic">Future interface work: routing and display logic<a class="anchor" aria-label="anchor" href="#future-interface-work-routing-and-display-logic"></a>
 </h3>
 <p>Everything beyond the band – <code><a href="../reference/path_burden_profile.html">path_burden_profile()</a></code>,
-<code><a href="../reference/burden_report.html">burden_report()</a></code>, <code><a href="../reference/respondent_burden.html">respondent_burden()</a></code>,
-<code><a href="../reference/calculation_certainty.html">calculation_certainty()</a></code> and <code><a href="../reference/realised_burden.html">realised_burden()</a></code>
-– currently takes a <code>qsf_raw</code> object and reads its
-<code>SurveyFlow</code>, block and <code>DisplayLogic</code> elements
-directly. Supporting another platform there needs one of:</p>
+<code><a href="../reference/burden_report.html">burden_report()</a></code>, <code><a href="../reference/respondent_burden.html">respondent_burden()</a></code> and
+<code><a href="../reference/calculation_certainty.html">calculation_certainty()</a></code> – currently takes a
+<code>qsf_raw</code> object and reads its <code>SurveyFlow</code>, block
+and <code>DisplayLogic</code> elements directly. Supporting another
+platform there needs one of:</p>
 <ul>
 <li>
 <strong>Translation</strong>: convert the platform’s survey into a
@@ -696,8 +695,7 @@ Qualtrics-format <code>DisplayLogic</code> trees</td>
 <tr class="odd">
 <td>
 <code><a href="../reference/respondent_burden.html">respondent_burden()</a></code>,
-<code><a href="../reference/calculation_certainty.html">calculation_certainty()</a></code>,
-<code><a href="../reference/realised_burden.html">realised_burden()</a></code>
+<code><a href="../reference/calculation_certainty.html">calculation_certainty()</a></code>
 </td>
 <td>3</td>
 <td>Yes, at present – take <code>qsf_raw</code>

@@ -2,75 +2,225 @@
 % Please edit documentation in R/respondent_burden.R
 \name{respondent_burden}
 \alias{respondent_burden}
-\title{Expected burden by respondent route}
+\title{Respondent burden from response data}
 \usage{
 respondent_burden(
   qsf,
-  routes = NULL,
+  responses,
   scheme = gfs_scheme(),
-  loop_typical = 2,
-  engine = NULL
+  by = c("respondent", "block"),
+  id_col = NULL,
+  furthest = c("answered", "column"),
+  furthest_col = NULL,
+  loop_iterations = c("driver", "observed"),
+  embedded = NULL
 )
 }
 \arguments{
-\item{qsf}{A \code{qsf_raw} object or a path/URL accepted by \code{\link[=read_qsf]{read_qsf()}}.}
+\item{qsf}{A \code{qsf_raw} object, a path to a \code{.qsf} file, or a survey id
+accepted by \code{\link[=fetch_qsf]{fetch_qsf()}}.}
 
-\item{routes}{Optional data frame of respondents. Recognised columns (all
-optional):
-\describe{
-\item{\verb{loop_<id>}}{Iteration count for a Loop & Merge block. \verb{<id>} may be
-the driving question id (\code{loop_QID9}) or the block id (\code{loop_BL6}). Any
-other \verb{loop_*} column is assigned to the survey's loop blocks in flow
-order. \code{0} (or less) means the respondent never entered that loop; a
-count above the block's cap is capped; \code{NA}, like a missing column,
-falls back to \code{loop_typical}.}
-\item{\verb{visit_<block_id>}}{\code{TRUE} to include a branch-gated optional block
-(e.g. \code{visit_BL11}). Read with \code{as.logical()}: \code{TRUE}, \code{1} or \code{"TRUE"}
-include it; \code{FALSE}, \code{NA} or any other value excludes it. When
-some optional blocks have a \code{visit_} column and others do not, the
-others are unknown: routes are matched on the blocks that have one,
-taking the matching path with the fewest optional blocks. With no
-\code{visit_} columns at all, every route is matched as visiting none.}
+\item{responses}{A data frame of response data, or the path to a raw
+Qualtrics CSV export. Columns must be mappable to question ids via one of
+these strategies (tried in order):
+\enumerate{
+\item A \code{col_map} attribute on the data frame: a named list, one entry per
+column, each either a QID string or \code{list(qid = , iteration = )}. It
+overrides the automatic strategies for the columns it names. With a
+bare QID, the loop iteration comes from an \code{N_} prefix on the column
+name (\verb{2_mycol} is iteration 2), else 0.
+\item The ImportId row of a raw Qualtrics CSV export, which names each
+column's question whatever the column is called. Where present it
+decides alone.
+\item Column names match question ids directly (\code{QID15}, \code{QID15_1}, or
+\verb{2_QID15} for loop iteration 2).
+\item Column names match \code{DataExportTag} values from the QSF (\code{Q15},
+\code{travel_mode_1}), exactly or ignoring case.
 }
-Missing loop columns fall back as described above.}
 
-\item{scheme}{A \code{\link[=gfs_scheme]{gfs_scheme()}} list.}
+Columns Qualtrics fills automatically -- display order (\verb{_DO}),
+page-timing clicks and browser meta data -- never count as answers.
 
-\item{loop_typical}{Loop iterations to assume for the \code{typical_pts} column,
-and for a route whose loop count is not supplied.}
+Leading label and ImportId rows from a raw Qualtrics CSV export are
+removed, with a message, when recognisable (an ImportId JSON cell, or a
+system column holding its own label such as \code{ResponseId} =
+"Response ID"); other rows are always kept.
 
-\item{engine}{Optional precomputed \code{burden_engine()} result for this \code{qsf}
-(internal reuse by \code{\link[=burden_report]{burden_report()}}; \code{NULL} builds it here, leaving the
-public behaviour unchanged).}
+The simplest input is the raw CSV export itself (with its header rows).
+\code{qualtRics::fetch_survey(survey_id, label = FALSE, convert = FALSE, add_column_map = FALSE)} also works, through the column names.}
+
+\item{scheme}{A \code{\link[=gfs_scheme]{gfs_scheme()}} list. Its \code{words_per_line} sets the
+descriptive-text line conversion.}
+
+\item{by}{\code{"respondent"} (default): one row per respondent. \code{"block"}: one
+row per respondent per live block.}
+
+\item{id_col}{Name of the respondent-id column. Auto-detected from
+\code{"ResponseId"}, \code{"response_id"}, or the first column whose values are all
+unique. Its values must be unique and not missing; Qualtrics'
+\code{ResponseId} is.}
+
+\item{furthest}{How to find the furthest block a respondent reached:
+\code{"answered"} (default) uses the last block with an answer; \code{"column"}
+reads \code{furthest_col}.}
+
+\item{furthest_col}{Name of a column holding, per respondent, the last block
+reached: a block id, a block name, a question id (its block is used) or
+a whole-number block ordinal (\code{flow_order} from \code{\link[=resolve_live_blocks]{resolve_live_blocks()}}),
+matched in that order, so a block named \code{"2"} is that block. Blank or
+unrecognised values fall back to \code{"answered"}.}
+
+\item{loop_iterations}{\code{"driver"} (default) or \code{"observed"}; see Loops.}
+
+\item{embedded}{Optional named character vector mapping embedded-data field
+names to response columns, e.g. \code{c(TotalVehicles = "total_vehicles")}.
+Overrides the automatic matching for the fields it names.}
 }
 \value{
-If \code{routes} is \code{NULL}: a \code{respondent_burden} tibble, one row per complete
-flow path, with \code{path_id}, \code{n_loop_blocks}, \code{optional_blocks} (a list column
-of branch-gated block ids on that path) and \code{floor_pts} / \code{typical_pts} /
-\code{ceiling_pts} (+ \verb{_min} in minutes). \code{\link[=summary_line]{summary_line()}} turns it into a
-sentence.
+With \code{by = "respondent"}, a \link[tibble:tibble]{tibble} with one row
+per respondent, in the order of \code{responses}:
+\describe{
+\item{\code{response_id}}{Respondent identifier.}
+\item{\code{finished}}{Logical, from the \code{Finished} column (\code{NA} if absent).}
+\item{\code{outcome}}{\code{"complete"}, \code{"breakoff"} or \code{"screen_out"} (the
+flow ended the survey early).}
+\item{\code{points}}{Respondent burden: GfS+ points of every item displayed
+(each loop iteration counted).}
+\item{\code{minutes}}{\code{points / points_per_minute}.}
+\item{\code{items}, \code{response_items}}{Visible items displayed, and those of
+them that take a response (not descriptive text).}
+\item{\code{pages}}{Pages displayed.}
+\item{\code{furthest_order}}{Flow order of the furthest block reached
+(\code{NA} for respondents who reached the end).}
+\item{\code{n_unresolved_items}, \code{n_unresolved_branches}}{Display and branch
+decisions the logic could not settle, which fell back to whether the
+respondent answered.}
+\item{\code{unresolved_loops}}{\code{TRUE} if a loop's iterations could not be
+recovered.}
+\item{\code{n_routing_conflicts}}{Blocks with answers that the evaluated
+flow did not route the respondent into (the answers are trusted).}
+}
 
-If \code{routes} is supplied: the routes tibble with \code{path_id}, \code{matched}
-(\code{TRUE} only if the set of optional blocks the respondent visited equals
-that of one of the enumerated complete flow paths; otherwise \code{FALSE}, the
-prediction falls back to the path with no optional blocks -- or, if
-there is none, the heaviest path -- and a warning reports how many
-routes went to each. This is a route-recovery diagnostic on the flow
-model itself), \code{pred_pts} and \code{pred_min} (predicted burden using each
-respondent's real loop counts).
+With \code{by = "block"}, a tibble with one row per respondent per live block,
+in flow order:
+\describe{
+\item{\code{response_id}}{Respondent identifier.}
+\item{\code{block_id}, \code{block_name}, \code{flow_order}}{The block.}
+\item{\code{outcome}}{As above.}
+\item{\code{routed_in}}{\code{TRUE} if the flow routed the respondent into the
+block, \code{FALSE} if it did not, \code{NA} for blocks after their exit.}
+\item{\code{displayed}}{\code{TRUE} if the block showed at least one visible
+question (Qualtrics skips a block whose questions are all hidden).}
+\item{\code{iterations}}{Loop & Merge iterations displayed; \code{NA} for other
+blocks.}
+\item{\code{points}}{GfS+ points of the items displayed in the block.}
+\item{\code{items}, \code{response_items}, \code{pages}}{As above, for the block.}
+\item{\code{hidden_items}}{Items the respondent passed that are never
+visible (hidden by injected CSS/JS, page timing, metadata). They score
+0 points and are not in \code{items}; reported for completeness.}
+\item{\code{design_points}}{The block's design score (its questions scored
+once), as in \code{burden_report()$blocks}.}
+\item{\code{exit_block}}{\code{TRUE} on the block the respondent left the survey
+in (break-offs and screen-outs only).}
+\item{\code{unresolved_items}}{Display decisions in this block that the
+logic could not settle.}
+}
+Block counts are \code{NA} where \code{routed_in} is \code{NA}, and 0 where it is
+\code{FALSE}. The attribute \code{respondents} holds the respondent-level
+diagnostics.
 }
 \description{
-Turns the flow/display-logic model into a per-path expected burden, so you
-can say "a typical respondent faces ~X points, rising to ~Y once the Loop &
-Merge sections repeat, or ~Z on the shortest complete path".
+The GfS+ burden each respondent experienced. For every respondent,
+including those who broke off or were screened out, walks the survey flow
+against their own answers and sums the GfS+ points of every item the
+survey displayed to them: descriptive text, and questions left blank, count
+alongside questions answered. Loop & Merge iterations are counted
+separately. For a break-off, burden runs up to the block they left in.
+}
+\details{
+\code{by = "respondent"} (default) returns one row per respondent. \code{by = "block"} returns one row per respondent per block, the input for a
+break-off (discrete-time hazard) model; see \code{\link[=exposure_person_period]{exposure_person_period()}}.
+
+\strong{What is evaluated.} Branch logic in the survey flow and display logic on
+questions are evaluated per respondent, in flow order, so that
+\code{Displayed()} literals see earlier decisions. Supported literals:
+question \code{Selected} / \code{NotSelected} (single choice, multiple choice and
+matrix cells, via the QSF \code{RecodeValues}), \code{Displayed} / \code{NotDisplayed},
+\code{Empty} / \code{NotEmpty} and numeric or text comparisons on a question's entry
+value, embedded-data comparisons, and the Loop & Merge "current loop"
+test. Embedded fields are read from a response column of the same name
+(matched exactly, then ignoring case, then ignoring case and
+punctuation), or from a fixed value set in the flow. A fixed value set in
+the flow holds from that point on, so a field set more than once is read
+as it stood at each branch. A cell holding several choice codes joined by
+commas (\code{"1,4"}) is split only when every piece is one of the question's
+choice codes, so a choice label containing a comma is never split.
+
+\strong{What cannot be evaluated} (an unsupported literal such as a quota test,
+an embedded field with no column and no fixed value -- typically one set by
+question JavaScript -- or a trigger question with no response columns) is
+never silently treated as true or false. Three-valued logic is used, so an
+unknown literal matters only when it decides the outcome. When it does:
+an item counts as displayed if the respondent answered it, and is counted in
+\code{unresolved_items}; a branch counts as taken if the respondent answered a
+question in a block inside it (or, for a branch that ends the survey, if
+they finished without answering anything later), and is counted in the
+\code{respondents} attribute's \code{n_unresolved_branches}.
+
+\strong{Exit.} A respondent's exit is the furthest block they reached:
+by default the last block in which they answered a question
+(\code{furthest = "answered"}). Someone who leaves on a newly displayed page
+without answering is therefore attributed to the previous block; supply a
+last-seen block or question in \code{furthest_col} to avoid this. Respondents
+marked finished reached every block the flow routed them into. Blocks after
+the exit have \code{routed_in = NA}: the flow beyond that point depends on
+answers that were never given. Qualtrics records a screened-out response as
+finished, so a respondent marked unfinished is a break-off, never a
+screen-out.
+
+\strong{Loops.} The iterations a Loop & Merge block ran are taken from the
+question driving the loop (the numeric response, or the selected choices)
+when that answer is available, else from the iterations with any answer
+(\code{loop_iterations = "observed"} forces the latter). Iterations with answers
+are always counted. In the exit block of a break-off, only iterations up to
+the last one answered are counted. Export columns number a choice-driven
+loop by the choice's position, so iteration \code{j} is the driving question's
+\code{j}-th choice. A randomised loop is not shown in export order: at a
+break-off only the iterations answered count, and where the driver cannot
+settle the iterations, or the loop presents only a subset of them, they
+come from the answers alone. Those respondents are flagged in
+\code{unresolved_loops}, as are respondents in loops whose size the QSF does not
+give.
+
+Answers that contradict the evaluated flow (answers in a block the flow
+did not route the respondent into) are trusted: the block counts as routed
+in, and the respondent's \code{n_routing_conflicts} is incremented.
 }
 \examples{
-\donttest{
 qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
                          package = "surveyBurden")
-rb <- respondent_burden(read_qsf(qsf_path))
-rb[, c("path_id", "floor_pts", "typical_pts", "ceiling_pts")]
-summary_line(rb)
-}
+responses <- data.frame(
+  ResponseId = c("R_1", "R_2", "R_3"),
+  Finished   = c(1, 0, 1),
+  QID2  = c("1", "1", "2"),   # consent: R_3 declines and is screened out
+  QID3  = c("1", "1", NA),
+  QID4  = c("2", "3", NA),
+  QID6  = c("1", "4", NA),    # R_1 employed: routed into Commuting
+  QID9  = c("2", NA, NA),     # two adults: the loop runs twice
+  QID10 = c("1", NA, NA),
+  `1_QID11` = c("2", NA, NA),
+  QID19_1 = c("3", NA, NA),
+  QID22 = c("3", NA, NA),
+  QID26 = c("1", NA, NA),
+  check.names = FALSE
+)
+respondent_burden(qsf_path, responses)
+rb <- respondent_burden(qsf_path, responses, by = "block")
+rb[rb$response_id == "R_1", c("block_name", "routed_in", "points")]
 
+}
+\seealso{
+\code{\link[=exposure_person_period]{exposure_person_period()}} to turn the \code{by = "block"} result into
+hazard data; \code{\link[=validate_times]{validate_times()}} to compare respondent burden with
+completion times.
 }

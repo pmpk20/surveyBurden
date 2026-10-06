@@ -1,5 +1,28 @@
 # surveyBurden (development version)
 
+* **Breaking: one respondent-level measure.** `respondent_burden(qsf,
+  responses)` now returns respondent burden: the GfS+ points of every item
+  displayed to each respondent, reconstructed from their answers, with
+  descriptive text and questions left blank included and each loop
+  iteration counted. `by = "block"` gives one row per respondent per block,
+  the input for `exposure_person_period()`.
+  * `realised_burden()` (answer-based points) and `realised_exposure()` are
+    removed. `realised_exposure(qsf, x)` is now `respondent_burden(qsf, x,
+    by = "block")`.
+  * The previous `respondent_burden(qsf, routes)` (median display-logic
+    burden of each respondent's matched path) and its per-path table are
+    removed, with `summary_line.respondent_burden()`.
+  * Block-level columns drop the `shown_` prefix: `points`, `items`,
+    `response_items`, `pages`, `hidden_items`.
+  * `burden_report()` takes `responses` instead of `routes`, and reports
+    `$respondents` (respondent burden over complete responses) instead of
+    `$population`.
+  * `validate_times()` loses `basis`: it always uses respondent burden and
+    needs response columns that map to the survey's questions.
+  * The per-respondent `words_per_line` vector is gone; set
+    `scheme$words_per_line` for a single value.
+  * The vignette `realised-burden` is now `respondent-burden`.
+
 * `validate_times()` gains `basis = "shown"`: each respondent's burden is
   the GfS+ points of every item displayed to them (summed `shown_points`
   from `realised_exposure()`), i.e. the respondent burden on their route,

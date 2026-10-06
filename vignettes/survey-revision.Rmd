@@ -127,8 +127,8 @@ It does **not** establish:
 
 ## Next
 
-- Fielded the revision? Compare answer-based burden with
-  `realised_burden()` (`vignette("realised-burden")`), and check predicted
+- Fielded the revision? Compare respondent burden with
+  `respondent_burden()` (`vignette("respondent-burden")`), and check predicted
   against observed completion times with `validate_times()`
   (`vignette("calibration")`).
 - Unsure why a question scored as it did? `vignette("gfs-scoring")` lists

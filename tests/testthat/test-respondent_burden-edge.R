@@ -1,4 +1,4 @@
-# realised_exposure() edge cases, each built by editing the synthetic fixture
+# rb_blocks() edge cases, each built by editing the synthetic fixture
 # survey (fixtures/exposure_fixture.qsf) in memory. Helpers for the fixture
 # and its responses are defined here.
 
@@ -56,7 +56,7 @@ fx_set_q <- function(q, qid, field, value) {
   q
 }
 run_q <- function(q, responses = exposure_responses(), ...) {
-  suppressMessages(suppressWarnings(realised_exposure(q, responses, ...)))
+  suppressMessages(suppressWarnings(rb_blocks(q, responses, ...)))
 }
 sel <- function(qid, choice, op = "Selected") {
   list(LogicType = "Question", QuestionID = qid, Operator = op,
@@ -133,7 +133,7 @@ test_that("Displayed() inside a loop sees the earlier question in the same pass"
     LeftOperand = "q://QID5/QuestionDisplayed", Type = "Expression")))
   ex <- run_q(q)
   # QID6 now shows whenever QID5 does: iteration 1 = 2 + 2 + 1, iteration 2 = 2 + 2
-  expect_equal(cell(ex, "R1", "BL3", "shown_points"), 9)
+  expect_equal(cell(ex, "R1", "BL3", "points"), 9)
   expect_equal(cell(ex, "R1", "BL3", "unresolved_items"), 0L)
 })
 
@@ -150,7 +150,7 @@ test_that("choice-driven loops map export iterations to choice positions", {
   ex <- run_q(q, r)
   # "Neither" (choice id 7) is the third choice: one iteration, export prefix 3
   expect_equal(cell(ex, "A", "BL3", "iterations"), 1L)
-  expect_equal(cell(ex, "A", "BL3", "shown_points"), 4)   # QID5 2 + QID6 2
+  expect_equal(cell(ex, "A", "BL3", "points"), 4)   # QID5 2 + QID6 2
   expect_equal(attr(ex, "respondents")$n_routing_conflicts, 0L)
 })
 
@@ -207,8 +207,8 @@ test_that("comma-joined codes are split only when every piece is a choice code",
   r$QID3 <- c("2,1", "A car, red")                    # codes; a label with a comma
   ex <- run_q(fx_raw(), r)
   # QID4 (shown if QID3 = car) costs 1 point in Household
-  expect_equal(cell(ex, "R1", "BL2", "shown_points"), 9)
-  expect_equal(cell(ex, "R5", "BL2", "shown_points"), 8)
+  expect_equal(cell(ex, "R1", "BL2", "points"), 9)
+  expect_equal(cell(ex, "R5", "BL2", "points"), 8)
 })
 
 test_that("a loop block reached through either of two branches keeps its iterations", {
@@ -227,9 +227,9 @@ test_that("a loop block reached through either of two branches keeps its iterati
   ex <- run_q(q, r)
   expect_equal(cell(ex, "R1", "BL3", "iterations"), 2L)
   # iteration 1: QID5 2 + QID6 2 (QID5 is not "child") + QID7 1; iteration 2: 2 + 2
-  expect_equal(cell(ex, "R1", "BL3", "shown_points"), 9)
+  expect_equal(cell(ex, "R1", "BL3", "points"), 9)
   # R5 (phone) takes the second occurrence
-  expect_equal(cell(ex, "R5", "BL3", "shown_points"), 5)
+  expect_equal(cell(ex, "R5", "BL3", "points"), 5)
 })
 
 test_that("respondent ids must be unique and present", {
@@ -242,7 +242,7 @@ test_that("respondent ids must be unique and present", {
   # a tibble with a factor id column works
   t <- tibble::as_tibble(exposure_responses())
   t$ResponseId <- factor(t$ResponseId)
-  expect_equal(cell(run_q(fx_raw(), t), "R1", "BL3", "shown_points"), 7)
+  expect_equal(cell(run_q(fx_raw(), t), "R1", "BL3", "points"), 7)
 })
 
 test_that("a loop with no recoverable iterations is flagged, not a crash", {
@@ -255,20 +255,20 @@ test_that("a loop with no recoverable iterations is flagged, not a crash", {
   expect_true(attr(ex, "respondents")$unresolved_loops[1])
 })
 
-test_that("hidden and metadata items are reported, not counted as shown", {
+test_that("hidden and metadata items are reported, not counted as displayed", {
   q <- fx_set_q(fx_raw(), "QID7", "QuestionType", "Timing")
   ex <- run_q(q)
   # QID7 is shown in R1's first loop iteration; now it is a timing item
-  expect_equal(cell(ex, "R1", "BL3", "shown_items"), 3L)
-  expect_equal(cell(ex, "R1", "BL3", "shown_hidden_items"), 1L)
-  expect_equal(cell(ex, "R1", "BL3", "shown_points"), 6)
+  expect_equal(cell(ex, "R1", "BL3", "items"), 3L)
+  expect_equal(cell(ex, "R1", "BL3", "hidden_items"), 1L)
+  expect_equal(cell(ex, "R1", "BL3", "points"), 6)
 })
 
 test_that("a block named like an ordinal is matched by name first", {
   q <- fx_set_block(fx_raw(), "BL5", "Description", "2")
   r <- exposure_responses()
   r$LastBlock <- c(NA, NA, "2", "2.5", NA)
-  ex <- suppressMessages(realised_exposure(q, r, furthest = "column",
+  ex <- suppressMessages(rb_blocks(q, r, furthest = "column",
                                            furthest_col = "LastBlock"))
   expect_equal(attr(ex, "respondents")$furthest_order[3], 5)
   # "2.5" is neither a block nor an integral ordinal: falls back to answers

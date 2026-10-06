@@ -9,7 +9,7 @@ burden_report(
   x,
   scheme = gfs_scheme(),
   profile = TRUE,
-  routes = NULL,
+  responses = NULL,
   rare_threshold = 1500,
   stem_warning_threshold = 40L,
   label_warning_threshold = 10L,
@@ -33,11 +33,11 @@ few seconds of extra work. \code{FALSE} skips
 that and falls back to a much faster but naive range (see Details): min/max
 only, no median, and the numbers can understate the true minimum.}
 
-\item{routes}{Optional respondent data frame (see \code{\link[=respondent_burden]{respondent_burden()}}).
-When supplied, the report adds \verb{$population}: quantiles and the mean of
-one predicted burden per respondent, so each path counts as often as
-respondents took it. Unlike the structural profile, this summarises
-observed respondents.}
+\item{responses}{Optional response data: a data frame or the path to a raw
+Qualtrics CSV export, as accepted by \code{\link[=respondent_burden]{respondent_burden()}}. When
+supplied, the report adds \verb{$respondents}: quantiles and the mean of
+respondent burden over complete responses, so each path counts as often
+as respondents took it.}
 
 \item{rare_threshold}{GfS+ points above which Heimgartner & Axhausen (2024)
 found surveys to be rare (their sample: median 399, n = 79 waves). Used for
@@ -103,13 +103,13 @@ its \code{gfs_points}, \code{score_flag} and \code{score_basis}.}
 \item{certainty}{\code{\link[=calculation_certainty]{calculation_certainty()}} output, or \code{NULL} when
 \code{certainty = FALSE}.}
 \item{warnings}{Character vector of QC flags, in plain language.}
-\item{population}{Present only when \code{routes} is supplied: an eight-row
-tibble with the same columns as \code{burden}, summarising per-respondent
-predictions as \code{min}, \code{p10}, \code{p25}, \code{median}, \code{mean}, \code{p75}, \code{p90},
+\item{respondents}{Present only when \code{responses} is supplied: an
+eight-row tibble with the same columns as \code{burden}, summarising
+\code{\link[=respondent_burden]{respondent_burden()}} over complete responses as \code{min}, \code{p10}, \code{p25}, \code{median}, \code{mean}, \code{p75}, \code{p90},
 \code{max}. Each respondent has equal weight. Quantiles use
 \code{\link[stats:quantile]{stats::quantile()}} with its default \code{type = 7}; \code{mean} is the
-arithmetic mean. Missing predictions are excluded; all statistics
-are \code{NA} when no non-missing predictions are available.}
+arithmetic mean. All statistics are \code{NA} when there are no complete
+responses.}
 }
 Scalars are attributes: \code{points_per_minute}, \code{rare_threshold}, \code{benchmark}
 (\code{list(median_points, n_waves)}) and \code{profile_used}.

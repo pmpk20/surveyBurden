@@ -47,7 +47,7 @@ Each joint state of a component's gates (and each loop iteration count
 carries their combined weight, and each path's weights sum to 1. The
 quantiles are weighted by these model weights. They are not observed
 respondent frequencies, so they are not percentiles of a respondent
-population; for that, use observed routes with \code{\link[=respondent_burden]{respondent_burden()}}.
+population; for that, use response data with \code{\link[=respondent_burden]{respondent_burden()}}.
 \code{\link[=burden_report]{burden_report()}} pools the complete paths' profiles, so each complete path
 carries equal total weight there.
 

@@ -13,11 +13,11 @@
 #'   few seconds of extra work. `FALSE` skips
 #'   that and falls back to a much faster but naive range (see Details): min/max
 #'   only, no median, and the numbers can understate the true minimum.
-#' @param routes Optional respondent data frame (see [respondent_burden()]).
-#'   When supplied, the report adds `$population`: quantiles and the mean of
-#'   one predicted burden per respondent, so each path counts as often as
-#'   respondents took it. Unlike the structural profile, this summarises
-#'   observed respondents.
+#' @param responses Optional response data: a data frame or the path to a raw
+#'   Qualtrics CSV export, as accepted by [respondent_burden()]. When
+#'   supplied, the report adds `$respondents`: quantiles and the mean of
+#'   respondent burden over complete responses, so each path counts as often
+#'   as respondents took it.
 #' @param rare_threshold GfS+ points above which Heimgartner & Axhausen (2024)
 #'   found surveys to be rare (their sample: median 399, n = 79 waves). Used for
 #'   the "rare burden" warning and to scale the `index` column of `$burden`
@@ -82,13 +82,13 @@
 #'     \item{certainty}{[calculation_certainty()] output, or `NULL` when
 #'       `certainty = FALSE`.}
 #'     \item{warnings}{Character vector of QC flags, in plain language.}
-#'     \item{population}{Present only when `routes` is supplied: an eight-row
-#'       tibble with the same columns as `burden`, summarising per-respondent
-#'       predictions as `min`, `p10`, `p25`, `median`, `mean`, `p75`, `p90`,
+#'     \item{respondents}{Present only when `responses` is supplied: an
+#'       eight-row tibble with the same columns as `burden`, summarising
+#'       [respondent_burden()] over complete responses as `min`, `p10`, `p25`, `median`, `mean`, `p75`, `p90`,
 #'       `max`. Each respondent has equal weight. Quantiles use
 #'       [stats::quantile()] with its default `type = 7`; `mean` is the
-#'       arithmetic mean. Missing predictions are excluded; all statistics
-#'       are `NA` when no non-missing predictions are available.}
+#'       arithmetic mean. All statistics are `NA` when there are no complete
+#'       responses.}
 #'   }
 #'   Scalars are attributes: `points_per_minute`, `rare_threshold`, `benchmark`
 #'   (`list(median_points, n_waves)`) and `profile_used`.
@@ -116,7 +116,7 @@
 #' }
 #' @export
 burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
-                          routes = NULL, rare_threshold = 1500,
+                          responses = NULL, rare_threshold = 1500,
                           stem_warning_threshold = 40L,
                           label_warning_threshold = 10L,
                           words_per_line = NULL,
@@ -145,12 +145,12 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
 
   # parse each question's display-logic tree once; the engine and the certainty
   # breakdown both need it.
-  need_engine <- !no_complete && (isTRUE(profile) || !is.null(routes))
+  need_engine <- !no_complete && isTRUE(profile)
   parsed_dl <- if (need_engine || isTRUE(certainty))
     parse_all_display_logic(qsf, scored) else NULL
 
   # the display-logic engine is the expensive step; build it once if either the
-  # structural profile or a routes summary will need it.
+  # structural profile will need it.
   engine <- if (need_engine)
     burden_engine(qsf, scheme = scheme, paths = paths, scored = scored,
                   blocks = blocks, parsed_dl = parsed_dl) else NULL
@@ -319,24 +319,24 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
       "\"there's a 50% chance a respondent sees the median burden\"."))
   }
 
-  # ---- $population (optional) --------------------------------------
-  population <- NULL
-  if (!is.null(routes)) {
-    pr <- respondent_burden(qsf, routes = routes, scheme = scheme, engine = engine)
-    population_stats <- c("min", "p10", "p25", "median", "mean", "p75", "p90", "max")
-    predictions <- pr$pred_pts[!is.na(pr$pred_pts)]
-    qp <- stats::quantile(predictions, c(0, .1, .25, .5, .75, .9, 1))
-    qp <- append(qp, if (length(predictions)) mean(predictions) else NA_real_,
-                 after = 4L)
-    population <- tibble::tibble(
-      statistic = factor(population_stats, levels = population_stats),
+  # ---- $respondents (optional) -------------------------------------
+  respondents <- NULL
+  if (!is.null(responses)) {
+    rb <- suppressMessages(respondent_burden(qsf, responses, scheme = scheme))
+    stats_lab <- c("min", "p10", "p25", "median", "mean", "p75", "p90", "max")
+    pts <- rb$points[rb$outcome == "complete"]
+    qp <- if (length(pts)) stats::quantile(pts, c(0, .1, .25, .5, .75, .9, 1))
+          else rep(NA_real_, 7)
+    qp <- append(qp, if (length(pts)) mean(pts) else NA_real_, after = 4L)
+    respondents <- tibble::tibble(
+      statistic = factor(stats_lab, levels = stats_lab),
       points    = as.numeric(qp),
       minutes   = as.numeric(qp) / ppm,
       index     = as.numeric(qp) / rare_threshold
     )
     warnings <- c(warnings, sprintf(
-      "The population-weighted numbers use %d respondent routes, so (unlike the structural range) they ARE weighted by how often each route actually occurred.",
-      nrow(pr)))
+      "Respondent burden uses %d complete responses, so (unlike the structural range) each path counts as often as respondents took it.",
+      length(pts)))
   }
 
   lead <- c("question_id", "block_id", "block_name", "question_text", "std_type",
@@ -355,7 +355,7 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
     certainty   = cert,
     warnings    = warnings
   )
-  if (!is.null(population)) out$population <- population
+  if (!is.null(respondents)) out$respondents <- respondents
   attr(out, "points_per_minute") <- ppm
   attr(out, "rare_threshold")    <- rare_threshold
   attr(out, "benchmark")         <- list(median_points = 399, n_waves = 79L)
@@ -393,11 +393,11 @@ render_table <- function(mat, right = NULL) {
 #' One- or two-line plain-language verdict for a burden report, shared by the
 #' full print method and [summary()][summary.burden_report] so the two cannot
 #' drift. `burden` is the `$burden` tibble -- its `attr(, "basis")` selects the
-#' wording. `population_median` is the population-weighted median burden in
-#' points, or `NULL` when no `routes` were supplied.
+#' wording. `respondent_median` is the median respondent burden in points
+#' over complete responses, or `NULL` when no `responses` were supplied.
 #' @noRd
 burden_verdict_line <- function(burden, ppm, benchmark_median, n_complete,
-                                population_median = NULL) {
+                                respondent_median = NULL) {
   basis <- attr(burden, "basis")
   pt    <- function(stat) burden$points[burden$statistic == stat]
   pl    <- if (identical(n_complete, 1L)) "" else "s"
@@ -426,10 +426,10 @@ burden_verdict_line <- function(burden, ppm, benchmark_median, n_complete,
     sprintf("Relative to benchmark: %sx the median of %d points.",
             ratio, round(benchmark_median)))
 
-  if (is.null(population_median)) return(lines)
+  if (is.null(respondent_median)) return(lines)
   c(lines, sprintf(
-    "Population-weighted median: %d points (~%d min) across the supplied routes.",
-    round(population_median), round(population_median / ppm)))
+    "Median respondent burden: %d points (~%d min) across complete responses.",
+    round(respondent_median), round(respondent_median / ppm)))
 }
 
 print_burden_report_body <- function(x) {
@@ -444,8 +444,8 @@ print_burden_report_body <- function(x) {
 
   verdict <- burden_verdict_line(
     x$burden, ppm, bm$median_points, ins$n_complete_paths,
-    population_median = if (!is.null(x$population))
-      x$population$points[x$population$statistic == "median"] else NULL)
+    respondent_median = if (!is.null(x$respondents))
+      x$respondents$points[x$respondents$statistic == "median"] else NULL)
   for (ln in verdict) cli::cli_text(ln)
 
   cli::cli_h2("Survey")
@@ -485,9 +485,9 @@ print_burden_report_body <- function(x) {
   }
   cli::cli_text("Benchmark: median {bm$median_points} points across {bm$n_waves} GfS-scored waves (Heimgartner & Axhausen 2024).")
 
-  if (!is.null(x$population)) {
-    p <- x$population
-    cli::cli_h2("Population-weighted burden (from your respondent routes)")
+  if (!is.null(x$respondents)) {
+    p <- x$respondents
+    cli::cli_h2("Respondent burden (complete responses)")
     cli::cli_verbatim(render_table(rbind(
       c("Statistic", "Points", "Expected Minutes", "Index"),
       cbind(labs[as.character(p$statistic)],
@@ -568,4 +568,24 @@ format.summary.burden_report <- function(x, ...) {
 print.summary.burden_report <- function(x, ...) {
   cat(format(x, ...), sep = "\n")
   invisible(x)
+}
+
+#' One-sentence summary of a burden object
+#'
+#' @param x A [burden_report()] object.
+#' @param ... Unused.
+#' @return A single character string.
+#' @export
+summary_line <- function(x, ...) UseMethod("summary_line")
+
+#' @export
+summary_line.burden_report <- function(x, ...) {
+  ppm <- attr(x, "points_per_minute") %||% 12
+  bm  <- attr(x, "benchmark")
+  resp_med <- if (!is.null(x$respondents))
+    x$respondents$points[x$respondents$statistic == "median"] else NULL
+  paste(burden_verdict_line(x$burden, ppm, bm$median_points,
+                            x$survey$n_complete_paths,
+                            respondent_median = resp_med),
+        collapse = " ")
 }

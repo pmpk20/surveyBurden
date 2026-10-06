@@ -25,7 +25,7 @@ test_that("the object exposes exactly the documented components", {
   )
   expect_false("top_items" %in% names(r))
   expect_false("summary" %in% names(r))
-  expect_null(r$population)
+  expect_null(r$respondents)
 })
 
 test_that("scalars live on attributes, not components", {
@@ -137,56 +137,66 @@ test_that("$readability carries long_stems, long_labels and long_grids", {
   expect_true("QID19" %in% rd$long_grids$question_id)
 })
 
-test_that("routes = adds eight population statistics with the same columns as $burden", {
-  set.seed(1)
-  routes <- data.frame(
-    source = "roots",
-    n_children = rbinom(60, 3, 0.3), n_cars = rbinom(60, 2, 0.6),
-    n_vans = 0, n_campers = 0,
-    loop_other_adults = rbinom(60, 3, 0.4),
-    loop_children = rbinom(60, 2, 0.4), loop_vehicles = rbinom(60, 2, 0.5)
-  )
-  r <- burden_report(fx(), routes = routes, certainty = FALSE)
-  expect_s3_class(r$population, "tbl_df")
-  expect_equal(names(r$population), names(r$burden))
-  expect_equal(as.character(r$population$statistic),
+# finishers on the demo survey answering different numbers of questions
+report_responses <- function(n = 40) {
+  cat_ <- parse_qsf(read_qsf(fx()))
+  qids <- cat_$question_id[!cat_$in_loop]
+  set.seed(3)
+  obs <- data.frame(ResponseId = paste0("R_", seq_len(n)),
+                    Finished = c(rep("1", n - 2), "0", "0"))
+  k <- sample(5:length(qids), n, TRUE)
+  for (j in seq_along(qids)) obs[[qids[j]]] <- ifelse(j <= k, "1", NA)
+  obs
+}
+
+test_that("responses = adds eight respondent statistics with the same columns as $burden", {
+  obs <- report_responses()
+  r <- burden_report(fx(), responses = obs, certainty = FALSE, quiet = TRUE)
+  expect_s3_class(r$respondents, "tbl_df")
+  expect_equal(names(r$respondents), names(r$burden))
+  expect_equal(as.character(r$respondents$statistic),
                c("min", "p10", "p25", "median", "mean", "p75", "p90", "max"))
-  pred <- respondent_burden(fx(), routes = routes)$pred_pts
-  expect_equal(bstat(r$population, "mean"), mean(pred))
-  expect_equal(bstat(r$population, "p10"), unname(quantile(pred, .1)))
-  expect_equal(bstat(r$population, "p90"), unname(quantile(pred, .9)))
-  expect_equal(r$population$minutes, r$population$points / 12)
-  expect_equal(r$population$index, r$population$points / 1500)
+  rb  <- suppressMessages(respondent_burden(fx(), obs))
+  pts <- rb$points[rb$outcome == "complete"]
+  expect_length(pts, 38L)                      # break-offs are left out
+  expect_equal(bstat(r$respondents, "mean"), mean(pts))
+  expect_equal(bstat(r$respondents, "p10"), unname(quantile(pts, .1)))
+  expect_equal(bstat(r$respondents, "p90"), unname(quantile(pts, .9)))
+  expect_equal(r$respondents$minutes, r$respondents$points / 12)
+  expect_equal(r$respondents$index, r$respondents$points / 1500)
   out <- paste(format(r), collapse = "\n")
+  expect_match(out, "Respondent burden \\(complete responses\\)")
   expect_match(out, "10th percentile")
-  expect_match(out, "90th percentile")
   expect_match(out, "Mean")
-  expect_match(paste(r$warnings, collapse = " "), "route", ignore.case = TRUE)
+  expect_match(paste(r$warnings, collapse = " "), "38 complete responses")
 })
 
-test_that("population statistics describe skewed predictions and omit missing values", {
+test_that("respondent statistics describe skewed burden", {
   local_mocked_bindings(
-    respondent_burden = function(...) data.frame(pred_pts = c(10, 10, 10, 50, 120, NA))
+    respondent_burden = function(...) data.frame(
+      points = c(10, 10, 10, 50, 120, 999),
+      outcome = c(rep("complete", 5), "breakoff"))
   )
   scheme <- gfs_scheme()
   scheme$points_per_minute <- 20
-  r <- burden_report(fx(), routes = data.frame(id = 1:6), scheme = scheme,
+  r <- burden_report(fx(), responses = data.frame(id = 1:6), scheme = scheme,
                      profile = FALSE, certainty = FALSE, quiet = TRUE,
                      rare_threshold = 200)
-  expect_equal(r$population$points, c(10, 10, 10, 10, 40, 50, 92, 120))
-  expect_equal(r$population$minutes, r$population$points / 20)
-  expect_equal(r$population$index, r$population$points / 200)
+  expect_equal(r$respondents$points, c(10, 10, 10, 10, 40, 50, 92, 120))
+  expect_equal(r$respondents$minutes, r$respondents$points / 20)
+  expect_equal(r$respondents$index, r$respondents$points / 200)
 })
 
-test_that("population statistics handle a single prediction and no predictions", {
-  for (pred in list(42, numeric(0), c(NA_real_, NA_real_))) {
+test_that("respondent statistics handle one and no complete responses", {
+  for (oc in list("complete", character(0), "breakoff")) {
     local_mocked_bindings(
-      respondent_burden = function(...) data.frame(pred_pts = pred)
+      respondent_burden = function(...) data.frame(points = rep(42, length(oc)),
+                                                   outcome = oc)
     )
-    r <- burden_report(fx(), routes = data.frame(id = seq_along(pred)),
+    r <- burden_report(fx(), responses = data.frame(id = seq_along(oc)),
                        profile = FALSE, certainty = FALSE, quiet = TRUE)
-    expect_equal(r$population$points,
-                 rep(if (length(pred) == 1L) 42 else NA_real_, 8L))
+    expect_equal(r$respondents$points,
+                 rep(if (identical(oc, "complete")) 42 else NA_real_, 8L))
   }
 })
 
@@ -336,17 +346,29 @@ test_that("summary() and print() state the same verdict", {
   expect_true(grepl(verdict1, squish(format(summary(r))), fixed = TRUE))
 })
 
-test_that("the verdict names the population-weighted median when routes are given", {
-  set.seed(1)
-  routes <- data.frame(
-    source = "roots",
-    n_children = rbinom(60, 3, 0.3), n_cars = rbinom(60, 2, 0.6),
-    n_vans = 0, n_campers = 0,
-    loop_other_adults = rbinom(60, 3, 0.4),
-    loop_children = rbinom(60, 2, 0.4), loop_vehicles = rbinom(60, 2, 0.5)
-  )
-  r <- burden_report(fx(), routes = routes, certainty = FALSE, quiet = TRUE)
-  expect_true(any(grepl("Population-weighted median", format(r), fixed = TRUE)))
+test_that("the verdict names the median respondent burden when responses are given", {
+  r <- burden_report(fx(), responses = report_responses(), certainty = FALSE, quiet = TRUE)
+  expect_true(any(grepl("Median respondent burden", format(r), fixed = TRUE)))
+  expect_match(summary_line(r), "Median respondent burden")
+})
+
+test_that("summary_line() works on a burden_report object", {
+  r <- burden_report(fx(), certainty = FALSE)
+  s <- summary_line(r)
+  expect_type(s, "character")
+  expect_length(s, 1L)
+  expect_match(s, "GfS\\+ points")
+  expect_match(s, "min")
+  expect_match(s, "benchmark")
+})
+
+test_that("summary_line() works on a naive burden_report", {
+  r <- burden_report(fx(), profile = FALSE, certainty = FALSE)
+  s <- summary_line(r)
+  expect_type(s, "character")
+  expect_length(s, 1L)
+  expect_match(s, "points")
+  expect_match(s, "min")
 })
 
 test_that("max_paths is threaded through burden_report to resolve_flow", {

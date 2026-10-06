@@ -19,8 +19,8 @@
     `$population`.
   * `validate_times()` loses `basis`: it always uses respondent burden and
     needs response columns that map to the survey's questions.
-  * The per-respondent `words_per_line` vector is gone; set
-    `scheme$words_per_line` for a single value.
+  * `words_per_line` carries over: `NULL`, one value, or one value per
+    respondent (for example by device).
   * The vignette `realised-burden` is now `respondent-burden`.
 
 * `validate_times()` gains `basis = "shown"`: each respondent's burden is

@@ -99,6 +99,14 @@
 #'   descriptive-text line conversion.
 #' @param by `"respondent"` (default): one row per respondent. `"block"`: one
 #'   row per respondent per live block.
+#' @param words_per_line How many words fit on one rendered line, used only
+#'   when scoring descriptive text. `NULL` (default) uses
+#'   `scheme$words_per_line` (12). A single number applies to all
+#'   respondents. A numeric vector with one value per respondent (one per row
+#'   of `responses`; header rows of a raw export may be included and are
+#'   dropped with them) lets the line length differ by respondent, for
+#'   example by device. Mapping device metadata to values is left to the
+#'   user.
 #' @param furthest How to find the furthest block a respondent reached:
 #'   `"answered"` (default) uses the last block with an answer; `"column"`
 #'   reads `furthest_col`.
@@ -196,14 +204,16 @@
 #'
 #' @export
 respondent_burden <- function(qsf, responses, scheme = gfs_scheme(),
-                              by = c("respondent", "block"), id_col = NULL,
+                              by = c("respondent", "block"), words_per_line = NULL,
+                              id_col = NULL,
                               furthest = c("answered", "column"), furthest_col = NULL,
                               loop_iterations = c("driver", "observed"),
                               embedded = NULL) {
   by <- match.arg(by)
   x <- respondent_blocks(qsf, responses, scheme = scheme, id_col = id_col,
                          furthest = furthest, furthest_col = furthest_col,
-                         loop_iterations = loop_iterations, embedded = embedded)
+                         loop_iterations = loop_iterations, embedded = embedded,
+                         words_per_line = words_per_line)
   if (identical(by, "block")) return(x)
   per_respondent(x, scheme$points_per_minute)
 }
@@ -238,12 +248,47 @@ per_respondent <- function(x, ppm) {
   out
 }
 
+#' One words-per-line value per respondent, from `NULL`, a scalar or a vector.
+#' @noRd
+resolve_words_per_line <- function(words_per_line, scheme, n) {
+  if (is.null(words_per_line)) return(rep(scheme$words_per_line, n))
+  ok <- is.numeric(words_per_line) && !anyNA(words_per_line) &&
+    all(words_per_line > 0) && length(words_per_line) %in% c(1L, n)
+  if (!ok) {
+    cli::cli_abort(
+      "{.arg words_per_line} must be {.code NULL}, a single positive number, or a vector of length {n} (one per respondent)."
+    )
+  }
+  rep_len(words_per_line, n)
+}
+
+#' Per-respondent points for the items whose score depends on words per line
+#' (descriptive text), when the respondents' values differ: a named list,
+#' question id -> numeric vector of length `n`. Empty when all share one value.
+#' @noRd
+respondent_scores <- function(catalogue, scheme, wpl, base) {
+  vals <- sort(unique(wpl))
+  if (length(vals) < 2L) return(list())
+  by_val <- lapply(vals, function(v) {
+    w <- scheme
+    w$words_per_line <- v
+    sc <- score_burden(catalogue, w)
+    p <- stats::setNames(sc$gfs_points, sc$question_id)
+    p[is.na(p)] <- 0
+    p[names(base)]
+  })
+  m <- do.call(cbind, by_val)
+  varies <- names(base)[apply(m, 1, function(r) length(unique(r)) > 1L)]
+  k <- match(wpl, vals)
+  stats::setNames(lapply(varies, function(qid) unname(m[qid, k])), varies)
+}
+
 #' Walk the flow per respondent; one row per respondent per live block.
 #' @noRd
 respondent_blocks <- function(qsf, responses, scheme = gfs_scheme(), id_col = NULL,
                               furthest = c("answered", "column"), furthest_col = NULL,
                               loop_iterations = c("driver", "observed"),
-                              embedded = NULL) {
+                              embedded = NULL, words_per_line = NULL) {
   furthest <- match.arg(furthest)
   loop_iterations <- match.arg(loop_iterations)
   if (!inherits(qsf, "qsf_raw")) qsf <- read_qsf(qsf)
@@ -253,9 +298,16 @@ respondent_blocks <- function(qsf, responses, scheme = gfs_scheme(), id_col = NU
       cli::cli_abort("{.arg furthest_col} must name a column of {.arg responses} when {.code furthest = \"column\"}.")
     }
   }
-  responses <- drop_qualtrics_header_rows(responses)$data
+  hdr <- drop_qualtrics_header_rows(responses)
+  # a per-respondent words_per_line given for the raw rows loses the header rows
+  if (hdr$n_dropped > 0L && length(words_per_line) == nrow(responses)) {
+    words_per_line <- words_per_line[-seq_len(hdr$n_dropped)]
+  }
+  responses <- hdr$data
   n <- nrow(responses)
   if (n == 0L) cli::cli_abort("{.arg responses} has no respondents.")
+  wpl <- resolve_words_per_line(words_per_line, scheme, n)
+  if (length(unique(wpl)) == 1L) scheme$words_per_line <- wpl[1]
 
   catalogue <- parse_qsf(qsf)
   blocks    <- resolve_live_blocks(qsf)
@@ -270,6 +322,7 @@ respondent_blocks <- function(qsf, responses, scheme = gfs_scheme(), id_col = NU
     block   = stats::setNames(scored$block_id, scored$question_id)
   )
   q$gfs[is.na(q$gfs)] <- 0
+  q$gfs_resp <- respondent_scores(catalogue, scheme, wpl, q$gfs)
   q$visible    <- stats::setNames(!q$qtype %in% c("Timing", "Meta") & !q$hidden,
                                   names(q$qtype))
   q$responsive <- stats::setNames(!q$qtype %in% c("DB", "Timing", "Meta"), names(q$qtype))
@@ -1139,7 +1192,7 @@ assemble_block <- function(k, blocks, walk, q, pages, rr, outcome, furthest_ord,
   if (!isTRUE(blocks$in_loop[k])) {
     for (qid in qs) {
       s <- (walk$shown[[qid]] %||% rep(FALSE, n)) & rr
-      pts <- pts + q$gfs[[qid]] * s
+      pts <- pts + (q$gfs_resp[[qid]] %||% q$gfs[[qid]]) * s
       vis <- q$visible[[qid]]
       items <- items + as.integer(s) * vis
       ritems <- ritems + as.integer(s) * q$responsive[[qid]] * vis
@@ -1181,7 +1234,7 @@ assemble_block <- function(k, blocks, walk, q, pages, rr, outcome, furthest_ord,
     pg_list <- list()
     for (qid in qs) {
       s <- walk$shown[[qid]][, j] & inm[, j]
-      pts <- pts + q$gfs[[qid]] * s
+      pts <- pts + (q$gfs_resp[[qid]] %||% q$gfs[[qid]]) * s
       vis <- q$visible[[qid]]
       items <- items + as.integer(s) * vis
       ritems <- ritems + as.integer(s) * q$responsive[[qid]] * vis

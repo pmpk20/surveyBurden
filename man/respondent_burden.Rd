@@ -9,6 +9,7 @@ respondent_burden(
   responses,
   scheme = gfs_scheme(),
   by = c("respondent", "block"),
+  words_per_line = NULL,
   id_col = NULL,
   furthest = c("answered", "column"),
   furthest_col = NULL,
@@ -54,6 +55,15 @@ descriptive-text line conversion.}
 
 \item{by}{\code{"respondent"} (default): one row per respondent. \code{"block"}: one
 row per respondent per live block.}
+
+\item{words_per_line}{How many words fit on one rendered line, used only
+when scoring descriptive text. \code{NULL} (default) uses
+\code{scheme$words_per_line} (12). A single number applies to all
+respondents. A numeric vector with one value per respondent (one per row
+of \code{responses}; header rows of a raw export may be included and are
+dropped with them) lets the line length differ by respondent, for
+example by device. Mapping device metadata to values is left to the
+user.}
 
 \item{id_col}{Name of the respondent-id column. Auto-detected from
 \code{"ResponseId"}, \code{"response_id"}, or the first column whose values are all

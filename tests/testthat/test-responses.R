@@ -283,3 +283,51 @@ test_that("a question left blank still counts towards respondent burden", {
   rb0 <- respondent_burden(qsf_fx(), blank)
   expect_equal(rb0$points[1], rb$points[1])
 })
+
+
+# ---------- per-respondent words_per_line ------------------------------------
+
+test_that("words_per_line = NULL uses the scheme's value", {
+  resp <- make_responses()
+  expect_equal(respondent_burden(qsf_fx(), resp)$points,
+               respondent_burden(qsf_fx(), resp, words_per_line = 12)$points)
+})
+
+test_that("a scalar words_per_line applies to every respondent", {
+  resp <- make_responses()
+  narrow <- gfs_scheme(); narrow$words_per_line <- 6
+  expect_equal(respondent_burden(qsf_fx(), resp, words_per_line = 6)$points,
+               respondent_burden(qsf_fx(), resp, scheme = narrow)$points)
+})
+
+test_that("a per-respondent words_per_line changes only that respondent's text", {
+  resp <- make_responses()
+  rb_vec    <- respondent_burden(qsf_fx(), resp, words_per_line = c(6, 12, 12, 12))
+  rb_scalar <- respondent_burden(qsf_fx(), resp, words_per_line = 12)
+  rb_6      <- respondent_burden(qsf_fx(), resp, words_per_line = 6)
+
+  expect_gt(rb_vec$points[1], rb_scalar$points[1])
+  expect_equal(rb_vec$points[1], rb_6$points[1])
+  expect_equal(rb_vec$points[-1], rb_scalar$points[-1])
+
+  bl <- respondent_burden(qsf_fx(), resp, words_per_line = c(6, 12, 12, 12), by = "block")
+  expect_equal(tapply(ifelse(bl$routed_in %in% TRUE, bl$points, 0), bl$response_id,
+                      sum, na.rm = TRUE)[rb_vec$response_id], rb_vec$points,
+               ignore_attr = TRUE)
+})
+
+test_that("a per-respondent words_per_line given for raw rows is trimmed with the header rows", {
+  resp <- make_responses()
+  raw  <- with_qualtrics_header_rows(resp)
+  ref  <- respondent_burden(qsf_fx(), resp, words_per_line = c(6, 12, 8, 10))
+  rb   <- suppressMessages(respondent_burden(qsf_fx(), raw,
+                                             words_per_line = c(NA, NA, 6, 12, 8, 10)))
+  expect_equal(rb$points, ref$points)
+})
+
+test_that("words_per_line of the wrong length or value errors", {
+  resp <- make_responses()
+  expect_error(respondent_burden(qsf_fx(), resp, words_per_line = c(6, 12)),
+               "words_per_line")
+  expect_error(respondent_burden(qsf_fx(), resp, words_per_line = 0), "words_per_line")
+})

@@ -1,8 +1,8 @@
 # Generates exposure_fixture.qsf, the synthetic survey used by
-# test-realised_exposure.R. Run from the package root:
+# test-respondent_burden.R. Run from the package root:
 #   Rscript tests/testthat/fixtures/make_exposure_fixture.R
 # Every value is invented. The survey covers the hard cases for
-# realised_exposure(): a screen-out branch, an embedded-data branch gate, a
+# rb_blocks(): a screen-out branch, an embedded-data branch gate, a
 # branch on a field set by question JavaScript (absent from the export), a
 # Loop & Merge block driven by a numeric response with an in-loop trigger and a
 # first-iteration-only question, Displayed() and NotSelected literals, an

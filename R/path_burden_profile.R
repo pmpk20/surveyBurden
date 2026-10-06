@@ -10,7 +10,7 @@
 #' carries their combined weight, and each path's weights sum to 1. The
 #' quantiles are weighted by these model weights. They are not observed
 #' respondent frequencies, so they are not percentiles of a respondent
-#' population; for that, use observed routes with [respondent_burden()].
+#' population; for that, use response data with [respondent_burden()].
 #' [burden_report()] pools the complete paths' profiles, so each complete path
 #' carries equal total weight there.
 #'

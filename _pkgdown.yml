@@ -12,7 +12,7 @@ articles:
       - survey-revision
       - gfs-scoring
       - paths-and-display-logic
-      - realised-burden
+      - respondent-burden
       - calibration
       - extensions
 
@@ -44,16 +44,14 @@ reference:
       - resolve_paths
       - classify_reachability
   - title: Path burden
-    desc: Turn the resolved paths into per-path and population-weighted burden.
+    desc: Turn the resolved paths into per-path burden.
     contents:
       - path_burden
       - path_burden_profile
-      - respondent_burden
-  - title: Realised burden
-    desc: Score each respondent's actual burden from their response data.
+  - title: Respondent burden
+    desc: The burden each respondent experienced, from their response data.
     contents:
-      - realised_burden
-      - realised_exposure
+      - respondent_burden
       - exposure_person_period
   - title: Diagnostics
     desc: Check where the calculation is exact and calibrate points to minutes.

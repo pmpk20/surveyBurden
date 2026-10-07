@@ -7,7 +7,15 @@
 # approximation. Referenced by both component_dist() (which produces the burden
 # numbers) and dl_certainty() (which reports the exact/approx split), so the two
 # cannot silently disagree.
-EXACT_CAP <- 5000L
+EXACT_CAP <- 10000L
+
+validate_condition_states <- function(x) {
+  if (!is.numeric(x) || length(x) != 1L || is.na(x) || !is.finite(x) ||
+      x < 1 || x != floor(x)) {
+    stop("max_condition_states must be a single positive finite whole number.", call. = FALSE)
+  }
+  invisible(x)
+}
 
 #' Return the `Payload` of every `SurveyElements` entry with a given `Element` tag
 #' @noRd

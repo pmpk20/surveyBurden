@@ -16,7 +16,8 @@ burden_report(
   words_per_line = NULL,
   max_paths = 10000L,
   certainty = TRUE,
-  quiet = FALSE
+  quiet = FALSE,
+  max_condition_states = 10000L
 )
 
 \method{summary}{burden_report}(object, ...)
@@ -69,6 +70,13 @@ error as a diagnostic finding (intractable routing).}
 
 \item{quiet}{If \code{FALSE} (default), report progress through the pipeline
 stages with \code{\link[cli:cli_progress_step]{cli::cli_progress_step()}}. \code{TRUE} silences it.}
+
+\item{max_condition_states}{Maximum joint condition-state combinations
+enumerated in full per connected display-logic component (default 10000).
+Must be a positive finite whole number. Larger components use the
+primary-gate approximation. This is separate from \code{max_paths} and does
+not remove other modelling assumptions. When precomputed results are
+supplied, use the same limit that generated those results.}
 
 \item{object}{A \code{burden_report} from \code{\link[=burden_report]{burden_report()}}.}
 

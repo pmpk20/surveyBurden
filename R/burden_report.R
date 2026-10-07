@@ -99,6 +99,12 @@
 #'   a QSF has words, not a rendered width -- not an empirically calibrated
 #'   constant. Set it to your survey theme's typical line length if you have
 #'   one.
+#' @param max_condition_states Maximum joint condition-state combinations
+#'   enumerated in full per connected display-logic component (default 10000).
+#'   Must be a positive finite whole number. Larger components use the
+#'   primary-gate approximation. This is separate from `max_paths` and does
+#'   not remove other modelling assumptions. When precomputed results are
+#'   supplied, use the same limit that generated those results.
 #' @param max_paths Cap on the number of distinct structural paths to
 #'   enumerate (default 10 000). Passed to [resolve_flow()]. Surveys with
 #'   heavily branching flows may exceed this; raise the cap or treat the
@@ -122,7 +128,8 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
                           words_per_line = NULL,
                           max_paths = 10000L,
                           certainty = TRUE,
-                          quiet = FALSE) {
+                          quiet = FALSE, max_condition_states = 10000L) {
+  validate_condition_states(max_condition_states)
   step <- if (isTRUE(quiet)) function(...) invisible() else cli::cli_progress_step
 
   step("Reading survey")
@@ -153,12 +160,14 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
   # structural profile will need it.
   engine <- if (need_engine)
     burden_engine(qsf, scheme = scheme, paths = paths, scored = scored,
-                  blocks = blocks, parsed_dl = parsed_dl) else NULL
+                  blocks = blocks, parsed_dl = parsed_dl,
+                  max_condition_states = max_condition_states) else NULL
 
   step("Checking calculation certainty")
   cert   <- if (isTRUE(certainty))
     calculation_certainty(qsf, scheme = scheme, paths = paths, scored = scored,
-                          blocks = blocks, parsed_dl = parsed_dl) else NULL
+                          blocks = blocks, parsed_dl = parsed_dl,
+                          max_condition_states = max_condition_states) else NULL
 
   # ---- $survey -------------------------------------------------------
   survey <- tibble::tibble(
@@ -527,6 +536,7 @@ print_burden_report_body <- function(x) {
     cli::cli_h2("Calculation certainty")
     cli::cli_text("Paths: {cp$n_exact}/{cp$n_full} have no unresolved display-logic question; {cp$n_with_unresolved} carry at least one.")
     cli::cli_text("Display logic: {cd$n_exact}/{cd$n_conditional} conditional questions enumerated in full within the model, {cd$n_approx} approximated.")
+    cli::cli_text("Joint enumeration limit: {cd$max_condition_states} condition states per component.")
     cli::cli_text("Loops: {cl$n_known} with a known cap, {cl$n_unknown} unknown.  Item scores: {cs$auto} auto / {cs$inferred} inferred / {cs$manual} manual.")
   }
 

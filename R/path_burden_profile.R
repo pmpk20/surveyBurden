@@ -19,7 +19,7 @@
 #' embedded field contributes binary states; a Loop & Merge block contributes
 #' iteration counts `1..max`. Conditional questions are grouped into coupling
 #' components (two questions couple if they share a gate, directly or through a
-#' chain of shared gates). A component with at most 5000 joint gate-states is
+#' chain of shared gates). A component with at most `max_condition_states` joint gate-states is
 #' **enumerated exactly** -- every joint combination of its gates' states,
 #' respecting single-choice mutual exclusion and AND-across-gates conditions
 #' precisely. A component above that (many questions sharing one popular
@@ -30,7 +30,7 @@
 #'
 #' Remaining approximations: different components are treated as independent
 #' (the real coupling between, say, employment status and having a licence is
-#' weak, but not checked); components above the 5000-state cap use the
+#' weak, but not checked); components above the chosen state limit use the
 #' primary-gate approximation above; loop iterations are scored at a flat
 #' per-iteration burden (within-loop display logic ignored). Once a path's
 #' convolved profile exceeds 3000 distinct burden values it is re-binned to
@@ -39,6 +39,12 @@
 #'
 #' @param qsf A `qsf_raw` object.
 #' @param scheme A [gfs_scheme()] list.
+#' @param max_condition_states Maximum joint condition-state combinations
+#'   enumerated in full per connected display-logic component (default 10000).
+#'   Must be a positive finite whole number. Larger components use the
+#'   primary-gate approximation. This is separate from `max_paths` and does
+#'   not remove other modelling assumptions. When precomputed results are
+#'   supplied, use the same limit that generated those results.
 #' @param max_paths Passed to [resolve_paths()].
 #' @param engine Optional precomputed `burden_engine()` result for this `qsf`
 #'   (internal reuse; `NULL` builds it here, leaving the public behaviour
@@ -64,9 +70,12 @@
 #'
 #' @export
 path_burden_profile <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
-                                engine = NULL, parsed_dl = NULL) {
+                                engine = NULL, parsed_dl = NULL,
+                                max_condition_states = 10000L) {
+  validate_condition_states(max_condition_states)
   e <- engine %||% burden_engine(qsf, scheme = scheme, max_paths = max_paths,
-                                 parsed_dl = parsed_dl)
+                                 parsed_dl = parsed_dl,
+                                 max_condition_states = max_condition_states)
 
   # Fill plain vectors per path and build the tibble once: a tibble() per path
   # (then rbind) dominated runtime on surveys with tens of thousands of paths.
@@ -98,7 +107,7 @@ path_burden_profile <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
 #' @noRd
 burden_engine <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
                           paths = NULL, scored = NULL, blocks = NULL,
-                          parsed_dl = NULL) {
+                          parsed_dl = NULL, max_condition_states = 10000L) {
   if (is.null(paths))  paths  <- resolve_paths(qsf, max_paths = max_paths)
   if (is.null(scored)) scored <- score_burden(parse_qsf(qsf), scheme = scheme)
   if (is.null(blocks)) blocks <- resolve_live_blocks(qsf)
@@ -118,7 +127,8 @@ burden_engine <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
       q_always = paths$q_always[[i]], q_maybe = paths$q_maybe[[i]],
       block_ids = paths$block_ids[[i]],
       parsed = parsed, gfs = gfs, stype = stype,
-      qblock = qblock, loop_blocks = loop_blocks, memo = memo
+      qblock = qblock, loop_blocks = loop_blocks, memo = memo,
+      max_condition_states = max_condition_states
     )
   })
 
@@ -159,7 +169,8 @@ assemble_path_distribution <- function(cp) {
 #' @noRd
 one_path_components <- function(q_always, q_maybe, block_ids,
                                 parsed, gfs, stype, qblock, loop_blocks,
-                                memo = new.env(parent = emptyenv())) {
+                                memo = new.env(parent = emptyenv()),
+                                max_condition_states = EXACT_CAP) {
   loop_bids <- intersect(block_ids, names(loop_blocks))
   loop_qids <- names(qblock)[qblock %in% loop_bids]
 
@@ -182,13 +193,14 @@ one_path_components <- function(q_always, q_maybe, block_ids,
       disp  <- intersect(q_always, unlist(lapply(grp, function(q) parsed[[q]]$displayed)))
       # trigger questions this path never shows: fixed as unanswered
       off   <- gvars[!startsWith(gvars, "@") & !gvars %in% shown_q]
-      key <- paste0(paste(sort(gvars), collapse = ","), "|",
+      key <- paste0(max_condition_states, "|", paste(sort(gvars), collapse = ","), "|",
                     paste(sort(grp), collapse = ","), "|",
                     paste(sort(disp), collapse = ","), "|",
                     paste(sort(off), collapse = ","))
       cc <- memo[[key]]
       if (is.null(cc)) {
-        cc <- component_dist(grp, gvars, parsed, gfs, stype, q_always, off = off)
+        cc <- component_dist(grp, gvars, parsed, gfs, stype, q_always, off = off,
+                             exact_cap = max_condition_states)
         memo[[key]] <- cc
       }
       display_dist <- convolve_dist(display_dist, cc)

@@ -11,7 +11,8 @@ calculation_certainty(
   paths = NULL,
   scored = NULL,
   blocks = NULL,
-  parsed_dl = NULL
+  parsed_dl = NULL,
+  max_condition_states = 10000L
 )
 }
 \arguments{
@@ -25,6 +26,13 @@ calculation_certainty(
 \code{\link[=score_burden]{score_burden()}}, \code{\link[=resolve_live_blocks]{resolve_live_blocks()}} and parsed display-logic results
 for this \code{qsf} (internal reuse by \code{\link[=burden_report]{burden_report()}}; \code{NULL} computes them
 here, leaving the public behaviour unchanged).}
+
+\item{max_condition_states}{Maximum joint condition-state combinations
+enumerated in full per connected display-logic component (default 10000).
+Must be a positive finite whole number. Larger components use the
+primary-gate approximation. This is separate from \code{max_paths} and does
+not remove other modelling assumptions. When precomputed results are
+supplied, use the same limit that generated those results.}
 }
 \value{
 An object of class \code{calculation_certainty} (list):

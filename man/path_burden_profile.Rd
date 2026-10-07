@@ -9,7 +9,8 @@ path_burden_profile(
   scheme = gfs_scheme(),
   max_paths = 10000L,
   engine = NULL,
-  parsed_dl = NULL
+  parsed_dl = NULL,
+  max_condition_states = 10000L
 )
 }
 \arguments{
@@ -26,6 +27,13 @@ unchanged).}
 \item{parsed_dl}{Optional precomputed map of parsed display-logic trees for
 this \code{qsf} (internal reuse by \code{\link[=burden_report]{burden_report()}}; ignored when \code{engine} is
 supplied, computed as needed when \code{NULL}).}
+
+\item{max_condition_states}{Maximum joint condition-state combinations
+enumerated in full per connected display-logic component (default 10000).
+Must be a positive finite whole number. Larger components use the
+primary-gate approximation. This is separate from \code{max_paths} and does
+not remove other modelling assumptions. When precomputed results are
+supplied, use the same limit that generated those results.}
 }
 \value{
 A \link[tibble:tibble]{tibble}, one row per flow path:
@@ -56,7 +64,7 @@ its referenced choices as mutually exclusive states; a multi-select or
 embedded field contributes binary states; a Loop & Merge block contributes
 iteration counts \verb{1..max}. Conditional questions are grouped into coupling
 components (two questions couple if they share a gate, directly or through a
-chain of shared gates). A component with at most 5000 joint gate-states is
+chain of shared gates). A component with at most \code{max_condition_states} joint gate-states is
 \strong{enumerated exactly} -- every joint combination of its gates' states,
 respecting single-choice mutual exclusion and AND-across-gates conditions
 precisely. A component above that (many questions sharing one popular
@@ -67,7 +75,7 @@ other and their contributions convolved into the profile for the path.
 
 Remaining approximations: different components are treated as independent
 (the real coupling between, say, employment status and having a licence is
-weak, but not checked); components above the 5000-state cap use the
+weak, but not checked); components above the chosen state limit use the
 primary-gate approximation above; loop iterations are scored at a flat
 per-iteration burden (within-loop display logic ignored). Once a path's
 convolved profile exceeds 3000 distinct burden values it is re-binned to

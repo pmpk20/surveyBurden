@@ -25,6 +25,12 @@
 #'
 #' @param qsf A path to a `.qsf`, or a `qsf_raw` object from [read_qsf()].
 #' @param scheme A [gfs_scheme()] list.
+#' @param max_condition_states Maximum joint condition-state combinations
+#'   enumerated in full per connected display-logic component (default 10000).
+#'   Must be a positive finite whole number. Larger components use the
+#'   primary-gate approximation. This is separate from `max_paths` and does
+#'   not remove other modelling assumptions. When precomputed results are
+#'   supplied, use the same limit that generated those results.
 #' @param max_paths Passed to [resolve_paths()].
 #' @param paths,scored,blocks,parsed_dl Optional precomputed [resolve_paths()],
 #'   [score_burden()], [resolve_live_blocks()] and parsed display-logic results
@@ -61,7 +67,8 @@
 #' @export
 calculation_certainty <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
                                   paths = NULL, scored = NULL, blocks = NULL,
-                                  parsed_dl = NULL) {
+                                  parsed_dl = NULL, max_condition_states = 10000L) {
+  validate_condition_states(max_condition_states)
   qsf    <- if (inherits(qsf, "qsf_raw")) qsf else read_qsf(qsf)
   if (is.null(paths))  paths  <- resolve_paths(qsf, max_paths = max_paths)
   if (is.null(scored)) scored <- score_burden(parse_qsf(qsf), scheme = scheme)
@@ -97,7 +104,8 @@ calculation_certainty <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L
   )
 
   # --- display logic: exact enumeration vs primary-gate approximation ---
-  dl_cert <- dl_certainty(qsf, scored, full, parsed_dl = parsed_dl)
+  dl_cert <- dl_certainty(qsf, scored, full, exact_cap = max_condition_states,
+                          parsed_dl = parsed_dl)
 
   # --- loops ---
   lb  <- blocks[blocks$in_loop & !is.na(blocks$loop_max), ]
@@ -152,6 +160,7 @@ dl_certainty <- function(qsf, scored, full, exact_cap = EXACT_CAP, parsed_dl = N
   }
 
   list(
+    max_condition_states        = exact_cap,
     n_conditional               = length(cond),
     n_exact                     = length(exact_q),
     n_approx                    = length(approx_q),
@@ -189,6 +198,7 @@ print_calculation_certainty_body <- function(x) {
   }
 
   cli::cli_h2("Display logic")
+  cli::cli_text("Joint enumeration limit: {d$max_condition_states} condition states per component.")
   cli::cli_text("{d$n_conditional} conditional questions on some path: {d$n_exact} scored by exact joint enumeration, {d$n_approx} with the primary-gate approximation.")
   cli::cli_text("{d$n_components} coupling components ({d$n_exact_components} exact, {d$n_approx_components} approximated).")
   if (isTRUE(d$cross_component_independence)) {

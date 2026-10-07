@@ -31,7 +31,7 @@ test_that("a single BlockRandomizer still warns once", {
 test_that("component_dist and dl_certainty share one exact_cap default", {
   expect_identical(formals(component_dist)$exact_cap,
                    formals(dl_certainty)$exact_cap)
-  expect_equal(eval(formals(component_dist)$exact_cap), 5000L)
+  expect_equal(eval(formals(component_dist)$exact_cap), 10000L)
 })
 
 # --- R3: HTML is stripped once and the derived fields are unchanged ----------

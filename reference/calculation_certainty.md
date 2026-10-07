@@ -19,7 +19,8 @@ calculation_certainty(
   paths = NULL,
   scored = NULL,
   blocks = NULL,
-  parsed_dl = NULL
+  parsed_dl = NULL,
+  max_condition_states = 10000L
 )
 ```
 
@@ -50,6 +51,15 @@ calculation_certainty(
   and parsed display-logic results for this `qsf` (internal reuse by
   [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md);
   `NULL` computes them here, leaving the public behaviour unchanged).
+
+- max_condition_states:
+
+  Maximum joint condition-state combinations enumerated in full per
+  connected display-logic component (default 10000). Must be a positive
+  finite whole number. Larger components use the primary-gate
+  approximation. This is separate from `max_paths` and does not remove
+  other modelling assumptions. When precomputed results are supplied,
+  use the same limit that generated those results.
 
 ## Value
 
@@ -125,6 +135,7 @@ calculation_certainty(qsf_path)
 #> 
 #> ── Display logic ──
 #> 
+#> Joint enumeration limit: 10000 condition states per component.
 #> 6 conditional questions on some path: 6 scored by exact joint enumeration, 0
 #> with the primary-gate approximation.
 #> 4 coupling components (4 exact, 0 approximated).

@@ -45,7 +45,8 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="surveyburden-development-version">surveyBurden (development version)<a class="anchor" aria-label="anchor" href="#surveyburden-development-version"></a></h2>
-<ul><li>
+<ul><li><p><code><a href="../reference/burden_report.html">burden_report()</a></code>, <code><a href="../reference/path_burden_profile.html">path_burden_profile()</a></code> and <code><a href="../reference/calculation_certainty.html">calculation_certainty()</a></code> accept <code>max_condition_states</code>, the joint display-condition enumeration limit per component. The default rises from 5,000 to 10,000 states; raising it can change burden profiles and certainty counts. Certainty output records the chosen limit.</p></li>
+<li>
 <p><strong>Breaking: one respondent-level measure.</strong> <code>respondent_burden(qsf, responses)</code> now returns respondent burden: the GfS+ points of every item displayed to each respondent, reconstructed from their answers, with descriptive text and questions left blank included and each loop iteration counted. <code>by = "block"</code> gives one row per respondent per block, the input for <code><a href="../reference/exposure_person_period.html">exposure_person_period()</a></code>.</p>
 <ul><li>
 <code>realised_burden()</code> (answer-based points) and <code>realised_exposure()</code> are removed. <code>realised_exposure(qsf, x)</code> is now <code>respondent_burden(qsf, x, by = "block")</code>.</li>

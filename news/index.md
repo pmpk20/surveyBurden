@@ -2,6 +2,15 @@
 
 ## surveyBurden (development version)
 
+- [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md),
+  [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md)
+  and
+  [`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md)
+  accept `max_condition_states`, the joint display-condition enumeration
+  limit per component. The default rises from 5,000 to 10,000 states;
+  raising it can change burden profiles and certainty counts. Certainty
+  output records the chosen limit.
+
 - **Breaking: one respondent-level measure.**
   `respondent_burden(qsf, responses)` now returns respondent burden: the
   GfS+ points of every item displayed to each respondent, reconstructed

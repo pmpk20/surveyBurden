@@ -20,7 +20,8 @@ burden_report(
   words_per_line = NULL,
   max_paths = 10000L,
   certainty = TRUE,
-  quiet = FALSE
+  quiet = FALSE,
+  max_condition_states = 10000L
 )
 
 # S3 method for class 'burden_report'
@@ -107,6 +108,15 @@ summary(object, ...)
   If `FALSE` (default), report progress through the pipeline stages with
   [`cli::cli_progress_step()`](https://cli.r-lib.org/reference/cli_progress_step.html).
   `TRUE` silences it.
+
+- max_condition_states:
+
+  Maximum joint condition-state combinations enumerated in full per
+  connected display-logic component (default 10000). Must be a positive
+  finite whole number. Larger components use the primary-gate
+  approximation. This is separate from `max_paths` and does not remove
+  other modelling assumptions. When precomputed results are supplied,
+  use the same limit that generated those results.
 
 - object:
 
@@ -222,13 +232,13 @@ br <- burden_report(qsf_path)
 #> ✔ Reading survey [9ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [109ms]
+#> ✔ Scoring questions and resolving paths [114ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [28ms]
+#> ✔ Checking calculation certainty [30ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [22ms]
+#> ✔ Enumerating display-logic combinations [23ms]
 #> 
 br
 #> 
@@ -299,6 +309,7 @@ br
 #> Paths: 0/2 have no unresolved display-logic question; 2 carry at least one.
 #> Display logic: 6/6 conditional questions enumerated in full within the model, 0
 #> approximated.
+#> Joint enumeration limit: 10000 condition states per component.
 #> Loops: 2 with a known cap, 0 unknown.  Item scores: 19 auto / 7 inferred / 0
 #> manual.
 #> 

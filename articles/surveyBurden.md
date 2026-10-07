@@ -153,6 +153,7 @@ report
 #> Paths: 0/2 have no unresolved display-logic question; 2 carry at least one.
 #> Display logic: 6/6 conditional questions enumerated in full within the model, 0
 #> approximated.
+#> Joint enumeration limit: 10000 condition states per component.
 #> Loops: 2 with a known cap, 0 unknown.  Item scores: 19 auto / 7 inferred / 0
 #> manual.
 #> 

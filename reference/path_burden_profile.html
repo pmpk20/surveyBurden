@@ -58,7 +58,8 @@ inside the band and enumerates it.</p>
 <span>  scheme <span class="op">=</span> <span class="fu"><a href="gfs_scheme.html">gfs_scheme</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  max_paths <span class="op">=</span> <span class="fl">10000L</span>,</span>
 <span>  engine <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  parsed_dl <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  parsed_dl <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  max_condition_states <span class="op">=</span> <span class="fl">10000L</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -89,6 +90,15 @@ unchanged).</p></dd>
 this <code>qsf</code> (internal reuse by <code><a href="burden_report.html">burden_report()</a></code>; ignored when <code>engine</code> is
 supplied, computed as needed when <code>NULL</code>).</p></dd>
 
+
+<dt id="arg-max-condition-states">max_condition_states<a class="anchor" aria-label="anchor" href="#arg-max-condition-states"></a></dt>
+<dd><p>Maximum joint condition-state combinations
+enumerated in full per connected display-logic component (default 10000).
+Must be a positive finite whole number. Larger components use the
+primary-gate approximation. This is separate from <code>max_paths</code> and does
+not remove other modelling assumptions. When precomputed results are
+supplied, use the same limit that generated those results.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -116,7 +126,7 @@ its referenced choices as mutually exclusive states; a multi-select or
 embedded field contributes binary states; a Loop &amp; Merge block contributes
 iteration counts <code>1..max</code>. Conditional questions are grouped into coupling
 components (two questions couple if they share a gate, directly or through a
-chain of shared gates). A component with at most 5000 joint gate-states is
+chain of shared gates). A component with at most <code>max_condition_states</code> joint gate-states is
 <strong>enumerated exactly</strong> – every joint combination of its gates' states,
 respecting single-choice mutual exclusion and AND-across-gates conditions
 precisely. A component above that (many questions sharing one popular
@@ -126,7 +136,7 @@ first gate with the rest held permissive. Components are independent of each
 other and their contributions convolved into the profile for the path.</p>
 <p>Remaining approximations: different components are treated as independent
 (the real coupling between, say, employment status and having a licence is
-weak, but not checked); components above the 5000-state cap use the
+weak, but not checked); components above the chosen state limit use the
 primary-gate approximation above; loop iterations are scored at a flat
 per-iteration burden (within-loop display logic ignored). Once a path's
 convolved profile exceeds 3000 distinct burden values it is re-binned to

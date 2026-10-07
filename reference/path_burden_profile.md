@@ -12,7 +12,8 @@ path_burden_profile(
   scheme = gfs_scheme(),
   max_paths = 10000L,
   engine = NULL,
-  parsed_dl = NULL
+  parsed_dl = NULL,
+  max_condition_states = 10000L
 )
 ```
 
@@ -45,6 +46,15 @@ path_burden_profile(
   [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md);
   ignored when `engine` is supplied, computed as needed when `NULL`).
 
+- max_condition_states:
+
+  Maximum joint condition-state combinations enumerated in full per
+  connected display-logic component (default 10000). Must be a positive
+  finite whole number. Larger components use the primary-gate
+  approximation. This is separate from `max_paths` and does not remove
+  other modelling assumptions. When precomputed results are supplied,
+  use the same limit that generated those results.
+
 ## Value
 
 A [tibble](https://tibble.tidyverse.org/reference/tibble.html), one row
@@ -75,19 +85,19 @@ multi-select or embedded field contributes binary states; a Loop & Merge
 block contributes iteration counts `1..max`. Conditional questions are
 grouped into coupling components (two questions couple if they share a
 gate, directly or through a chain of shared gates). A component with at
-most 5000 joint gate-states is **enumerated exactly** – every joint
-combination of its gates' states, respecting single-choice mutual
-exclusion and AND-across-gates conditions precisely. A component above
-that (many questions sharing one popular trigger, such as employment
-status) falls back to a primary-gate approximation for just that
-component: each question is scored against its first gate with the rest
-held permissive. Components are independent of each other and their
+most `max_condition_states` joint gate-states is **enumerated exactly**
+– every joint combination of its gates' states, respecting single-choice
+mutual exclusion and AND-across-gates conditions precisely. A component
+above that (many questions sharing one popular trigger, such as
+employment status) falls back to a primary-gate approximation for just
+that component: each question is scored against its first gate with the
+rest held permissive. Components are independent of each other and their
 contributions convolved into the profile for the path.
 
 Remaining approximations: different components are treated as
 independent (the real coupling between, say, employment status and
-having a licence is weak, but not checked); components above the
-5000-state cap use the primary-gate approximation above; loop iterations
+having a licence is weak, but not checked); components above the chosen
+state limit use the primary-gate approximation above; loop iterations
 are scored at a flat per-iteration burden (within-loop display logic
 ignored). Once a path's convolved profile exceeds 3000 distinct burden
 values it is re-binned to multiples of 5 GfS points, so on a very heavy

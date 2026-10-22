@@ -144,19 +144,34 @@ eval_branch_op <- function(op, x, rhs) {
     FALSE)
 }
 
-#' The distinct outcome vectors (one logical per branch) that some value of
-#' the field can produce. Candidate values cover every region the thresholds
-#' define, each tested string, an unmatched string, and an empty field.
+#' The distinct outcome vectors (one logical per comparison) that some value
+#' of the field can produce.
 #' @noRd
 feasible_outcomes <- function(ops, values) {
+  lapply(field_value_classes(ops, values), function(x) field_outcome(ops, values, x))
+}
+
+#' One representative value per distinguishable class of a field compared by
+#' `ops` against `values`: two values are in the same class when every
+#' comparison gives the same result for both. Candidate values cover every
+#' region the thresholds define, each tested string, an unmatched string, and
+#' an empty field (`NA`). Returns a character vector.
+#' @noRd
+field_value_classes <- function(ops, values) {
   nums <- suppressWarnings(as.numeric(values))
   nums <- sort(unique(nums[!is.na(nums)]))
   mids <- if (length(nums) > 1L) (utils::head(nums, -1) + utils::tail(nums, -1)) / 2 else numeric(0)
   cand <- c(as.character(c(nums, mids, if (length(nums)) c(min(nums) - 1, max(nums) + 1))),
             unique(values), "other", NA)
-  vecs <- lapply(cand, function(x) vapply(seq_along(ops), function(i)
-    eval_branch_op(ops[[i]], x, values[[i]]), logical(1)))
-  vecs[!duplicated(vapply(vecs, paste, "", collapse = ""))]
+  keys <- vapply(cand, function(x) paste(field_outcome(ops, values, x), collapse = ""),
+                 character(1))
+  cand[!duplicated(keys)]
+}
+
+#' Results of each comparison for one candidate field value.
+#' @noRd
+field_outcome <- function(ops, values, x) {
+  vapply(seq_along(ops), function(i) eval_branch_op(ops[[i]], x, values[[i]]), logical(1))
 }
 
 #' Does a flow (list of nodes) show any block, at any depth?

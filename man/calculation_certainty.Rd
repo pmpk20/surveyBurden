@@ -57,9 +57,11 @@ unknown before fieldwork.}
 \item{display_logic}{\code{n_conditional} questions gated by an unresolved
 condition on some full path; \code{n_exact} scored by exact joint
 enumeration of their gate states; \code{n_approx} scored with the
-primary-gate approximation; component counts; and
+primary-gate approximation; component counts;
 \code{cross_component_independence} (\code{TRUE} when >1 coupling component is
-convolved as independent).}
+convolved as independent); and \code{n_binary_field_gates}, the stored
+fields compared with an operator the package cannot evaluate (such as
+\code{Contains}), each treated as a free true/false condition.}
 \item{loops}{\code{n_known} loop blocks with an explicit iteration cap,
 \code{n_unknown} with a dynamic/unknown bound, and a \code{bounds} tibble.}
 \item{scores}{Counts of \code{score_flag}: \code{auto} (confident structural

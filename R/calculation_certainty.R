@@ -55,9 +55,11 @@
 #'     \item{display_logic}{`n_conditional` questions gated by an unresolved
 #'       condition on some full path; `n_exact` scored by exact joint
 #'       enumeration of their gate states; `n_approx` scored with the
-#'       primary-gate approximation; component counts; and
+#'       primary-gate approximation; component counts;
 #'       `cross_component_independence` (`TRUE` when >1 coupling component is
-#'       convolved as independent).}
+#'       convolved as independent); and `n_binary_field_gates`, the stored
+#'       fields compared with an operator the package cannot evaluate (such as
+#'       `Contains`), each treated as a free true/false condition.}
 #'     \item{loops}{`n_known` loop blocks with an explicit iteration cap,
 #'       `n_unknown` with a dynamic/unknown bound, and a `bounds` tibble.}
 #'     \item{scores}{Counts of `score_flag`: `auto` (confident structural
@@ -177,7 +179,9 @@ dl_certainty <- function(qsf, scored, full, exact_cap = EXACT_CAP, parsed_dl = N
     n_components                = n_comp,
     n_exact_components          = n_exact_comp,
     n_approx_components         = n_approx_comp,
-    cross_component_independence = n_comp > 1L
+    cross_component_independence = n_comp > 1L,
+    n_binary_field_gates        = length(unique(grep("^@[?]",
+      unlist(lapply(cond, function(q) parsed[[q]]$vars)), value = TRUE)))
   )
 }
 
@@ -212,6 +216,9 @@ print_calculation_certainty_body <- function(x) {
   cli::cli_text("{d$n_components} coupling components ({d$n_exact_components} exact, {d$n_approx_components} approximated).")
   if (isTRUE(d$cross_component_independence)) {
     cli::cli_text("Separate components are convolved as independent (assumption).")
+  }
+  if (isTRUE(d$n_binary_field_gates > 0L)) {
+    cli::cli_text("{d$n_binary_field_gates} stored field{?s} compared with an operator the package cannot evaluate: each is treated as a free true/false condition (both outcomes enumerated).")
   }
 
   cli::cli_h2("Loops")

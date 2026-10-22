@@ -71,9 +71,14 @@ population; for that, use response data with \code{\link[=respondent_burden]{res
 carries equal total weight there.
 
 Each display-logic trigger is a \emph{gate}: a single-choice question contributes
-its referenced choices as mutually exclusive states; a multi-select or
-embedded field contributes binary states; a Loop & Merge block contributes
-iteration counts \verb{1..max}. Conditional questions are grouped into coupling
+its referenced choices as mutually exclusive states; a multi-select
+contributes the subsets of its referenced choices; a stored (embedded data)
+field contributes one state per distinguishable value class of the
+comparisons made on it (each referenced value, the ranges between
+thresholds, any other value, empty), so conditions on different values of
+one field are mutually exclusive; a comparison the package cannot evaluate
+(such as \code{Contains}) is a free true/false gate; a Loop & Merge block
+contributes iteration counts \verb{1..max}. Conditional questions are grouped into coupling
 components (two questions couple if they share a gate, directly or through a
 chain of shared gates). A component with at most \code{max_condition_states} joint gate-states is
 \strong{enumerated exactly} -- every joint combination of its gates' states,

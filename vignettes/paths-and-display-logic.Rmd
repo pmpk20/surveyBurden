@@ -90,12 +90,16 @@ the display-logic states the package can model.
 - Conditional questions are grouped into **coupling components**: two
   questions couple if they share a gate, directly or through a chain of
   shared gates.
-- A component with at most 5000 joint gate-states is enumerated
-  **in full** -- every joint state of its gates that the model represents,
-  respecting single-choice mutual exclusion and AND-across-gates
-  conditions. "In full" means exhaustive within the model; embedded-data
-  conditions are still treated as free, and branch conditions are not
-  checked against each other.
+- A component with at most `max_condition_states` (default 10000) joint
+  gate-states is enumerated **in full** -- every joint state of its gates
+  that the model represents, respecting single-choice mutual exclusion and
+  AND-across-gates conditions. A stored (embedded data) field compared with
+  `EqualTo`, `NotEqualTo` or an inequality is enumerated over its
+  distinguishable values, so conditions on different values of one field
+  are mutually exclusive. "In full" means exhaustive within the model: a
+  field compared with any other operator is still treated as a free
+  true/false condition, and branch conditions are not checked against
+  display logic.
 - A larger component (dozens of questions keyed off one popular trigger
   such as employment status) falls back to a **primary-gate
   approximation**: each question is scored against its first gate, the

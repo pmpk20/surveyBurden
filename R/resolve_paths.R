@@ -14,7 +14,7 @@
 #' maybe); see [path_burden()].
 #'
 #' @param qsf A `qsf_raw` object from [read_qsf()].
-#' @param max_paths Passed to [resolve_flow()].
+#' @param max_paths,field_domains Passed to [resolve_flow()].
 #' @param catalogue,blocks Optional precomputed [parse_qsf()] and
 #'   [resolve_live_blocks()] results for this `qsf`. Internal: lets
 #'   [burden_report()] parse and resolve the survey once and reuse it. When
@@ -36,8 +36,9 @@
 #' paths[, c("path_id", "terminates_early", "n_gates")]
 #'
 #' @export
-resolve_paths <- function(qsf, max_paths = 10000L, catalogue = NULL, blocks = NULL) {
-  flow <- resolve_flow(qsf, max_paths = max_paths)
+resolve_paths <- function(qsf, max_paths = 10000L, catalogue = NULL, blocks = NULL,
+                          field_domains = NULL) {
+  flow <- resolve_flow(qsf, max_paths = max_paths, field_domains = field_domains)
   if (is.null(catalogue)) catalogue <- parse_qsf(qsf)
   if (is.null(blocks))    blocks    <- resolve_live_blocks(qsf)
   block_q <- stats::setNames(blocks$question_ids, blocks$block_id)

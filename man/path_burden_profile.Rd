@@ -12,7 +12,8 @@ path_burden_profile(
   parsed_dl = NULL,
   max_condition_states = 10000L,
   overrides = NULL,
-  choice_tasks = NULL
+  choice_tasks = NULL,
+  field_domains = NULL
 )
 }
 \arguments{
@@ -45,6 +46,10 @@ the computed score of the named questions, e.g. \code{c(QID51 = 10)}. See
 (\code{question_id}, \code{n_alternatives}, \code{n_attributes}), scored by the GfS
 stated-choice rule. See \code{\link[=burden_report]{burden_report()}}. Ignored, with a warning, when
 \code{engine} is supplied.}
+
+\item{field_domains}{Optional named list giving the values an
+embedded-data field can hold, e.g. \code{list(SP_05 = 0:5)}. Passed to
+\code{\link[=resolve_flow]{resolve_flow()}}. Ignored, with a warning, when \code{engine} is supplied.}
 }
 \value{
 A \link[tibble:tibble]{tibble}, one row per flow path:

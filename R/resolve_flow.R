@@ -11,12 +11,21 @@
 #' path space* -- every block sequence a respondent could encounter -- without
 #' any assumption about branch probabilities.
 #'
-#' Field values are unrestricted: a field may hold any value or be empty, so
-#' an outcome such as "neither `> 0` nor `= 0`" (a negative or empty field) is
-#' kept. The enumeration is therefore an upper bound under unrestricted field
-#' values. Where a survey's own code limits a field's values (for example,
-#' question JavaScript that always writes a count), some enumerated paths may
-#' be impossible in practice. `resolve_flow()` reports branch fields it finds
+#' A field holds one value along a path, so every branch on it agrees with
+#' that value, whether or not the branches are adjacent. A fixed value set in
+#' the flow (an embedded-data assignment, including one chosen by a block
+#' randomiser) decides the branches after it, until the field is set again;
+#' a piped or computed value (`${...}`) makes it unknown again.
+#'
+#' Otherwise field values are unrestricted: a field may hold any value or be
+#' empty, so an outcome such as "neither `> 0` nor `= 0`" (a negative or
+#' empty field) is kept, and a run of equality tests keeps a "none matches"
+#' path. The enumeration is therefore an upper bound under unrestricted field
+#' values. When a field can only hold certain values (for example a panel
+#' field coded 0 to 5), declare them in `field_domains` to drop the paths no
+#' declared value can produce. Where a survey's own code limits a field's
+#' values (for example, question JavaScript that always writes a count), some
+#' enumerated paths may be impossible in practice. `resolve_flow()` reports branch fields it finds
 #' assigned in question JavaScript, so these cases can be checked; it does not
 #' interpret the code, and it may not detect every assignment.
 #'
@@ -26,6 +35,12 @@
 #' @param qsf A `qsf_raw` object from [read_qsf()].
 #' @param max_paths Cap on the number of distinct paths. If the flow would
 #'   produce more, an error is raised rather than a partial result.
+#' @param field_domains Optional named list giving, for an embedded-data
+#'   field, every value it can hold, e.g. `list(SP_05 = 0:5)` (values are
+#'   compared as text or numbers like Qualtrics does; `NA` stands for an
+#'   empty field). Branches on a declared field are enumerated only for those
+#'   values. A value set in the flow still takes precedence. Naming a field
+#'   no branch tests gives a warning.
 #'
 #' @return A [tibble][tibble::tibble], one row per distinct path:
 #'   \describe{
@@ -43,13 +58,21 @@
 #'                          package = "surveyBurden")
 #' flow <- resolve_flow(read_qsf(qsf_path))
 #' flow[, c("path_id", "terminates_early")]
+#' \dontrun{
+#' resolve_flow(read_qsf("survey.qsf"), field_domains = list(group = c("1", "2")))
+#' }
 #'
 #' @export
-resolve_flow <- function(qsf, max_paths = 10000L) {
+resolve_flow <- function(qsf, max_paths = 10000L, field_domains = NULL) {
   if (!inherits(qsf, "qsf_raw")) {
     cli::cli_abort("{.arg qsf} must be a {.cls qsf_raw} object from {.fn read_qsf}.")
   }
+  field_domains <- validate_field_domains(field_domains)
   nodes <- qsf_flow(qsf)[["Flow"]]
+  unused <- setdiff(names(field_domains), branch_fields(nodes))
+  if (length(unused)) {
+    cli::cli_warn("{.arg field_domains} names {cli::qty(length(unused))}{?a field/fields} no branch tests, so {?it is/they are} ignored: {.val {unused}}.")
+  }
   js <- js_assigned_branch_fields(qsf, nodes)
   if (nrow(js)) {
     where <- paste(sprintf("%s (%s)", js$field, js$questions), collapse = "; ")
@@ -59,7 +82,26 @@ resolve_flow <- function(qsf, max_paths = 10000L) {
                 "include outcomes excluded by that code.")
     ))
   }
-  enumerate_paths(nodes, max_paths = max_paths)
+  enumerate_paths(nodes, max_paths = max_paths, field_domains = field_domains)
+}
+
+#' Check `field_domains`: `NULL`, or a named list of non-empty vectors of
+#' values (converted to text; `NA` stands for an empty field).
+#' @noRd
+validate_field_domains <- function(field_domains) {
+  if (is.null(field_domains)) return(list())
+  nm <- names(field_domains)
+  if (!is.list(field_domains) || is.null(nm) || any(!nzchar(nm)) || anyDuplicated(nm)) {
+    cli::cli_abort(c(
+      "{.arg field_domains} must be a named list, one element per embedded field.",
+      i = "For example {.code list(SP_05 = 0:5)}."
+    ))
+  }
+  bad <- nm[vapply(field_domains, function(v) !is.atomic(v) || length(v) == 0L, logical(1))]
+  if (length(bad)) {
+    cli::cli_abort("{.arg field_domains} must give at least one value for each field; check {.val {bad}}.")
+  }
+  lapply(field_domains, function(v) unique(as.character(v)))
 }
 
 #' Embedded-data fields tested by any branch in the flow
@@ -187,7 +229,9 @@ flow_has_blocks <- function(nodes) {
 
 #' Replace runs of consecutive Branch nodes on one field with a single
 #' synthetic ExclusiveBranchGroup node. A run qualifies when every Branch in
-#' it is a simple single-literal EmbeddedField comparison on the same field.
+#' it is a simple single-literal EmbeddedField comparison on the same field;
+#' a single such Branch becomes a group of one, so its field's value is
+#' tracked along the path.
 #' Recurses into Group, Authenticator, and BlockRandomizer child flows.
 #' @noRd
 collapse_exclusive_branches <- function(nodes) {
@@ -225,7 +269,7 @@ collapse_exclusive_branches <- function(nodes) {
       run[[length(run) + 1L]] <- nodes[[j]]
       j <- j + 1L
     }
-    if (length(run) >= 2L) {
+    if (length(run) >= 1L) {
       fids <- vapply(run, function(b) b[["FlowID"]] %||% "branch", character(1))
       keys <- lapply(run, extract_branch_key)
       out[[length(out) + 1L]] <- list(
@@ -252,10 +296,65 @@ collapse_exclusive_branches <- function(nodes) {
 #' sequence collapses the branch explosion (many branches only set embedded data
 #' and do not change the block sequence).
 #' @noRd
-enumerate_paths <- function(nodes, max_paths = 10000L) {
+enumerate_paths <- function(nodes, max_paths = 10000L, field_domains = list()) {
   nodes <- collapse_exclusive_branches(nodes)
   exclusive_fields <- character(0)
   joint_notes <- character(0)
+
+  # Each tracked field (one tested by a simple branch) holds one value along a
+  # path. Its candidate values are one per class of all its comparisons in
+  # the flow, or its declared domain. `st` maps fields to their value on the
+  # current path (NA = empty); a field not in `st` is not yet decided.
+  cmp <- list()
+  collect <- function(ns) for (n in ns) {
+    if (!is.list(n)) next
+    if (identical(n$Type, "ExclusiveBranchGroup")) {
+      cmp[[n$field]] <<- rbind(cmp[[n$field]], cbind(n$ops, n$values))
+      for (b in n$branches) collect(b[["Flow"]])
+    } else if (is.list(n[["Flow"]])) {
+      collect(n[["Flow"]])
+    }
+  }
+  collect(nodes)
+  tracked <- names(cmp)
+  classes <- lapply(stats::setNames(tracked, tracked), function(f) {
+    ops <- cmp[[f]][, 1]; values <- cmp[[f]][, 2]
+    cand <- field_domains[[f]] %||% field_value_classes(ops, values)
+    keys <- vapply(cand, function(x) paste(field_outcome(ops, values, x), collapse = ""),
+                   character(1))
+    cand[!duplicated(keys)]
+  })
+  state_key <- function(st) {
+    if (!length(st)) return("")
+    st <- st[order(names(st))]
+    v <- unlist(st)
+    paste(names(st), ifelse(is.na(v), "\001NA", v), sep = "=", collapse = "\002")
+  }
+  # tracked fields an EmbeddedData node sets: a fixed value (a Custom
+  # assignment, including an empty one) sets it; a piped or computed value
+  # makes it unknown again; a declaration with no value (a panel or URL
+  # field) changes nothing
+  assign_fields <- function(node, st) {
+    for (e in node$EmbeddedData %||% list()) {
+      f <- e$Field %||% ""
+      if (!f %in% tracked) next
+      val <- e$Value %||% ""
+      if (!is.character(val) || grepl("\\$[A-Za-z]*\\{", val)) {
+        st[[f]] <- NULL
+      } else if (nzchar(val) || identical(e$Type, "Custom")) {
+        st[f] <- list(if (nzchar(val)) val else NA_character_)
+      }
+    }
+    st
+  }
+  assigns_tracked <- function(children) {
+    hit <- FALSE
+    flow_walk(children, function(n) if (identical(n$Type, "EmbeddedData")) {
+      if (any(vapply(n$EmbeddedData %||% list(), function(e) (e$Field %||% "") %in% tracked,
+                     logical(1)))) hit <<- TRUE
+    })
+    hit
+  }
 
   memo <- new.env(parent = emptyenv())
   randomisers <- character(0)   # collected, warned about once (see below)
@@ -279,11 +378,11 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
     })
   }
 
-  outcomes <- function(remaining) {
+  outcomes <- function(remaining, st = list()) {
     if (length(remaining) == 0L) {
       return(list(list(blocks = character(0), bkey = "", early = FALSE, decisions = list())))
     }
-    key <- key_of(remaining)
+    key <- paste0(key_of(remaining), "#", state_key(st))
     hit <- memo[[key]]
     if (!is.null(hit)) return(hit)
 
@@ -293,26 +392,33 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
 
     res <- if (type %in% c("Standard", "Block")) {
       id <- node$ID %||% NA_character_
-      lapply(outcomes(rest), function(o) {
+      lapply(outcomes(rest, st), function(o) {
         o$bkey <- if (length(o$blocks)) paste0(id, ">", o$bkey) else paste(id)
         o$blocks <- c(id, o$blocks)
         o
       })
     } else if (type == "EmbeddedData") {
-      outcomes(rest)
+      outcomes(rest, assign_fields(node, st))
     } else if (type == "EndSurvey") {
       list(list(blocks = character(0), bkey = "", early = length(rest) > 0L, decisions = list()))
     } else if (type == "ExclusiveBranchGroup") {
       branches <- node$branches
-      exclusive_fields <<- c(exclusive_fields, node$field)
-      vecs <- feasible_outcomes(node$ops, node$values)
-      joint_notes <<- c(joint_notes, sprintf("%s: %d of %d", node$field,
-                                             length(vecs), 2L^length(branches)))
+      f <- node$field
+      exclusive_fields <<- c(exclusive_fields, f)
+      if (length(branches) > 1L) {
+        n_feas <- length(unique(lapply(classes[[f]], function(x) field_outcome(node$ops, node$values, x))))
+        joint_notes <<- c(joint_notes, sprintf("%s: %d of %d", f, n_feas, 2L^length(branches)))
+      }
+      # a decided field takes its one outcome; otherwise one fork per value
+      xs <- if (f %in% names(st)) st[f] else as.list(classes[[f]])
       all_outs <- list()
-      for (v in vecs) {
+      for (x in xs) {
+        v <- field_outcome(node$ops, node$values, x)
+        st2 <- st
+        st2[f] <- list(x)
         # taken branches run in flow order, then the rest of the flow
         sub  <- do.call(c, c(list(list()), lapply(branches[v], function(b) b[["Flow"]] %||% list())))
-        outs <- outcomes(c(sub, rest))
+        outs <- outcomes(c(sub, rest), st2)
         for (bi in rev(seq_along(branches))) {
           outs <- annotate(outs, branches[[bi]][["FlowID"]] %||% "branch", v[[bi]])
         }
@@ -321,30 +427,38 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
       all_outs
     } else if (type == "Branch") {
       fid <- node$FlowID %||% "branch"
-      taken <- annotate(outcomes(c(node[["Flow"]] %||% list(), rest)), fid, TRUE)
-      not   <- annotate(outcomes(rest), fid, FALSE)
+      taken <- annotate(outcomes(c(node[["Flow"]] %||% list(), rest), st), fid, TRUE)
+      not   <- annotate(outcomes(rest, st), fid, FALSE)
       c(taken, not)   # deduped with every other node type below
     } else if (type %in% c("Group", "Authenticator")) {
       # an Authenticator wraps the flow shown once a respondent authenticates;
       # failed authentication never yields a response, so only that flow counts
-      outcomes(c(node[["Flow"]] %||% list(), rest))
+      outcomes(c(node[["Flow"]] %||% list(), rest), st)
     } else if (type == "BlockRandomizer") {
       children <- node[["Flow"]] %||% list()
       m <- randomiser_subset(node)
-      if (!flow_has_blocks(children) || (!is.na(m) && m >= length(children))) {
+      sets_fields <- assigns_tracked(children)
+      if ((!flow_has_blocks(children) && !sets_fields) || (!is.na(m) && m >= length(children))) {
         # a randomiser holding only embedded-data assignments (random condition
         # assignment) shows no blocks, so it cannot change burden; one showing
         # every child shows them all (order does not change burden)
-        outcomes(c(children, rest))
+        outcomes(c(children, rest), st)
+      } else if (is.na(m) && !flow_has_blocks(children)) {
+        # assignments from an unknown subset: the fields they set are unknown
+        st2 <- st
+        flow_walk(children, function(n) if (identical(n$Type, "EmbeddedData")) {
+          for (e in n$EmbeddedData %||% list()) st2[[e$Field %||% ""]] <<- NULL
+        })
+        outcomes(rest, st2)
       } else if (is.na(m)) {
         randomisers <<- c(randomisers, node$FlowID %||% node$ID %||% "BlockRandomizer")
-        outcomes(c(children, rest))
+        outcomes(c(children, rest), st)
       } else {
         # show m of the children: one outcome per combination, survey order
         n_comb <- choose(length(children), m)
         if (n_comb > max_paths) path_space_abort(max_paths, nodes)
         do.call(c, lapply(utils::combn(length(children), m, simplify = FALSE),
-                          function(ix) outcomes(c(children[ix], rest))))
+                          function(ix) outcomes(c(children[ix], rest), st)))
       }
     } else if (type == "WebService") {
       # a web-service call shows nothing; it can set embedded fields, which
@@ -352,10 +466,10 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
       if (length(node$ResponseMap)) {
         web_services <<- c(web_services, node$FlowID %||% "WebService")
       }
-      outcomes(rest)
+      outcomes(rest, st)
     } else {
       cli::cli_warn("Unhandled flow node type {.val {type}}; skipping.")
-      outcomes(rest)
+      outcomes(rest, st)
     }
 
     res <- dedupe(res)
@@ -367,7 +481,7 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
   paths <- dedupe(outcomes(nodes))
 
   exclusive_fields <- unique(exclusive_fields)
-  if (length(exclusive_fields)) {
+  if (length(joint_notes)) {
     joint_notes <- paste(unique(joint_notes), collapse = "; ")
     cli::cli_inform(c(
       i = "Branches on the same embedded field evaluated jointly (feasible of 2^k outcomes): {joint_notes}."

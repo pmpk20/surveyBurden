@@ -60,6 +60,9 @@
 #' @param overrides Optional named numeric vector of GfS+ points that replace
 #'   the computed score of the named questions, e.g. `c(QID51 = 10)`. See
 #'   [burden_report()]. Ignored, with a warning, when `engine` is supplied.
+#' @param field_domains Optional named list giving the values an
+#'   embedded-data field can hold, e.g. `list(SP_05 = 0:5)`. Passed to
+#'   [resolve_flow()]. Ignored, with a warning, when `engine` is supplied.
 #' @param choice_tasks Optional data frame declaring stated-choice tasks
 #'   (`question_id`, `n_alternatives`, `n_attributes`), scored by the GfS
 #'   stated-choice rule. See [burden_report()]. Ignored, with a warning, when
@@ -84,7 +87,7 @@
 path_burden_profile <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
                                 engine = NULL, parsed_dl = NULL,
                                 max_condition_states = 10000L, overrides = NULL,
-                                choice_tasks = NULL) {
+                                choice_tasks = NULL, field_domains = NULL) {
   validate_condition_states(max_condition_states)
   if (!is.null(engine) && (!is.null(overrides) || !is.null(choice_tasks))) {
     cli::cli_warn(c(
@@ -92,10 +95,17 @@ path_burden_profile <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
       i = "Leave out {.arg engine}, or build it with the same scoring adjustments."
     ))
   }
+  if (!is.null(engine) && !is.null(field_domains)) {
+    cli::cli_warn(c(
+      "{.arg field_domains} is ignored because a precomputed {.arg engine} was supplied.",
+      i = "Leave out {.arg engine}, or build it with the same {.arg field_domains}."
+    ))
+  }
   e <- engine %||% burden_engine(qsf, scheme = scheme, max_paths = max_paths,
                                  parsed_dl = parsed_dl, overrides = overrides,
                                  choice_tasks = choice_tasks,
-                                 max_condition_states = max_condition_states)
+                                 max_condition_states = max_condition_states,
+                                 field_domains = field_domains)
 
   # Fill plain vectors per path and build the tibble once: a tibble() per path
   # (then rbind) dominated runtime on surveys with tens of thousands of paths.
@@ -128,8 +138,10 @@ path_burden_profile <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
 burden_engine <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
                           paths = NULL, scored = NULL, blocks = NULL,
                           parsed_dl = NULL, max_condition_states = 10000L,
-                          overrides = NULL, choice_tasks = NULL) {
-  if (is.null(paths))  paths  <- resolve_paths(qsf, max_paths = max_paths)
+                          overrides = NULL, choice_tasks = NULL,
+                          field_domains = NULL) {
+  if (is.null(paths))  paths  <- resolve_paths(qsf, max_paths = max_paths,
+                                               field_domains = field_domains)
   if (is.null(scored)) scored <- score_burden(parse_qsf(qsf), scheme = scheme)
   scored <- adjust_scores(scored, scheme, choice_tasks, overrides)
   if (is.null(blocks)) blocks <- resolve_live_blocks(qsf)

@@ -4,12 +4,18 @@
 \alias{resolve_paths}
 \title{Resolve the survey's paths, flow \emph{and} display logic}
 \usage{
-resolve_paths(qsf, max_paths = 10000L, catalogue = NULL, blocks = NULL)
+resolve_paths(
+  qsf,
+  max_paths = 10000L,
+  catalogue = NULL,
+  blocks = NULL,
+  field_domains = NULL
+)
 }
 \arguments{
 \item{qsf}{A \code{qsf_raw} object from \code{\link[=read_qsf]{read_qsf()}}.}
 
-\item{max_paths}{Passed to \code{\link[=resolve_flow]{resolve_flow()}}.}
+\item{max_paths, field_domains}{Passed to \code{\link[=resolve_flow]{resolve_flow()}}.}
 
 \item{catalogue, blocks}{Optional precomputed \code{\link[=parse_qsf]{parse_qsf()}} and
 \code{\link[=resolve_live_blocks]{resolve_live_blocks()}} results for this \code{qsf}. Internal: lets

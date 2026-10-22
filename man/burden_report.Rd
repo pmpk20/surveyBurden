@@ -18,7 +18,8 @@ burden_report(
   certainty = TRUE,
   quiet = FALSE,
   max_condition_states = 10000L,
-  overrides = NULL
+  overrides = NULL,
+  choice_tasks = NULL
 )
 
 \method{summary}{burden_report}(object, ...)
@@ -88,6 +89,20 @@ profile and respondents). Overridden items get \code{score_flag = "manual"}
 and \code{score_basis = "user override"}. The same argument is accepted by
 \code{\link[=path_burden]{path_burden()}}, \code{\link[=path_burden_profile]{path_burden_profile()}}, \code{\link[=calculation_certainty]{calculation_certainty()}},
 \code{\link[=respondent_burden]{respondent_burden()}} and \code{\link[=validate_times]{validate_times()}}.}
+
+\item{choice_tasks}{Optional data frame declaring the survey's
+stated-choice tasks, one row per question: \code{question_id},
+\code{n_alternatives} (count an opt-out such as "neither" as an alternative)
+and \code{n_attributes} (attributes shown per alternative). A QSF does not
+mark choice tasks, so they are not detected automatically;
+\code{\link[=suggest_choice_tasks]{suggest_choice_tasks()}} lists likely candidates to check. Each declared
+task scores \code{sc_2_alt} (2 alternatives) or \code{sc_3_alt} (3) from
+\code{\link[=gfs_scheme]{gfs_scheme()}}, plus \code{sc_per_extra_alt} for each alternative beyond
+three (an extrapolation past GfS Table 1), plus \code{sc_per_variable} per
+attribute: a 2-alternative, 4-attribute task scores 2 + 4 = 6 points.
+Declared tasks are flagged \code{"manual"}. \code{overrides} are applied after
+\code{choice_tasks}, so an override wins. The same argument is accepted by
+the functions that take \code{overrides}.}
 
 \item{object}{A \code{burden_report} from \code{\link[=burden_report]{burden_report()}}.}
 

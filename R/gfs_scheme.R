@@ -35,9 +35,24 @@
 #'   Per SC variable, per question \tab 1.0 \tab `sc_per_variable` \cr
 #' }
 #'
-#' Reference only: `rank_per_item`, `open_medium`, `please_specify`,
-#' `open_essay_per_extra`, `filter`, `branching`, `sc_2_alt`, `sc_3_alt` and
-#' `sc_per_variable` are transcribed for completeness but not read by any
+#' Stated choice: `sc_2_alt`, `sc_3_alt` and `sc_per_variable` score the
+#' tasks you declare with the `choice_tasks` argument of [burden_report()]
+#' and the other burden functions. A QSF does not mark choice tasks, so they
+#' are never applied automatically; [suggest_choice_tasks()] lists likely
+#' candidates.
+#'
+#' Filter and branching: `filter` and `branching` are added only when
+#' `apply_filter_branching` is `TRUE` (default `FALSE`). A question then earns
+#' `filter` if its answer drives another question's display logic and
+#' `branching` if its answer is tested by a branch in the survey flow, so at
+#' most both. Only answered questions earn them; embedded data fields,
+#' randomiser assignments, loop and quota conditions, and `Displayed`
+#' conditions do not. GfS budgets interviewer-administered surveys, where an
+#' interviewer applies each filter; in a web survey the software does, so
+#' the default leaves them out. Turn it on to match a manual GfS count.
+#'
+#' Reference only: `rank_per_item`, `open_medium`, `please_specify` and
+#' `open_essay_per_extra` are transcribed for completeness but not read by any
 #' automatic rule in [score_burden()], so changing them does not change
 #' scores. `vignette("gfs-scoring")` lists the rule used for each question
 #' type.
@@ -54,6 +69,11 @@
 #'     score does not depend on which axis the QSF stored as rows. A documented
 #'     inference, not GfS; the vignette describes the alternatives that were
 #'     considered.}
+#'   \item{`sc_per_extra_alt`}{1.0 -- each stated-choice alternative beyond
+#'     three. GfS Table 1 stops at three alternatives (2.0, 3.0); this
+#'     continues its one point per alternative.}
+#'   \item{`apply_filter_branching`}{`FALSE` -- switch for the GfS filter and
+#'     branching points (see above).}
 #'   \item{`points_per_minute`}{12 -- the published GfS rule of thumb ("twelve
 #'     points roughly correspond to a one-minute response time", Heimgartner &
 #'     Axhausen 2024). Overridable: set `s$points_per_minute` on the returned
@@ -100,6 +120,7 @@ gfs_scheme <- function() {
     sc_2_alt                   = 2.0,
     sc_3_alt                   = 3.0,
     sc_per_variable            = 1.0,
+    sc_per_extra_alt           = 1.0,
 
     # --- our additions / proxies ---
     slider                     = 2.0,
@@ -108,6 +129,9 @@ gfs_scheme <- function() {
 
     # --- conversions / proxies ---
     points_per_minute          = 12,
-    words_per_line             = 12
+    words_per_line             = 12,
+
+    # --- switches ---
+    apply_filter_branching     = FALSE
   )
 }

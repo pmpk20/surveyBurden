@@ -23,7 +23,9 @@
 #'   (HTML-stripped, truncated to 200 characters), `is_hidden` (`TRUE` if the
 #'   question is hidden from the respondent via injected CSS/JS),
 #'   `has_display_logic`, `display_logic_refs`, `has_validation`, `in_loop`,
-#'   `loop_max`, `flag`.
+#'   `loop_max`, `filter_trigger` (`TRUE` if the question's answer drives
+#'   another question's display logic), `branch_trigger` (`TRUE` if a flow
+#'   branch tests its answer), `flag`.
 #'
 #' @examples
 #' qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
@@ -37,6 +39,15 @@ parse_qsf <- function(x) {
 
   blocks <- resolve_live_blocks(qsf)
   questions <- index_questions(qsf)
+
+  # questions whose answers drive display logic (filters) or flow branches
+  live <- unlist(blocks$question_ids)
+  filters <- unique(unlist(lapply(live, function(q)
+    setdiff(answer_refs(questions[[q]]$DisplayLogic), q))))
+  branches <- character(0)
+  flow_walk(qsf_flow(qsf)[["Flow"]], function(n) {
+    if (identical(n$Type, "Branch")) branches <<- c(branches, answer_refs(n[["BranchLogic"]]))
+  })
 
   rows <- list()
   for (bi in seq_len(nrow(blocks))) {
@@ -53,6 +64,8 @@ parse_qsf <- function(x) {
       cls$block_name <- blk$block_name
       cls$in_loop    <- isTRUE(blk$in_loop)
       cls$loop_max   <- as.integer(blk$loop_max)
+      cls$filter_trigger <- qid %in% filters
+      cls$branch_trigger <- qid %in% branches
       rows[[length(rows) + 1L]] <- cls
     }
   }
@@ -98,9 +111,31 @@ catalogue_tibble <- function(rows) {
     display_logic_refs = lapply(rows, function(r) r$display_logic_refs %||% character(0)),
     has_validation     = lgl("has_validation"),
     in_loop            = lgl("in_loop"),
+    filter_trigger     = lgl("filter_trigger"),
+    branch_trigger     = lgl("branch_trigger"),
     loop_max           = int("loop_max"),
     flag               = chr("flag")
   )
+}
+
+#' Question ids whose *answers* a DisplayLogic or BranchLogic tree tests:
+#' `Question` literals other than `Displayed` / `NotDisplayed`. Embedded-field,
+#' loop, quota and other literals are not answers and are left out.
+#' @noRd
+answer_refs <- function(logic) {
+  out <- character(0)
+  rec <- function(x) {
+    if (!is.list(x)) return(invisible())
+    if (identical(x[["LogicType"]], "Question") &&
+        !(x[["Operator"]] %||% "") %in% c("Displayed", "NotDisplayed")) {
+      qid <- x[["QuestionID"]] %||%
+        sub("^q://(QID[0-9]+).*", "\\1", x[["LeftOperand"]] %||% "")
+      if (grepl("^QID[0-9]+$", qid)) out <<- c(out, qid)
+    }
+    for (el in x) if (is.list(el)) rec(el)
+  }
+  rec(logic)
+  unique(out)
 }
 
 #' Index every `SQ` payload by its QuestionID

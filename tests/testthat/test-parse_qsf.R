@@ -12,7 +12,7 @@ test_that("parse_qsf returns a one-row-per-live-question catalogue with the expe
     "n_options", "n_rows", "n_cols", "text_words", "max_label_words",
     "label_text", "options_numeric", "question_text", "is_hidden",
     "has_display_logic", "display_logic_refs", "has_validation",
-    "in_loop", "loop_max", "flag"
+    "in_loop", "loop_max", "filter_trigger", "branch_trigger", "flag"
   ))
   expect_false(anyNA(cat$question_id))
   expect_equal(anyDuplicated(cat$question_id), 0L)

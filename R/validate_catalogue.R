@@ -39,6 +39,10 @@
 #'   \item{`has_validation`}{Logical. Whether a response is forced.}
 #'   \item{`in_loop`}{Logical. Whether the question is inside a loop block.}
 #'   \item{`loop_max`}{Integer. Maximum loop iterations (`NA` if not in loop).}
+#'   \item{`filter_trigger`}{Logical. `TRUE` if the question's answer drives
+#'     another question's display logic (a GfS filter).}
+#'   \item{`branch_trigger`}{Logical. `TRUE` if the question's answer is
+#'     tested by a branch in the survey flow (GfS branching).}
 #'   \item{`flag`}{Character. Confidence flag (`"auto"`, `"inferred"`,
 #'     `"manual"`, or `"unknown"`).}
 #' }
@@ -98,6 +102,8 @@ validate_catalogue <- function(catalogue) {
     has_validation   = FALSE,
     in_loop          = FALSE,
     loop_max         = NA_integer_,
+    filter_trigger   = FALSE,
+    branch_trigger   = FALSE,
     flag             = "auto",
     qualtrics_type   = NA_character_,
     selector         = NA_character_,

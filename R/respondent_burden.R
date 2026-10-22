@@ -127,6 +127,9 @@
 #'   the computed score of the named questions, e.g. `c(QID51 = 10)`, for
 #'   every respondent (whatever their `words_per_line`). See
 #'   [burden_report()].
+#' @param choice_tasks Optional data frame declaring stated-choice tasks
+#'   (`question_id`, `n_alternatives`, `n_attributes`), scored by the GfS
+#'   stated-choice rule. See [burden_report()].
 #'
 #' @return With `by = "respondent"`, a [tibble][tibble::tibble] with one row
 #'   per respondent, in the order of `responses`:
@@ -212,12 +215,14 @@ respondent_burden <- function(qsf, responses, scheme = gfs_scheme(),
                               id_col = NULL,
                               furthest = c("answered", "column"), furthest_col = NULL,
                               loop_iterations = c("driver", "observed"),
-                              embedded = NULL, overrides = NULL) {
+                              embedded = NULL, overrides = NULL,
+                              choice_tasks = NULL) {
   by <- match.arg(by)
   x <- respondent_blocks(qsf, responses, scheme = scheme, id_col = id_col,
                          furthest = furthest, furthest_col = furthest_col,
                          loop_iterations = loop_iterations, embedded = embedded,
-                         words_per_line = words_per_line, overrides = overrides)
+                         words_per_line = words_per_line, overrides = overrides,
+                         choice_tasks = choice_tasks)
   if (identical(by, "block")) return(x)
   per_respondent(x, scheme$points_per_minute)
 }
@@ -270,13 +275,14 @@ resolve_words_per_line <- function(words_per_line, scheme, n) {
 #' (descriptive text), when the respondents' values differ: a named list,
 #' question id -> numeric vector of length `n`. Empty when all share one value.
 #' @noRd
-respondent_scores <- function(catalogue, scheme, wpl, base, overrides = NULL) {
+respondent_scores <- function(catalogue, scheme, wpl, base, overrides = NULL,
+                              choice_tasks = NULL) {
   vals <- sort(unique(wpl))
   if (length(vals) < 2L) return(list())
   by_val <- lapply(vals, function(v) {
     w <- scheme
     w$words_per_line <- v
-    sc <- score_overrides(score_burden(catalogue, w), overrides, w)
+    sc <- adjust_scores(score_burden(catalogue, w), w, choice_tasks, overrides)
     p <- stats::setNames(sc$gfs_points, sc$question_id)
     p[is.na(p)] <- 0
     p[names(base)]
@@ -293,7 +299,7 @@ respondent_blocks <- function(qsf, responses, scheme = gfs_scheme(), id_col = NU
                               furthest = c("answered", "column"), furthest_col = NULL,
                               loop_iterations = c("driver", "observed"),
                               embedded = NULL, words_per_line = NULL,
-                              overrides = NULL) {
+                              overrides = NULL, choice_tasks = NULL) {
   furthest <- match.arg(furthest)
   loop_iterations <- match.arg(loop_iterations)
   if (!inherits(qsf, "qsf_raw")) qsf <- read_qsf(qsf)
@@ -316,7 +322,8 @@ respondent_blocks <- function(qsf, responses, scheme = gfs_scheme(), id_col = NU
 
   catalogue <- parse_qsf(qsf)
   blocks    <- resolve_live_blocks(qsf)
-  scored    <- score_overrides(score_burden(catalogue, scheme), overrides, scheme)
+  scored    <- adjust_scores(score_burden(catalogue, scheme), scheme,
+                             choice_tasks, overrides)
   payloads  <- index_questions(qsf)
   nb        <- nrow(blocks)
 
@@ -327,7 +334,8 @@ respondent_blocks <- function(qsf, responses, scheme = gfs_scheme(), id_col = NU
     block   = stats::setNames(scored$block_id, scored$question_id)
   )
   q$gfs[is.na(q$gfs)] <- 0
-  q$gfs_resp <- respondent_scores(catalogue, scheme, wpl, q$gfs, overrides)
+  q$gfs_resp <- respondent_scores(catalogue, scheme, wpl, q$gfs, overrides,
+                                  choice_tasks)
   q$visible    <- stats::setNames(!q$qtype %in% c("Timing", "Meta") & !q$hidden,
                                   names(q$qtype))
   q$responsive <- stats::setNames(!q$qtype %in% c("DB", "Timing", "Meta"), names(q$qtype))

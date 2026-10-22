@@ -36,6 +36,7 @@ reference:
       - validate_catalogue
       - gfs_scheme
       - score_burden
+      - suggest_choice_tasks
   - title: Resolve paths
     desc: Walk the flow and display logic to the feasible respondent paths.
     contents:

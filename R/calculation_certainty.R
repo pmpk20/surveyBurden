@@ -39,6 +39,10 @@
 #' @param overrides Optional named numeric vector of GfS+ points that replace
 #'   the computed score of the named questions, e.g. `c(QID51 = 10)`; counted
 #'   as `manual` in `scores`. See [burden_report()].
+#' @param choice_tasks Optional data frame declaring stated-choice tasks
+#'   (`question_id`, `n_alternatives`, `n_attributes`), scored by the GfS
+#'   stated-choice rule. Counted as `manual`. See
+#'   [burden_report()].
 #'
 #' @return An object of class `calculation_certainty` (list):
 #'   \describe{
@@ -71,12 +75,12 @@
 calculation_certainty <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
                                   paths = NULL, scored = NULL, blocks = NULL,
                                   parsed_dl = NULL, max_condition_states = 10000L,
-                                  overrides = NULL) {
+                                  overrides = NULL, choice_tasks = NULL) {
   validate_condition_states(max_condition_states)
   qsf    <- if (inherits(qsf, "qsf_raw")) qsf else read_qsf(qsf)
   if (is.null(paths))  paths  <- resolve_paths(qsf, max_paths = max_paths)
   if (is.null(scored)) scored <- score_burden(parse_qsf(qsf), scheme = scheme)
-  scored <- score_overrides(scored, overrides, scheme)
+  scored <- adjust_scores(scored, scheme, choice_tasks, overrides)
   if (is.null(blocks)) blocks <- resolve_live_blocks(qsf)
   full   <- paths[!paths$terminates_early, ]
 

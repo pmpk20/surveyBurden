@@ -10,7 +10,8 @@ path_burden(
   max_paths = 10000L,
   paths = NULL,
   scored = NULL,
-  overrides = NULL
+  overrides = NULL,
+  choice_tasks = NULL
 )
 }
 \arguments{
@@ -27,6 +28,10 @@ them here, leaving the public behaviour unchanged).}
 \item{overrides}{Optional named numeric vector of GfS+ points that replace
 the computed score of the named questions, e.g. \code{c(QID51 = 10)}. See
 \code{\link[=burden_report]{burden_report()}}.}
+
+\item{choice_tasks}{Optional data frame declaring stated-choice tasks
+(\code{question_id}, \code{n_alternatives}, \code{n_attributes}), scored by the GfS
+stated-choice rule. See \code{\link[=burden_report]{burden_report()}}.}
 }
 \value{
 A \link[tibble:tibble]{tibble}, one row per flow path:

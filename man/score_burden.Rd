@@ -41,6 +41,10 @@ the quantity GfS needs -- a dropdown has no Table 1 row, a slider is not in
 the scheme, "lines" of text are not in a QSF -- the package applies an
 explicit, documented inference rule. \code{score_flag} and \code{score_basis} say
 which case each item is.
+
+With \code{scheme$apply_filter_branching = TRUE}, a question whose answer drives
+display logic or a flow branch also gains the GfS \code{filter} / \code{branching}
+points (see \code{\link[=gfs_scheme]{gfs_scheme()}}), flagged at least \code{"inferred"}.
 }
 \examples{
 qsf_path <- system.file("extdata", "demo_travel_survey.qsf",

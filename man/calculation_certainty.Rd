@@ -13,7 +13,8 @@ calculation_certainty(
   blocks = NULL,
   parsed_dl = NULL,
   max_condition_states = 10000L,
-  overrides = NULL
+  overrides = NULL,
+  choice_tasks = NULL
 )
 }
 \arguments{
@@ -38,6 +39,11 @@ supplied, use the same limit that generated those results.}
 \item{overrides}{Optional named numeric vector of GfS+ points that replace
 the computed score of the named questions, e.g. \code{c(QID51 = 10)}; counted
 as \code{manual} in \code{scores}. See \code{\link[=burden_report]{burden_report()}}.}
+
+\item{choice_tasks}{Optional data frame declaring stated-choice tasks
+(\code{question_id}, \code{n_alternatives}, \code{n_attributes}), scored by the GfS
+stated-choice rule. Counted as \code{manual}. See
+\code{\link[=burden_report]{burden_report()}}.}
 }
 \value{
 An object of class \code{calculation_certainty} (list):

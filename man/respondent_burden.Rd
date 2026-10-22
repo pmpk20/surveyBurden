@@ -15,7 +15,8 @@ respondent_burden(
   furthest_col = NULL,
   loop_iterations = c("driver", "observed"),
   embedded = NULL,
-  overrides = NULL
+  overrides = NULL,
+  choice_tasks = NULL
 )
 }
 \arguments{
@@ -91,6 +92,10 @@ Overrides the automatic matching for the fields it names.}
 the computed score of the named questions, e.g. \code{c(QID51 = 10)}, for
 every respondent (whatever their \code{words_per_line}). See
 \code{\link[=burden_report]{burden_report()}}.}
+
+\item{choice_tasks}{Optional data frame declaring stated-choice tasks
+(\code{question_id}, \code{n_alternatives}, \code{n_attributes}), scored by the GfS
+stated-choice rule. See \code{\link[=burden_report]{burden_report()}}.}
 }
 \value{
 With \code{by = "respondent"}, a \link[tibble:tibble]{tibble} with one row

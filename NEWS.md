@@ -1,5 +1,13 @@
 # surveyBurden (development version)
 
+* New `overrides` argument in `burden_report()`, `path_burden()`,
+  `path_burden_profile()`, `calculation_certainty()`, `respondent_burden()`
+  and `validate_times()`: a named numeric vector of points, e.g.
+  `c(QID51 = 10)`, that replaces the computed score of the named questions
+  after `score_burden()`. The new score carries into every total, profile
+  and respondent figure. Overridden items are flagged `"manual"` with basis
+  `"user override"`. An unknown question id is an error.
+
 * `burden_report()`, `path_burden_profile()` and `calculation_certainty()`
   accept `max_condition_states`, the joint display-condition enumeration
   limit per component. The default rises from 5,000 to 10,000 states; raising

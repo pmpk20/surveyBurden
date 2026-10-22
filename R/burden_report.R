@@ -109,6 +109,15 @@
 #'   enumerate (default 10 000). Passed to [resolve_flow()]. Surveys with
 #'   heavily branching flows may exceed this; raise the cap or treat the
 #'   error as a diagnostic finding (intractable routing).
+#' @param overrides Optional named numeric vector of GfS+ points that replace
+#'   the computed score of the named questions, e.g. `c(QID51 = 10)` to score
+#'   a choice task at 10 points. Names are question ids as in `$items`; an
+#'   unknown id is an error. Overrides are applied after [score_burden()], so
+#'   they carry into every figure in the report (items, blocks, paths,
+#'   profile and respondents). Overridden items get `score_flag = "manual"`
+#'   and `score_basis = "user override"`. The same argument is accepted by
+#'   [path_burden()], [path_burden_profile()], [calculation_certainty()],
+#'   [respondent_burden()] and [validate_times()].
 #'
 #' @examples
 #' \donttest{
@@ -128,7 +137,8 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
                           words_per_line = NULL,
                           max_paths = 10000L,
                           certainty = TRUE,
-                          quiet = FALSE, max_condition_states = 10000L) {
+                          quiet = FALSE, max_condition_states = 10000L,
+                          overrides = NULL) {
   validate_condition_states(max_condition_states)
   step <- if (isTRUE(quiet)) function(...) invisible() else cli::cli_progress_step
 
@@ -141,7 +151,8 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
   # through the pipeline; every function below accepts them precomputed and
   # falls back to computing its own when called directly.
   catalogue <- parse_qsf(qsf)
-  scored    <- score_burden(catalogue, scheme = scheme)
+  scored    <- score_overrides(score_burden(catalogue, scheme = scheme),
+                               overrides, scheme)
   blocks    <- resolve_live_blocks(qsf)
   paths     <- resolve_paths(qsf, max_paths = max_paths, catalogue = catalogue, blocks = blocks)
   isum      <- survey_summary(qsf, blocks = blocks)

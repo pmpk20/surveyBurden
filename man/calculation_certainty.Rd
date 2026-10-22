@@ -12,7 +12,8 @@ calculation_certainty(
   scored = NULL,
   blocks = NULL,
   parsed_dl = NULL,
-  max_condition_states = 10000L
+  max_condition_states = 10000L,
+  overrides = NULL
 )
 }
 \arguments{
@@ -33,6 +34,10 @@ Must be a positive finite whole number. Larger components use the
 primary-gate approximation. This is separate from \code{max_paths} and does
 not remove other modelling assumptions. When precomputed results are
 supplied, use the same limit that generated those results.}
+
+\item{overrides}{Optional named numeric vector of GfS+ points that replace
+the computed score of the named questions, e.g. \code{c(QID51 = 10)}; counted
+as \code{manual} in \code{scores}. See \code{\link[=burden_report]{burden_report()}}.}
 }
 \value{
 An object of class \code{calculation_certainty} (list):

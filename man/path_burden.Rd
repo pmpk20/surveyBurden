@@ -9,7 +9,8 @@ path_burden(
   scheme = gfs_scheme(),
   max_paths = 10000L,
   paths = NULL,
-  scored = NULL
+  scored = NULL,
+  overrides = NULL
 )
 }
 \arguments{
@@ -22,6 +23,10 @@ path_burden(
 \item{paths, scored}{Optional precomputed \code{\link[=resolve_paths]{resolve_paths()}} and
 \code{\link[=score_burden]{score_burden()}} results for this \code{qsf} (internal reuse; \code{NULL} computes
 them here, leaving the public behaviour unchanged).}
+
+\item{overrides}{Optional named numeric vector of GfS+ points that replace
+the computed score of the named questions, e.g. \code{c(QID51 = 10)}. See
+\code{\link[=burden_report]{burden_report()}}.}
 }
 \value{
 A \link[tibble:tibble]{tibble}, one row per flow path:

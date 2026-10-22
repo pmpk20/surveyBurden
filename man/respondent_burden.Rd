@@ -14,7 +14,8 @@ respondent_burden(
   furthest = c("answered", "column"),
   furthest_col = NULL,
   loop_iterations = c("driver", "observed"),
-  embedded = NULL
+  embedded = NULL,
+  overrides = NULL
 )
 }
 \arguments{
@@ -85,6 +86,11 @@ unrecognised values fall back to \code{"answered"}.}
 \item{embedded}{Optional named character vector mapping embedded-data field
 names to response columns, e.g. \code{c(TotalVehicles = "total_vehicles")}.
 Overrides the automatic matching for the fields it names.}
+
+\item{overrides}{Optional named numeric vector of GfS+ points that replace
+the computed score of the named questions, e.g. \code{c(QID51 = 10)}, for
+every respondent (whatever their \code{words_per_line}). See
+\code{\link[=burden_report]{burden_report()}}.}
 }
 \value{
 With \code{by = "respondent"}, a \link[tibble:tibble]{tibble} with one row

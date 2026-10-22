@@ -17,7 +17,8 @@ burden_report(
   max_paths = 10000L,
   certainty = TRUE,
   quiet = FALSE,
-  max_condition_states = 10000L
+  max_condition_states = 10000L,
+  overrides = NULL
 )
 
 \method{summary}{burden_report}(object, ...)
@@ -77,6 +78,16 @@ Must be a positive finite whole number. Larger components use the
 primary-gate approximation. This is separate from \code{max_paths} and does
 not remove other modelling assumptions. When precomputed results are
 supplied, use the same limit that generated those results.}
+
+\item{overrides}{Optional named numeric vector of GfS+ points that replace
+the computed score of the named questions, e.g. \code{c(QID51 = 10)} to score
+a choice task at 10 points. Names are question ids as in \verb{$items}; an
+unknown id is an error. Overrides are applied after \code{\link[=score_burden]{score_burden()}}, so
+they carry into every figure in the report (items, blocks, paths,
+profile and respondents). Overridden items get \code{score_flag = "manual"}
+and \code{score_basis = "user override"}. The same argument is accepted by
+\code{\link[=path_burden]{path_burden()}}, \code{\link[=path_burden_profile]{path_burden_profile()}}, \code{\link[=calculation_certainty]{calculation_certainty()}},
+\code{\link[=respondent_burden]{respondent_burden()}} and \code{\link[=validate_times]{validate_times()}}.}
 
 \item{object}{A \code{burden_report} from \code{\link[=burden_report]{burden_report()}}.}
 

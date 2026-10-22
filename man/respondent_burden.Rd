@@ -120,6 +120,9 @@ respondent answered.}
 recovered.}
 \item{\code{n_routing_conflicts}}{Blocks with answers that the evaluated
 flow did not route the respondent into (the answers are trusted).}
+\item{\code{n_randomiser_fallbacks}}{Block randomisers whose shown
+elements came from the respondent's answers, for want of a
+display-order column (see Block randomisers).}
 }
 
 With \code{by = "block"}, a tibble with one row per respondent per live block,
@@ -216,6 +219,17 @@ give.
 Answers that contradict the evaluated flow (answers in a block the flow
 did not route the respondent into) are trusted: the block counts as routed
 in, and the respondent's \code{n_routing_conflicts} is incremented.
+
+\strong{Block randomisers.} A randomiser that shows every element needs no
+data. One that shows some of its elements ("present 1 of 3 blocks") is
+read from the export's display-order column, \code{FL_xx_DO} (\code{xx} from the
+randomiser's flow id), whose cell lists the elements shown, joined by
+\code{|}; an element can be named by its flow id, block id or block name.
+Where the column is missing, or a respondent's cell is blank or names no
+element, the elements shown are those holding a block the respondent
+answered, with a warning; such randomisers are counted in
+\code{n_randomiser_fallbacks}. A respondent who answered nothing in a shown
+element is then undercounted.
 }
 \examples{
 qsf_path <- system.file("extdata", "demo_travel_survey.qsf",

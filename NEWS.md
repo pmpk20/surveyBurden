@@ -15,8 +15,16 @@
   path. This lowers the burden of affected paths, which was overstated.
   When the subset cannot be read, every element is still treated as shown,
   with a warning (now only in that case). `calculation_certainty()` gains a
-  `randomisers` table. `respondent_burden()` is unchanged: it still treats
-  every element of a block randomiser as shown.
+  `randomisers` table.
+
+* `respondent_burden()` now reads which elements of a block randomiser
+  each respondent was shown from the export's display-order column
+  (`FL_xx_DO`), when the randomiser shows only some of its elements.
+  Without the column, or with a blank cell, the elements shown are taken
+  from the blocks the respondent answered, with a warning, and counted in
+  the new `n_randomiser_fallbacks` column. Previously every element was
+  treated as shown, which overstated burden. A randomiser that shows every
+  element no longer warns.
 
 * Display logic on a stored (embedded data) field is now evaluated against
   the field's value. Previously every comparison on a field shared one

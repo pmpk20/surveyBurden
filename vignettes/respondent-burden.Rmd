@@ -210,8 +210,8 @@ Each row gives:
     displayed, those of them that take a response, and pages displayed.
 -   **diagnostics** -- `furthest_order`, and counts of logic the data
     could not settle (`n_unresolved_items`, `n_unresolved_branches`,
-    `unresolved_loops`) or answers that contradict the flow
-    (`n_routing_conflicts`).
+    `unresolved_loops`, `n_randomiser_fallbacks`) or answers that
+    contradict the flow (`n_routing_conflicts`).
 
 ## Survey-level summaries
 
@@ -338,6 +338,12 @@ Some decisions are reported rather than hidden:
   (`loop_iterations = "observed"` forces the latter).
 - **Answers contradicting the flow** (answers in a block the flow skipped)
   are trusted and counted in `n_routing_conflicts`.
+- **Block randomisers** that show some of their elements ("present 1 of
+  3 blocks") are read from the export's display-order column
+  (`FL_xx_DO`). Without it, the elements shown are taken from the blocks
+  each respondent answered, with a warning, and counted in
+  `n_randomiser_fallbacks`. Include the display-order columns in the
+  export to avoid this.
 
 ## Next
 

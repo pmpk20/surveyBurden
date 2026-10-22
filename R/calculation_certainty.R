@@ -39,6 +39,10 @@
 #' @param overrides Optional named numeric vector of GfS+ points that replace
 #'   the computed score of the named questions, e.g. `c(QID51 = 10)`; counted
 #'   as `manual` in `scores`. See [burden_report()].
+#' @param field_domains Optional named list giving the values an
+#'   embedded-data field can hold, e.g. `list(SP_05 = 0:5)`. Passed to
+#'   [resolve_flow()]: branches on a declared field take only outcomes those
+#'   values produce, so an unreachable "none matches" path is dropped.
 #' @param choice_tasks Optional data frame declaring stated-choice tasks
 #'   (`question_id`, `n_alternatives`, `n_attributes`), scored by the GfS
 #'   stated-choice rule. Counted as `manual`. See
@@ -82,10 +86,12 @@
 calculation_certainty <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
                                   paths = NULL, scored = NULL, blocks = NULL,
                                   parsed_dl = NULL, max_condition_states = 10000L,
-                                  overrides = NULL, choice_tasks = NULL) {
+                                  overrides = NULL, choice_tasks = NULL,
+                                  field_domains = NULL) {
   validate_condition_states(max_condition_states)
   qsf    <- if (inherits(qsf, "qsf_raw")) qsf else read_qsf(qsf)
-  if (is.null(paths))  paths  <- resolve_paths(qsf, max_paths = max_paths)
+  if (is.null(paths))  paths  <- resolve_paths(qsf, max_paths = max_paths,
+                                               field_domains = field_domains)
   if (is.null(scored)) scored <- score_burden(parse_qsf(qsf), scheme = scheme)
   scored <- adjust_scores(scored, scheme, choice_tasks, overrides)
   if (is.null(blocks)) blocks <- resolve_live_blocks(qsf)

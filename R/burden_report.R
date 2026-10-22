@@ -119,6 +119,10 @@
 #'   and `score_basis = "user override"`. The same argument is accepted by
 #'   [path_burden()], [path_burden_profile()], [calculation_certainty()],
 #'   [respondent_burden()] and [validate_times()].
+#' @param field_domains Optional named list giving the values an
+#'   embedded-data field can hold, e.g. `list(SP_05 = 0:5)`. Passed to
+#'   [resolve_flow()]: branches on a declared field take only outcomes those
+#'   values produce, so an unreachable "none matches" path is dropped.
 #' @param choice_tasks Optional data frame declaring the survey's
 #'   stated-choice tasks, one row per question: `question_id`,
 #'   `n_alternatives` (count an opt-out such as "neither" as an alternative)
@@ -152,7 +156,8 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
                           max_paths = 10000L,
                           certainty = TRUE,
                           quiet = FALSE, max_condition_states = 10000L,
-                          overrides = NULL, choice_tasks = NULL) {
+                          overrides = NULL, choice_tasks = NULL,
+                          field_domains = NULL) {
   validate_condition_states(max_condition_states)
   step <- if (isTRUE(quiet)) function(...) invisible() else cli::cli_progress_step
 
@@ -168,7 +173,8 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
   scored    <- adjust_scores(score_burden(catalogue, scheme = scheme), scheme,
                              choice_tasks, overrides)
   blocks    <- resolve_live_blocks(qsf)
-  paths     <- resolve_paths(qsf, max_paths = max_paths, catalogue = catalogue, blocks = blocks)
+  paths     <- resolve_paths(qsf, max_paths = max_paths, catalogue = catalogue, blocks = blocks,
+                             field_domains = field_domains)
   isum      <- survey_summary(qsf, blocks = blocks)
   pb        <- path_burden(qsf, scheme = scheme, paths = paths, scored = scored)
   ppm    <- scheme$points_per_minute

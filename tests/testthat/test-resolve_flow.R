@@ -219,15 +219,16 @@ test_that("branches on different fields are separate groups", {
   expect_equal(nrow(paths), 9L)
 })
 
-test_that("a non-consecutive branch breaks the group", {
+test_that("non-adjacent branches on one field still agree on its value", {
   paths <- suppressMessages(enumerate_paths(list(
     n_ebranch("B1", "mode", "car", n_block("CAR")),
     n_block("MID"),
     n_ebranch("B2", "mode", "bus", n_block("BUS")),
     n_block("Z")
   )))
-  # B1 and B2 separated by a block -> not grouped -> 2 * 2 = 4 paths
-  expect_equal(nrow(paths), 4L)
+  # mode is car, bus or something else: CAR and BUS never share a path
+  seqs <- vapply(paths$block_ids, paste, "", collapse = ">")
+  expect_setequal(seqs, c("CAR>MID>Z", "MID>BUS>Z", "MID>Z"))
 })
 
 test_that("a single EmbeddedField branch is not grouped", {
@@ -249,10 +250,9 @@ test_that("ungroupable branch in the middle breaks the run into two groups", {
     n_ebranch("B4", "mode", "walk", n_block("WALK")),
     n_block("Z")
   )))
-  # first group: mode {car,bus} -> 3 outcomes
-  # Q1: 2 outcomes
-  # second group: mode {rail,walk} -> 3 outcomes (same field but separated)
-  expect_equal(nrow(paths), 3L * 2L * 3L)
+  # mode is car, bus, rail, walk or something else (5), each with Q1 taken
+  # or not (2); the two groups test the same field, so they agree
+  expect_equal(nrow(paths), 5L * 2L)
 })
 
 # --- joint evaluation of comparisons on one field ---
@@ -320,6 +320,9 @@ test_that("Zeitkostenstudie SP gets 525 paths with exclusive branch detection", 
   # 4 groups: SP_05(6), SP_67(2), SP_8(4), SP_9(4) -> (6+1)*(2+1)*(4+1)*(4+1)
   expect_equal(nrow(paths), 525L)
   expect_equal(sum(paths$terminates_early), 0L)
+  # declared exhaustive: no "none matches" path, 6 * 2 * 4 * 4
+  dom <- list(SP_05 = 0:5, SP_67 = 6:7, SP_8 = c(8, 88, 888, 8888), SP_9 = c(9, 99, 999, 9999))
+  expect_equal(nrow(suppressMessages(resolve_flow(qsf, field_domains = dom))), 192L)
 })
 
 # --- integration: INFUZE Part A (owner / non-owner gates on a vehicle count) ---

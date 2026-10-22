@@ -14,6 +14,10 @@
 #' @param overrides Optional named numeric vector of GfS+ points that replace
 #'   the computed score of the named questions, e.g. `c(QID51 = 10)`. See
 #'   [burden_report()].
+#' @param field_domains Optional named list giving the values an
+#'   embedded-data field can hold, e.g. `list(SP_05 = 0:5)`. Passed to
+#'   [resolve_flow()]: branches on a declared field take only outcomes those
+#'   values produce, so an unreachable "none matches" path is dropped.
 #' @param choice_tasks Optional data frame declaring stated-choice tasks
 #'   (`question_id`, `n_alternatives`, `n_attributes`), scored by the GfS
 #'   stated-choice rule. See [burden_report()].
@@ -31,8 +35,9 @@
 #' @export
 path_burden <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
                         paths = NULL, scored = NULL, overrides = NULL,
-                        choice_tasks = NULL) {
-  if (is.null(paths))  paths  <- resolve_paths(qsf, max_paths = max_paths)
+                        choice_tasks = NULL, field_domains = NULL) {
+  if (is.null(paths))  paths  <- resolve_paths(qsf, max_paths = max_paths,
+                                               field_domains = field_domains)
   if (is.null(scored)) scored <- score_burden(parse_qsf(qsf), scheme = scheme)
   scored <- adjust_scores(scored, scheme, choice_tasks, overrides)
 

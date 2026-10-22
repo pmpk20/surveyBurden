@@ -11,7 +11,8 @@ path_burden(
   paths = NULL,
   scored = NULL,
   overrides = NULL,
-  choice_tasks = NULL
+  choice_tasks = NULL,
+  field_domains = NULL
 )
 }
 \arguments{
@@ -32,6 +33,11 @@ the computed score of the named questions, e.g. \code{c(QID51 = 10)}. See
 \item{choice_tasks}{Optional data frame declaring stated-choice tasks
 (\code{question_id}, \code{n_alternatives}, \code{n_attributes}), scored by the GfS
 stated-choice rule. See \code{\link[=burden_report]{burden_report()}}.}
+
+\item{field_domains}{Optional named list giving the values an
+embedded-data field can hold, e.g. \code{list(SP_05 = 0:5)}. Passed to
+\code{\link[=resolve_flow]{resolve_flow()}}: branches on a declared field take only outcomes those
+values produce, so an unreachable "none matches" path is dropped.}
 }
 \value{
 A \link[tibble:tibble]{tibble}, one row per flow path:

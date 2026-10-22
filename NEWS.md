@@ -1,5 +1,18 @@
 # surveyBurden (development version)
 
+* Path enumeration now follows embedded-field values along each path. A
+  field tested by simple comparisons (`=`, `!=`, `>`, `>=`, `<`, `<=`)
+  holds one value on a path, so branches on it agree even when they are not
+  adjacent; a fixed value set in the flow, including one chosen by a block
+  randomiser, decides later branches until the field is set again; a piped
+  value makes it unknown again.
+* New `field_domains` argument in `resolve_flow()`, `resolve_paths()`,
+  `burden_report()`, `path_burden()`, `path_burden_profile()` and
+  `calculation_certainty()`: a named list of the values each field can hold
+  (e.g. `list(SP_05 = 0:5)`). Branches on a declared field are enumerated
+  only for those values, so the "none matches" path of a run of equality
+  tests is dropped when every value matches a branch.
+
 * `validate_times()`: the headline `implied_points_per_minute` is now the
   median predicted points divided by the median observed minutes over the
   kept respondents. The previous through-origin regression rate, which a

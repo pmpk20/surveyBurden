@@ -4,13 +4,20 @@
 \alias{resolve_flow}
 \title{Enumerate the structural paths through the survey flow}
 \usage{
-resolve_flow(qsf, max_paths = 10000L)
+resolve_flow(qsf, max_paths = 10000L, field_domains = NULL)
 }
 \arguments{
 \item{qsf}{A \code{qsf_raw} object from \code{\link[=read_qsf]{read_qsf()}}.}
 
 \item{max_paths}{Cap on the number of distinct paths. If the flow would
 produce more, an error is raised rather than a partial result.}
+
+\item{field_domains}{Optional named list giving, for an embedded-data
+field, every value it can hold, e.g. \code{list(SP_05 = 0:5)} (values are
+compared as text or numbers like Qualtrics does; \code{NA} stands for an
+empty field). Branches on a declared field are enumerated only for those
+values. A value set in the flow still takes precedence. Naming a field
+no branch tests gives a warning.}
 }
 \value{
 A \link[tibble:tibble]{tibble}, one row per distinct path:
@@ -37,12 +44,21 @@ path space} -- every block sequence a respondent could encounter -- without
 any assumption about branch probabilities.
 }
 \details{
-Field values are unrestricted: a field may hold any value or be empty, so
-an outcome such as "neither \verb{> 0} nor \verb{= 0}" (a negative or empty field) is
-kept. The enumeration is therefore an upper bound under unrestricted field
-values. Where a survey's own code limits a field's values (for example,
-question JavaScript that always writes a count), some enumerated paths may
-be impossible in practice. \code{resolve_flow()} reports branch fields it finds
+A field holds one value along a path, so every branch on it agrees with
+that value, whether or not the branches are adjacent. A fixed value set in
+the flow (an embedded-data assignment, including one chosen by a block
+randomiser) decides the branches after it, until the field is set again;
+a piped or computed value (\verb{$\{...\}}) makes it unknown again.
+
+Otherwise field values are unrestricted: a field may hold any value or be
+empty, so an outcome such as "neither \verb{> 0} nor \verb{= 0}" (a negative or
+empty field) is kept, and a run of equality tests keeps a "none matches"
+path. The enumeration is therefore an upper bound under unrestricted field
+values. When a field can only hold certain values (for example a panel
+field coded 0 to 5), declare them in \code{field_domains} to drop the paths no
+declared value can produce. Where a survey's own code limits a field's
+values (for example, question JavaScript that always writes a count), some
+enumerated paths may be impossible in practice. \code{resolve_flow()} reports branch fields it finds
 assigned in question JavaScript, so these cases can be checked; it does not
 interpret the code, and it may not detect every assignment.
 
@@ -54,5 +70,8 @@ qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
                          package = "surveyBurden")
 flow <- resolve_flow(read_qsf(qsf_path))
 flow[, c("path_id", "terminates_early")]
+\dontrun{
+resolve_flow(read_qsf("survey.qsf"), field_domains = list(group = c("1", "2")))
+}
 
 }

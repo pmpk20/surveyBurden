@@ -19,7 +19,8 @@ burden_report(
   quiet = FALSE,
   max_condition_states = 10000L,
   overrides = NULL,
-  choice_tasks = NULL
+  choice_tasks = NULL,
+  field_domains = NULL
 )
 
 \method{summary}{burden_report}(object, ...)
@@ -103,6 +104,11 @@ attribute: a 2-alternative, 4-attribute task scores 2 + 4 = 6 points.
 Declared tasks are flagged \code{"manual"}. \code{overrides} are applied after
 \code{choice_tasks}, so an override wins. The same argument is accepted by
 the functions that take \code{overrides}.}
+
+\item{field_domains}{Optional named list giving the values an
+embedded-data field can hold, e.g. \code{list(SP_05 = 0:5)}. Passed to
+\code{\link[=resolve_flow]{resolve_flow()}}: branches on a declared field take only outcomes those
+values produce, so an unreachable "none matches" path is dropped.}
 
 \item{object}{A \code{burden_report} from \code{\link[=burden_report]{burden_report()}}.}
 

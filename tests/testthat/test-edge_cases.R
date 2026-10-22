@@ -75,10 +75,13 @@ test_that("a long descriptive block scores above the descriptive base", {
   expect_gt(sc$gfs_points[sc$question_id == "QID_longdb"], w$descriptive_base)
 })
 
-test_that("the flow resolver handles a BlockRandomizer (all sub-blocks, order kept)", {
-  expect_warning(f <- resolve_flow(sx()), "BlockRandomizer")
+test_that("the flow resolver honours a BlockRandomizer subset (1 of 2)", {
+  # changed in M5: previously every sub-block was shown, with a warning
+  expect_no_warning(f <- suppressMessages(resolve_flow(sx())))
   bids <- unique(unlist(f$block_ids))
   expect_true(all(c("BL_intro", "BL_empty") %in% bids))
+  both <- vapply(f$block_ids, function(b) all(c("BL_intro", "BL_empty") %in% b), logical(1))
+  expect_false(any(both))
 })
 
 test_that("nested branches resolve and the inner-branch block is reachable", {

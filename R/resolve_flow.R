@@ -329,12 +329,23 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
       # failed authentication never yields a response, so only that flow counts
       outcomes(c(node[["Flow"]] %||% list(), rest))
     } else if (type == "BlockRandomizer") {
-      # a randomiser holding only embedded-data assignments (random condition
-      # assignment) shows no blocks, so it cannot change burden: no warning
-      if (flow_has_blocks(node[["Flow"]] %||% list())) {
+      children <- node[["Flow"]] %||% list()
+      m <- randomiser_subset(node)
+      if (!flow_has_blocks(children) || (!is.na(m) && m >= length(children))) {
+        # a randomiser holding only embedded-data assignments (random condition
+        # assignment) shows no blocks, so it cannot change burden; one showing
+        # every child shows them all (order does not change burden)
+        outcomes(c(children, rest))
+      } else if (is.na(m)) {
         randomisers <<- c(randomisers, node$FlowID %||% node$ID %||% "BlockRandomizer")
+        outcomes(c(children, rest))
+      } else {
+        # show m of the children: one outcome per combination, survey order
+        n_comb <- choose(length(children), m)
+        if (n_comb > max_paths) path_space_abort(max_paths, nodes)
+        do.call(c, lapply(utils::combn(length(children), m, simplify = FALSE),
+                          function(ix) outcomes(c(children[ix], rest))))
       }
-      outcomes(c(node[["Flow"]] %||% list(), rest))
     } else if (type == "WebService") {
       # a web-service call shows nothing; it can set embedded fields, which
       # branches then treat like any other field (both outcomes enumerated)
@@ -348,13 +359,7 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
     }
 
     res <- dedupe(res)
-    if (length(res) > max_paths) {
-      cli::cli_abort(c(
-        "This survey's path space is too large to enumerate.",
-        i = "More than {max_paths} distinct paths; the flow has {count_branches(nodes)} branches.",
-        i = "Raise {.arg max_paths} (e.g. {.code burden_report(x, max_paths = 50000)}) or treat this as a diagnostic finding (intractable routing)."
-      ))
-    }
+    if (length(res) > max_paths) path_space_abort(max_paths, nodes)
     memo[[key]] <- res
     res
   }
@@ -381,8 +386,8 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
   randomisers <- unique(randomisers)
   if (length(randomisers)) {
     cli::cli_warn(c(
-      paste("{length(randomisers)} BlockRandomizer{?s} in the flow; treating all",
-            "sub-blocks as shown, in survey order (randomised subsets not enumerated)."),
+      paste("{length(randomisers)} BlockRandomizer{?s} in the flow without a readable",
+            "number of elements to show; treating all sub-blocks as shown, in survey order."),
       i = "Affected flow node{?s}: {.val {randomisers}}"
     ))
   }
@@ -396,6 +401,27 @@ enumerate_paths <- function(nodes, max_paths = 10000L) {
       if (length(d) == 0L) logical(0) else unlist(d)
     })
   )
+}
+
+#' Stop: the path space exceeds `max_paths`.
+#' @noRd
+path_space_abort <- function(max_paths, nodes) {
+  cli::cli_abort(c(
+    "This survey's path space is too large to enumerate.",
+    i = "More than {max_paths} distinct paths; the flow has {count_branches(nodes)} branches.",
+    i = "Raise {.arg max_paths} (e.g. {.code burden_report(x, max_paths = 50000)}) or treat this as a diagnostic finding (intractable routing)."
+  ))
+}
+
+#' How many of its children a BlockRandomizer shows (`SubSet`, a number or a
+#' string); `NA` when missing or not a positive whole number.
+#' @noRd
+randomiser_subset <- function(node) {
+  x <- node[["SubSet"]]
+  if (length(x) != 1L) return(NA_integer_)
+  m <- suppressWarnings(as.numeric(as.character(x)))
+  if (is.na(m) || m < 1 || m != round(m)) return(NA_integer_)
+  as.integer(m)
 }
 
 #' Count Branch nodes anywhere in a flow-node list

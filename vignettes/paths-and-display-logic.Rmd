@@ -53,8 +53,13 @@ sum(report$paths$status == "complete")
 sum(report$paths$status == "screen_out")
 ```
 
-Block randomisers are treated as "all sub-blocks shown, in survey order"
--- the randomised subsets are not enumerated. The path space is
+A block randomiser that shows `m` of its `M` elements ("present 1 of 3
+blocks") is enumerated as one path per combination of elements, each in
+survey order; order does not change burden. With even presentation each
+combination is equally likely, which matches the equal weight each path
+gets. When the number shown cannot be read, every element is treated as
+shown, with a warning. A randomiser holding only embedded-data
+assignments shows nothing and adds no paths. The path space is
 enumerated up to `max_paths` (10000); a flow that would produce more
 raises an error rather than a partial answer.
 

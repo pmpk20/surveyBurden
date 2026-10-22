@@ -54,6 +54,11 @@ An object of class \code{calculation_certainty} (list):
 Both outcomes of every branch are always enumerated, so a branch is not
 an approximation -- but which outcome a given respondent takes is
 unknown before fieldwork.}
+\item{randomisers}{One row per \code{BlockRandomizer}: \code{flow_id},
+\code{n_children}, \code{subset} (how many it shows; \code{NA} when not readable),
+\code{shows_blocks} (\code{FALSE} for a randomiser of embedded-data
+assignments) and \code{enumerated} (\code{TRUE} when the subset was read, so
+each combination of elements is a separate path).}
 \item{display_logic}{\code{n_conditional} questions gated by an unresolved
 condition on some full path; \code{n_exact} scored by exact joint
 enumeration of their gate states; \code{n_approx} scored with the

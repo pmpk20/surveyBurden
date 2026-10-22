@@ -1,5 +1,14 @@
 # surveyBurden (development version)
 
+* Block randomisers that show a subset of their elements ("present 1 of 3
+  blocks", the QSF's `SubSet`) are now enumerated as one path per
+  combination of elements, instead of every element being shown on one
+  path. This lowers the burden of affected paths, which was overstated.
+  When the subset cannot be read, every element is still treated as shown,
+  with a warning (now only in that case). `calculation_certainty()` gains a
+  `randomisers` table. `respondent_burden()` is unchanged: it still treats
+  every element of a block randomiser as shown.
+
 * Display logic on a stored (embedded data) field is now evaluated against
   the field's value. Previously every comparison on a field shared one
   true/false gate, so items shown for `grp == 1` and for `grp == 2` were

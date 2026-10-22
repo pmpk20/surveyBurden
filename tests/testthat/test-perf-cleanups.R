@@ -2,9 +2,21 @@
 # refactor did not change an observable contract.
 
 # --- R6: one combined BlockRandomizer warning, not one per randomiser ---------
+# Since M5 a randomiser warns only when its subset size cannot be read, so
+# these tests remove `SubSet` from the fixture's randomiser.
+
+no_subset_qsf <- function() {
+  q  <- read_qsf(test_path("fixtures/synthetic_edge_cases.qsf"))
+  fl <- which(vapply(q$SurveyElements,
+                     function(e) identical(e$Element, "FL"), logical(1)))
+  flow <- q$SurveyElements[[fl]]$Payload$Flow
+  rnd  <- which(vapply(flow, function(n) identical(n$Type, "BlockRandomizer"), logical(1)))
+  for (i in rnd) q$SurveyElements[[fl]]$Payload$Flow[[i]]$SubSet <- NULL
+  q
+}
 
 test_that("multiple BlockRandomizers raise a single combined warning naming them", {
-  q  <- read_qsf(test_path("fixtures/synthetic_edge_cases.qsf"))
+  q  <- no_subset_qsf()
   fl <- which(vapply(q$SurveyElements,
                      function(e) identical(e$Element, "FL"), logical(1)))
   flow  <- q$SurveyElements[[fl]]$Payload$Flow
@@ -21,8 +33,7 @@ test_that("multiple BlockRandomizers raise a single combined warning naming them
 })
 
 test_that("a single BlockRandomizer still warns once", {
-  warns <- testthat::capture_warnings(
-    resolve_flow(read_qsf(test_path("fixtures/synthetic_edge_cases.qsf"))))
+  warns <- testthat::capture_warnings(resolve_flow(no_subset_qsf()))
   expect_length(grep("andomiz|andomis", warns, value = TRUE), 1L)
 })
 

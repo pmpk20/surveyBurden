@@ -15,9 +15,14 @@
 #' carries equal total weight there.
 #'
 #' Each display-logic trigger is a *gate*: a single-choice question contributes
-#' its referenced choices as mutually exclusive states; a multi-select or
-#' embedded field contributes binary states; a Loop & Merge block contributes
-#' iteration counts `1..max`. Conditional questions are grouped into coupling
+#' its referenced choices as mutually exclusive states; a multi-select
+#' contributes the subsets of its referenced choices; a stored (embedded data)
+#' field contributes one state per distinguishable value class of the
+#' comparisons made on it (each referenced value, the ranges between
+#' thresholds, any other value, empty), so conditions on different values of
+#' one field are mutually exclusive; a comparison the package cannot evaluate
+#' (such as `Contains`) is a free true/false gate; a Loop & Merge block
+#' contributes iteration counts `1..max`. Conditional questions are grouped into coupling
 #' components (two questions couple if they share a gate, directly or through a
 #' chain of shared gates). A component with at most `max_condition_states` joint gate-states is
 #' **enumerated exactly** -- every joint combination of its gates' states,
@@ -383,7 +388,13 @@ group_sum <- function(burden, weight) {
 #' @noRd
 gate_states <- function(v, deps, parsed, stype, off = character(0)) {
   if (v %in% off) return(list(character(0)))   # never shown: unanswered
-  if (startsWith(v, "@")) return(list(TRUE, FALSE))
+  if (startsWith(v, "@")) {
+    cmp <- unlist(lapply(deps, function(q) parsed[[q]]$fields[[v]]), recursive = FALSE)
+    if (!length(cmp)) return(list(TRUE, FALSE))  # free binary gate
+    ops    <- vapply(cmp, `[[`, character(1), "op")
+    values <- vapply(cmp, `[[`, character(1), "value")
+    return(as.list(field_value_classes(ops, values)))
+  }
   refs <- unique(unlist(lapply(deps, function(q) lits_refs(parsed[[q]], v))))
   if (length(refs) == 0) return(list(TRUE, FALSE))
   if (identical(stype[[v]] %||% "", "single_choice")) {

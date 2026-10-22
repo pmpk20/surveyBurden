@@ -100,11 +100,20 @@ test_that("missing group Type falls back to AND (pre-2026-09 behaviour)", {
   expect_false(p$predicate(list(QID9 = "1", QID12 = "2")))
 })
 
-test_that("embedded-field literals become a free binary gate", {
+test_that("embedded-field comparisons are evaluated against the field's value", {
+  # changed in M2: previously a free binary gate keyed by the field name
   p <- parse_display_logic(dl_of(grp(lit_embed("source", val = "household"))))
   expect_identical(p$vars, "@source")
-  expect_true(p$predicate(list(`@source` = TRUE)))
-  expect_false(p$predicate(list(`@source` = FALSE)))
+  expect_true(p$predicate(list(`@source` = "household")))
+  expect_false(p$predicate(list(`@source` = "panel")))
+  expect_false(p$predicate(list(`@source` = NA_character_)))
+})
+
+test_that("embedded-field operators that cannot be evaluated stay a free binary gate", {
+  p <- parse_display_logic(dl_of(grp(lit_embed("source", op = "Contains", val = "house"))))
+  expect_identical(p$vars, "@?source")
+  expect_true(p$predicate(list(`@?source` = TRUE)))
+  expect_false(p$predicate(list(`@?source` = FALSE)))
 })
 
 test_that("Displayed operator resolves against the shown map", {

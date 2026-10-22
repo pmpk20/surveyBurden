@@ -1,5 +1,16 @@
 # surveyBurden (development version)
 
+* Display logic on a stored (embedded data) field is now evaluated against
+  the field's value. Previously every comparison on a field shared one
+  true/false gate, so items shown for `grp == 1` and for `grp == 2` were
+  either both shown or both hidden. The field's states are now its
+  distinguishable value classes (each referenced value, the ranges between
+  thresholds, any other value, empty), using the same evaluation as flow
+  branches, so such items are mutually exclusive. Burden profiles and
+  certainty counts can change for surveys with field-based display logic.
+  Comparisons the package cannot evaluate (such as `Contains`) remain a free
+  true/false gate, counted in `calculation_certainty()$display_logic$n_binary_field_gates`.
+
 * Stated-choice tasks can now be scored with the GfS stated-choice rule.
   Declare them with the new `choice_tasks` argument (a data frame of
   `question_id`, `n_alternatives`, `n_attributes`) in `burden_report()`,

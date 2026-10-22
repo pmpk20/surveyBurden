@@ -10,20 +10,32 @@
 #' set of gate variables the logic reads and a function that evaluates the
 #' logic against an assignment of those variables.
 #'
+#' Stored fields: an `EmbeddedField` literal whose operator is a comparison
+#' (`EqualTo`, `NotEqualTo`, `GreaterThan`, `GreaterThanOrEqual`, `LessThan`,
+#' `LessThanOrEqual`) is evaluated against a value of the field: gate
+#' `"@<field>"`, whose states are the field's distinguishable value classes
+#' (see `field_value_classes()`), so literals on the same field are evaluated
+#' jointly.
+#'
 #' Approximations (documented, for the enumeration in [path_burden_profile()]):
 #' \itemize{
-#'   \item `EmbeddedField` and `LoopAndMerge` literals become a free binary gate
-#'     (the actual comparison is not evaluated -- both outcomes are enumerated).
-#'   \item Unrecognised question operators also become a free binary gate.
+#'   \item `EmbeddedField` literals with any other operator become a free
+#'     binary gate `"@?<field>"` (the comparison is not evaluated -- both
+#'     outcomes are enumerated); [calculation_certainty()] counts them.
+#'   \item `LoopAndMerge` literals and unrecognised question operators also
+#'     become a free binary gate.
 #' }
 #'
 #' @param dl A `Payload$DisplayLogic` list.
 #'
 #' @return `list(vars, predicate)`. `vars` is a character vector of gate names
-#'   (a `QID` for question literals, `"@<operand>"` for free gates). `predicate`
-#'   is `function(state, shown = NULL)`: `state[[qid]]` is a character vector of
-#'   selected choice-locator tails; `state[["@x"]]` is a logical; `shown[[qid]]`
-#'   is whether that question was displayed (for the `Displayed` operator).
+#'   (a `QID` for question literals, `"@<field>"` for evaluable stored fields,
+#'   `"@?<field>"` or `"@<operand>"` for free gates). `predicate` is
+#'   `function(state, shown = NULL)`: `state[[qid]]` is a character vector of
+#'   selected choice-locator tails; `state[["@<field>"]]` is the field's value
+#'   (`NA` when empty); a free gate's state is a logical; `shown[[qid]]` is
+#'   whether that question was displayed (for the `Displayed` operator).
+#'   `fields` maps each evaluable field gate to its `(op, value)` comparisons.
 #' @noRd
 parse_display_logic <- function(dl) {
   group_keys <- setdiff(names(dl), c("Type", "inPage"))
@@ -41,12 +53,16 @@ parse_display_logic <- function(dl) {
 
   vars <- character(0)
   refs <- list()
+  fields <- list()
   parsed_groups <- lapply(groups, function(lits) {
     lapply(lits, function(lit) {
       pl <- parse_literal(lit)
       vars <<- c(vars, pl$var)
       if (!is.null(pl$ref_tail) && !startsWith(pl$var, "@")) {
         refs[[pl$var]] <<- unique(c(refs[[pl$var]], pl$ref_tail))
+      }
+      if (!is.null(pl$field_cmp)) {
+        fields[[pl$var]] <<- c(fields[[pl$var]], list(pl$field_cmp))
       }
       pl
     })
@@ -84,7 +100,7 @@ parse_display_logic <- function(dl) {
   displayed <- unlist(lapply(parsed_groups, function(lits)
     unlist(lapply(lits, function(pl) pl$displayed_qid))))
 
-  list(vars = unique(vars), predicate = predicate, refs = refs,
+  list(vars = unique(vars), predicate = predicate, refs = refs, fields = fields,
        displayed = unique(displayed), possible = possible)
 }
 
@@ -121,7 +137,32 @@ parse_literal <- function(lit) {
                 eval = function(state, shown) isTRUE(state[[fv]])))
   }
 
-  # EmbeddedField / LoopAndMerge / anything else -> free binary gate
+  field <- lit$LeftOperand %||% ""
+  if (identical(logic_type, "EmbeddedField") && nzchar(field)) {
+    if (op %in% branch_ops) {
+      # evaluated against the field's value; literals on one field share a gate
+      fv  <- paste0("@", field)
+      rhs <- as.character(lit$RightOperand %||% "")
+      # a gate takes only a few values but is evaluated once per joint state:
+      # cache the result per value
+      memo <- new.env(parent = emptyenv())
+      ev <- function(state, shown) {
+        x <- state[[fv]]
+        if (is.null(x)) x <- NA_character_
+        key <- if (is.na(x)) "\001NA" else x
+        hit <- memo[[key]]
+        if (is.null(hit)) hit <- memo[[key]] <- eval_branch_op(op, x, rhs)
+        hit
+      }
+      return(list(var = fv, conj = conj, eval = ev,
+                  field_cmp = list(op = op, value = rhs)))
+    }
+    # a comparison we cannot evaluate: free binary gate, kept apart
+    fv <- paste0("@?", field)
+    return(list(var = fv, conj = conj, eval = function(state, shown) isTRUE(state[[fv]])))
+  }
+
+  # LoopAndMerge / anything else -> free binary gate
   fv <- paste0("@", lit$LeftOperand %||% "field")
   list(var = fv, conj = conj, eval = function(state, shown) isTRUE(state[[fv]]))
 }

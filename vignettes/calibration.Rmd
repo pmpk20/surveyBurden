@@ -18,7 +18,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
 **What you need.** A `.qsf`; for validation, the response export, with completion times.
 
-**What it cannot establish.** An implied points-per-minute rate is rough, trim-sensitive and specific to one survey. Burden scores do not predict dropout, satisficing or data quality.
+**What it cannot establish.** An implied points-per-minute rate is rough and specific to one survey. Burden scores do not predict dropout, satisficing or data quality.
 
 This vignette covers two assumptions in the pipeline --
 words-to-lines and points-to-minutes -- and the limitations of the
@@ -101,10 +101,13 @@ Reading the output:
 - `cor` is the correlation of respondent burden with observed minutes.
   Completion times vary for many reasons besides survey content, so
   expect it to be small on real data.
-- `implied_points_per_minute` is `60 / b`, where `b` is the slope, in
-  seconds per point, of a through-origin fit of observed seconds on
-  predicted points. It is a rough, trim-sensitive rate for this survey,
-  not a calibrated constant.
+- `implied_points_per_minute` is the median respondent burden divided by
+  the median observed time, over the respondents kept. Medians keep a few
+  respondents who left the survey open from dominating it. It is a rough
+  rate for this survey, not a calibrated constant.
+- `ols_points_per_minute` is the older estimate, `60 / b` from a
+  through-origin fit of observed seconds on predicted points. Long
+  completion times dominate it, so treat it as a comparison only.
 
 To use that rate:
 

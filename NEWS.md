@@ -1,5 +1,14 @@
 # surveyBurden (development version)
 
+* `validate_times()`: the headline `implied_points_per_minute` is now the
+  median predicted points divided by the median observed minutes over the
+  kept respondents. The previous through-origin regression rate, which a
+  few very long completion times dominate, is kept as
+  `ols_points_per_minute` (with `lm`) but no longer printed as the headline.
+  The print method now labels the rate and says how many rows `trim`
+  dropped; the result gains `n_trimmed`, `trim` and `observed_minutes`.
+  The default `trim = c(3, 180)` is unchanged and now documented.
+
 * Block randomisers that show a subset of their elements ("present 1 of 3
   blocks", the QSF's `SubSet`) are now enumerated as one path per
   combination of elements, instead of every element being shown on one

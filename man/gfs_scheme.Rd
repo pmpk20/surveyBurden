@@ -44,9 +44,24 @@ Stated choice question, 3 alternatives \tab 3.0 \tab \code{sc_3_alt} \cr
 Per SC variable, per question \tab 1.0 \tab \code{sc_per_variable} \cr
 }
 
-Reference only: \code{rank_per_item}, \code{open_medium}, \code{please_specify},
-\code{open_essay_per_extra}, \code{filter}, \code{branching}, \code{sc_2_alt}, \code{sc_3_alt} and
-\code{sc_per_variable} are transcribed for completeness but not read by any
+Stated choice: \code{sc_2_alt}, \code{sc_3_alt} and \code{sc_per_variable} score the
+tasks you declare with the \code{choice_tasks} argument of \code{\link[=burden_report]{burden_report()}}
+and the other burden functions. A QSF does not mark choice tasks, so they
+are never applied automatically; \code{\link[=suggest_choice_tasks]{suggest_choice_tasks()}} lists likely
+candidates.
+
+Filter and branching: \code{filter} and \code{branching} are added only when
+\code{apply_filter_branching} is \code{TRUE} (default \code{FALSE}). A question then earns
+\code{filter} if its answer drives another question's display logic and
+\code{branching} if its answer is tested by a branch in the survey flow, so at
+most both. Only answered questions earn them; embedded data fields,
+randomiser assignments, loop and quota conditions, and \code{Displayed}
+conditions do not. GfS budgets interviewer-administered surveys, where an
+interviewer applies each filter; in a web survey the software does, so
+the default leaves them out. Turn it on to match a manual GfS count.
+
+Reference only: \code{rank_per_item}, \code{open_medium}, \code{please_specify} and
+\code{open_essay_per_extra} are transcribed for completeness but not read by any
 automatic rule in \code{\link[=score_burden]{score_burden()}}, so changing them does not change
 scores. \code{vignette("gfs-scoring")} lists the rule used for each question
 type.
@@ -63,6 +78,11 @@ for grid working-memory efficiency. This is orientation-invariant -- the
 score does not depend on which axis the QSF stored as rows. A documented
 inference, not GfS; the vignette describes the alternatives that were
 considered.}
+\item{\code{sc_per_extra_alt}}{1.0 -- each stated-choice alternative beyond
+three. GfS Table 1 stops at three alternatives (2.0, 3.0); this
+continues its one point per alternative.}
+\item{\code{apply_filter_branching}}{\code{FALSE} -- switch for the GfS filter and
+branching points (see above).}
 \item{\code{points_per_minute}}{12 -- the published GfS rule of thumb ("twelve
 points roughly correspond to a one-minute response time", Heimgartner &
 Axhausen 2024). Overridable: set \code{s$points_per_minute} on the returned

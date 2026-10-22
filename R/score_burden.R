@@ -14,6 +14,10 @@
 #' explicit, documented inference rule. `score_flag` and `score_basis` say
 #' which case each item is.
 #'
+#' With `scheme$apply_filter_branching = TRUE`, a question whose answer drives
+#' display logic or a flow branch also gains the GfS `filter` / `branching`
+#' points (see [gfs_scheme()]), flagged at least `"inferred"`.
+#'
 #' @param catalogue A tibble from [parse_qsf()].
 #' @param scheme A named list of scheme; defaults to [gfs_scheme()].
 #'
@@ -46,11 +50,30 @@ score_burden <- function(catalogue, scheme = gfs_scheme()) {
                  function(i) lapply(cols, function(col) col[[i]]))
   scored <- lapply(rows, score_item, scheme)
 
-  gfs <- vapply(scored, `[[`, numeric(1), "gfs_points")
+  gfs   <- vapply(scored, `[[`, numeric(1), "gfs_points")
+  flag  <- vapply(scored, `[[`, character(1), "score_flag")
+  basis <- vapply(scored, `[[`, character(1), "score_basis")
+
+  if (isTRUE(scheme$apply_filter_branching)) {
+    # GfS filter / branching: 0.5 per role on the answered question whose
+    # answer drives display logic or a flow branch.
+    f <- catalogue$filter_trigger %in% TRUE
+    b <- catalogue$branch_trigger %in% TRUE
+    hit <- (f | b) & !is.na(gfs) & !(catalogue$is_hidden %in% TRUE) &
+      !catalogue$std_type %in% c("descriptive", "timing", "meta", "captcha")
+    gfs[hit] <- gfs[hit] + scheme$filter * f[hit] + scheme$branching * b[hit]
+    role <- ifelse(f & b, sprintf("GfS filter %.1f + branching %.1f", scheme$filter, scheme$branching),
+                   ifelse(f, sprintf("GfS filter %.1f", scheme$filter),
+                          sprintf("GfS branching %.1f", scheme$branching)))
+    basis[hit] <- paste0(basis[hit], "; + ", role[hit],
+                         " (its answer drives later routing)")
+    flag[hit] <- vapply(flag[hit], escalate, character(1), to = "inferred")
+  }
+
   catalogue$gfs_points  <- gfs
   catalogue$est_seconds <- gfs / scheme$points_per_minute * 60
-  catalogue$score_flag  <- vapply(scored, `[[`, character(1), "score_flag")
-  catalogue$score_basis <- vapply(scored, `[[`, character(1), "score_basis")
+  catalogue$score_flag  <- flag
+  catalogue$score_basis <- basis
   catalogue
 }
 
@@ -83,13 +106,82 @@ score_overrides <- function(scored, overrides, scheme = gfs_scheme()) {
       i = "Use the ids in {.code score_burden()$question_id} (or {.code burden_report()$items})."
     ))
   }
-  i <- match(ids, scored$question_id)
-  scored$gfs_points[i]  <- unname(as.numeric(overrides))
+  set_item_scores(scored, match(ids, scored$question_id),
+                  unname(as.numeric(overrides)), "user override", scheme)
+}
+
+#' Score declared stated-choice tasks by the GfS stated-choice rows:
+#' `sc_2_alt` or `sc_3_alt` for the alternatives (`sc_per_extra_alt` for each
+#' beyond three, an extrapolation past GfS Table 1) plus `sc_per_variable` per
+#' attribute. `choice_tasks` is a data frame with `question_id`,
+#' `n_alternatives` and `n_attributes`. Scored items get
+#' `score_flag = "manual"` (the structure is declared by the user, not read
+#' from the QSF). `NULL` returns `scored` unchanged.
+#' @noRd
+score_choice_tasks <- function(scored, choice_tasks, scheme = gfs_scheme()) {
+  if (is.null(choice_tasks)) return(scored)
+  if (!is.data.frame(choice_tasks)) {
+    cli::cli_abort("{.arg choice_tasks} must be a data frame with columns {.field question_id}, {.field n_alternatives} and {.field n_attributes}.")
+  }
+  need <- c("question_id", "n_alternatives", "n_attributes")
+  miss <- setdiff(need, names(choice_tasks))
+  if (length(miss)) {
+    cli::cli_abort("{.arg choice_tasks} is missing {cli::qty(length(miss))}column{?s} {.field {miss}}; it needs {.field question_id}, {.field n_alternatives} and {.field n_attributes}.")
+  }
+  ids   <- as.character(choice_tasks$question_id)
+  alts  <- choice_tasks$n_alternatives
+  attrs <- choice_tasks$n_attributes
+  whole <- function(x) is.numeric(x) && !anyNA(x) && all(is.finite(x)) && all(x == round(x))
+  if (!whole(alts) || !whole(attrs) || any(attrs < 0)) {
+    cli::cli_abort("{.field n_alternatives} and {.field n_attributes} in {.arg choice_tasks} must be whole numbers, and {.field n_attributes} cannot be negative.")
+  }
+  if (any(alts < 2)) {
+    cli::cli_abort("A stated-choice task needs at least 2 alternatives ({.field n_alternatives}); count an opt-out such as {.val neither} as an alternative.")
+  }
+  dup <- unique(ids[duplicated(ids)])
+  if (length(dup)) {
+    cli::cli_abort("{.arg choice_tasks} lists {cli::qty(length(dup))}question{?s} more than once: {.val {dup}}.")
+  }
+  unknown <- setdiff(ids, scored$question_id)
+  if (length(unknown)) {
+    cli::cli_abort(c(
+      "{.arg choice_tasks} names {cli::qty(length(unknown))}question{?s} not in this survey: {.val {unknown}}.",
+      i = "Use the ids in {.code score_burden()$question_id} (or {.code burden_report()$items})."
+    ))
+  }
+  alt_pts <- ifelse(alts == 2, scheme$sc_2_alt,
+                    scheme$sc_3_alt + scheme$sc_per_extra_alt * (alts - 3))
+  pts <- alt_pts + scheme$sc_per_variable * attrs
+  basis <- sprintf(
+    "declared stated choice: %d alternatives (%.1f%s) + %d attributes x %.1f",
+    as.integer(alts), alt_pts,
+    ifelse(alts > 3,
+           sprintf(" = %.1f + %.1f per alternative beyond 3, beyond GfS Table 1",
+                   scheme$sc_3_alt, scheme$sc_per_extra_alt), ""),
+    as.integer(attrs), scheme$sc_per_variable)
+  set_item_scores(scored, match(ids, scored$question_id), pts, basis, scheme)
+}
+
+#' Apply the user's scoring adjustments to a [score_burden()] table, in a fixed
+#' order: declared stated-choice tasks, then overrides (an override is the
+#' final word on an item).
+#' @noRd
+adjust_scores <- function(scored, scheme = gfs_scheme(), choice_tasks = NULL,
+                          overrides = NULL) {
+  scored <- score_choice_tasks(scored, choice_tasks, scheme)
+  score_overrides(scored, overrides, scheme)
+}
+
+#' Set points, flag "manual" and basis for rows `i`, keeping `est_seconds` in
+#' step.
+#' @noRd
+set_item_scores <- function(scored, i, pts, basis, scheme) {
+  scored$gfs_points[i]  <- pts
   if ("est_seconds" %in% names(scored)) {
-    scored$est_seconds[i] <- scored$gfs_points[i] / scheme$points_per_minute * 60
+    scored$est_seconds[i] <- pts / scheme$points_per_minute * 60
   }
   scored$score_flag[i]  <- "manual"
-  scored$score_basis[i] <- "user override"
+  scored$score_basis[i] <- basis
   scored
 }
 

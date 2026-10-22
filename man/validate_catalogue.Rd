@@ -51,6 +51,10 @@ missing):
 \item{\code{has_validation}}{Logical. Whether a response is forced.}
 \item{\code{in_loop}}{Logical. Whether the question is inside a loop block.}
 \item{\code{loop_max}}{Integer. Maximum loop iterations (\code{NA} if not in loop).}
+\item{\code{filter_trigger}}{Logical. \code{TRUE} if the question's answer drives
+another question's display logic (a GfS filter).}
+\item{\code{branch_trigger}}{Logical. \code{TRUE} if the question's answer is
+tested by a branch in the survey flow (GfS branching).}
 \item{\code{flag}}{Character. Confidence flag (\code{"auto"}, \code{"inferred"},
 \code{"manual"}, or \code{"unknown"}).}
 }

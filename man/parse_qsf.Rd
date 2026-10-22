@@ -24,7 +24,9 @@ option labels, lowercased and joined; \code{NA} if none), \code{options_numeric}
 (HTML-stripped, truncated to 200 characters), \code{is_hidden} (\code{TRUE} if the
 question is hidden from the respondent via injected CSS/JS),
 \code{has_display_logic}, \code{display_logic_refs}, \code{has_validation}, \code{in_loop},
-\code{loop_max}, \code{flag}.
+\code{loop_max}, \code{filter_trigger} (\code{TRUE} if the question's answer drives
+another question's display logic), \code{branch_trigger} (\code{TRUE} if a flow
+branch tests its answer), \code{flag}.
 }
 \description{
 The Layer 1 entry point. Reads the file (or an already-loaded object),

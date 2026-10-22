@@ -14,6 +14,9 @@
 #' @param overrides Optional named numeric vector of GfS+ points that replace
 #'   the computed score of the named questions, e.g. `c(QID51 = 10)`. See
 #'   [burden_report()].
+#' @param choice_tasks Optional data frame declaring stated-choice tasks
+#'   (`question_id`, `n_alternatives`, `n_attributes`), scored by the GfS
+#'   stated-choice rule. See [burden_report()].
 #'
 #' @return A [tibble][tibble::tibble], one row per flow path:
 #'   `path_id`, `terminates_early`, `n_blocks`, `n_q_floor`, `n_q_ceiling`,
@@ -27,10 +30,11 @@
 #'
 #' @export
 path_burden <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
-                        paths = NULL, scored = NULL, overrides = NULL) {
+                        paths = NULL, scored = NULL, overrides = NULL,
+                        choice_tasks = NULL) {
   if (is.null(paths))  paths  <- resolve_paths(qsf, max_paths = max_paths)
   if (is.null(scored)) scored <- score_burden(parse_qsf(qsf), scheme = scheme)
-  scored <- score_overrides(scored, overrides, scheme)
+  scored <- adjust_scores(scored, scheme, choice_tasks, overrides)
 
   pts  <- stats::setNames(scored$gfs_points, scored$question_id)
   lmax <- stats::setNames(scored$loop_max, scored$question_id)

@@ -1,5 +1,29 @@
 # surveyBurden (development version)
 
+* Stated-choice tasks can now be scored with the GfS stated-choice rule.
+  Declare them with the new `choice_tasks` argument (a data frame of
+  `question_id`, `n_alternatives`, `n_attributes`) in `burden_report()`,
+  `path_burden()`, `path_burden_profile()`, `calculation_certainty()`,
+  `respondent_burden()` and `validate_times()`. A task scores 2.0 for two
+  alternatives, 3.0 for three and 1.0 more per alternative beyond three
+  (new `gfs_scheme()` element `sc_per_extra_alt`), plus 1.0 per attribute.
+  Declared tasks are flagged `"manual"`. Without `choice_tasks`, scores are
+  unchanged.
+
+* New `suggest_choice_tasks()` lists questions that look like stated-choice
+  tasks (a single choice with an HTML table in its stem or in the text
+  item before it, or with an image stem repeated in its block), with
+  guessed alternative and attribute counts, for you to check and pass to
+  `choice_tasks`. It never scores anything itself.
+
+* New `gfs_scheme()` switch `apply_filter_branching` (default `FALSE`, so
+  scores are unchanged). When `TRUE`, a question whose answer drives another
+  question's display logic gains the GfS `filter` points (0.5) and one whose
+  answer a flow branch tests gains the `branching` points (0.5). Embedded
+  data fields, randomiser assignments and `Displayed` conditions earn
+  nothing. `parse_qsf()` gains the columns `filter_trigger` and
+  `branch_trigger`; `validate_catalogue()` defaults them to `FALSE`.
+
 * New `overrides` argument in `burden_report()`, `path_burden()`,
   `path_burden_profile()`, `calculation_certainty()`, `respondent_burden()`
   and `validate_times()`: a named numeric vector of points, e.g.

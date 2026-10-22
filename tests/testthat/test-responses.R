@@ -244,7 +244,8 @@ test_that("one row per respondent, in input order, with the documented columns",
   expect_identical(names(rb), c(
     "response_id", "finished", "outcome", "points", "minutes", "items",
     "response_items", "pages", "furthest_order", "n_unresolved_items",
-    "n_unresolved_branches", "unresolved_loops", "n_routing_conflicts"))
+    "n_unresolved_branches", "unresolved_loops", "n_routing_conflicts",
+    "n_randomiser_fallbacks"))
   expect_equal(rb$finished, c(TRUE, TRUE, FALSE, FALSE))
 })
 

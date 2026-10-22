@@ -66,6 +66,17 @@
 #' did not route the respondent into) are trusted: the block counts as routed
 #' in, and the respondent's `n_routing_conflicts` is incremented.
 #'
+#' **Block randomisers.** A randomiser that shows every element needs no
+#' data. One that shows some of its elements ("present 1 of 3 blocks") is
+#' read from the export's display-order column, `FL_xx_DO` (`xx` from the
+#' randomiser's flow id), whose cell lists the elements shown, joined by
+#' `|`; an element can be named by its flow id, block id or block name.
+#' Where the column is missing, or a respondent's cell is blank or names no
+#' element, the elements shown are those holding a block the respondent
+#' answered, with a warning; such randomisers are counted in
+#' `n_randomiser_fallbacks`. A respondent who answered nothing in a shown
+#' element is then undercounted.
+#'
 #' @param qsf A `qsf_raw` object, a path to a `.qsf` file, or a survey id
 #'   accepted by [fetch_qsf()].
 #' @param responses A data frame of response data, or the path to a raw
@@ -153,6 +164,9 @@
 #'       recovered.}
 #'     \item{`n_routing_conflicts`}{Blocks with answers that the evaluated
 #'       flow did not route the respondent into (the answers are trusted).}
+#'     \item{`n_randomiser_fallbacks`}{Block randomisers whose shown
+#'       elements came from the respondent's answers, for want of a
+#'       display-order column (see Block randomisers).}
 #'   }
 #'
 #'   With `by = "block"`, a tibble with one row per respondent per live block,
@@ -251,7 +265,8 @@ per_respondent <- function(x, ppm) {
     n_unresolved_items    = r$n_unresolved_items,
     n_unresolved_branches = r$n_unresolved_branches,
     unresolved_loops      = r$unresolved_loops,
-    n_routing_conflicts   = r$n_routing_conflicts
+    n_routing_conflicts   = r$n_routing_conflicts,
+    n_randomiser_fallbacks = r$n_randomiser_fallbacks
   )
   attr(out, "points_per_minute") <- ppm
   out
@@ -380,7 +395,8 @@ respondent_blocks <- function(qsf, responses, scheme = gfs_scheme(), id_col = NU
 
   # ---- walk the flow -------------------------------------------------------
   walk <- exposure_walk(qsf, blocks, ctx, emb, ans_block, last_ans, fin,
-                        loop_iterations, furthest_ord)
+                        loop_iterations, furthest_ord,
+                        display_order = responses[grepl("^FL_.*_DO$", names(responses))])
 
   # ---- outcome ---------------------------------------------------------------
   # Screened out: the flow ended the survey early at a point the respondent
@@ -460,8 +476,19 @@ respondent_blocks <- function(qsf, responses, scheme = gfs_scheme(), id_col = NU
     n_unresolved_items    = as.integer(unres_items),
     n_unresolved_branches = as.integer(walk$unres_branch),
     unresolved_loops      = unres_loop | exit_random,
-    n_routing_conflicts   = as.integer(walk$conflicts)
+    n_routing_conflicts   = as.integer(walk$conflicts),
+    n_randomiser_fallbacks = as.integer(walk$rand_fallback)
   )
+  if (any(walk$rand_fallback > 0L)) {
+    cols <- walk$rand_missing
+    cli::cli_warn(c(
+      paste("No display order for {sum(walk$rand_fallback > 0L)} respondent{?s} at a block",
+            "randomiser that shows some of its elements: the elements shown were taken from",
+            "the blocks they answered."),
+      i = "Qualtrics exports the display order as {.field {cols}}; include {cli::qty(length(cols))}{?it/them} in the export.",
+      i = "See {.field n_randomiser_fallbacks}."
+    ))
+  }
   if (sum(respondents$n_unresolved_items) + sum(respondents$n_unresolved_branches) > 0L) {
     cli::cli_inform(c(
       i = paste("Logic not settled by the data for {sum(respondents$n_unresolved_items > 0 |",
@@ -960,7 +987,7 @@ qsf_elements_payload <- function(qsf, qid) {
 #' and display logic in flow order.
 #' @noRd
 exposure_walk <- function(qsf, blocks, ctx, emb, ans_block, last_ans, fin,
-                          loop_iterations, furthest_ord) {
+                          loop_iterations, furthest_ord, display_order = list()) {
   n <- ctx$n; nb <- nrow(blocks)
   st <- new.env(parent = emptyenv())
   st$alive <- rep(TRUE, n)
@@ -978,7 +1005,8 @@ exposure_walk <- function(qsf, blocks, ctx, emb, ans_block, last_ans, fin,
   st$unres <- list()       # qid -> logical vector / matrix: fell back to answered
   st$iters <- list()       # block id -> logical matrix n x iteration ids
   st$loop_random <- list()
-  st$warned_rand <- FALSE
+  st$rand_fallback <- integer(n)
+  st$rand_missing <- character()   # display-order columns not found or blank
   # embedded values: column values where the export has the field
   st$emb_val <- lapply(emb, identity)
   st$emb_known <- lapply(emb, function(v) rep(TRUE, n))
@@ -1178,17 +1206,60 @@ exposure_walk <- function(qsf, blocks, ctx, emb, ans_block, last_ans, fin,
       } else if (tp %in% c("Group", "Authenticator")) {
         walk(nd[["Flow"]] %||% list(), mask)
       } else if (identical(tp, "BlockRandomizer")) {
-        if (!st$warned_rand && flow_has_blocks(nd[["Flow"]] %||% list())) {
-          cli::cli_warn("BlockRandomizer in the flow: every sub-block is treated as shown, in survey order.")
-          st$warned_rand <- TRUE
+        kids <- nd[["Flow"]] %||% list()
+        m <- randomiser_subset(nd)
+        if (!flow_has_blocks(kids) || (!is.na(m) && m >= length(kids))) {
+          walk(kids, mask)
+          next
         }
-        walk(nd[["Flow"]] %||% list(), mask)
+        col <- paste0(nd$FlowID %||% "", "_DO")
+        sh <- randomiser_shown(kids, display_order[[col]], blocks, ans_block, n)
+        # count only randomisers the respondent got past (before their exit)
+        cnt <- sh$fallback & mask & st$alive & furthest_ord > st$pos
+        if (any(cnt)) {
+          st$rand_fallback[cnt] <- st$rand_fallback[cnt] + 1L
+          st$rand_missing <- union(st$rand_missing, col)
+        }
+        for (i in seq_along(kids)) walk(kids[i], mask & sh$shown[, i])
       }
     }
   }
 
   walk(qsf_flow(qsf)[["Flow"]], rep(TRUE, n))
   as.list(st)
+}
+
+#' Which elements of a block randomiser each respondent was shown: from the
+#' export's display-order column (`FL_xx_DO`, elements joined by `|`, each
+#' named by its flow id, block id or block name), else from the blocks the
+#' respondent answered. Returns `shown` (n x elements) and `fallback` (the
+#' respondents whose shown elements came from their answers).
+#' @noRd
+randomiser_shown <- function(kids, do, blocks, ans_block, n) {
+  shown <- matrix(FALSE, n, length(kids))
+  fallback <- rep(TRUE, n)
+  if (!is.null(do)) {
+    do <- as.character(do)
+    do[is.na(do)] <- ""
+    toks <- lapply(strsplit(do, "|", fixed = TRUE), trimws)
+    for (i in seq_along(kids)) {
+      kid <- kids[[i]]
+      names_i <- c(kid$FlowID, kid$ID, kid$Description,
+                   blocks$block_name[match(kid$ID %||% "", blocks$block_id)])
+      names_i <- names_i[!is.na(names_i) & nzchar(names_i)]
+      shown[, i] <- vapply(toks, function(t) any(t %in% names_i), logical(1))
+    }
+    fallback <- rowSums(shown) == 0
+  }
+  if (any(fallback)) {
+    for (i in seq_along(kids)) {
+      ks <- match(flow_contents(kids[i])$blocks, blocks$block_id)
+      ks <- ks[!is.na(ks)]
+      ans <- if (length(ks)) rowSums(ans_block[, ks, drop = FALSE]) > 0 else rep(FALSE, n)
+      shown[fallback, i] <- ans[fallback]
+    }
+  }
+  list(shown = shown, fallback = fallback)
 }
 
 #' Shown counts for block k.

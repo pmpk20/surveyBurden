@@ -138,3 +138,41 @@ test_that("respondent_burden() errors propagate", {
   obs$ResponseId[2] <- "R_1"   # duplicated id
   expect_error(validate_times(qsf, obs), "unique")
 })
+
+# --- M3: robust headline rate ------------------------------------------------
+
+# finishers whose times follow a true rate of 12 points per minute (small
+# noise), with 5% taking ten times as long (left the survey open)
+rate_fixture <- function(n = 100) {
+  qsf <- read_qsf(demo_qsf())
+  obs <- varied_fixture(n)
+  pts <- suppressMessages(respondent_burden(qsf, obs))$points
+  set.seed(3)
+  obs$completion_mins <- pts / 12 * exp(stats::rnorm(n, 0, 0.1))
+  slow <- seq_len(n) %% 20 == 0
+  obs$completion_mins[slow] <- obs$completion_mins[slow] * 10
+  obs
+}
+
+test_that("the headline rate is median points over median minutes and resists long durations", {
+  qsf <- read_qsf(demo_qsf())
+  v <- validate_times(qsf, rate_fixture(), trim = c(0, Inf))
+  expect_equal(v$implied_points_per_minute,
+               stats::median(v$predicted_burden) / stats::median(v$observed_minutes))
+  expect_lt(abs(v$implied_points_per_minute / 12 - 1), 0.10)
+  # the through-origin regression is kept, but is pulled down by the 5%
+  expect_gt(abs(v$ols_points_per_minute / 12 - 1), 0.10)
+  expect_equal(v$ols_points_per_minute, 60 / stats::coef(v$lm)[["pred_pts"]])
+})
+
+test_that("print shows the median-based label and how many rows the trim dropped", {
+  qsf <- read_qsf(demo_qsf())
+  obs <- rate_fixture(40)
+  obs$completion_mins[1:3] <- c(0.1, 0.2, 500)
+  v <- validate_times(qsf, obs, trim = c(0.5, 400))
+  expect_equal(v$n_trimmed, 3L)
+  expect_equal(v$n, 37L)
+  out <- paste(cli::cli_fmt(print(v)), collapse = "\n")
+  expect_match(out, "median points / median minutes")
+  expect_match(out, "3 dropped")
+})

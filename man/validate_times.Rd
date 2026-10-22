@@ -24,7 +24,11 @@ export).}
 
 \item{trim}{Length-2 numeric: the completion-time range to keep, in
 minutes. Rows outside it, or with a missing or non-finite time, are
-dropped.}
+dropped, and the printed summary says how many. The default
+\code{c(3, 180)} drops times too short for anyone to have read the survey and
+times over three hours, which usually mean the survey was left open.
+The headline rate uses medians, so it moves little with the trim; widen
+it (e.g. \code{c(0, Inf)}) to keep every finisher.}
 
 \item{finished_only}{If \code{TRUE} (default) and \code{observed} has a \code{Finished}
 column, keep only respondents who finished. A break-off's duration does
@@ -52,12 +56,19 @@ the honest fit statistic.}
 (with intercept). Do \strong{not} quote the no-intercept model's \code{r.squared}
 from \code{lm} below -- it is a through-origin pseudo-\eqn{R^2}, much larger
 and not a variance-explained figure.}
-\item{implied_points_per_minute}{\code{60 / b}, where \code{b} is the slope of
-the through-origin fit \code{observed_seconds ~ 0 + predicted_points}
-(seconds per point). Trim-sensitive; prefer a median-regression
-estimate from a dedicated calibration on real completion times.}
+\item{implied_points_per_minute}{The headline rate: median predicted
+points divided by median observed minutes, over the kept
+respondents. Robust to a few very long completion times.}
+\item{ols_points_per_minute}{\code{60 / b}, where \code{b} is the slope of the
+through-origin fit \code{observed_seconds ~ 0 + predicted_points} (seconds
+per point). Kept for comparison; long completion times dominate it,
+so it is not the headline. In version 0.2.0 this was
+\code{implied_points_per_minute}.}
 \item{lm}{The through-origin \code{lm} (kept for back-compatibility).}
-\item{predicted_burden}{Per-respondent points.}
+\item{n_trimmed, trim}{Rows dropped by \code{trim} (after \code{finished_only}),
+and the range used.}
+\item{predicted_burden, observed_minutes}{Per-respondent points and
+observed minutes for the kept respondents.}
 }
 }
 \description{

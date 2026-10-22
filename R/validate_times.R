@@ -21,7 +21,11 @@
 #' @param scheme A [gfs_scheme()] list.
 #' @param trim Length-2 numeric: the completion-time range to keep, in
 #'   minutes. Rows outside it, or with a missing or non-finite time, are
-#'   dropped.
+#'   dropped, and the printed summary says how many. The default
+#'   `c(3, 180)` drops times too short for anyone to have read the survey and
+#'   times over three hours, which usually mean the survey was left open.
+#'   The headline rate uses medians, so it moves little with the trim; widen
+#'   it (e.g. `c(0, Inf)`) to keep every finisher.
 #' @param finished_only If `TRUE` (default) and `observed` has a `Finished`
 #'   column, keep only respondents who finished. A break-off's duration does
 #'   not measure the time to complete the survey.
@@ -45,12 +49,19 @@
 #'       (with intercept). Do **not** quote the no-intercept model's `r.squared`
 #'       from `lm` below -- it is a through-origin pseudo-\eqn{R^2}, much larger
 #'       and not a variance-explained figure.}
-#'     \item{implied_points_per_minute}{`60 / b`, where `b` is the slope of
-#'       the through-origin fit `observed_seconds ~ 0 + predicted_points`
-#'       (seconds per point). Trim-sensitive; prefer a median-regression
-#'       estimate from a dedicated calibration on real completion times.}
+#'     \item{implied_points_per_minute}{The headline rate: median predicted
+#'       points divided by median observed minutes, over the kept
+#'       respondents. Robust to a few very long completion times.}
+#'     \item{ols_points_per_minute}{`60 / b`, where `b` is the slope of the
+#'       through-origin fit `observed_seconds ~ 0 + predicted_points` (seconds
+#'       per point). Kept for comparison; long completion times dominate it,
+#'       so it is not the headline. In version 0.2.0 this was
+#'       `implied_points_per_minute`.}
 #'     \item{lm}{The through-origin `lm` (kept for back-compatibility).}
-#'     \item{predicted_burden}{Per-respondent points.}
+#'     \item{n_trimmed, trim}{Rows dropped by `trim` (after `finished_only`),
+#'       and the range used.}
+#'     \item{predicted_burden, observed_minutes}{Per-respondent points and
+#'       observed minutes for the kept respondents.}
 #'   }
 #'
 #' @examples
@@ -77,11 +88,14 @@ validate_times <- function(qsf, observed, scheme = gfs_scheme(), trim = c(3, 180
                                                      overrides = overrides,
                                                      choice_tasks = choice_tasks))$points
 
-  keep <- is.finite(mins) & mins >= trim[1] & mins <= trim[2]
+  keep <- rep(TRUE, length(mins))
   if (finished_only) {
     fin <- detect_finished(observed)
-    if (!all(is.na(fin))) keep <- keep & fin %in% TRUE
+    if (!all(is.na(fin))) keep <- fin %in% TRUE
   }
+  in_range <- is.finite(mins) & mins >= trim[1] & mins <= trim[2]
+  n_trimmed <- sum(keep & !in_range)
+  keep <- keep & in_range
   o <- observed[keep, , drop = FALSE]
   o$completion_mins <- mins[keep]
 
@@ -100,9 +114,14 @@ validate_times <- function(qsf, observed, scheme = gfs_scheme(), trim = c(3, 180
     ratio = stats::median(o$pred_min, na.rm = TRUE) / stats::median(o$completion_mins),
     cor = if (varies) stats::cor(o$pred_pts, o$completion_mins, use = "complete.obs") else NA_real_,
     r_squared = summary(fit_int)$r.squared,
-    implied_points_per_minute = 60 / stats::coef(fit)[["pred_pts"]],
+    implied_points_per_minute = stats::median(o$pred_pts, na.rm = TRUE) /
+      stats::median(o$completion_mins),
+    ols_points_per_minute = 60 / stats::coef(fit)[["pred_pts"]],
     lm = fit,
-    predicted_burden = o$pred_pts
+    n_trimmed = n_trimmed,
+    trim = trim,
+    predicted_burden = o$pred_pts,
+    observed_minutes = o$completion_mins
   ), class = "burden_time_validation", points_per_minute = ppm)
 }
 
@@ -114,10 +133,13 @@ print.burden_time_validation <- function(x, ...) {
     c("Predicted minutes", sprintf("%.1f", x$predicted)))
   cli::cli_h2("Predicted vs observed completion time")
   cli::cli_text("{x$n} respondent{?s}; respondent burden at {attr(x, 'points_per_minute')} points per minute.")
+  if (!is.null(x$n_trimmed)) {
+    cli::cli_text("Completion times outside {x$trim[1]} to {x$trim[2]} minutes or missing: {x$n_trimmed} dropped.")
+  }
   cli::cli_verbatim(render_table(tab))
   cli::cli_text("Median ratio (predicted / observed): {sprintf('%.2f', x$ratio)}")
   cli::cli_text("Correlation (points vs minutes): {if (is.na(x$cor)) 'NA (every respondent has the same prediction)' else sprintf('%.2f', x$cor)}")
-  cli::cli_text("Implied points per minute: {sprintf('%.1f', x$implied_points_per_minute)}")
+  cli::cli_text("Implied points per minute (median points / median minutes): {sprintf('%.1f', x$implied_points_per_minute)}")
   invisible(x)
 }
 

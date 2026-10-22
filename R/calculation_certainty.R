@@ -52,6 +52,11 @@
 #'       Both outcomes of every branch are always enumerated, so a branch is not
 #'       an approximation -- but which outcome a given respondent takes is
 #'       unknown before fieldwork.}
+#'     \item{randomisers}{One row per `BlockRandomizer`: `flow_id`,
+#'       `n_children`, `subset` (how many it shows; `NA` when not readable),
+#'       `shows_blocks` (`FALSE` for a randomiser of embedded-data
+#'       assignments) and `enumerated` (`TRUE` when the subset was read, so
+#'       each combination of elements is a separate path).}
 #'     \item{display_logic}{`n_conditional` questions gated by an unresolved
 #'       condition on some full path; `n_exact` scored by exact joint
 #'       enumeration of their gate states; `n_approx` scored with the
@@ -114,6 +119,25 @@ calculation_certainty <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L
     trigger = vapply(br, `[[`, character(1), "trigger")
   )
 
+  # --- randomisers: subset honoured (each combination a path) or not ---
+  rn <- list()
+  flow_walk(qsf_flow(qsf)[["Flow"]], function(n) {
+    if (identical(n$Type, "BlockRandomizer")) {
+      ch <- n[["Flow"]] %||% list()
+      m  <- randomiser_subset(n)
+      rn[[length(rn) + 1L]] <<- list(
+        flow_id = n$FlowID %||% NA_character_, n_children = length(ch),
+        subset = m, shows_blocks = flow_has_blocks(ch), enumerated = !is.na(m))
+    }
+  })
+  rand_tbl <- tibble::tibble(
+    flow_id      = vapply(rn, `[[`, character(1), "flow_id"),
+    n_children   = vapply(rn, `[[`, integer(1), "n_children"),
+    subset       = vapply(rn, `[[`, integer(1), "subset"),
+    shows_blocks = vapply(rn, `[[`, logical(1), "shows_blocks"),
+    enumerated   = vapply(rn, `[[`, logical(1), "enumerated")
+  )
+
   # --- display logic: exact enumeration vs primary-gate approximation ---
   dl_cert <- dl_certainty(qsf, scored, full, exact_cap = max_condition_states,
                           parsed_dl = parsed_dl)
@@ -138,6 +162,7 @@ calculation_certainty <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L
     survey_name   = qsf$SurveyEntry$SurveyName %||% NA_character_,
     paths         = paths_cert,
     branches      = branch_tbl,
+    randomisers   = rand_tbl,
     display_logic = dl_cert,
     loops         = loops_cert,
     scores        = scores_cert
@@ -207,6 +232,19 @@ print_calculation_certainty_body <- function(x) {
     cli::cli_text("{nrow(x$branches)} flow branches; both outcomes of each are enumerated, but which one a given respondent takes is unknown before fieldwork:")
     for (i in seq_len(nrow(x$branches))) {
       cli::cli_text("  {x$branches$flow_id[i]}: trigger {x$branches$trigger[i]}")
+    }
+  }
+
+  rb <- x$randomisers
+  if (!is.null(rb)) rb <- rb[rb$shows_blocks, ]
+  if (!is.null(rb) && nrow(rb) > 0) {
+    cli::cli_h2("Randomisers")
+    for (i in seq_len(nrow(rb))) {
+      if (rb$enumerated[i]) {
+        cli::cli_text("  {rb$flow_id[i]}: shows {min(rb$subset[i], rb$n_children[i])} of {rb$n_children[i]} elements; each combination is a separate path.")
+      } else {
+        cli::cli_text("  {rb$flow_id[i]}: number shown not readable; all {rb$n_children[i]} elements treated as shown.")
+      }
     }
   }
 

@@ -50,9 +50,10 @@
 #' **Path-space cap.** The structural path space is enumerated up to
 #' `max_paths` (default 10 000). A flow that would produce more raises an
 #' error rather than a partial answer; raise `max_paths` or treat it as a
-#' diagnostic finding (intractable routing). Block randomisers are treated as "all
-#' sub-blocks shown, in survey order" -- the randomised subsets are not
-#' enumerated.
+#' diagnostic finding (intractable routing). A block randomiser that shows
+#' `m` of its `M` elements is enumerated as `choose(M, m)` paths, one per
+#' combination, each in survey order; when the number shown cannot be read
+#' from the QSF, every element is treated as shown, with a warning.
 #'
 #' @return An object of class `burden_report`: a list of tibbles under stable
 #'   names. Print it for the formatted summary, or read its components:

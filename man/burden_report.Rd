@@ -171,9 +171,10 @@ uses the profile's range as the one range shown, whenever \code{profile = TRUE}.
 \strong{Path-space cap.} The structural path space is enumerated up to
 \code{max_paths} (default 10 000). A flow that would produce more raises an
 error rather than a partial answer; raise \code{max_paths} or treat it as a
-diagnostic finding (intractable routing). Block randomisers are treated as "all
-sub-blocks shown, in survey order" -- the randomised subsets are not
-enumerated.
+diagnostic finding (intractable routing). A block randomiser that shows
+\code{m} of its \code{M} elements is enumerated as \code{choose(M, m)} paths, one per
+combination, each in survey order; when the number shown cannot be read
+from the QSF, every element is treated as shown, with a warning.
 }
 \examples{
 \donttest{

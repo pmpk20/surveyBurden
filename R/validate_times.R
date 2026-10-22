@@ -25,6 +25,9 @@
 #' @param finished_only If `TRUE` (default) and `observed` has a `Finished`
 #'   column, keep only respondents who finished. A break-off's duration does
 #'   not measure the time to complete the survey.
+#' @param overrides Optional named numeric vector of GfS+ points that replace
+#'   the computed score of the named questions, e.g. `c(QID51 = 10)`; passed
+#'   to [respondent_burden()].
 #'
 #' @return A `burden_time_validation` list (printed as a short summary):
 #'   \describe{
@@ -56,7 +59,7 @@
 #'
 #' @export
 validate_times <- function(qsf, observed, scheme = gfs_scheme(), trim = c(3, 180),
-                           finished_only = TRUE) {
+                           finished_only = TRUE, overrides = NULL) {
   if (!inherits(qsf, "qsf_raw")) qsf <- read_qsf(qsf)
   observed <- read_responses(observed, "observed")
   observed <- drop_qualtrics_header_rows(observed)$data
@@ -65,7 +68,8 @@ validate_times <- function(qsf, observed, scheme = gfs_scheme(), trim = c(3, 180
   mins <- completion_minutes(observed)
   # computed on the full data: row subsetting would drop the ImportId
   # attribute the column mapping uses
-  burden <- suppressMessages(respondent_burden(qsf, observed, scheme = scheme))$points
+  burden <- suppressMessages(respondent_burden(qsf, observed, scheme = scheme,
+                                                     overrides = overrides))$points
 
   keep <- is.finite(mins) & mins >= trim[1] & mins <= trim[2]
   if (finished_only) {

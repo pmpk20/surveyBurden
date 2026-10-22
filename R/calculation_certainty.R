@@ -36,6 +36,9 @@
 #'   [score_burden()], [resolve_live_blocks()] and parsed display-logic results
 #'   for this `qsf` (internal reuse by [burden_report()]; `NULL` computes them
 #'   here, leaving the public behaviour unchanged).
+#' @param overrides Optional named numeric vector of GfS+ points that replace
+#'   the computed score of the named questions, e.g. `c(QID51 = 10)`; counted
+#'   as `manual` in `scores`. See [burden_report()].
 #'
 #' @return An object of class `calculation_certainty` (list):
 #'   \describe{
@@ -67,11 +70,13 @@
 #' @export
 calculation_certainty <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
                                   paths = NULL, scored = NULL, blocks = NULL,
-                                  parsed_dl = NULL, max_condition_states = 10000L) {
+                                  parsed_dl = NULL, max_condition_states = 10000L,
+                                  overrides = NULL) {
   validate_condition_states(max_condition_states)
   qsf    <- if (inherits(qsf, "qsf_raw")) qsf else read_qsf(qsf)
   if (is.null(paths))  paths  <- resolve_paths(qsf, max_paths = max_paths)
   if (is.null(scored)) scored <- score_burden(parse_qsf(qsf), scheme = scheme)
+  scored <- score_overrides(scored, overrides, scheme)
   if (is.null(blocks)) blocks <- resolve_live_blocks(qsf)
   full   <- paths[!paths$terminates_early, ]
 

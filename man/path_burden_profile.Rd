@@ -10,7 +10,8 @@ path_burden_profile(
   max_paths = 10000L,
   engine = NULL,
   parsed_dl = NULL,
-  max_condition_states = 10000L
+  max_condition_states = 10000L,
+  overrides = NULL
 )
 }
 \arguments{
@@ -34,6 +35,10 @@ Must be a positive finite whole number. Larger components use the
 primary-gate approximation. This is separate from \code{max_paths} and does
 not remove other modelling assumptions. When precomputed results are
 supplied, use the same limit that generated those results.}
+
+\item{overrides}{Optional named numeric vector of GfS+ points that replace
+the computed score of the named questions, e.g. \code{c(QID51 = 10)}. See
+\code{\link[=burden_report]{burden_report()}}. Ignored, with a warning, when \code{engine} is supplied.}
 }
 \value{
 A \link[tibble:tibble]{tibble}, one row per flow path:

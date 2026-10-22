@@ -52,6 +52,9 @@
 #' @param parsed_dl Optional precomputed map of parsed display-logic trees for
 #'   this `qsf` (internal reuse by [burden_report()]; ignored when `engine` is
 #'   supplied, computed as needed when `NULL`).
+#' @param overrides Optional named numeric vector of GfS+ points that replace
+#'   the computed score of the named questions, e.g. `c(QID51 = 10)`. See
+#'   [burden_report()]. Ignored, with a warning, when `engine` is supplied.
 #'
 #' @return A [tibble][tibble::tibble], one row per flow path:
 #'   `path_id`, `terminates_early`, `n_gates`,
@@ -71,10 +74,16 @@
 #' @export
 path_burden_profile <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
                                 engine = NULL, parsed_dl = NULL,
-                                max_condition_states = 10000L) {
+                                max_condition_states = 10000L, overrides = NULL) {
   validate_condition_states(max_condition_states)
+  if (!is.null(engine) && !is.null(overrides)) {
+    cli::cli_warn(c(
+      "{.arg overrides} is ignored because a precomputed {.arg engine} was supplied.",
+      i = "Leave out {.arg engine}, or build it with the same overrides."
+    ))
+  }
   e <- engine %||% burden_engine(qsf, scheme = scheme, max_paths = max_paths,
-                                 parsed_dl = parsed_dl,
+                                 parsed_dl = parsed_dl, overrides = overrides,
                                  max_condition_states = max_condition_states)
 
   # Fill plain vectors per path and build the tibble once: a tibble() per path
@@ -107,9 +116,11 @@ path_burden_profile <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
 #' @noRd
 burden_engine <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
                           paths = NULL, scored = NULL, blocks = NULL,
-                          parsed_dl = NULL, max_condition_states = 10000L) {
+                          parsed_dl = NULL, max_condition_states = 10000L,
+                          overrides = NULL) {
   if (is.null(paths))  paths  <- resolve_paths(qsf, max_paths = max_paths)
   if (is.null(scored)) scored <- score_burden(parse_qsf(qsf), scheme = scheme)
+  scored <- score_overrides(scored, overrides, scheme)
   if (is.null(blocks)) blocks <- resolve_live_blocks(qsf)
 
   gfs    <- stats::setNames(scored$gfs_points, scored$question_id)

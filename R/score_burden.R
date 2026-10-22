@@ -54,6 +54,45 @@ score_burden <- function(catalogue, scheme = gfs_scheme()) {
   catalogue
 }
 
+#' Apply user score overrides to a [score_burden()] table: a named numeric
+#' vector of points keyed by question id. Overridden items get
+#' `score_flag = "manual"` and `score_basis = "user override"`. `NULL` returns
+#' `scored` unchanged. `est_seconds` is recomputed at the scheme's points per
+#' minute.
+#' @noRd
+score_overrides <- function(scored, overrides, scheme = gfs_scheme()) {
+  if (is.null(overrides)) return(scored)
+  if (!is.numeric(overrides)) {
+    cli::cli_abort("{.arg overrides} must be a named numeric vector of points, e.g. {.code c(QID51 = 10)}.")
+  }
+  ids <- names(overrides)
+  if (is.null(ids) || anyNA(ids) || any(ids == "")) {
+    cli::cli_abort("Every element of {.arg overrides} must be named with a question id, e.g. {.code c(QID51 = 10)}.")
+  }
+  dup <- unique(ids[duplicated(ids)])
+  if (length(dup)) {
+    cli::cli_abort("{.arg overrides} names {cli::qty(length(dup))}question{?s} more than once: {.val {dup}}.")
+  }
+  if (anyNA(overrides) || any(!is.finite(overrides)) || any(overrides < 0)) {
+    cli::cli_abort("{.arg overrides} must be finite, non-negative numbers of points.")
+  }
+  unknown <- setdiff(ids, scored$question_id)
+  if (length(unknown)) {
+    cli::cli_abort(c(
+      "{.arg overrides} names {cli::qty(length(unknown))}question{?s} not in this survey: {.val {unknown}}.",
+      i = "Use the ids in {.code score_burden()$question_id} (or {.code burden_report()$items})."
+    ))
+  }
+  i <- match(ids, scored$question_id)
+  scored$gfs_points[i]  <- unname(as.numeric(overrides))
+  if ("est_seconds" %in% names(scored)) {
+    scored$est_seconds[i] <- scored$gfs_points[i] / scheme$points_per_minute * 60
+  }
+  scored$score_flag[i]  <- "manual"
+  scored$score_basis[i] <- "user override"
+  scored
+}
+
 #' Regex: a response asks for a magnitude / quantity / date, not a category.
 #' Currency words only, no symbols, to keep the source ASCII (portable-package rule).
 #' @noRd

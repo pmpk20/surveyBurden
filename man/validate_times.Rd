@@ -9,7 +9,8 @@ validate_times(
   observed,
   scheme = gfs_scheme(),
   trim = c(3, 180),
-  finished_only = TRUE
+  finished_only = TRUE,
+  overrides = NULL
 )
 }
 \arguments{
@@ -27,6 +28,10 @@ dropped.}
 \item{finished_only}{If \code{TRUE} (default) and \code{observed} has a \code{Finished}
 column, keep only respondents who finished. A break-off's duration does
 not measure the time to complete the survey.}
+
+\item{overrides}{Optional named numeric vector of GfS+ points that replace
+the computed score of the named questions, e.g. \code{c(QID51 = 10)}; passed
+to \code{\link[=respondent_burden]{respondent_burden()}}.}
 }
 \value{
 A \code{burden_time_validation} list (printed as a short summary):

@@ -55,3 +55,148 @@ test_that("force_response_map reads only ForceResponse ON", {
       function(p) list(Element = "SQ", PrimaryAttribute = p$QuestionID, SecondaryAttribute = "", Payload = p))))
   expect_identical(force_response_map(q), c(Q1 = TRUE, Q2 = FALSE, Q3 = FALSE, Q4 = FALSE))
 })
+
+# ---- loop-aware structural profile -------------------------------------------
+
+# Question-literal logic: `qid` has choice `choice` selected.
+lp_sel <- function(qid, choice, conj = NULL) {
+  loc <- sprintf("q://%s/SelectableChoice/%s", qid, choice)
+  x <- list(LogicType = "Question", QuestionID = qid, Operator = "Selected",
+            LeftOperand = loc, ChoiceLocator = loc, Type = "Expression")
+  if (!is.null(conj)) x$Conjuction <- conj
+  x
+}
+lp_forced <- function(p, fr = "ON") { p$Validation <- list(Settings = list(ForceResponse = fr)); p }
+
+# Blocks in flow order. `blocks` is a list of list(id, qs = list of payloads,
+# loop = NULL or a static iteration count).
+lp_qsf <- function(blocks) {
+  bl <- lapply(blocks, function(b) {
+    x <- list(Type = "Standard", SubType = "", Description = b$id, ID = b$id,
+              BlockElements = lapply(b$qs, function(p) list(Type = "Question", QuestionID = p$QuestionID)))
+    if (!is.null(b$loop)) {
+      x$Options <- list(Looping = "Static", LoopingOptions = list(
+        Static = stats::setNames(lapply(seq_len(b$loop), function(i) list(`1` = as.character(i))),
+                                 as.character(seq_len(b$loop)))))
+    }
+    x
+  })
+  flow <- lapply(seq_along(blocks), function(i)
+    list(Type = "Standard", ID = blocks[[i]]$id, FlowID = paste0("FL_", i)))
+  qs <- unlist(lapply(blocks, `[[`, "qs"), recursive = FALSE)
+  el <- c(
+    list(list(Element = "BL", PrimaryAttribute = "Survey Blocks", SecondaryAttribute = "",
+              Payload = stats::setNames(bl, as.character(seq_along(bl) - 1L))),
+         list(Element = "FL", PrimaryAttribute = "Survey Flow", SecondaryAttribute = "",
+              Payload = list(Type = "Root", FlowID = "FL_root", Flow = flow))),
+    lapply(qs, function(p) list(Element = "SQ", PrimaryAttribute = p$QuestionID,
+                                SecondaryAttribute = "", Payload = p)))
+  as_qsf_raw(list(SurveyEntry = list(SurveyID = "SV_lp", SurveyName = "Loop fixture"),
+                  SurveyElements = el))
+}
+# The single path's profile as a named weight vector (names = burden).
+lp_dist <- function(q, ...) {
+  pr <- suppressMessages(suppressWarnings(path_burden_profile(q, ...)))
+  stopifnot(nrow(pr) == 1L)
+  d <- pr$profile[[1]]
+  stats::setNames(d$weight / sum(d$weight), format(d$burden))
+}
+lp_expect <- function(got, want) {
+  expect_identical(sort(as.numeric(names(got))), sort(as.numeric(names(want))))
+  o <- order(as.numeric(names(got))); w <- order(as.numeric(names(want)))
+  expect_equal(unname(got[o]), unname(want[w]), tolerance = 1e-9)
+}
+
+test_that("shared gate holds one state across iterations", {
+  # QIDh 1 pt; loop (max 2) QIDb 2 pts shown when QIDh = 1
+  q <- lp_qsf(list(list(id = "BL_M", qs = list(fg_mc("QIDh", 2))),
+                   list(id = "BL_L", loop = 2, qs = list(fg_mc("QIDb", 3, fg_logic(lp_sel("QIDh", 1)))))))
+  lp_expect(lp_dist(q), c(`1` = .5, `3` = .25, `5` = .25))
+})
+
+test_that("iteration gate varies independently across iterations", {
+  # loop (max 2): QIDa 1 pt always; QIDb 2 pts when this iteration's QIDa = 1
+  q <- lp_qsf(list(list(id = "BL_L", loop = 2, qs = list(
+    fg_mc("QIDa", 2), fg_mc("QIDb", 3, fg_logic(lp_sel("QIDa", 1)))))))
+  lp_expect(lp_dist(q), c(`1` = .25, `3` = .25, `2` = .125, `4` = .25, `6` = .125))
+})
+
+test_that("n = 1 vs n = 2 totals follow loop_weights", {
+  q <- lp_qsf(list(list(id = "BL_L", loop = 2, qs = list(
+    fg_mc("QIDa", 2), fg_mc("QIDb", 3, fg_logic(lp_sel("QIDa", 1)))))))
+  lp_expect(lp_dist(q, loop_weights = list(BL_L = c(1, 0))), c(`1` = .5, `3` = .5))
+  lp_expect(lp_dist(q, loop_weights = list(BL_L = c(0, 1))), c(`2` = .25, `4` = .5, `6` = .25))
+  lp_expect(lp_dist(q, loop_weights = list(BL_L = function(state) c(0, 3))),
+            c(`2` = .25, `4` = .5, `6` = .25))
+})
+
+test_that("position question counted once", {
+  q <- lp_qsf(list(list(id = "BL_L", loop = 3, qs = list(fg_mc("QIDp", 3, lp_pos_logic("BL_L", 1))))))
+  lp_expect(lp_dist(q, loop_weights = list(BL_L = c(0, 0, 1))), c(`2` = 1))
+  lp_expect(lp_dist(q), c(`2` = 1))
+})
+
+test_that("shared gate couples loop and non-loop questions", {
+  # QIDh 1 pt; QIDm 3 pts and loop QIDb 2 pts both shown when QIDh = 1
+  q <- lp_qsf(list(list(id = "BL_M", qs = list(fg_mc("QIDh", 2), fg_mc("QIDm", 7, fg_logic(lp_sel("QIDh", 1))))),
+                   list(id = "BL_L", loop = 1, qs = list(fg_mc("QIDb", 3, fg_logic(lp_sel("QIDh", 1)))))))
+  lp_expect(lp_dist(q), c(`1` = .5, `6` = .5))
+})
+
+test_that("cross-loop trigger is shared and flagged", {
+  q <- lp_qsf(list(list(id = "BL_A", loop = 2, qs = list(fg_mc("QIDa", 2))),
+                   list(id = "BL_B", loop = 2, qs = list(fg_mc("QIDb", 3, fg_logic(lp_sel("QIDa", 1)))))))
+  e <- suppressMessages(suppressWarnings(burden_engine(q)))
+  expect_true(any(e$unresolved$question_id == "QIDb" &
+                    e$unresolved$reason == "trigger in another loop"))
+})
+
+test_that("nested gate: B never shown when A is hidden", {
+  # X 1 pt always; A 1 pt when X = 1; B 3 pts when A = 1
+  q <- lp_qsf(list(list(id = "BL_M", qs = list(
+    fg_mc("QIDx", 2), fg_mc("QIDa", 2, fg_logic(lp_sel("QIDx", 1))),
+    fg_mc("QIDb", 7, fg_logic(lp_sel("QIDa", 1)))))))
+  lp_expect(lp_dist(q, respect_force_response = FALSE), c(`1` = .5, `2` = .25, `5` = .25))
+})
+
+test_that("forced-response trigger has no unanswered state", {
+  # T (2 choices, 1 pt): Q2 (2 pts) when T = 1, Q3 (3 pts) when T = 2
+  mk <- function(t) lp_qsf(list(list(id = "BL_M", qs = list(
+    t, fg_mc("QID2", 3, fg_logic(lp_sel("QIDt", 1))), fg_mc("QID3", 7, fg_logic(lp_sel("QIDt", 2)))))))
+  forced <- mk(lp_forced(fg_mc("QIDt", 2)))
+  lp_expect(lp_dist(forced), c(`3` = .5, `4` = .5))
+  lp_expect(lp_dist(forced, respect_force_response = FALSE), c(`1` = 1/3, `3` = 1/3, `4` = 1/3))
+  lp_expect(lp_dist(mk(lp_forced(fg_mc("QIDt", 2), "RequestResponse"))),
+            c(`1` = 1/3, `3` = 1/3, `4` = 1/3))
+  # three choices, two referenced: "none" (answered choice 3) stays
+  three <- mk(lp_forced(fg_mc("QIDt", 3)))
+  lp_expect(lp_dist(three), c(`2` = 1/3, `4` = 1/3, `5` = 1/3))
+})
+
+test_that("bad loop_weights error clearly", {
+  q <- lp_qsf(list(list(id = "BL_L", loop = 2, qs = list(fg_mc("QIDa", 2)))))
+  pb <- function(w) suppressMessages(path_burden_profile(q, loop_weights = w))
+  expect_error(pb(list(BL_L = c(1, 1, 1))), "BL_L")
+  expect_error(pb(list(BL_L = c(1, -1))), "BL_L")
+  expect_error(pb(list(BL_L = c(0, 0))), "BL_L")
+  expect_error(pb(list(BL_nope = c(1, 1))), "BL_nope")
+})
+
+test_that("surveys without loop display logic are unchanged", {
+  snap <- readRDS(test_path("fixtures", "profile_pre_loop.rds"))
+  for (n in c("demo_simple_linear", "demo_display_logic", "demo_large_branching")) {
+    q <- read_qsf(system.file("extdata", paste0(n, ".qsf"), package = "surveyBurden"))
+    expect_identical(suppressMessages(path_burden_profile(q)), snap[[n]], label = n)
+  }
+})
+
+test_that("burden_report() and calculation_certainty() pass the loop arguments on", {
+  q <- lp_qsf(list(list(id = "BL_L", loop = 2, qs = list(
+    fg_mc("QIDa", 2), fg_mc("QIDb", 3, fg_logic(lp_sel("QIDa", 1)))))))
+  r <- burden_report(q, quiet = TRUE, loop_weights = list(BL_L = c(0, 1)))
+  expect_equal(r$burden$points[c(1, 5)], c(2, 6))
+  cc <- calculation_certainty(q, loop_weights = list(BL_L = c(0, 1)),
+                              respect_force_response = FALSE)
+  expect_true(is.list(cc))
+  expect_error(burden_report(q, quiet = TRUE, loop_weights = list(BL_L = 1)), "BL_L")
+})

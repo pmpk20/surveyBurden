@@ -66,10 +66,14 @@ test_that("the enumerated profile sits inside the floor/ceiling band and is narr
   expect_true(all(m$burden_min >= m$gfs_floor - 5))
   expect_true(all(m$burden_max <= m$gfs_ceiling + 5))
 
-  # a complete path's enumerated spread is tighter than its raw floor/ceiling band
+  # a complete path's enumerated spread never exceeds its floor/ceiling band,
+  # and is tighter on at least one path. With loop display logic evaluated, a
+  # path whose conditions are independent reaches its floor and ceiling.
   full <- m[!m$terminates_early, ]
-  narrower <- (full$burden_max - full$burden_min) < (full$gfs_ceiling - full$gfs_floor)
-  expect_true(all(narrower))
+  spread <- full$burden_max - full$burden_min
+  band_w <- full$gfs_ceiling - full$gfs_floor
+  expect_true(all(spread <= band_w))
+  expect_true(any(spread < band_w))
 })
 
 test_that("median across full paths is well inside the floor/ceiling extremes", {

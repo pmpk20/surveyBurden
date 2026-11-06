@@ -62,12 +62,15 @@ test_that("$burden is a 5-row tibble; minutes and index are derived", {
 
 test_that("$burden matches the pre-refactor structural range (value parity)", {
   r <- report_full()
-  expect_equal(bstat(r, "min"), 106)
-  expect_equal(bstat(r, "p25"), 117)
-  expect_equal(bstat(r, "median"), 123)
+  # 103/114/120/126 (were 106/117/123/130) since display logic inside Loop &
+  # Merge blocks is evaluated: the demo's loop questions QID13 and QID17 are
+  # conditional and were counted as always shown in every iteration
+  expect_equal(bstat(r, "min"), 103)
+  expect_equal(bstat(r, "p25"), 114)
+  expect_equal(bstat(r, "median"), 120)
   # 130 (was 129) since And If binds before Else If: the demo's QID22
   # (If employed / Else If self-employed / And If not fully remote) shows more
-  expect_equal(bstat(r, "p75"), 130)
+  expect_equal(bstat(r, "p75"), 126)
   expect_equal(bstat(r, "max"), 143)
 })
 
@@ -233,7 +236,7 @@ test_that("summary(burden_report) returns a short headline object", {
   expect_s3_class(s, "summary.burden_report")
   out <- capture.output(print(s))
   expect_true(any(grepl("Neighbourhood Travel Survey", out)))
-  expect_true(any(grepl("106", out)) && any(grepl("143", out)))
+  expect_true(any(grepl("103", out)) && any(grepl("143", out)))
   expect_output(res <- withVisible(print(s)))
   expect_identical(res$visible, FALSE)
 })
@@ -307,7 +310,7 @@ test_that("the structural verdict states median, minutes, benchmark ratio and ra
   v <- paste(burden_verdict_line(
     report_full()$burden, 12, 399, report_full()$survey$n_complete_paths),
     collapse = " ")
-  expect_match(v, "Median burden: 123 GfS\\+ points [(]range 106-143 across 2 completing paths[)]")
+  expect_match(v, "Median burden: 120 GfS\\+ points [(]range 103-143 across 2 completing paths[)]")
   expect_match(v, "Expected minutes: ~10 [(]range 9-12[)]")
   expect_match(v, "Relative to benchmark: 0[.]3x the median of 399 points")
 })

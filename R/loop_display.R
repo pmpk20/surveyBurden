@@ -41,3 +41,37 @@ force_response_map <- function(qsf) {
   on  <- vapply(sq, function(p) identical(p$Validation$Settings$ForceResponse, "ON"), logical(1))
   stats::setNames(on, ids)
 }
+
+#' Check one loop-count weight vector: non-negative, finite, not all zero,
+#' one weight per iteration count 1..n.
+#' @noRd
+check_loop_weight_vector <- function(w, bid, n) {
+  if (!is.numeric(w) || length(w) != n || anyNA(w) || any(!is.finite(w)) ||
+      any(w < 0) || sum(w) <= 0) {
+    cli::cli_abort(c(
+      "{.arg loop_weights} for {.val {bid}} must be {n} non-negative finite number{?s}, not all zero.",
+      i = "One weight per iteration count 1..{n}; they need not sum to 1."
+    ))
+  }
+  as.numeric(w)
+}
+
+#' Validate `loop_weights` against the survey's Loop & Merge blocks.
+#' @noRd
+validate_loop_weights <- function(loop_weights, blocks) {
+  if (is.null(loop_weights)) return(invisible(NULL))
+  if (!is.list(loop_weights) || is.null(names(loop_weights)) || any(names(loop_weights) == "")) {
+    cli::cli_abort("{.arg loop_weights} must be a named list keyed by loop block id.")
+  }
+  maxes <- stats::setNames(blocks$loop_max, blocks$block_id)
+  maxes <- maxes[!is.na(maxes)]
+  for (bid in names(loop_weights)) {
+    if (!bid %in% names(maxes)) {
+      cli::cli_abort(c("{.arg loop_weights} names {.val {bid}}, which is not a Loop & Merge block with a known maximum.",
+                       i = "Loop blocks: {.val {names(maxes)}}."))
+    }
+    w <- loop_weights[[bid]]
+    if (!is.function(w)) check_loop_weight_vector(w, bid, maxes[[bid]])
+  }
+  invisible(NULL)
+}

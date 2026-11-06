@@ -41,7 +41,7 @@ report <- burden_report(demo, quiet = TRUE)
 report
 #> 
 #> ── Survey Burden Report: Neighbourhood Travel Survey (demo) ────────────────────
-#> Median burden: 123 GfS+ points (range 106-143 across 2 completing paths).
+#> Median burden: 120 GfS+ points (range 103-143 across 2 completing paths).
 #> Expected minutes: ~10 (range 9-12).
 #> Relative to benchmark: 0.3x the median of 399 points.
 #> 
@@ -64,10 +64,10 @@ report
 #> 
 #> Statistic        Points  Expected Minutes  Index
 #> ------------------------------------------------
-#> Minimum             106                 9   0.07
-#> 25th percentile     117                10   0.08
-#> Median              123                10   0.08
-#> 75th percentile     130                11   0.09
+#> Minimum             103                 9   0.07
+#> 25th percentile     114                10   0.08
+#> Median              120                10   0.08
+#> 75th percentile     126                10   0.08
 #> Maximum             143                12   0.10
 #> Benchmark: median 399 points across 79 GfS-scored waves (Heimgartner & Axhausen
 #> 2024).
@@ -187,10 +187,10 @@ report$burden
 #> # A tibble: 5 × 4
 #>   statistic points minutes  index
 #>   <fct>      <dbl>   <dbl>  <dbl>
-#> 1 min          106    8.83 0.0707
-#> 2 p25          117    9.75 0.078 
-#> 3 median       123   10.2  0.082 
-#> 4 p75          130   10.8  0.0867
+#> 1 min          103    8.58 0.0687
+#> 2 p25          114    9.5  0.076 
+#> 3 median       120   10    0.08  
+#> 4 p75          126   10.5  0.084 
 #> 5 max          143   11.9  0.0953
 attr(report$burden, "basis")
 #> [1] "structural"
@@ -229,8 +229,8 @@ report$paths[, c("path_id", "status", "burden_min",
 #>     <int> <fct>           <dbl>         <dbl>      <dbl>
 #> 1       1 screen_out         12            12         12
 #> 2       2 screen_out         14            14         14
-#> 3       3 complete          106           125        143
-#> 4       4 complete          106           122        139
+#> 3       3 complete          103           121        143
+#> 4       4 complete          103           119        139
 ```
 
 These columns are `NA` when `profile = FALSE`.

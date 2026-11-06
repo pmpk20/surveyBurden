@@ -71,6 +71,10 @@ Turn the resolved paths into per-path burden.
   : Burden per survey path
 - [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md)
   : Structural burden profile across a path's display-logic sub-states
+- [`path_burden_traversals()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_traversals.md)
+  : Burden by block for each structural traversal of the survey
+- [`traversal_stability()`](https://pmpk20.github.io/surveyBurden/reference/traversal_stability.md)
+  : Monte Carlo stability of sampled traversal quantiles across seeds
 
 ## Respondent burden
 

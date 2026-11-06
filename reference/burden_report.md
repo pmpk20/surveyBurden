@@ -24,7 +24,9 @@ burden_report(
   max_condition_states = 10000L,
   overrides = NULL,
   choice_tasks = NULL,
-  field_domains = NULL
+  field_domains = NULL,
+  loop_weights = NULL,
+  respect_force_response = TRUE
 )
 
 # S3 method for class 'burden_report'
@@ -164,6 +166,21 @@ summary(object, ...)
   branches on a declared field take only outcomes those values produce,
   so an unreachable "none matches" path is dropped.
 
+- loop_weights:
+
+  Optional named list of loop-count weights, keyed by Loop & Merge block
+  id: a non-negative numeric vector with one weight per iteration count
+  `1..max` (normalised internally), or a function of the component's
+  shared-gate states returning such a vector. `NULL` (default) weights
+  each count equally, e.g. `list(BL_x = c(1, 1, 1, 9))`.
+
+- respect_force_response:
+
+  If `TRUE` (default), a display-logic trigger that the route shows and
+  whose response is forced (`ForceResponse = "ON"`) has no unanswered
+  state, when its referenced choices cover all its choices. `FALSE`
+  gives the 0.2.0 behaviour.
+
 - object:
 
   A `burden_report` from `burden_report()`.
@@ -279,10 +296,10 @@ br <- burden_report(qsf_path)
 #> ✔ Reading survey [9ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [119ms]
+#> ✔ Scoring questions and resolving paths [123ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [37ms]
+#> ✔ Checking calculation certainty [35ms]
 #> 
 #> ℹ Enumerating display-logic combinations
 #> ✔ Enumerating display-logic combinations [20ms]
@@ -290,7 +307,7 @@ br <- burden_report(qsf_path)
 br
 #> 
 #> ── Survey Burden Report: Neighbourhood Travel Survey (demo) ────────────────────
-#> Median burden: 123 GfS+ points (range 106-143 across 2 completing paths).
+#> Median burden: 120 GfS+ points (range 103-143 across 2 completing paths).
 #> Expected minutes: ~10 (range 9-12).
 #> Relative to benchmark: 0.3x the median of 399 points.
 #> 
@@ -313,10 +330,10 @@ br
 #> 
 #> Statistic        Points  Expected Minutes  Index
 #> ------------------------------------------------
-#> Minimum             106                 9   0.07
-#> 25th percentile     117                10   0.08
-#> Median              123                10   0.08
-#> 75th percentile     130                11   0.09
+#> Minimum             103                 9   0.07
+#> 25th percentile     114                10   0.08
+#> Median              120                10   0.08
+#> 75th percentile     126                10   0.08
 #> Maximum             143                12   0.10
 #> Benchmark: median 399 points across 79 GfS-scored waves (Heimgartner & Axhausen
 #> 2024).
@@ -369,17 +386,17 @@ summary(br)
 #> 
 #> ── Neighbourhood Travel Survey (demo) ──────────────────────────────────────────
 #> 26 questions, 12 pages, 12 blocks, 4 structural paths (2 complete).
-#> Median burden: 123 GfS+ points (range 106-143 across 2 completing paths).
+#> Median burden: 120 GfS+ points (range 103-143 across 2 completing paths).
 #> Expected minutes: ~10 (range 9-12).
 #> Relative to benchmark: 0.3x the median of 399 points.
 br$burden
 #> # A tibble: 5 × 4
 #>   statistic points minutes  index
 #>   <fct>      <dbl>   <dbl>  <dbl>
-#> 1 min          106    8.83 0.0707
-#> 2 p25          117    9.75 0.078 
-#> 3 median       123   10.2  0.082 
-#> 4 p75          130   10.8  0.0867
+#> 1 min          103    8.58 0.0687
+#> 2 p25          114    9.5  0.076 
+#> 3 median       120   10    0.08  
+#> 4 p75          126   10.5  0.084 
 #> 5 max          143   11.9  0.0953
 br$items[order(-br$items$gfs_points), ]
 #> # A tibble: 26 × 32

@@ -2,6 +2,45 @@
 
 ## surveyBurden (development version)
 
+- Display logic inside Loop & Merge blocks is now evaluated in the
+  structural profile
+  ([`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md),
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)).
+  Previously every conditional loop question counted as shown in every
+  iteration. Triggers in the same loop block are answered afresh in each
+  iteration; triggers outside it keep one answer for all iterations and
+  are shared with non-loop questions; “Loop k … Current Loop” conditions
+  are evaluated per iteration (and are false outside a loop). Structural
+  figures fall for surveys with conditional loop questions.
+
+- A trigger question that is not shown is now treated as unanswered
+  before its dependants are evaluated. This removes impossible states
+  and can move structural figures for surveys with nested display logic
+  (the Swiss Mobility Panel wave 4 median moves from 439 to 431 points).
+
+- New `loop_weights` argument
+  ([`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md),
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md),
+  [`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md)):
+  weights for each loop’s iteration counts.
+
+- New `respect_force_response = TRUE` argument: a shown trigger with a
+  forced response (`ForceResponse = "ON"`) has no unanswered state.
+  `FALSE` restores the earlier behaviour.
+
+- New
+  [`path_burden_traversals()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_traversals.md):
+  burden, items, response items and pages by block for each structural
+  traversal (exact or sampled, stratified by route), with `field_rules`
+  for derived fields and `output = "summary"` for large runs; and
+  [`traversal_stability()`](https://pmpk20.github.io/surveyBurden/reference/traversal_stability.md)
+  for Monte Carlo spread. Rules may be vectorised (`vectorised = TRUE`)
+  for speed; display-logic and rule results are memoised per run.
+
+- [`read_responses()`](https://pmpk20.github.io/surveyBurden/reference/read_responses.md)
+  is exported. The report’s “Early-exit points” line is now labelled
+  “End-of-survey elements” (the count is unchanged).
+
 - Path enumeration now follows embedded-field values along each path. A
   field tested by simple comparisons (`=`, `!=`, `>`, `>=`, `<`, `<=`)
   holds one value on a path, so branches on it agree even when they are

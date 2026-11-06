@@ -197,7 +197,7 @@ numbers the current package produces. To use your own survey, replace
 <span><span class="va">report</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Burden Report: Neighbourhood Travel Survey (demo)</span> <span style="color: #00BBBB;">────────────────────</span></span></span>
-<span><span class="co">#&gt; Median burden: 123 GfS+ points (range 106-143 across 2 completing paths).</span></span>
+<span><span class="co">#&gt; Median burden: 120 GfS+ points (range 103-143 across 2 completing paths).</span></span>
 <span><span class="co">#&gt; Expected minutes: ~10 (range 9-12).</span></span>
 <span><span class="co">#&gt; Relative to benchmark: 0.3x the median of 399 points.</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -220,10 +220,10 @@ numbers the current package produces. To use your own survey, replace
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Statistic        Points  Expected Minutes  Index</span></span>
 <span><span class="co">#&gt; ------------------------------------------------</span></span>
-<span><span class="co">#&gt; Minimum             106                 9   0.07</span></span>
-<span><span class="co">#&gt; 25th percentile     117                10   0.08</span></span>
-<span><span class="co">#&gt; Median              123                10   0.08</span></span>
-<span><span class="co">#&gt; 75th percentile     130                11   0.09</span></span>
+<span><span class="co">#&gt; Minimum             103                 9   0.07</span></span>
+<span><span class="co">#&gt; 25th percentile     114                10   0.08</span></span>
+<span><span class="co">#&gt; Median              120                10   0.08</span></span>
+<span><span class="co">#&gt; 75th percentile     126                10   0.08</span></span>
 <span><span class="co">#&gt; Maximum             143                12   0.10</span></span>
 <span><span class="co">#&gt; Benchmark: median 399 points across 79 GfS-scored waves (Heimgartner &amp; Axhausen</span></span>
 <span><span class="co">#&gt; 2024).</span></span>
@@ -369,10 +369,10 @@ out each part:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 4</span></span></span>
 <span><span class="co">#&gt;   statistic points minutes  index</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> min          106    8.83 0.070<span style="text-decoration: underline;">7</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> p25          117    9.75 0.078 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> median       123   10.2  0.082 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> p75          130   10.8  0.086<span style="text-decoration: underline;">7</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> min          103    8.58 0.068<span style="text-decoration: underline;">7</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> p25          114    9.5  0.076 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> median       120   10    0.08  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> p75          126   10.5  0.084 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> max          143   11.9  0.095<span style="text-decoration: underline;">3</span></span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">report</span><span class="op">$</span><span class="va">items</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">report</span><span class="op">$</span><span class="va">items</span><span class="op">$</span><span class="va">gfs_points</span><span class="op">)</span>,</span>
 <span>                  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"question_id"</span>, <span class="st">"std_type"</span>, <span class="st">"gfs_points"</span>, <span class="st">"score_flag"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
@@ -397,7 +397,7 @@ live on attributes: <code>attr(report, "points_per_minute")</code>.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Neighbourhood Travel Survey (demo)</span> <span style="color: #00BBBB;">──────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; 26 questions, 12 pages, 12 blocks, 4 structural paths (2 complete).</span></span>
-<span><span class="co">#&gt; Median burden: 123 GfS+ points (range 106-143 across 2 completing paths).</span></span>
+<span><span class="co">#&gt; Median burden: 120 GfS+ points (range 103-143 across 2 completing paths).</span></span>
 <span><span class="co">#&gt; Expected minutes: ~10 (range 9-12).</span></span>
 <span><span class="co">#&gt; Relative to benchmark: 0.3x the median of 399 points.</span></span></code></pre></div>
 </div>
@@ -412,8 +412,8 @@ live on attributes: <code>attr(report, "points_per_minute")</code>.</p>
 <span><span class="co">#&gt;     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       1 screen_out                 2                   2         12         12</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>       2 screen_out                 3                   3         14         14</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>       3 complete                  20                  26        106        143</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>       4 complete                  20                  23        106        139</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>       3 complete                  20                  26        103        143</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>       4 complete                  20                  23        103        139</span></span></code></pre></div>
 <p>The two screen-out paths end early after the area check; the two
 complete paths differ mainly in one branch-gated block. The spread from
 minimum to maximum is the effect of the survey’s optional questions and

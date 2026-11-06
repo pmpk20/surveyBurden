@@ -118,10 +118,10 @@ data.frame(
   change    = after$burden$points - before$burden$points
 )
 #>   statistic before after change
-#> 1       min    106    96    -10
-#> 2       p25    117   107    -10
-#> 3    median    123   113    -10
-#> 4       p75    130   120    -10
+#> 1       min    103    93    -10
+#> 2       p25    114   104    -10
+#> 3    median    120   110    -10
+#> 4       p75    126   116    -10
 #> 5       max    143   133    -10
 
 q <- "QID21"

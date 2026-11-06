@@ -154,7 +154,17 @@ states the package can model.
 - Separate components are convolved as independent.
 - Loop & Merge blocks are unrolled to the explicit `?v=N` cap, with the
   iteration count treated as uniform over 1 to N in the structural
-  profile.
+  profile, unless `loop_weights` gives other weights (for example
+  `loop_weights = list(BL_x = c(1, 1, 1, 9))`).
+- Display logic inside a loop is evaluated. A trigger in the same loop
+  block is answered afresh in each iteration; a trigger outside the
+  block (an earlier question or a stored field) has one answer for every
+  iteration, shared with any non-loop question that uses it; a “Loop 1 …
+  Current Loop” condition holds in the first iteration only.
+- A trigger question that is not shown is unanswered, so nothing appears
+  because of an answer to a question that was never displayed. A shown
+  trigger whose response is forced has no unanswered state
+  (`respect_force_response = TRUE`, the default).
 
 ``` r
 
@@ -166,10 +176,10 @@ pbp[, c("path_id", "terminates_early", "burden_min",
 #>     <int> <lgl>                 <dbl>         <dbl>      <dbl>
 #> 1       1 TRUE                     12            12         12
 #> 2       2 TRUE                     14            14         14
-#> 3       3 FALSE                   106           125        143
-#> 4       4 FALSE                   106           122        139
+#> 3       3 FALSE                   103           121        143
+#> 4       4 FALSE                   103           119        139
 nrow(pbp$profile[[3]])   # distinct modelled burden values on complete path 3
-#> [1] 36
+#> [1] 41
 ```
 
 Each row of a `profile` table is one modelled burden value with a
@@ -177,6 +187,33 @@ structural weight: each joint gate state and each loop iteration count
 gets equal weight, a value produced by several states carries their
 combined weight, and the weights on a path sum to 1. **That weight is a
 model weight, not a respondent probability.**
+
+### Burden by block for each traversal
+
+[`path_burden_traversals()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_traversals.md)
+returns the traversals behind the profile: one row per traversal and
+block, with points, items, response items and pages, so a
+cumulative-by-block curve and the totals come from the same weighted
+traversals. Small surveys are enumerated exactly; larger ones are
+sampled with a fixed seed
+([`traversal_stability()`](https://pmpk20.github.io/surveyBurden/reference/traversal_stability.md)
+reports the spread across seeds). `field_rules` can derive stored fields
+that survey code computes, which the survey file does not record.
+
+``` r
+
+tr <- path_burden_traversals(qsf, method = "exact")
+head(tr[, c("traversal_id", "path_id", "weight", "block_id", "points")])
+#> # A tibble: 6 × 5
+#>   traversal_id path_id  weight block_id points
+#>          <int>   <int>   <dbl> <chr>     <dbl>
+#> 1            1       3 0.00139 BL1          11
+#> 2            1       3 0.00139 BL2           1
+#> 3            1       3 0.00139 BL3           2
+#> 4            1       3 0.00139 BL4          15
+#> 5            1       3 0.00139 BL5           3
+#> 6            1       3 0.00139 BL6           4
+```
 
 ## Structural versus respondent burden
 
@@ -186,7 +223,7 @@ The default result is a **structural burden profile**. It covers the
 combinations of optional questions the package can model, weighted by
 the model: each complete path carries equal total weight, and within a
 path each modelled combination does. It carries no respondent
-probabilities. When the report says the median is 123 points, it means
+probabilities. When the report says the median is 120 points, it means
 the median of that model-weighted distribution. It does **not** mean
 half of respondents face at least that much burden. Nobody has told the
 package how common each path or combination is.

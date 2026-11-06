@@ -207,7 +207,18 @@ the rest held permissive.</li>
 <li>Separate components are convolved as independent.</li>
 <li>Loop &amp; Merge blocks are unrolled to the explicit
 <code>?v=N</code> cap, with the iteration count treated as uniform over
-1 to N in the structural profile.</li>
+1 to N in the structural profile, unless <code>loop_weights</code> gives
+other weights (for example
+<code>loop_weights = list(BL_x = c(1, 1, 1, 9))</code>).</li>
+<li>Display logic inside a loop is evaluated. A trigger in the same loop
+block is answered afresh in each iteration; a trigger outside the block
+(an earlier question or a stored field) has one answer for every
+iteration, shared with any non-loop question that uses it; a “Loop 1 …
+Current Loop” condition holds in the first iteration only.</li>
+<li>A trigger question that is not shown is unanswered, so nothing
+appears because of an answer to a question that was never displayed. A
+shown trigger whose response is forced has no unanswered state
+(<code>respect_force_response = TRUE</code>, the default).</li>
 </ul>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pbp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/path_burden_profile.html">path_burden_profile</a></span><span class="op">(</span><span class="va">qsf</span><span class="op">)</span></span>
@@ -218,15 +229,39 @@ the rest held permissive.</li>
 <span><span class="co">#&gt;     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       1 TRUE                     12            12         12</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>       2 TRUE                     14            14         14</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>       3 FALSE                   106           125        143</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>       4 FALSE                   106           122        139</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>       3 FALSE                   103           121        143</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>       4 FALSE                   103           119        139</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">pbp</span><span class="op">$</span><span class="va">profile</span><span class="op">[[</span><span class="fl">3</span><span class="op">]</span><span class="op">]</span><span class="op">)</span>   <span class="co"># distinct modelled burden values on complete path 3</span></span>
-<span><span class="co">#&gt; [1] 36</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 41</span></span></code></pre></div>
 <p>Each row of a <code>profile</code> table is one modelled burden value
 with a structural weight: each joint gate state and each loop iteration
 count gets equal weight, a value produced by several states carries
 their combined weight, and the weights on a path sum to 1. <strong>That
 weight is a model weight, not a respondent probability.</strong></p>
+<div class="section level3">
+<h3 id="burden-by-block-for-each-traversal">Burden by block for each traversal<a class="anchor" aria-label="anchor" href="#burden-by-block-for-each-traversal"></a>
+</h3>
+<p><code><a href="../reference/path_burden_traversals.html">path_burden_traversals()</a></code> returns the traversals behind
+the profile: one row per traversal and block, with points, items,
+response items and pages, so a cumulative-by-block curve and the totals
+come from the same weighted traversals. Small surveys are enumerated
+exactly; larger ones are sampled with a fixed seed
+(<code><a href="../reference/traversal_stability.html">traversal_stability()</a></code> reports the spread across seeds).
+<code>field_rules</code> can derive stored fields that survey code
+computes, which the survey file does not record.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/path_burden_traversals.html">path_burden_traversals</a></span><span class="op">(</span><span class="va">qsf</span>, method <span class="op">=</span> <span class="st">"exact"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">tr</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"traversal_id"</span>, <span class="st">"path_id"</span>, <span class="st">"weight"</span>, <span class="st">"block_id"</span>, <span class="st">"points"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 5</span></span></span>
+<span><span class="co">#&gt;   traversal_id path_id  weight block_id points</span></span>
+<span><span class="co">#&gt;          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>            1       3 0.001<span style="text-decoration: underline;">39</span> BL1          11</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>            1       3 0.001<span style="text-decoration: underline;">39</span> BL2           1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>            1       3 0.001<span style="text-decoration: underline;">39</span> BL3           2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>            1       3 0.001<span style="text-decoration: underline;">39</span> BL4          15</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>            1       3 0.001<span style="text-decoration: underline;">39</span> BL5           3</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>            1       3 0.001<span style="text-decoration: underline;">39</span> BL6           4</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="structural-versus-respondent-burden">Structural versus respondent burden<a class="anchor" aria-label="anchor" href="#structural-versus-respondent-burden"></a>
@@ -236,7 +271,7 @@ weight is a model weight, not a respondent probability.</strong></p>
 It covers the combinations of optional questions the package can model,
 weighted by the model: each complete path carries equal total weight,
 and within a path each modelled combination does. It carries no
-respondent probabilities. When the report says the median is 123 points,
+respondent probabilities. When the report says the median is 120 points,
 it means the median of that model-weighted distribution. It does
 <strong>not</strong> mean half of respondents face at least that much
 burden. Nobody has told the package how common each path or combination

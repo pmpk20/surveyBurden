@@ -23,7 +23,9 @@ calculation_certainty(
   max_condition_states = 10000L,
   overrides = NULL,
   choice_tasks = NULL,
-  field_domains = NULL
+  field_domains = NULL,
+  loop_weights = NULL,
+  respect_force_response = TRUE
 )
 ```
 
@@ -85,6 +87,21 @@ calculation_certainty(
   [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md):
   branches on a declared field take only outcomes those values produce,
   so an unreachable "none matches" path is dropped.
+
+- loop_weights:
+
+  Optional named list of loop-count weights, keyed by Loop & Merge block
+  id: a non-negative numeric vector with one weight per iteration count
+  `1..max` (normalised internally), or a function of the component's
+  shared-gate states returning such a vector. `NULL` (default) weights
+  each count equally, e.g. `list(BL_x = c(1, 1, 1, 9))`.
+
+- respect_force_response:
+
+  If `TRUE` (default), a display-logic trigger that the route shows and
+  whose response is forced (`ForceResponse = "ON"`) has no unanswered
+  state, when its referenced choices cover all its choices. `FALSE`
+  gives the 0.2.0 behaviour.
 
 ## Value
 

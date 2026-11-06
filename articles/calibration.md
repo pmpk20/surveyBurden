@@ -52,7 +52,7 @@ You can set the words per line in your survey with:
 ``` r
 
 burden_report(demo, words_per_line = 8, quiet = TRUE)$burden$points[1:2]
-#> [1] 112 123
+#> [1] 109 120
 ```
 
 ## points_per_minute
@@ -70,10 +70,10 @@ burden_report(demo, scheme = w, quiet = TRUE)$burden[, c("statistic", "minutes")
 #> # A tibble: 5 × 2
 #>   statistic minutes
 #>   <fct>       <dbl>
-#> 1 min          7.07
-#> 2 p25          7.8 
-#> 3 median       8.2 
-#> 4 p75          8.67
+#> 1 min          6.87
+#> 2 p25          7.6 
+#> 3 median       8   
+#> 4 p75          8.4 
 #> 5 max          9.53
 ```
 
@@ -157,10 +157,10 @@ burden_report(demo, scheme = w, quiet = TRUE)$burden[, c("statistic", "minutes")
 #> # A tibble: 5 × 2
 #>   statistic minutes
 #>   <fct>       <dbl>
-#> 1 min          9.55
-#> 2 p25         10.5 
-#> 3 median      11.1 
-#> 4 p75         11.7 
+#> 1 min          9.28
+#> 2 p25         10.3 
+#> 3 median      10.8 
+#> 4 p75         11.4 
 #> 5 max         12.9
 ```
 

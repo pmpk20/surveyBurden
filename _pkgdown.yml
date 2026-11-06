@@ -53,6 +53,7 @@ reference:
     desc: The burden each respondent experienced, from their response data.
     contents:
       - respondent_burden
+      - read_responses
       - exposure_person_period
   - title: Diagnostics
     desc: Check where the calculation is exact and calibrate points to minutes.

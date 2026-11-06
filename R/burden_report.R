@@ -497,7 +497,7 @@ print_burden_report_body <- function(x) {
     c("Branch points",       ins$n_branches),
     c("Randomisers",         ins$n_randomisers),
     c("Loop & Merge blocks", ins$n_loop_blocks),
-    c("Early-exit points",   ins$n_end_points)
+    c("End-of-survey elements", ins$n_end_points)
   ))[-c(1, 2)])
 
   cli::cli_h2("Paths")

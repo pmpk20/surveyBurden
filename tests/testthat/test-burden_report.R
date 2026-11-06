@@ -384,3 +384,9 @@ test_that("burden_report reports progress under quiet = FALSE", {
   withr::local_options(cli.progress_show_after = 0, cli.progress_clear = FALSE)
   expect_message(burden_report(fx(), certainty = FALSE, quiet = FALSE))
 })
+
+test_that("the Survey section labels the endpoint count as end-of-survey elements", {
+  out <- format(report_full())
+  expect_true(any(grepl("End-of-survey elements", out)))
+  expect_false(any(grepl("Early-exit", out)))
+})

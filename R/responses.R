@@ -5,10 +5,24 @@
 # Qualtrics export header rows
 # ==============================================================================
 
-#' Read response data given as a CSV path; a data frame passes through.
-#' Columns are read as text with their names unchanged, so a raw Qualtrics
-#' export keeps its header rows for [drop_qualtrics_header_rows()].
-#' @noRd
+#' Read a Qualtrics response export
+#'
+#' Reads a response CSV as it is, so you can build per-respondent inputs,
+#' such as a `words_per_line` vector from device metadata, for
+#' [respondent_burden()]. Every column is read as text and keeps its name
+#' unchanged. A raw Qualtrics export keeps its two header rows (question
+#' labels and ImportId), so the result has two more rows than there are
+#' respondents. [respondent_burden()] accepts a vector of either length: when
+#' it removes the header rows, it drops the matching entries too.
+#'
+#' @param x Path to a CSV file, or a data frame, which is returned unchanged.
+#' @param arg Argument name used in error messages.
+#' @return A data frame with one row per CSV row, all columns character.
+#' @examples
+#' csv <- tempfile(fileext = ".csv")
+#' writeLines(c("ResponseId,Q1", "Response ID,Q1 text", "R_1,yes"), csv)
+#' read_responses(csv)
+#' @export
 read_responses <- function(x, arg = "responses") {
   if (is.data.frame(x)) return(x)
   if (is.character(x) && length(x) == 1L) {

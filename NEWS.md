@@ -23,6 +23,12 @@
   for large runs; and `traversal_stability()` for Monte Carlo spread.
   Rules may be vectorised (`vectorised = TRUE`) for speed; display-logic
   and rule results are memoised per run.
+  A loop-count rule (`"@@n:<block>"`) must name a Loop & Merge block, warns
+  when `loop_weights` are also given for that loop, and forces sampling
+  only on routes containing the loop. Forward references in display logic
+  are reported in `attr(x, "unresolved")`. `output = "summary"` now
+  reduces each chunk of draws as it goes, so a route's draws are never held
+  in memory together.
 * `read_responses()` is exported. The report's "Early-exit points" line is
   now labelled "End-of-survey elements" (the count is unchanged).
 

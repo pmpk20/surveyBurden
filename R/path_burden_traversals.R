@@ -39,7 +39,10 @@
 #' logic that reads it. A rule returning `NA` rejects the traversal: exact
 #' weights are renormalised within the route, rejected draws are redrawn, and
 #' the rejected share per route is in `attr(x, "rejected")`. A loop-count
-#' rule requires sampling.
+#' rule makes routes that contain its loop sampled (`loop_weights` for that loop
+#' are then ignored, with a warning). A display condition that reads a
+#' question later in the flow is listed in `attr(x, "unresolved")` as a
+#' forward reference; that question is read as unanswered.
 #'
 #' **Speed.** A rule is called once per distinct combination of its inputs,
 #' and results are reused across chunks and routes. Rules with many inputs
@@ -110,10 +113,16 @@ path_burden_traversals <- function(qsf, method = c("auto", "exact", "sample"),
   blocks <- resolve_live_blocks(qsf)
   validate_loop_weights(loop_weights, blocks)
   rules  <- normalise_field_rules(field_rules)
-  has_n_rule <- any(startsWith(names(rules) %||% character(0), "@@n:"))
-  if (has_n_rule && method == "exact") {
-    cli::cli_abort(c("A loop-count rule needs {.code method = \"sample\"}.",
-                     i = "Loop counts set by a rule are not enumerated."))
+  n_targets <- sub("^@@n:", "", grep("^@@n:", names(rules) %||% character(0), value = TRUE))
+  loop_ids <- blocks$block_id[!is.na(blocks$loop_max)]
+  bad <- setdiff(n_targets, loop_ids)
+  if (length(bad)) {
+    cli::cli_abort(c("{.arg field_rules} sets the loop count of {.val {bad}}, which is not a Loop & Merge block with a known maximum.",
+                     i = "Loop blocks: {.val {loop_ids}}."))
+  }
+  both <- intersect(n_targets, names(loop_weights))
+  if (length(both)) {
+    cli::cli_warn("{.arg loop_weights} for {.val {both}} {?is/are} ignored: a loop-count rule sets {?its/their} iteration count{?s}.")
   }
 
   sel <- if (isTRUE(complete_only)) which(!paths$terminates_early) else seq_len(nrow(paths))
@@ -137,7 +146,12 @@ path_burden_traversals <- function(qsf, method = c("auto", "exact", "sample"),
     i <- sel[k]
     route <- route_spec(ctx, paths, i, loop_weights)
     unres[[k]] <- route$unresolved
-    use <- if (method == "auto") (if (has_n_rule) "sample" else "exact") else method
+    route_n_rule <- any(route$bids %in% n_targets)
+    if (route_n_rule && method == "exact") {
+      cli::cli_abort(c("A loop-count rule needs {.code method = \"sample\"} (path {paths$path_id[i]}).",
+                       i = "Loop counts set by a rule are not enumerated."))
+    }
+    use <- if (method == "auto") (if (route_n_rule) "sample" else "exact") else method
     res <- NULL
     if (use == "exact") {
       res <- tryCatch(walk_route(ctx, route, "exact", 1L, max_traversals),
@@ -158,11 +172,13 @@ path_burden_traversals <- function(qsf, method = c("auto", "exact", "sample"),
       res <- subset_rows(res, ok)
       res$w <- res$w / sum(res$w) / n_paths
     } else {
-      res <- sample_route(ctx, route, n_draws, chunk, paths$path_id[i])
+      res <- sample_route(ctx, route, n_draws, chunk, paths$path_id[i],
+                          w_each = 1 / (n_paths * n_draws),
+                          blocks = if (output == "summary") blocks else NULL)
       rej[k] <- res$rejected_share
-      res$w <- rep(1 / (n_paths * n_draws), length(res$w))
     }
     meth[k] <- use
+    if (!is.null(res$tabs)) { results[[k]] <- res$tabs; next }
     res$path_id <- paths$path_id[i]
     res$bids <- route$bids
     results[[k]] <- if (output == "summary") reduce_summary(res, blocks) else res
@@ -278,8 +294,12 @@ route_spec <- function(ctx, paths, i, loop_weights) {
   unres <- list()
   flag <- function(q, why) unres[[length(unres) + 1L]] <<- data.frame(
     path_id = paths$path_id[i], question_id = q, reason = why, stringsAsFactors = FALSE)
+  flow_q <- unlist(lapply(bids, function(b) ctx$blocks$question_ids[[match(b, ctx$blocks$block_id)]]))
+  pos <- stats::setNames(seq_along(flow_q), flow_q)
   for (q in cond) {
     v <- parsed[[q]]$vars
+    later <- v[!startsWith(v, "@") & v %in% names(pos) & v != q]
+    if (length(later) && any(pos[later] > pos[[q]])) flag(q, "forward reference")
     own <- ctx$qblock[[q]]
     lv <- v[v %in% loop_q]
     if (own %in% loop_bids) {
@@ -587,8 +607,10 @@ walk_route <- function(ctx, route, mode, n, max_traversals = Inf) {
 #' Sample `n_draws` accepted traversals of one route, in chunks; rejected
 #' draws are redrawn.
 #' @noRd
-sample_route <- function(ctx, route, n_draws, chunk, path_id) {
-  got <- list(); accepted <- 0L; drawn <- 0L
+sample_route <- function(ctx, route, n_draws, chunk, path_id, w_each = 1, blocks = NULL) {
+  # with `blocks`, each chunk is reduced to weight tables at once (summary
+  # output), so a route's draws are never held together
+  got <- list(); tabs <- NULL; accepted <- 0L; drawn <- 0L; n_rej <- 0L
   cap <- 100 * n_draws
   while (accepted < n_draws) {
     if (drawn >= cap) {
@@ -600,13 +622,35 @@ sample_route <- function(ctx, route, n_draws, chunk, path_id) {
     m <- min(chunk, max(n_draws - accepted, 1L) * if (drawn == 0L) 1L else 2L, chunk)
     r <- walk_route(ctx, route, "sample", m)
     drawn <- drawn + m
-    ok <- !r$rej
-    if (any(ok)) { got[[length(got) + 1L]] <- subset_rows(r, ok); accepted <- accepted + sum(ok) }
+    ok <- which(!r$rej)
+    take <- ok[seq_len(min(length(ok), n_draws - accepted))]
+    if (length(take)) {
+      g <- subset_rows(r, take)
+      if (is.null(blocks)) got[[length(got) + 1L]] <- g else {
+        g$w <- rep(w_each, length(take)); g$bids <- route$bids
+        tabs <- merge_summary_tables(tabs, reduce_summary(g, blocks))
+      }
+      accepted <- accepted + length(take)
+    }
+    n_rej <- n_rej + sum(r$rej)
   }
+  share <- n_rej / drawn
+  if (!is.null(blocks)) return(list(tabs = tabs, rejected_share = share))
   acc <- lapply(stats::setNames(nm = names(got[[1]]$acc)), function(a)
-    do.call(rbind, lapply(got, function(g) g$acc[[a]]))[seq_len(n_draws), , drop = FALSE])
-  list(acc = acc, w = rep(1, n_draws), rej = rep(FALSE, n_draws), cols = list(),
-       rejected_share = (drawn - accepted) / drawn)
+    do.call(rbind, lapply(got, function(g) g$acc[[a]])))
+  list(acc = acc, w = rep(w_each, n_draws), rej = rep(FALSE, n_draws), cols = list(),
+       rejected_share = share)
+}
+
+#' Merge two sets of per-route summary weight tables.
+#' @noRd
+merge_summary_tables <- function(a, b) {
+  if (is.null(a)) return(b)
+  m <- function(x, y) group_sum(c(x$burden, y$burden), c(x$weight, y$weight))
+  list(points = m(a$points, b$points),
+       response_items = m(a$response_items, b$response_items),
+       pages = m(a$pages, b$pages),
+       cumulative = Map(m, a$cumulative, b$cumulative))
 }
 
 #' Survey flow order of a route's blocks.

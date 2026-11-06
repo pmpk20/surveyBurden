@@ -129,7 +129,10 @@ test_that("surveys without loop display logic are unchanged", {
   snap <- readRDS(test_path("fixtures", "profile_pre_loop.rds"))
   for (n in c("demo_simple_linear", "demo_display_logic", "demo_large_branching")) {
     q <- read_qsf(system.file("extdata", paste0(n, ".qsf"), package = "surveyBurden"))
-    expect_identical(suppressMessages(path_burden_profile(q)), snap[[n]], label = n)
+    got <- suppressMessages(path_burden_profile(q))
+    expect_equal(nrow(attr(got, "approximations")), 0L, label = n)
+    attr(got, "unresolved") <- NULL; attr(got, "approximations") <- NULL
+    expect_identical(got, snap[[n]], label = n)
   }
 })
 
@@ -142,4 +145,60 @@ test_that("burden_report() and calculation_certainty() pass the loop arguments o
                               respect_force_response = FALSE)
   expect_true(is.list(cc))
   expect_error(burden_report(q, quiet = TRUE, loop_weights = list(BL_L = 1)), "BL_L")
+})
+
+# ---- final-review fixes ------------------------------------------------------
+
+lp_notsel <- function(qid, choice) { x <- lp_sel(qid, choice); x$Operator <- "NotSelected"; x }
+
+test_that("C1: function loop weights on a loop without display logic", {
+  q <- lp_qsf(list(list(id = "BL_L", loop = 2, qs = list(fg_mc("QIDa", 2)))))
+  lp_expect(lp_dist(q, loop_weights = list(BL_L = function(s) c(1, 3))), c(`1` = .25, `2` = .75))
+})
+
+test_that("I1: hidden triggers settle in dependency order, whatever the catalogue order", {
+  # X always; B if X = 1; A if B NotSelected 1; C (3 pts) if A = 1. C listed before A.
+  q <- lp_qsf(list(list(id = "BL_M", qs = list(
+    fg_mc("QIDx", 2), fg_mc("QIDc", 7, fg_logic(lp_sel("QIDa", 1))),
+    fg_mc("QIDb", 2, fg_logic(lp_sel("QIDx", 1))), fg_mc("QIDa", 2, fg_logic(lp_notsel("QIDb", 1)))))))
+  lp_expect(lp_dist(q, respect_force_response = FALSE),
+            c(`2` = .5, `3` = .125, `5` = .25, `6` = .125))
+})
+
+test_that("I2: many independent iteration triggers stay exact (no silent permissive cap)", {
+  # loop (max 2): 14 independent pairs, trigger (1 pt) -> dependant (2 pts) on choice 1
+  qs <- unlist(lapply(seq_len(14), function(i) {
+    t <- sprintf("QIDt%02d", i)
+    list(fg_mc(t, 2), fg_mc(sprintf("QIDd%02d", i), 3, fg_logic(lp_sel(t, 1))))
+  }), recursive = FALSE)
+  q <- lp_qsf(list(list(id = "BL_L", loop = 2, qs = qs)))
+  d <- lp_dist(q)
+  mean_b <- sum(as.numeric(names(d)) * d)
+  # per iteration: 14 + 14 * 2 * 0.5 = 28 points; uniform n in {1, 2} -> 1.5 iterations
+  expect_equal(mean_b, 42, tolerance = 1e-9)
+})
+
+test_that("M2: a loop trigger the route never shows does not show its dependants", {
+  # In the loop, QIDa needs QIDzz (in a block outside the flow), so it is never
+  # shown; QIDb (2 pts) shows if this iteration's QIDa = 1 OR QIDh = 1 (QIDh 1 pt)
+  q <- lp_qsf(list(list(id = "BL_M", qs = list(fg_mc("QIDh", 2))),
+                   list(id = "BL_L", loop = 1, qs = list(
+                     fg_mc("QIDa", 2, fg_logic(lp_sel("QIDzz", 1))),
+                     fg_mc("QIDb", 3, fg_logic(lp_sel("QIDa", 1), lp_sel("QIDh", 1, conj = "Or")))))))
+  q <- lp_add_unflowed_block(q, "BL_S", fg_mc("QIDzz", 2))
+  lp_expect(lp_dist(q), c(`1` = .5, `3` = .5))
+})
+
+test_that("profile lists its approximations for the caller", {
+  qs <- unlist(lapply(seq_len(3), function(i) {
+    t <- sprintf("QIDt%02d", i)
+    list(fg_mc(t, 2), fg_mc(sprintf("QIDd%02d", i), 3, fg_logic(lp_sel(t, 1))))
+  }), recursive = FALSE)
+  q <- lp_qsf(list(list(id = "BL_L", loop = 2, qs = qs)))
+  ok <- suppressMessages(path_burden_profile(q))
+  expect_equal(nrow(attr(ok, "approximations")), 0L)
+  capped <- suppressMessages(path_burden_profile(q, max_condition_states = 1))
+  a <- attr(capped, "approximations")
+  expect_true(nrow(a) > 0)
+  expect_true(all(c("path_id", "question_id", "reason") %in% names(a)))
 })

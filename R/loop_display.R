@@ -11,7 +11,7 @@
 #' @return list(iter = chr, shared = chr, position = lgl)
 #' @noRd
 classify_loop_gates <- function(qids, loop_bid, parsed, qblock) {
-  vars <- unique(unlist(lapply(qids, function(q) parsed[[q]]$vars)))
+  vars <- as.character(unique(unlist(lapply(qids, function(q) parsed[[q]]$vars))))
   position <- "@@iter" %in% vars
   vars <- setdiff(vars, "@@iter")
   in_block <- !startsWith(vars, "@") & vars %in% names(qblock) &

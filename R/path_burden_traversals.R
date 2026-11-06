@@ -257,9 +257,9 @@ route_spec <- function(ctx, paths, i, loop_weights) {
   bids <- bids[bids %in% ctx$blocks$block_id]
   parsed <- ctx$parsed
   cond <- intersect(q_maybe, names(parsed))
-  vars <- unique(unlist(lapply(cond, function(q) parsed[[q]]$vars)))
-  targets <- names(ctx$rules)
-  inputs  <- unique(unlist(lapply(ctx$rules, `[[`, "inputs")))
+  vars <- as.character(unique(unlist(lapply(cond, function(q) parsed[[q]]$vars))))
+  targets <- names(ctx$rules) %||% character(0)
+  inputs  <- as.character(unique(unlist(lapply(ctx$rules, `[[`, "inputs"))))
   gate_q  <- unique(c(vars[!startsWith(vars, "@")], inputs))
   fields  <- setdiff(vars[startsWith(vars, "@")], c("@@iter", targets))
 
@@ -304,14 +304,20 @@ route_spec <- function(ctx, paths, i, loop_weights) {
     n <- ctx$loop_max[[b]]
     if (is.na(n)) return(NULL)
     w <- loop_weights[[b]] %||% rep(1, n)
-    if (is.function(w)) w <- check_loop_weight_vector(w(list()), b, n)
+    if (is.function(w)) return(w)   # evaluated per row on the loop's shared gates
     w / sum(w)
   })
   names(lw) <- bids
+  loop_shared <- lapply(bids, function(b) {
+    lc <- intersect(ctx$blocks$question_ids[[match(b, ctx$blocks$block_id)]], cond)
+    classify_loop_gates(lc, b, parsed, ctx$qblock)$shared
+  })
+  names(loop_shared) <- bids
 
   list(path_id = paths$path_id[i], bids = bids, q_always = q_always, q_maybe = q_maybe,
        route_q = c(q_always, q_maybe), cond = cond, gate_q = gate_q, gstates = gstates,
        fields = fields, fstates = fstates, fkind = fkind, loop_w = lw,
+       loop_shared = loop_shared,
        unresolved = if (length(unres)) unique(do.call(rbind, unres)) else NULL)
 }
 
@@ -396,22 +402,36 @@ walk_route <- function(ctx, route, mode, n, max_traversals = Inf) {
     out
   }
   apply_rule <- function(rule, rows) {
-    cols <- unlist(lapply(rule$inputs, function(q) {
-      b <- ctx$qblock[[q]] %||% NA_character_
-      mx <- if (!is.na(b)) ctx$loop_max[[b]] else NA
-      if (!is.na(mx)) c(q, paste0(q, "#", seq_len(mx))) else q
-    }))
-    cols <- unique(c(cols, grep("^@@n:", names(X$cols), value = TRUE),
-                     intersect(names(X$cols), c(route$gate_q, route$fields))))
-    vals <- by_key(cols, rows, function(st) {
-      v <- tryCatch(rule$fun(st), error = function(e) cli::cli_abort(
-        "{.arg field_rules} entry {.val {rule$target}} failed: {conditionMessage(e)}"))
-      if (length(v) != 1L || is.na(v)) NA_KEY else as.character(v)
-    })
-    v <- col(rule$target)
-    v[rows] <- unlist(vals[rows])
-    X$cols[[rule$target]] <<- v
-    X$rej[rows] <<- X$rej[rows] | v[rows] == NA_KEY
+    cols <- if (length(rule$inputs)) {
+      unlist(lapply(rule$inputs, function(q) {
+        b <- ctx$qblock[[q]] %||% NA_character_
+        mx <- if (!is.na(b)) ctx$loop_max[[b]] else NA
+        if (!is.na(mx)) c(q, paste0(q, "#", seq_len(mx))) else q
+      }))
+    } else {
+      intersect(names(X$cols), c(route$gate_q, route$fields))
+    }
+    cols <- unique(c(cols, grep("^@@n:", names(X$cols), value = TRUE)))
+    # recompute only rows whose inputs changed since the last evaluation
+    key_col <- paste0(".rk:", rule$target)
+    key <- if (length(cols)) do.call(paste, c(lapply(cols, col), sep = "\r")) else rep("", nrow_x())
+    old <- X$cols[[key_col]]
+    todo <- rows & (is.null(old) | (if (is.null(old)) TRUE else old != key))
+    if (any(todo)) {
+      vals <- by_key(cols, todo, function(st) {
+        st <- structure(st, class = "rule_state", rule = rule$target)
+        v <- tryCatch(rule$fun(st), rule_state_unknown = function(e) stop(e),
+                      error = function(e) cli::cli_abort(
+          "{.arg field_rules} entry {.val {rule$target}} failed: {conditionMessage(e)}"))
+        if (length(v) != 1L || is.na(v)) NA_KEY else as.character(v)
+      })
+      v <- col(rule$target)
+      v[todo] <- unlist(vals[todo])
+      X$cols[[rule$target]] <<- v
+      kc <- if (is.null(old)) rep(NA_character_, nrow_x()) else old
+      kc[todo] <- key[todo]
+      X$cols[[key_col]] <<- kc
+    }
   }
   shown_of <- function(q, rows, j) {
     if (!q %in% route$route_q) return(rep(FALSE, nrow_x()))
@@ -483,6 +503,17 @@ walk_route <- function(ctx, route, mode, n, max_traversals = Inf) {
       v <- suppressWarnings(as.integer(X$cols[[ncol_name]]))
       v[is.na(v)] <- 0L
       X$cols[[ncol_name]] <- as.character(pmin(pmax(v, 0L), mx))
+    } else if (is.function(route$loop_w[[b]])) {
+      fw <- route$loop_w[[b]]; sh <- route$loop_shared[[b]]
+      wv <- by_key(sh, rep(TRUE, nrow_x()), function(st) check_loop_weight_vector(fw(st), b, mx))
+      wk <- vapply(wv, function(x) paste(x, collapse = "/"), character(1))
+      X$cols[[".wkey"]] <- wk
+      for (wkey in unique(wk)) {
+        w1 <- as.numeric(strsplit(wkey, "/", fixed = TRUE)[[1]])
+        rows <- X$cols[[".wkey"]] == wkey & col(ncol_name) == ""
+        branch(ncol_name, rows, as.character(seq_len(mx)), w1 / sum(w1))
+      }
+      X$cols[[".wkey"]] <- NULL
     } else {
       branch(ncol_name, rep(TRUE, nrow_x()), as.character(seq_len(mx)), route$loop_w[[b]])
     }
@@ -500,7 +531,11 @@ walk_route <- function(ctx, route, mode, n, max_traversals = Inf) {
     X$acc$iterations[, k] <- as.numeric(col(ncol_name))
   }
   X$cols[["@@iter"]] <- NULL
-  for (r in ctx$rules) if (!startsWith(r$target, "@@n:")) apply_rule(r, rep(TRUE, nrow_x()))
+  for (r in ctx$rules) if (!startsWith(r$target, "@@n:")) {
+    apply_rule(r, rep(TRUE, nrow_x()))
+    X$rej <- X$rej | col(r$target) == NA_KEY
+  }
+  for (k in grep("^\\.rk:", names(X$cols), value = TRUE)) X$cols[[k]] <- NULL
   X
 }
 
@@ -601,3 +636,25 @@ combine_summary <- function(tabs, blocks, probs) {
   }))
   list(totals = totals, cumulative = cumulative)
 }
+
+#' Strict access to a rule's traversal state: reading a name the rule did not
+#' declare (and that is not a loop count) is an error naming the rule.
+#' @param x A traversal state passed to a `field_rules` function.
+#' @param i Name to read.
+#' @param ... Unused.
+#' @keywords internal
+#' @export
+`[[.rule_state` <- function(x, i, ...) {
+  nm <- names(unclass(x))
+  if (i %in% nm) return(unclass(x)[[i]])
+  if (startsWith(i, "@@n:")) return(NULL)
+  rule <- attr(x, "rule")
+  cli::cli_abort(c(
+    "{.arg field_rules} entry {.val {rule}} read {.val {i}}, which it did not declare.",
+    i = "Add it to the rule's {.code inputs}, e.g. {.code list(fun = , inputs = c(\"{i}\"))}."),
+    class = "rule_state_unknown")
+}
+
+#' @rdname sub-.rule_state
+#' @export
+`$.rule_state` <- function(x, name) x[[name]]

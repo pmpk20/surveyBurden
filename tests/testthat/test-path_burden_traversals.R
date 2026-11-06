@@ -137,3 +137,56 @@ test_that("traversal_stability reports per-seed quantiles", {
   expect_true(all(c("seed", "p10", "median", "p90") %in% names(st$per_seed)))
   expect_true(all(c("median", "p10", "p90") %in% names(st$range)))
 })
+
+# ---- final-review fixes ------------------------------------------------------
+
+test_that("C1: traversals of surveys and routes without display logic", {
+  q <- read_qsf(system.file("extdata", "demo_simple_linear.qsf", package = "surveyBurden"))
+  x <- pbt(q, method = "exact")
+  expect_equal(sum(tot(x)$weight), 1)
+  ql <- lp_qsf(list(list(id = "BL_L", loop = 2, qs = list(fg_mc("QIDa", 2)))))
+  expect_equal(sort(unique(tot(pbt(ql, method = "exact"))$points)), c(1, 2))
+})
+
+test_that("I4: function loop weights use the shared state in traversals too", {
+  # digit ids, as in real QSFs: choice tails are then bare ids ("1")
+  q <- lp_qsf(list(list(id = "BL_M", qs = list(fg_mc("QID901", 2))),
+                   list(id = "BL_L", loop = 2, qs = list(fg_mc("QID902", 3, fg_logic(lp_sel("QID901", 1)))))))
+  w <- list(BL_L = function(s) if (identical(s[["QID901"]], "1")) c(0, 1) else c(1, 0))
+  t <- tot(pbt(q, method = "exact", loop_weights = w))
+  prof <- lp_dist(q, loop_weights = w)
+  expect_equal(weighted_quantile(t$points, t$weight, c(0, .5, 1)),
+               weighted_quantile(as.numeric(names(prof)), unname(prof), c(0, .5, 1)))
+  expect_equal(sort(unique(t$points)), c(1, 5))
+})
+
+test_that("I6: a rule reading an undeclared question errors, naming the rule", {
+  r <- list(`@cnt` = list(inputs = "QIDa", fun = function(s) if (identical(s[["QID9"]], "1")) 1 else 0))
+  expect_error(pbt(rule_fx(), method = "exact", field_rules = r), "@cnt")
+})
+
+test_that("M7: a rule's final value decides rejection, not an early evaluation", {
+  # QIDz (before the loop) reads @cnt; the rule returns NA while QIDa is unanswered
+  q <- lp_qsf(list(
+    list(id = "BL_Z", qs = list(fg_mc("QIDz", 7, fg_logic(fg_emb("cnt", "GreaterThanOrEqual", "2"))))),
+    list(id = "BL_A", loop = 1, qs = list(lp_forced(fg_mc("QIDa", 2))))))
+  r <- list(`@cnt` = list(inputs = "QIDa", fun = function(s) {
+    a <- s[["QIDa#1"]]; if (!length(a)) NA else as.integer(identical(a, "1")) }))
+  x <- pbt(q, method = "exact", field_rules = r)
+  expect_equal(attr(x, "rejected")$rejected_share, 0)
+})
+
+test_that("I5: rule evaluation keys on declared inputs only", {
+  # an unrelated trigger (QIDh -> QIDk) must not leak into the rule's state
+  q <- lp_qsf(list(
+    list(id = "BL_H", qs = list(fg_mc("QIDh", 2), fg_mc("QIDk", 3, fg_logic(lp_sel("QIDh", 1))))),
+    list(id = "BL_A", loop = 3, qs = list(lp_forced(fg_mc("QIDa", 2)))),
+    list(id = "BL_Z", qs = list(fg_mc("QIDz", 7, fg_logic(fg_emb("cnt", "GreaterThanOrEqual", "2")))))))
+  ok <- FALSE
+  r <- list(`@cnt` = list(inputs = "QIDa", fun = function(s) {
+    ok <<- all(names(s) %in% c("QIDa", paste0("QIDa#", 1:3)) | startsWith(names(s), "@@n:"))
+    sum(vapply(1:3, function(j) identical(s[[paste0("QIDa#", j)]], "1"), logical(1)))
+  }))
+  pbt(q, method = "exact", loop_weights = list(BL_A = c(0, 0, 1)), field_rules = r)
+  expect_true(ok)
+})

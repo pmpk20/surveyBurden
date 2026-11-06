@@ -140,7 +140,7 @@ path_burden_profile <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
     profiles[[i]] <- prof
     q[i, ] <- weighted_quantile(prof$burden, prof$weight, c(0, .25, .5, .75, 1))
   }
-  tibble::tibble(
+  out <- tibble::tibble(
     path_id = e$paths$path_id,
     terminates_early = e$paths$terminates_early,
     n_gates = e$paths$n_gates,
@@ -148,6 +148,12 @@ path_burden_profile <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L,
     burden_p75 = q[, 4], burden_max = q[, 5],
     profile = profiles
   )
+  u <- e$unresolved %||% tibble::tibble(path_id = integer(0), question_id = character(0),
+                                        reason = character(0))
+  attr(out, "unresolved") <- u
+  attr(out, "approximations") <- u[grepl("approximation|max_condition_states|keeps unanswered",
+                                         u$reason), ]
+  out
 }
 
 #' Shared setup for the path-burden family: parse, score, resolve paths, and
@@ -275,7 +281,7 @@ one_path_components <- function(q_always, q_maybe, block_ids,
     for (q in lcond) if (any(parsed[[q]]$vars %in% other_loop)) flag(q, "trigger in another loop")
     units[[bid]] <- list(bid = bid, n = n, w = w, always = setdiff(lq, lcond),
                          cond = lcond, iter = g$iter, shared = g$shared,
-                         position = g$position)
+                         position = g$position, off_iter = setdiff(g$iter, shown_q))
   }
 
   cond <- q_maybe_main[q_maybe_main %in% names(parsed)]
@@ -313,7 +319,9 @@ one_path_components <- function(q_always, q_maybe, block_ids,
                           collapse = ","), "|",
                     paste(vapply(us, function(u) paste(u$bid, u$n,
                                                        if (is.function(u$w)) "fn" else paste(u$w, collapse = "/"),
-                                                       paste(sort(u$always), collapse = "+")),
+                                                       paste(sort(u$always), collapse = "+"),
+                                                       paste(sort(u$cond), collapse = "+"),
+                                                       paste(sort(u$off_iter), collapse = "+")),
                                  character(1)), collapse = ";"))
       cc <- if (fn_w) NULL else memo[[key]]
       if (is.null(cc)) {
@@ -321,13 +329,13 @@ one_path_components <- function(q_always, q_maybe, block_ids,
           component_dist(qgrp, gvars, parsed, gfs, stype, q_always, off = off,
                          exact_cap = max_condition_states, forced = forced, nopt = nopt)
         } else {
-          r <- component_dist_loop(qgrp, us, gvars, parsed, gfs, stype, q_always, off = off,
-                                   exact_cap = max_condition_states, forced = forced, nopt = nopt)
-          if (isTRUE(attr(r, "approximated"))) for (u in us) flag(u$cond, "loop component above state limit")
-          r
+          component_dist_loop(qgrp, us, gvars, parsed, gfs, stype, q_always, off = off,
+                              exact_cap = max_condition_states, forced = forced, nopt = nopt)
         }
         if (!fn_w) memo[[key]] <- cc
       }
+      ap <- attr(cc, "approx")
+      if (!is.null(ap) && nrow(ap)) for (r in seq_len(nrow(ap))) flag(ap$question_id[r], ap$reason[r])
       display_dist <- convolve_dist(display_dist, cc)
     }
   }
@@ -342,6 +350,7 @@ one_path_components <- function(q_always, q_maybe, block_ids,
 #' units: enumerate the joint state of the shared gates (one state for every
 #' iteration and for the non-loop questions); for each, add the non-loop
 #' questions' burden and each loop's contribution given that state.
+#' Approximations are returned in `attr(, "approx")` (question_id, reason).
 #' @noRd
 component_dist_loop <- function(qgrp, units, gvars, parsed, gfs, stype, q_always,
                                 off = character(0), exact_cap = EXACT_CAP,
@@ -352,15 +361,30 @@ component_dist_loop <- function(qgrp, units, gvars, parsed, gfs, stype, q_always
   names(states) <- gvars
   total <- prod(vapply(states, length, integer(1)))
   shown0 <- stats::setNames(rep(TRUE, length(q_always)), q_always)
+  # iteration-gate groups per loop: built once, independent of the shared state
+  for (k in seq_along(units)) {
+    units[[k]]$icomps <- loop_iter_components(units[[k]], parsed, stype, off, exact_cap, forced, nopt)
+  }
+  work <- sum(vapply(units, loop_unit_work, numeric(1)))
+  approx <- do.call(rbind, lapply(units, function(u) {
+    a <- Filter(function(cmp) cmp$approx, u$icomps)
+    if (!length(a)) return(NULL)
+    data.frame(question_id = unlist(lapply(a, `[[`, "q")),
+               reason = "iteration gates above max_condition_states (held permissive)",
+               stringsAsFactors = FALSE)
+  }))
 
-  if (total > exact_cap) {
+  if (total * max(1, work) > exact_cap) {
     # above the limit: shared gates held permissive
     d <- if (length(qgrp)) component_dist_fallback(qgrp, parsed, gfs, stype, q_always, off) else bw_df(0, 1)
     for (u in units) {
-      d <- convolve_dist(d, loop_unit_dist(u, list(), parsed, gfs, stype, q_always,
-                                           off, exact_cap, forced, nopt, permissive = u$shared))
+      d <- convolve_dist(d, loop_unit_dist(u, list(), parsed, gfs, q_always,
+                                           permissive = u$shared))
     }
-    attr(d, "approximated") <- TRUE
+    attr(d, "approx") <- rbind(approx, data.frame(
+      question_id = c(qgrp, unlist(lapply(units, `[[`, "cond"))),
+      reason = "loop component above max_condition_states (shared gates held permissive)",
+      stringsAsFactors = FALSE))
     return(d)
   }
 
@@ -369,7 +393,7 @@ component_dist_loop <- function(qgrp, units, gvars, parsed, gfs, stype, q_always
   gcols <- lapply(grid, as.integer)
   preds <- lapply(qgrp, function(q) parsed[[q]]$predicate)
   gq    <- vapply(qgrp, function(q) gfs[[q]] %||% 0, numeric(1))
-  trig  <- intersect(gvars, qgrp)
+  trig  <- order_triggers(intersect(gvars, qgrp), parsed)
   tpreds <- lapply(trig, function(q) parsed[[q]]$predicate)
   lmemo <- new.env(parent = emptyenv())
 
@@ -385,52 +409,97 @@ component_dist_loop <- function(qgrp, units, gvars, parsed, gfs, stype, q_always
                                      character(1)), collapse = "|"))
       ld <- if (is.function(u$w)) NULL else lmemo[[k]]
       if (is.null(ld)) {
-        ld <- loop_unit_dist(u, s[u$shared], parsed, gfs, stype, q_always, off,
-                             exact_cap, forced, nopt)
+        ld <- loop_unit_dist(u, s[u$shared], parsed, gfs, q_always)
         if (!is.function(u$w)) lmemo[[k]] <- ld
       }
       d <- convolve_dist(d, ld)
     }
     d
   })
-  mix_dists(parts, rep(1 / length(parts), length(parts)))
+  out <- mix_dists(parts, rep(1 / length(parts), length(parts)))
+  attr(out, "approx") <- approx
+  out
+}
+
+#' Order trigger questions so each comes after the triggers its own condition
+#' reads (cycles keep their input order at the end).
+#' @noRd
+order_triggers <- function(trig, parsed) {
+  if (length(trig) < 2L) return(trig)
+  deps <- lapply(trig, function(t) intersect(parsed[[t]]$vars %||% character(0), setdiff(trig, t)))
+  names(deps) <- trig
+  out <- character(0); left <- trig
+  repeat {
+    ready <- left[vapply(left, function(t) all(deps[[t]] %in% out), logical(1))]
+    if (!length(ready)) break
+    out <- c(out, ready); left <- setdiff(left, ready)
+    if (!length(left)) break
+  }
+  c(out, left)
+}
+
+#' A loop's conditional questions grouped by the iteration gates they share,
+#' each group with its enumerated gate states. A group whose joint states
+#' exceed `exact_cap` holds its gates permissive and is reported.
+#' @noRd
+loop_iter_components <- function(u, parsed, stype, off, exact_cap, forced, nopt) {
+  off_u <- unique(c(off, u$off_iter))
+  plist <- stats::setNames(lapply(u$cond, function(q)
+    list(vars = intersect(parsed[[q]]$vars %||% character(0), u$iter))), u$cond)
+  comps <- if (length(u$cond)) connected_components(u$cond, plist) else list()
+  lapply(comps, function(cq) {
+    gates <- unique(unlist(lapply(cq, function(q) plist[[q]]$vars)))
+    st <- lapply(gates, function(v) gate_states(v, cq, parsed, stype, off_u, forced, nopt))
+    names(st) <- gates
+    m <- prod(vapply(st, length, integer(1)))
+    list(q = cq, gates = gates, states = st, m = m, approx = m > exact_cap,
+         trig = order_triggers(intersect(gates, cq), parsed))
+  })
+}
+
+#' Enumeration work of one loop unit per shared state.
+#' @noRd
+loop_unit_work <- function(u) {
+  per <- sum(vapply(u$icomps, function(cmp) if (cmp$approx) 1 else cmp$m, numeric(1)))
+  max(1, per) * (if (isTRUE(u$position)) u$n else 1)
 }
 
 #' One Loop & Merge block's total contribution given the shared-gate state
-#' `s`: iteration gates take a fresh, equally weighted state each iteration;
-#' iteration j uses `@@iter = j`; n iterations are the convolution of the
-#' first n per-iteration distributions, mixed over n by the loop weights.
+#' `s`: iteration gates take a fresh, equally weighted state each iteration
+#' (groups of questions sharing iteration gates are enumerated jointly and
+#' convolved); iteration j uses `@@iter = j`; n iterations are the
+#' convolution of the first n per-iteration distributions, mixed over n by the
+#' loop weights.
 #' @noRd
-loop_unit_dist <- function(u, s, parsed, gfs, stype, q_always, off = character(0),
-                           exact_cap = EXACT_CAP, forced = character(0), nopt = NULL,
-                           permissive = character(0)) {
+loop_unit_dist <- function(u, s, parsed, gfs, q_always, permissive = character(0)) {
   shown0 <- stats::setNames(rep(TRUE, length(q_always)), q_always)
-  istates <- lapply(u$iter, function(v) gate_states(v, u$cond, parsed, stype, off, forced, nopt))
-  names(istates) <- u$iter
-  m <- prod(vapply(istates, length, integer(1)))
-  if (m > exact_cap) { permissive <- c(permissive, u$iter); istates <- list(); m <- 1L }
-  grid  <- expand.grid(lapply(istates, seq_along), KEEP.OUT.ATTRS = FALSE)
-  if (!length(istates)) grid <- data.frame(.row = 1L)
-  gcols <- lapply(grid, as.integer)
-  preds <- lapply(u$cond, function(q) parsed[[q]]$predicate)
-  gc    <- vapply(u$cond, function(q) gfs[[q]] %||% 0, numeric(1))
-  alw   <- sum(gfs[u$always], na.rm = TRUE)
-  trig  <- intersect(u$iter, u$cond)
-  tpreds <- lapply(trig, function(q) parsed[[q]]$predicate)
+  alw <- sum(gfs[u$always], na.rm = TRUE)
 
-  per_iter <- function(j) {
+  comp_dist <- function(cmp, j) {
+    perm <- if (cmp$approx) c(permissive, cmp$gates) else permissive
+    st <- if (cmp$approx) list() else cmp$states
+    grid <- if (length(st)) expand.grid(lapply(st, seq_along), KEEP.OUT.ATTRS = FALSE) else
+      data.frame(.row = 1L)
+    m <- nrow(grid)
+    gcols <- lapply(grid, as.integer)
+    preds <- lapply(cmp$q, function(q) parsed[[q]]$predicate)
+    gc <- vapply(cmp$q, function(q) gfs[[q]] %||% 0, numeric(1))
+    tpreds <- lapply(cmp$trig, function(q) parsed[[q]]$predicate)
     b <- vapply(seq_len(m), function(r) {
       a <- s
-      for (k in seq_along(istates)) a[[names(istates)[k]]] <- istates[[k]][[gcols[[k]][r]]]
+      for (k in seq_along(st)) a[[names(st)[k]]] <- st[[k]][[gcols[[k]][r]]]
       a[["@@iter"]] <- j
-      a <- settle_hidden_triggers(a, trig, tpreds, shown0, permissive)
-      x <- alw
-      for (i in seq_along(u$cond)) {
-        if (isTRUE(preds[[i]](a, shown0, permissive = permissive))) x <- x + gc[i]
-      }
+      a <- settle_hidden_triggers(a, cmp$trig, tpreds, shown0, perm)
+      x <- 0
+      for (i in seq_along(cmp$q)) if (isTRUE(preds[[i]](a, shown0, permissive = perm))) x <- x + gc[i]
       x
     }, numeric(1))
     group_sum(round(b, 1), rep(1 / m, m))
+  }
+  per_iter <- function(j) {
+    d <- bw_df(alw, 1)
+    for (cmp in u$icomps) d <- convolve_dist(d, comp_dist(cmp, j))
+    d
   }
 
   w <- u$w
@@ -501,7 +570,10 @@ component_dist <- function(grp, gvars, parsed, gfs, stype, q_always, exact_cap =
   if (length(gvars) <= 1 || total <= exact_cap) {
     return(component_dist_exact(grp, gvars, states, parsed, gfs, q_always))
   }
-  component_dist_fallback(grp, parsed, gfs, stype, q_always, off)
+  d <- component_dist_fallback(grp, parsed, gfs, stype, q_always, off)
+  attr(d, "approx") <- data.frame(question_id = grp,
+    reason = "primary-gate approximation above max_condition_states", stringsAsFactors = FALSE)
+  d
 }
 
 #' Hidden triggers are unanswered: a conditional question that is also a gate
@@ -538,7 +610,7 @@ component_dist_exact <- function(grp, gvars, states, parsed, gfs, q_always) {
   ng      <- seq_along(gvars)
   preds   <- lapply(grp, function(q) parsed[[q]]$predicate)
   gfs_grp <- vapply(grp, function(q) gfs[[q]] %||% 0, numeric(1))
-  trig    <- intersect(gvars, grp)     # conditional questions that are also gates
+  trig    <- order_triggers(intersect(gvars, grp), parsed)   # conditional gates, in dependency order
   tpreds  <- lapply(trig, function(q) parsed[[q]]$predicate)
 
   burdens <- vapply(seq_len(n), function(r) {

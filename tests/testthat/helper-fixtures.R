@@ -86,3 +86,18 @@ lp_expect <- function(got, want) {
   expect_equal(unname(got[o]), unname(want[w]), tolerance = 1e-9)
 }
 
+
+# Add a block (and its questions) that the survey flow never reaches.
+lp_add_unflowed_block <- function(q, id, ...) {
+  qs <- list(...)
+  el <- q$SurveyElements
+  bi <- which(vapply(el, function(e) identical(e$Element, "BL"), logical(1)))
+  pl <- el[[bi]]$Payload
+  pl[[as.character(length(pl))]] <- list(Type = "Standard", SubType = "", Description = id, ID = id,
+    BlockElements = lapply(qs, function(p) list(Type = "Question", QuestionID = p$QuestionID)))
+  el[[bi]]$Payload <- pl
+  el <- c(el, lapply(qs, function(p) list(Element = "SQ", PrimaryAttribute = p$QuestionID,
+                                         SecondaryAttribute = "", Payload = p)))
+  q$SurveyElements <- el
+  q
+}

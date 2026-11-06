@@ -1,4 +1,4 @@
-# surveyBurden (development version)
+# surveyBurden 0.3.0
 
 * Display logic inside Loop & Merge blocks is now evaluated in the
   structural profile (`path_burden_profile()`, `burden_report()`).

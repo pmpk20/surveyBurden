@@ -1,6 +1,6 @@
 Package: surveyBurden
 Title: An R package for assessing the response-burden of web surveys
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: 
     person("Peter", "King", , "p.king1@leeds.ac.uk", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-8550-466X"))

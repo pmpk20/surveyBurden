@@ -36,3 +36,6 @@ inst/doc/
 
 # Built tarballs
 *.tar.gz
+
+# Literature cache: PDFs stay private
+literature/pdf/

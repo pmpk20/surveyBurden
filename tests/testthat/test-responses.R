@@ -332,3 +332,16 @@ test_that("words_per_line of the wrong length or value errors", {
                "words_per_line")
   expect_error(respondent_burden(qsf_fx(), resp, words_per_line = 0), "words_per_line")
 })
+
+test_that("read_responses() is exported and keeps Qualtrics header rows", {
+  expect_true("read_responses" %in% getNamespaceExports("surveyBurden"))
+  csv <- withr::local_tempfile(fileext = ".csv")
+  writeLines(c("ResponseId,Q1", "Response ID,Q1 text",
+               '"{""ImportId"":""_recordId""}","{""ImportId"":""QID1""}"',
+               "R_1,yes"), csv)
+  r <- surveyBurden::read_responses(csv)
+  expect_equal(nrow(r), 3L)
+  expect_true(all(vapply(r, is.character, logical(1))))
+  df <- data.frame(a = 1)
+  expect_identical(surveyBurden::read_responses(df), df)
+})

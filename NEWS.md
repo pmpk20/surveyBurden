@@ -21,6 +21,8 @@
   by block for each structural traversal (exact or sampled, stratified by
   route), with `field_rules` for derived fields and `output = "summary"`
   for large runs; and `traversal_stability()` for Monte Carlo spread.
+  Rules may be vectorised (`vectorised = TRUE`) for speed; display-logic
+  and rule results are memoised per run.
 * `read_responses()` is exported. The report's "Early-exit points" line is
   now labelled "End-of-survey elements" (the count is unchanged).
 

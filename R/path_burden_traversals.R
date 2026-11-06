@@ -41,6 +41,14 @@
 #' the rejected share per route is in `attr(x, "rejected")`. A loop-count
 #' rule requires sampling.
 #'
+#' **Speed.** A rule is called once per distinct combination of its inputs,
+#' and results are reused across chunks and routes. Rules with many inputs
+#' (for example an answer in each of ten loop iterations) are faster when
+#' vectorised: \code{list(fun = , inputs = , vectorised = TRUE)} calls
+#' \code{fun} once per chunk with whole columns (\code{""} for unanswered,
+#' choice ids otherwise; loop counts as integers, \code{NULL} when the route
+#' has no such loop) and expects one value per traversal.
+#'
 #' Differences from [path_burden_profile()]: no primary-gate approximation;
 #' a conditionally shown forced trigger never has an unanswered state; and
 #' `field_rules` apply. Without these, exact traversal quantiles equal the
@@ -221,7 +229,8 @@ normalise_field_rules <- function(field_rules) {
       cli::cli_abort("{.arg field_rules} entry {.val {nm}} must be a function or {.code list(fun = , inputs = )}.")
     }
     if (!startsWith(nm, "@")) cli::cli_abort("{.arg field_rules} target {.val {nm}} must start with {.val @}.")
-    list(target = nm, fun = r$fun, inputs = as.character(r$inputs %||% character(0)))
+    list(target = nm, fun = r$fun, inputs = as.character(r$inputs %||% character(0)),
+         vectorised = isTRUE(r$vectorised))
   })
   stats::setNames(out, names(field_rules))
 }
@@ -245,7 +254,8 @@ traversal_context <- function(qsf, scored, blocks, rules, respect_force_response
     visible = flags$visible, responsive = flags$responsive,
     page = block_pages(qsf), choices = choices,
     forced = if (isTRUE(respect_force_response)) names(fmap)[fmap] else character(0),
-    loop_max = stats::setNames(blocks$loop_max, blocks$block_id)
+    loop_max = stats::setNames(blocks$loop_max, blocks$block_id),
+    memo = new.env(parent = emptyenv())
   )
 }
 
@@ -387,19 +397,35 @@ walk_route <- function(ctx, route, mode, n, max_traversals = Inf) {
     if (identical(val, "")) character(0) else strsplit(val, "+", fixed = TRUE)[[1]]
   }
   # evaluate f(state) once per distinct combination of the columns it reads
-  by_key <- function(vars, rows, f) {
-    out <- vector("list", nrow_x())
-    if (!any(rows)) return(out)
-    vals <- lapply(vars, function(v) col(v)[rows])
-    key <- if (length(vars)) do.call(paste, c(vals, sep = "\r")) else rep("", sum(rows))
+  # Returns list(res, m, idx): one result per distinct combination (`res`),
+  # and for the rows `idx` the index `m` of their combination in `res`.
+  by_key <- function(vars, rows, f, memo = NULL) {
+    idx <- which(rows)
+    if (!length(idx)) return(list(res = list(), m = integer(0), idx = idx))
+    vals <- lapply(vars, function(v) col(v)[idx])
+    key <- if (length(vars)) do.call(paste, c(vals, sep = "\r")) else rep("", length(idx))
     u <- unique(key); m <- match(key, u)
     first <- match(seq_along(u), m)
-    res <- lapply(first, function(r) {
+    eval_one <- function(r) {
       st <- stats::setNames(lapply(seq_along(vars), function(j) decode(vars[j], vals[[j]][r])), vars)
       f(st)
-    })
-    out[which(rows)] <- res[m]
-    out
+    }
+    if (is.null(memo)) return(list(res = lapply(first, eval_one), m = m, idx = idx))
+    ku <- paste0("k", u)
+    res <- mget(ku, envir = memo, ifnotfound = list(NULL))
+    miss <- which(vapply(res, is.null, logical(1)))
+    if (length(miss)) {
+      new <- lapply(first[miss], eval_one)
+      res[miss] <- new
+      list2env(stats::setNames(new, ku[miss]), envir = memo)
+    }
+    list(res = unname(res), m = m, idx = idx)
+  }
+  memo_for <- function(kind, name) {
+    nm <- paste0(kind, ":", name)
+    e <- ctx$memo[[nm]]
+    if (is.null(e)) { e <- new.env(parent = emptyenv()); assign(nm, e, envir = ctx$memo) }
+    e
   }
   apply_rule <- function(rule, rows) {
     cols <- if (length(rule$inputs)) {
@@ -417,16 +443,31 @@ walk_route <- function(ctx, route, mode, n, max_traversals = Inf) {
     key <- if (length(cols)) do.call(paste, c(lapply(cols, col), sep = "\r")) else rep("", nrow_x())
     old <- X$cols[[key_col]]
     todo <- rows & (is.null(old) | (if (is.null(old)) TRUE else old != key))
-    if (any(todo)) {
+    if (any(todo) && isTRUE(rule$vectorised)) {
+      ti <- which(todo)
+      sv <- stats::setNames(lapply(cols, function(cn) {
+        x <- col(cn)[ti]
+        if (startsWith(cn, "@@n:")) suppressWarnings(as.integer(x)) else x
+      }), cols)
+      sv <- structure(sv, class = "rule_state", rule = rule$target)
+      out <- tryCatch(rule$fun(sv), rule_state_unknown = function(e) stop(e),
+                      error = function(e) cli::cli_abort(
+        "{.arg field_rules} entry {.val {rule$target}} failed: {conditionMessage(e)}"))
+      if (length(out) != length(ti)) {
+        cli::cli_abort("{.arg field_rules} entry {.val {rule$target}} (vectorised) returned {length(out)} value{?s} for {length(ti)} traversal{?s}.")
+      }
+      enc <- ifelse(is.na(out), NA_KEY, as.character(out))
+      v <- col(rule$target); v[ti] <- enc; X$cols[[rule$target]] <<- v
+    } else if (any(todo)) {
       vals <- by_key(cols, todo, function(st) {
         st <- structure(st, class = "rule_state", rule = rule$target)
         v <- tryCatch(rule$fun(st), rule_state_unknown = function(e) stop(e),
                       error = function(e) cli::cli_abort(
           "{.arg field_rules} entry {.val {rule$target}} failed: {conditionMessage(e)}"))
         if (length(v) != 1L || is.na(v)) NA_KEY else as.character(v)
-      })
+      }, memo = memo_for("rule", paste(rule$target, paste(cols, collapse = ","))))
       v <- col(rule$target)
-      v[todo] <- unlist(vals[todo])
+      v[vals$idx] <- unlist(vals$res)[vals$m]
       X$cols[[rule$target]] <<- v
       kc <- if (is.null(old)) rep(NA_character_, nrow_x()) else old
       kc[todo] <- key[todo]
@@ -441,14 +482,16 @@ walk_route <- function(ctx, route, mode, n, max_traversals = Inf) {
     if (!is.na(j)) { X$cols[["@@iter"]] <<- rep(as.character(j), nrow_x()) }
     else X$cols[["@@iter"]] <<- NULL
     pred <- parsed[[q]]$predicate
-    r <- by_key(vars, rows, function(st) isTRUE(pred(st, shown0)))
+    mk <- if (length(parsed[[q]]$displayed)) paste(q, route$path_id) else q
+    r <- by_key(c(vars, if (!is.na(j)) "@@iter"), rows,
+                function(st) isTRUE(pred(st, shown0)), memo = memo_for("pred", mk))
     s <- rows
-    s[rows] <- vapply(r[rows], isTRUE, logical(1))
+    if (length(r$idx)) s[r$idx] <- vapply(r$res, isTRUE, logical(1))[r$m]
     s
   }
   visit <- function(q, k, j, ncol_name) {
     in_loop <- !is.na(j)
-    rows <- if (in_loop) as.integer(col(ncol_name)) >= j else rep(TRUE, nrow_x())
+    rows <- if (in_loop) X$cols[[".ni"]] >= j else rep(TRUE, nrow_x())
     s <- shown_of(q, rows, j)
     pts <- ctx$gfs[[q]] %||% 0
     vis <- isTRUE(ctx$visible[[q]]); resp <- isTRUE(ctx$responsive[[q]])
@@ -506,7 +549,7 @@ walk_route <- function(ctx, route, mode, n, max_traversals = Inf) {
     } else if (is.function(route$loop_w[[b]])) {
       fw <- route$loop_w[[b]]; sh <- route$loop_shared[[b]]
       wv <- by_key(sh, rep(TRUE, nrow_x()), function(st) check_loop_weight_vector(fw(st), b, mx))
-      wk <- vapply(wv, function(x) paste(x, collapse = "/"), character(1))
+      wk <- vapply(wv$res, function(x) paste(x, collapse = "/"), character(1))[wv$m]
       X$cols[[".wkey"]] <- wk
       for (wkey in unique(wk)) {
         w1 <- as.numeric(strsplit(wkey, "/", fixed = TRUE)[[1]])
@@ -517,18 +560,20 @@ walk_route <- function(ctx, route, mode, n, max_traversals = Inf) {
     } else {
       branch(ncol_name, rep(TRUE, nrow_x()), as.character(seq_len(mx)), route$loop_w[[b]])
     }
+    X$cols[[".ni"]] <- as.integer(col(ncol_name))   # replicated with the rows
     for (q in intersect(qs, route$gate_q)) for (j in seq_len(mx)) {
       X$cols[[paste0(q, "#", j)]] <- rep("", nrow_x())
     }
     for (j in seq_len(mx)) {
-      act <- as.integer(col(ncol_name)) >= j
+      act <- X$cols[[".ni"]] >= j
       if (!any(act)) break
       for (q in intersect(qs, route$gate_q)) { v <- col(q); v[act] <- ""; X$cols[[q]] <- v }
       for (q in qs) visit(q, k, j, ncol_name)
-      act <- as.integer(col(ncol_name)) >= j
+      act <- X$cols[[".ni"]] >= j
       close_pages(k, act)
     }
-    X$acc$iterations[, k] <- as.numeric(col(ncol_name))
+    X$acc$iterations[, k] <- as.numeric(X$cols[[".ni"]])
+    X$cols[[".ni"]] <- NULL
   }
   X$cols[["@@iter"]] <- NULL
   for (r in ctx$rules) if (!startsWith(r$target, "@@n:")) {

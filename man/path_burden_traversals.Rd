@@ -131,6 +131,14 @@ weights are renormalised within the route, rejected draws are redrawn, and
 the rejected share per route is in \code{attr(x, "rejected")}. A loop-count
 rule requires sampling.
 
+\strong{Speed.} A rule is called once per distinct combination of its inputs,
+and results are reused across chunks and routes. Rules with many inputs
+(for example an answer in each of ten loop iterations) are faster when
+vectorised: \code{list(fun = , inputs = , vectorised = TRUE)} calls
+\code{fun} once per chunk with whole columns (\code{""} for unanswered,
+choice ids otherwise; loop counts as integers, \code{NULL} when the route
+has no such loop) and expects one value per traversal.
+
 Differences from \code{\link[=path_burden_profile]{path_burden_profile()}}: no primary-gate approximation;
 a conditionally shown forced trigger never has an unanswered state; and
 \code{field_rules} apply. Without these, exact traversal quantiles equal the

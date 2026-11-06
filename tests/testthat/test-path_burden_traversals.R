@@ -190,3 +190,21 @@ test_that("I5: rule evaluation keys on declared inputs only", {
   pbt(q, method = "exact", loop_weights = list(BL_A = c(0, 0, 1)), field_rules = r)
   expect_true(ok)
 })
+
+test_that("a vectorised rule gives the same traversals as the per-row rule", {
+  vec <- list(`@cnt` = list(inputs = "QIDa", vectorised = TRUE, fun = function(s) {
+    # s: named list of whole columns; "" = unanswered, choice ids otherwise
+    (s[["QIDa#1"]] == "1") + (s[["QIDa#2"]] == "1") + (s[["QIDa#3"]] == "1")
+  }))
+  a <- pbt(rule_fx(), method = "exact", loop_weights = list(BL_A = c(0, 0, 1)), field_rules = cnt_rule())
+  b <- pbt(rule_fx(), method = "exact", loop_weights = list(BL_A = c(0, 0, 1)), field_rules = vec)
+  expect_equal(as.data.frame(a), as.data.frame(b))
+  sa <- pbt(rule_fx(), method = "sample", n_draws = 2000, seed = 4, field_rules = cnt_rule())
+  sb <- pbt(rule_fx(), method = "sample", n_draws = 2000, seed = 4, field_rules = vec)
+  expect_equal(as.data.frame(sa), as.data.frame(sb))
+})
+
+test_that("a vectorised rule must return one value per row", {
+  bad <- list(`@cnt` = list(inputs = "QIDa", vectorised = TRUE, fun = function(s) 1:2))
+  expect_error(pbt(rule_fx(), method = "exact", field_rules = bad), "@cnt")
+})

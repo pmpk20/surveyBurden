@@ -129,7 +129,10 @@ derived field is never enumerated; its value is set before any display
 logic that reads it. A rule returning \code{NA} rejects the traversal: exact
 weights are renormalised within the route, rejected draws are redrawn, and
 the rejected share per route is in \code{attr(x, "rejected")}. A loop-count
-rule requires sampling.
+rule makes routes that contain its loop sampled (\code{loop_weights} for that loop
+are then ignored, with a warning). A display condition that reads a
+question later in the flow is listed in \code{attr(x, "unresolved")} as a
+forward reference; that question is read as unanswered.
 
 \strong{Speed.} A rule is called once per distinct combination of its inputs,
 and results are reused across chunks and routes. Rules with many inputs

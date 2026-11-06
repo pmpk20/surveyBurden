@@ -208,3 +208,79 @@ test_that("a vectorised rule must return one value per row", {
   bad <- list(`@cnt` = list(inputs = "QIDa", vectorised = TRUE, fun = function(s) 1:2))
   expect_error(pbt(rule_fx(), method = "exact", field_rules = bad), "@cnt")
 })
+
+# ---- deferred minors (M3-M6, M8, M9) -----------------------------------------
+
+test_that("M3: a loop-count rule and loop_weights for the same loop warn", {
+  expect_warning(path_burden_traversals(iter_fx(), method = "sample", n_draws = 50,
+                                        loop_weights = list(BL_L = c(1, 1)),
+                                        field_rules = list(`@@n:BL_L` = function(s) 2)),
+                 "BL_L")
+})
+
+test_that("M4: a loop-count rule naming a non-loop block errors", {
+  expect_error(pbt(iter_fx(), method = "sample", n_draws = 50,
+                   field_rules = list(`@@n:BL_nope` = function(s) 1)), "BL_nope")
+})
+
+test_that("M5: a loop-count rule forces sampling only on routes with that loop", {
+  # two routes: grp = 1 runs the loop BL_L, otherwise it is skipped
+  q <- lp_qsf(list(list(id = "BL_M", qs = list(fg_mc("QIDx", 2))),
+                   list(id = "BL_L", loop = 2, qs = list(fg_mc("QIDa", 2)))))
+  q$SurveyElements <- lapply(q$SurveyElements, function(e) {
+    if (identical(e$Element, "FL")) e$Payload$Flow <- list(
+      list(Type = "EmbeddedData", FlowID = "FL_ed", EmbeddedData = list(list(
+        Description = "grp", Type = "Recipient", Field = "grp", VariableType = "String"))),
+      list(Type = "Standard", ID = "BL_M", FlowID = "FL_1"),
+      list(Type = "Branch", FlowID = "FL_b", Description = "grp",
+           BranchLogic = fg_logic(fg_emb("grp", "EqualTo", "1")),
+           Flow = list(list(Type = "Standard", ID = "BL_L", FlowID = "FL_2"))))
+    e
+  })
+  r <- list(`@@n:BL_L` = function(s) 1)
+  m <- attr(pbt(q, method = "auto", n_draws = 20, field_rules = r), "method")
+  expect_equal(nrow(m), 2L)
+  expect_setequal(m$method, c("sample", "exact"))
+})
+
+test_that("M6: forward references are flagged", {
+  # QIDb (first) is shown when QIDa (later in the flow) = 1
+  q <- lp_qsf(list(list(id = "BL_M", qs = list(
+    fg_mc("QIDb", 3, fg_logic(lp_sel("QIDa", 1))), fg_mc("QIDa", 2)))))
+  u <- attr(pbt(q, method = "exact"), "unresolved")
+  expect_true(any(u$question_id == "QIDb" & u$reason == "forward reference"))
+})
+
+test_that("M8: summary output is reduced per chunk and equals the long output", {
+  q <- read_qsf(demo_qsf())
+  probs <- c(.1, .5, .9)
+  long <- pbt(q, method = "sample", n_draws = 2500, seed = 9, chunk = 700)
+  s <- pbt(q, method = "sample", n_draws = 2500, seed = 9, chunk = 700, output = "summary", probs = probs)
+  t <- tot(long)
+  expect_equal(s$totals$points, weighted_quantile(t$points, t$weight, probs))
+  expect_equal(s$totals$pages, weighted_quantile(t$pages, t$weight, probs))
+})
+
+test_that("M9: exact traversals equal the profile on the shared-gate and position fixtures", {
+  probs <- c(0, .25, .5, .75, 1)
+  qs <- list(
+    lp_qsf(list(list(id = "BL_M", qs = list(fg_mc("QIDh", 2))),
+                list(id = "BL_L", loop = 2, qs = list(fg_mc("QIDb", 3, fg_logic(lp_sel("QIDh", 1))))))),
+    lp_qsf(list(list(id = "BL_L", loop = 3, qs = list(fg_mc("QIDp", 3, lp_pos_logic("BL_L", 1)), fg_mc("QIDq", 2))))))
+  for (q in qs) {
+    t <- tot(pbt(q, method = "exact", respect_force_response = FALSE))
+    r <- suppressMessages(burden_report(q, quiet = TRUE, respect_force_response = FALSE))
+    expect_equal(weighted_quantile(t$points, t$weight, probs), r$burden$points)
+  }
+})
+
+test_that("M9: a loop block with no readable maximum is scored once, in both engines", {
+  q <- lp_qsf(list(list(id = "BL_L", loop = 2, qs = list(fg_mc("QIDa", 2)))))
+  q$SurveyElements <- lapply(q$SurveyElements, function(e) {
+    if (identical(e$Element, "BL")) e$Payload[["0"]]$Options$LoopingOptions <- list()
+    e
+  })
+  expect_true(is.na(resolve_live_blocks(q)$loop_max))
+  lp_expect(lp_dist(q), c(`1` = 1))
+  expect_equal(unique(tot(pbt(q, method = "exact"))$points), 1)
+})

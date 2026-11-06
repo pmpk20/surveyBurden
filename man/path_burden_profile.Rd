@@ -13,7 +13,9 @@ path_burden_profile(
   max_condition_states = 10000L,
   overrides = NULL,
   choice_tasks = NULL,
-  field_domains = NULL
+  field_domains = NULL,
+  loop_weights = NULL,
+  respect_force_response = TRUE
 )
 }
 \arguments{
@@ -50,6 +52,17 @@ stated-choice rule. See \code{\link[=burden_report]{burden_report()}}. Ignored, 
 \item{field_domains}{Optional named list giving the values an
 embedded-data field can hold, e.g. \code{list(SP_05 = 0:5)}. Passed to
 \code{\link[=resolve_flow]{resolve_flow()}}. Ignored, with a warning, when \code{engine} is supplied.}
+
+\item{loop_weights}{Optional named list of loop-count weights, keyed by
+Loop & Merge block id: a non-negative numeric vector with one weight per
+iteration count \verb{1..max} (normalised internally), or a function of the
+component's shared-gate states returning such a vector. \code{NULL} (default)
+weights each count equally, e.g. \code{list(BL_x = c(1, 1, 1, 9))}.}
+
+\item{respect_force_response}{If \code{TRUE} (default), a display-logic trigger
+that the route shows and whose response is forced
+(\code{ForceResponse = "ON"}) has no unanswered state, when its referenced
+choices cover all its choices. \code{FALSE} gives the 0.2.0 behaviour.}
 }
 \value{
 A \link[tibble:tibble]{tibble}, one row per flow path:
@@ -94,11 +107,22 @@ approximation for just that component: each question is scored against its
 first gate with the rest held permissive. Components are independent of each
 other and their contributions convolved into the profile for the path.
 
+Loop & Merge blocks: display logic inside a loop is evaluated. A
+trigger in the same loop block takes a fresh, equally weighted state in
+each iteration (iterations are independent); a trigger outside the block
+(another question or a stored field) keeps one state for every iteration
+and is shared with non-loop questions that use it; a \code{LoopAndMerge}
+"Loop k ... Current Loop" condition is evaluated from the iteration index.
+Iteration counts \verb{1..max} are weighted by \code{loop_weights} (equal by
+default). A trigger question whose own condition fails is treated as
+unanswered, so a question never appears because of an answer to a
+question that was not shown. A trigger in a different loop block is
+treated as shared and reported by the engine as unresolved.
+
 Remaining approximations: different components are treated as independent
 (the real coupling between, say, employment status and having a licence is
 weak, but not checked); components above the chosen state limit use the
-primary-gate approximation above; loop iterations are scored at a flat
-per-iteration burden (within-loop display logic ignored). Once a path's
+primary-gate approximation above. Once a path's
 convolved profile exceeds 3000 distinct burden values it is re-binned to
 multiples of 5 GfS points, so on a very heavy survey the reported quantiles
 can move a few points from the fine-grained figure.

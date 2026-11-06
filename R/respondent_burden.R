@@ -351,9 +351,9 @@ respondent_blocks <- function(qsf, responses, scheme = gfs_scheme(), id_col = NU
   q$gfs[is.na(q$gfs)] <- 0
   q$gfs_resp <- respondent_scores(catalogue, scheme, wpl, q$gfs, overrides,
                                   choice_tasks)
-  q$visible    <- stats::setNames(!q$qtype %in% c("Timing", "Meta") & !q$hidden,
-                                  names(q$qtype))
-  q$responsive <- stats::setNames(!q$qtype %in% c("DB", "Timing", "Meta"), names(q$qtype))
+  flags        <- item_flags(scored)
+  q$visible    <- flags$visible
+  q$responsive <- flags$responsive
   pages <- block_pages(qsf)
 
   # ---- response columns ------------------------------------------------------

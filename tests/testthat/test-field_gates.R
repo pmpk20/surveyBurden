@@ -5,27 +5,6 @@
 # Comparisons that cannot be evaluated keep a free true/false gate, reported
 # by calculation_certainty().
 
-fg_mc <- function(qid, n, dl = NULL) {
-  p <- list(QuestionID = qid, QuestionType = "MC", Selector = "SAVR", SubSelector = "TX",
-            QuestionText = paste("Question", qid), DataExportTag = qid,
-            QuestionDescription = qid,
-            Choices = stats::setNames(lapply(seq_len(n), function(i) list(Display = paste("c", i))),
-                                      as.character(seq_len(n))))
-  if (!is.null(dl)) p$DisplayLogic <- dl
-  p
-}
-fg_emb <- function(field, op, value, conj = NULL) {
-  l <- list(LogicType = "EmbeddedField", LeftOperand = field, Operator = op,
-            RightOperand = value, Type = "Expression")
-  if (!is.null(conj)) l$Conjuction <- conj
-  l
-}
-fg_logic <- function(...) {
-  lits <- list(...)
-  g <- stats::setNames(lits, as.character(seq_along(lits) - 1L))
-  g$Type <- "If"
-  list(`0` = g, Type = "BooleanExpression", inPage = FALSE)
-}
 # One block: QID1 (2 options, 1 point, always shown), QID2 (3 options, 2 points)
 # and QID3 (7 options, 3 points) gated by the given logic; field `grp` set in
 # the flow.

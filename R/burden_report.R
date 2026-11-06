@@ -119,6 +119,15 @@
 #'   and `score_basis = "user override"`. The same argument is accepted by
 #'   [path_burden()], [path_burden_profile()], [calculation_certainty()],
 #'   [respondent_burden()] and [validate_times()].
+#' @param loop_weights Optional named list of loop-count weights, keyed by
+#'   Loop & Merge block id: a non-negative numeric vector with one weight per
+#'   iteration count `1..max` (normalised internally), or a function of the
+#'   component's shared-gate states returning such a vector. `NULL` (default)
+#'   weights each count equally, e.g. `list(BL_x = c(1, 1, 1, 9))`.
+#' @param respect_force_response If `TRUE` (default), a display-logic trigger
+#'   that the route shows and whose response is forced
+#'   (`ForceResponse = "ON"`) has no unanswered state, when its referenced
+#'   choices cover all its choices. `FALSE` gives the 0.2.0 behaviour.
 #' @param field_domains Optional named list giving the values an
 #'   embedded-data field can hold, e.g. `list(SP_05 = 0:5)`. Passed to
 #'   [resolve_flow()]: branches on a declared field take only outcomes those
@@ -157,7 +166,8 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
                           certainty = TRUE,
                           quiet = FALSE, max_condition_states = 10000L,
                           overrides = NULL, choice_tasks = NULL,
-                          field_domains = NULL) {
+                          field_domains = NULL, loop_weights = NULL,
+                          respect_force_response = TRUE) {
   validate_condition_states(max_condition_states)
   step <- if (isTRUE(quiet)) function(...) invisible() else cli::cli_progress_step
 
@@ -192,13 +202,17 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
   engine <- if (need_engine)
     burden_engine(qsf, scheme = scheme, paths = paths, scored = scored,
                   blocks = blocks, parsed_dl = parsed_dl,
-                  max_condition_states = max_condition_states) else NULL
+                  max_condition_states = max_condition_states,
+                  loop_weights = loop_weights,
+                  respect_force_response = respect_force_response) else NULL
 
   step("Checking calculation certainty")
   cert   <- if (isTRUE(certainty))
     calculation_certainty(qsf, scheme = scheme, paths = paths, scored = scored,
                           blocks = blocks, parsed_dl = parsed_dl,
-                          max_condition_states = max_condition_states) else NULL
+                          max_condition_states = max_condition_states,
+                          loop_weights = loop_weights,
+                          respect_force_response = respect_force_response) else NULL
 
   # ---- $survey -------------------------------------------------------
   survey <- tibble::tibble(

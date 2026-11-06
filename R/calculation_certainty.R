@@ -39,6 +39,15 @@
 #' @param overrides Optional named numeric vector of GfS+ points that replace
 #'   the computed score of the named questions, e.g. `c(QID51 = 10)`; counted
 #'   as `manual` in `scores`. See [burden_report()].
+#' @param loop_weights Optional named list of loop-count weights, keyed by
+#'   Loop & Merge block id: a non-negative numeric vector with one weight per
+#'   iteration count `1..max` (normalised internally), or a function of the
+#'   component's shared-gate states returning such a vector. `NULL` (default)
+#'   weights each count equally, e.g. `list(BL_x = c(1, 1, 1, 9))`.
+#' @param respect_force_response If `TRUE` (default), a display-logic trigger
+#'   that the route shows and whose response is forced
+#'   (`ForceResponse = "ON"`) has no unanswered state, when its referenced
+#'   choices cover all its choices. `FALSE` gives the 0.2.0 behaviour.
 #' @param field_domains Optional named list giving the values an
 #'   embedded-data field can hold, e.g. `list(SP_05 = 0:5)`. Passed to
 #'   [resolve_flow()]: branches on a declared field take only outcomes those
@@ -87,7 +96,8 @@ calculation_certainty <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L
                                   paths = NULL, scored = NULL, blocks = NULL,
                                   parsed_dl = NULL, max_condition_states = 10000L,
                                   overrides = NULL, choice_tasks = NULL,
-                                  field_domains = NULL) {
+                                  field_domains = NULL, loop_weights = NULL,
+                                  respect_force_response = TRUE) {
   validate_condition_states(max_condition_states)
   qsf    <- if (inherits(qsf, "qsf_raw")) qsf else read_qsf(qsf)
   if (is.null(paths))  paths  <- resolve_paths(qsf, max_paths = max_paths,
@@ -151,12 +161,26 @@ calculation_certainty <- function(qsf, scheme = gfs_scheme(), max_paths = 10000L
   # --- loops ---
   lb  <- blocks[blocks$in_loop & !is.na(blocks$loop_max), ]
   lbu <- blocks[blocks$in_loop & is.na(blocks$loop_max), ]
+  validate_loop_weights(loop_weights, blocks)
+  cond_all <- unique(unlist(full$q_maybe))
+  loop_cond <- intersect(cond_all[cond_all %in% scored$question_id[scored$block_id %in% lb$block_id]],
+                         scored$question_id[scored$has_display_logic])
+  # conditionally shown forced-response triggers keep an unanswered state in
+  # the structural profile (path_burden_traversals() has no such approximation)
+  pdl <- parsed_dl %||% parse_all_display_logic(qsf, scored)
+  fmap <- force_response_map(qsf)
+  trig <- unique(unlist(lapply(cond_all[cond_all %in% names(pdl)], function(q) pdl[[q]]$vars)))
+  nested_forced <- if (isTRUE(respect_force_response))
+    intersect(intersect(trig, cond_all), names(fmap)[fmap]) else character(0)
   loops_cert <- list(
     n_known   = nrow(lb),
     n_unknown = nrow(lbu),
     bounds    = tibble::tibble(block_id = lb$block_id,
                                block_name = lb$block_name,
-                               max_iter = lb$loop_max)
+                               max_iter = lb$loop_max),
+    n_loop_conditional  = length(loop_cond),
+    weights             = if (is.null(loop_weights)) "uniform" else "user",
+    nested_forced_gates = nested_forced
   )
 
   # --- item scores ---

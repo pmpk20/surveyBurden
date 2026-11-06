@@ -100,8 +100,12 @@ parse_display_logic <- function(dl) {
   displayed <- unlist(lapply(parsed_groups, function(lits)
     unlist(lapply(lits, function(pl) pl$displayed_qid))))
 
+  loop_blocks <- unlist(lapply(parsed_groups, function(lits)
+    unlist(lapply(lits, function(pl) pl$loop_block))))
+
   list(vars = unique(vars), predicate = predicate, refs = refs, fields = fields,
-       displayed = unique(displayed), possible = possible)
+       displayed = unique(displayed), possible = possible,
+       loop_blocks = unique(loop_blocks))
 }
 
 #' Parse one literal into `list(var, conj, eval)`
@@ -162,7 +166,24 @@ parse_literal <- function(lit) {
     return(list(var = fv, conj = conj, eval = function(state, shown) isTRUE(state[[fv]])))
   }
 
-  # LoopAndMerge / anything else -> free binary gate
+  # Loop position: "Loop k <op> Current Loop" is evaluated from the iteration
+  # index the caller supplies as state[["@@iter"]]. Outside a loop Qualtrics
+  # leaves lm://CurrentLoop empty, so the literal is FALSE there.
+  if (identical(lit$LogicType, "LoopAndMerge") &&
+      identical(lit$RightOperand, "lm://CurrentLoop") &&
+      grepl("^[^,]+,[0-9]+$", lit$LeftOperand %||% "")) {
+    blk <- sub(",[0-9]+$", "", lit$LeftOperand)
+    k   <- sub("^.*,", "", lit$LeftOperand)
+    op  <- lit$Operator %||% "EqualTo"
+    ev <- function(state, shown) {
+      j <- state[["@@iter"]]
+      if (is.null(j) || length(j) != 1L || is.na(j)) return(FALSE)
+      isTRUE(eval_branch_op(op, k, as.character(j)))
+    }
+    return(list(var = "@@iter", conj = conj, eval = ev, loop_block = blk))
+  }
+
+  # LoopAndMerge (other forms) / anything else -> free binary gate
   fv <- paste0("@", lit$LeftOperand %||% "field")
   list(var = fv, conj = conj, eval = function(state, shown) isTRUE(state[[fv]]))
 }

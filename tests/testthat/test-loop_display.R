@@ -1,14 +1,6 @@
 # Display logic inside Loop & Merge blocks: the iteration-position gate,
 # gate classification, and the loop-aware structural profile.
 
-lp_pos_logic <- function(block = "BL_x", k = 1, op = "EqualTo") {
-  list(`0` = list(`0` = list(LogicType = "LoopAndMerge",
-                             LeftOperand = paste0(block, ",", k), Operator = op,
-                             RightOperand = "lm://CurrentLoop", Type = "Expression"),
-                  Type = "If"),
-       Type = "BooleanExpression", inPage = FALSE)
-}
-
 test_that("LoopAndMerge CurrentLoop literal becomes the @@iter gate", {
   p <- parse_display_logic(lp_pos_logic())
   expect_identical(p$vars, "@@iter")
@@ -57,55 +49,6 @@ test_that("force_response_map reads only ForceResponse ON", {
 })
 
 # ---- loop-aware structural profile -------------------------------------------
-
-# Question-literal logic: `qid` has choice `choice` selected.
-lp_sel <- function(qid, choice, conj = NULL) {
-  loc <- sprintf("q://%s/SelectableChoice/%s", qid, choice)
-  x <- list(LogicType = "Question", QuestionID = qid, Operator = "Selected",
-            LeftOperand = loc, ChoiceLocator = loc, Type = "Expression")
-  if (!is.null(conj)) x$Conjuction <- conj
-  x
-}
-lp_forced <- function(p, fr = "ON") { p$Validation <- list(Settings = list(ForceResponse = fr)); p }
-
-# Blocks in flow order. `blocks` is a list of list(id, qs = list of payloads,
-# loop = NULL or a static iteration count).
-lp_qsf <- function(blocks) {
-  bl <- lapply(blocks, function(b) {
-    x <- list(Type = "Standard", SubType = "", Description = b$id, ID = b$id,
-              BlockElements = lapply(b$qs, function(p) list(Type = "Question", QuestionID = p$QuestionID)))
-    if (!is.null(b$loop)) {
-      x$Options <- list(Looping = "Static", LoopingOptions = list(
-        Static = stats::setNames(lapply(seq_len(b$loop), function(i) list(`1` = as.character(i))),
-                                 as.character(seq_len(b$loop)))))
-    }
-    x
-  })
-  flow <- lapply(seq_along(blocks), function(i)
-    list(Type = "Standard", ID = blocks[[i]]$id, FlowID = paste0("FL_", i)))
-  qs <- unlist(lapply(blocks, `[[`, "qs"), recursive = FALSE)
-  el <- c(
-    list(list(Element = "BL", PrimaryAttribute = "Survey Blocks", SecondaryAttribute = "",
-              Payload = stats::setNames(bl, as.character(seq_along(bl) - 1L))),
-         list(Element = "FL", PrimaryAttribute = "Survey Flow", SecondaryAttribute = "",
-              Payload = list(Type = "Root", FlowID = "FL_root", Flow = flow))),
-    lapply(qs, function(p) list(Element = "SQ", PrimaryAttribute = p$QuestionID,
-                                SecondaryAttribute = "", Payload = p)))
-  as_qsf_raw(list(SurveyEntry = list(SurveyID = "SV_lp", SurveyName = "Loop fixture"),
-                  SurveyElements = el))
-}
-# The single path's profile as a named weight vector (names = burden).
-lp_dist <- function(q, ...) {
-  pr <- suppressMessages(suppressWarnings(path_burden_profile(q, ...)))
-  stopifnot(nrow(pr) == 1L)
-  d <- pr$profile[[1]]
-  stats::setNames(d$weight / sum(d$weight), format(d$burden))
-}
-lp_expect <- function(got, want) {
-  expect_identical(sort(as.numeric(names(got))), sort(as.numeric(names(want))))
-  o <- order(as.numeric(names(got))); w <- order(as.numeric(names(want)))
-  expect_equal(unname(got[o]), unname(want[w]), tolerance = 1e-9)
-}
 
 test_that("shared gate holds one state across iterations", {
   # QIDh 1 pt; loop (max 2) QIDb 2 pts shown when QIDh = 1

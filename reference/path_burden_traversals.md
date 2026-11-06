@@ -173,7 +173,11 @@ derived field is never enumerated; its value is set before any display
 logic that reads it. A rule returning `NA` rejects the traversal: exact
 weights are renormalised within the route, rejected draws are redrawn,
 and the rejected share per route is in `attr(x, "rejected")`. A
-loop-count rule requires sampling.
+loop-count rule makes routes that contain its loop sampled
+(`loop_weights` for that loop are then ignored, with a warning). A
+display condition that reads a question later in the flow is listed in
+`attr(x, "unresolved")` as a forward reference; that question is read as
+unanswered.
 
 **Speed.** A rule is called once per distinct combination of its inputs,
 and results are reused across chunks and routes. Rules with many inputs

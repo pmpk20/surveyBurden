@@ -118,6 +118,10 @@ in the original table, hence GfS+.</p>
 <span><span class="co">#&gt; [1] 12</span></span></code></pre></div>
 <p>A few of the Table 1 weights, in points per response action:</p>
 <table class="table">
+<colgroup>
+<col width="50%">
+<col width="50%">
+</colgroup>
 <thead><tr class="header">
 <th>response action</th>
 <th>GfS+ points</th>
@@ -141,7 +145,7 @@ in the original table, hence GfS+.</p>
 </tr>
 <tr class="odd">
 <td>two-alternative stated-choice task</td>
-<td>2 (reference only – see below)</td>
+<td>2, plus 1 per attribute (declared tasks only – see below)</td>
 </tr>
 </tbody>
 </table>
@@ -427,21 +431,40 @@ are numbers and the question asks for a quantity or date</td>
 </tr>
 </tbody>
 </table>
+<p><strong>Stated-choice tasks.</strong> A QSF does not mark a question
+as a choice task, so the scorer treats one as whatever widget Qualtrics
+used (usually a single choice). Declare your tasks with
+<code>choice_tasks</code>, a data frame of <code>question_id</code>,
+<code>n_alternatives</code> and <code>n_attributes</code>, in
+<code><a href="../reference/burden_report.html">burden_report()</a></code> or any other burden function. Each declared
+task scores 2 points for two alternatives, 3 for three and 1 more for
+each alternative beyond three (an extrapolation past Table 1), plus 1
+per attribute (<code>sc_per_variable</code>). Count an opt-out such as
+“neither” as an alternative. <code><a href="../reference/suggest_choice_tasks.html">suggest_choice_tasks()</a></code> lists
+questions that look like choice tasks (an HTML table in the stem) for
+you to check; it never scores them itself.</p>
+<p><strong>Filter and branching points.</strong> GfS adds 0.5 for a
+filter and 0.5 for a branching. These are off by default
+(<code>apply_filter_branching = FALSE</code>): GfS budgets
+interviewer-administered surveys, where the interviewer applies each
+filter, while in a web survey the software does. Set
+<code>s$apply_filter_branching &lt;- TRUE</code> to match a manual GfS
+count: a question then earns 0.5 if its answer drives another question’s
+display logic and 0.5 if a flow branch tests it. Embedded data fields,
+randomiser assignments and <code>Displayed</code> conditions earn
+nothing.</p>
 <p><strong>Reference-only entries.</strong> These Table 1 weights are in
 <code><a href="../reference/gfs_scheme.html">gfs_scheme()</a></code> for completeness, but no automatic rule reads
 them, so changing them does not change any score:
 <code>rank_per_item</code>, <code>open_medium</code>,
-<code>please_specify</code>, <code>open_essay_per_extra</code>,
-<code>filter</code>, <code>branching</code>, <code>sc_2_alt</code>,
-<code>sc_3_alt</code> and <code>sc_per_variable</code>. In practice:</p>
+<code>please_specify</code> and <code>open_essay_per_extra</code>. In
+practice:</p>
 <ul>
 <li>a ranking scores its first item only, so rankings of several items
 are under-scored;</li>
-<li>stated-choice tasks, “please specify” boxes and repeated open
-answers are scored as whatever widget Qualtrics used for them (a single
-choice, a text box), not with the stated-choice or follow-up
-weights;</li>
-<li>branching and filter points are not added.</li>
+<li>“please specify” boxes and repeated open answers are scored as
+whatever widget Qualtrics used for them (a text box), not with the
+follow-up weights.</li>
 </ul>
 <p>Where your survey has these, check the affected questions’
 <code>score_basis</code> and adjust by hand if needed.</p>

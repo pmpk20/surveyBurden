@@ -59,13 +59,13 @@ w$points_per_minute
 
 A few of the Table 1 weights, in points per response action:
 
-| response action                    | GfS+ points                    |
-|------------------------------------|--------------------------------|
-| yes / no question                  | 1                              |
-| rating scale, up to 5 options      | 2                              |
-| rating scale, more than 5 options  | 3                              |
-| first answer to an open question   | 6                              |
-| two-alternative stated-choice task | 2 (reference only – see below) |
+| response action | GfS+ points |
+|----|----|
+| yes / no question | 1 |
+| rating scale, up to 5 options | 2 |
+| rating scale, more than 5 options | 3 |
+| first answer to an open question | 6 |
+| two-alternative stated-choice task | 2, plus 1 per attribute (declared tasks only – see below) |
 
 The full table is in Heimgartner and Axhausen (2024); it is not
 reproduced here.
@@ -217,19 +217,40 @@ list; `score_basis` names the rule used for each question.
 | `timing`, `meta`, or hidden by CSS/JS | 0 | – | auto / inferred |
 | anything else | not scored: `NA`, counted as 0 in totals | – | unknown |
 
+**Stated-choice tasks.** A QSF does not mark a question as a choice
+task, so the scorer treats one as whatever widget Qualtrics used
+(usually a single choice). Declare your tasks with `choice_tasks`, a
+data frame of `question_id`, `n_alternatives` and `n_attributes`, in
+[`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
+or any other burden function. Each declared task scores 2 points for two
+alternatives, 3 for three and 1 more for each alternative beyond three
+(an extrapolation past Table 1), plus 1 per attribute
+(`sc_per_variable`). Count an opt-out such as “neither” as an
+alternative.
+[`suggest_choice_tasks()`](https://pmpk20.github.io/surveyBurden/reference/suggest_choice_tasks.md)
+lists questions that look like choice tasks (an HTML table in the stem)
+for you to check; it never scores them itself.
+
+**Filter and branching points.** GfS adds 0.5 for a filter and 0.5 for a
+branching. These are off by default (`apply_filter_branching = FALSE`):
+GfS budgets interviewer-administered surveys, where the interviewer
+applies each filter, while in a web survey the software does. Set
+`s$apply_filter_branching <- TRUE` to match a manual GfS count: a
+question then earns 0.5 if its answer drives another question’s display
+logic and 0.5 if a flow branch tests it. Embedded data fields,
+randomiser assignments and `Displayed` conditions earn nothing.
+
 **Reference-only entries.** These Table 1 weights are in
 [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)
 for completeness, but no automatic rule reads them, so changing them
 does not change any score: `rank_per_item`, `open_medium`,
-`please_specify`, `open_essay_per_extra`, `filter`, `branching`,
-`sc_2_alt`, `sc_3_alt` and `sc_per_variable`. In practice:
+`please_specify` and `open_essay_per_extra`. In practice:
 
 - a ranking scores its first item only, so rankings of several items are
   under-scored;
-- stated-choice tasks, “please specify” boxes and repeated open answers
-  are scored as whatever widget Qualtrics used for them (a single
-  choice, a text box), not with the stated-choice or follow-up weights;
-- branching and filter points are not added.
+- “please specify” boxes and repeated open answers are scored as
+  whatever widget Qualtrics used for them (a text box), not with the
+  follow-up weights.
 
 Where your survey has these, check the affected questions’ `score_basis`
 and adjust by hand if needed.

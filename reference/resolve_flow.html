@@ -77,7 +77,7 @@ any assumption about branch probabilities.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">resolve_flow</span><span class="op">(</span><span class="va">qsf</span>, max_paths <span class="op">=</span> <span class="fl">10000L</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">resolve_flow</span><span class="op">(</span><span class="va">qsf</span>, max_paths <span class="op">=</span> <span class="fl">10000L</span>, field_domains <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -91,6 +91,15 @@ any assumption about branch probabilities.</p>
 <dt id="arg-max-paths">max_paths<a class="anchor" aria-label="anchor" href="#arg-max-paths"></a></dt>
 <dd><p>Cap on the number of distinct paths. If the flow would
 produce more, an error is raised rather than a partial result.</p></dd>
+
+
+<dt id="arg-field-domains">field_domains<a class="anchor" aria-label="anchor" href="#arg-field-domains"></a></dt>
+<dd><p>Optional named list giving, for an embedded-data
+field, every value it can hold, e.g. <code>list(SP_05 = 0:5)</code> (values are
+compared as text or numbers like Qualtrics does; <code>NA</code> stands for an
+empty field). Branches on a declared field are enumerated only for those
+values. A value set in the flow still takes precedence. Naming a field
+no branch tests gives a warning.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -114,12 +123,20 @@ condition taken.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Field values are unrestricted: a field may hold any value or be empty, so
-an outcome such as "neither <code>&gt; 0</code> nor <code>= 0</code>" (a negative or empty field) is
-kept. The enumeration is therefore an upper bound under unrestricted field
-values. Where a survey's own code limits a field's values (for example,
-question JavaScript that always writes a count), some enumerated paths may
-be impossible in practice. <code>resolve_flow()</code> reports branch fields it finds
+    <p>A field holds one value along a path, so every branch on it agrees with
+that value, whether or not the branches are adjacent. A fixed value set in
+the flow (an embedded-data assignment, including one chosen by a block
+randomiser) decides the branches after it, until the field is set again;
+a piped or computed value (<code>${...}</code>) makes it unknown again.</p>
+<p>Otherwise field values are unrestricted: a field may hold any value or be
+empty, so an outcome such as "neither <code>&gt; 0</code> nor <code>= 0</code>" (a negative or
+empty field) is kept, and a run of equality tests keeps a "none matches"
+path. The enumeration is therefore an upper bound under unrestricted field
+values. When a field can only hold certain values (for example a panel
+field coded 0 to 5), declare them in <code>field_domains</code> to drop the paths no
+declared value can produce. Where a survey's own code limits a field's
+values (for example, question JavaScript that always writes a count), some
+enumerated paths may be impossible in practice. <code>resolve_flow()</code> reports branch fields it finds
 assigned in question JavaScript, so these cases can be checked; it does not
 interpret the code, and it may not detect every assignment.</p>
 <p>Within-block display logic (whether an individual question is shown) is <em>not</em>
@@ -139,6 +156,9 @@ resolved here; that is a separate step. Paths are at block granularity.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>       2 TRUE            </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>       3 FALSE           </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span>       4 FALSE           </span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="fu">resolve_flow</span><span class="op">(</span><span class="fu"><a href="read_qsf.html">read_qsf</a></span><span class="op">(</span><span class="st">"survey.qsf"</span><span class="op">)</span>, field_domains <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

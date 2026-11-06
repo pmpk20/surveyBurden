@@ -107,11 +107,23 @@ see <code><a href="../articles/gfs-scoring.html">vignette("gfs-scoring")</a></co
 <code><a href="../reference/resolve_flow.html">resolve_flow()</a></code> walks the <code>SurveyFlow</code>, forking
 at every <code>Branch</code> into a condition-true and a condition-false
 continuation, and at every <code>EndSurvey</code> into a screen-out.
-Branch conditions are <strong>not evaluated</strong> – they depend on
-embedded data or prior answers that are unknown before fieldwork – so
-both outcomes are always kept. The result is every block sequence a
-respondent could encounter.</p>
+Branch conditions mostly depend on embedded data or prior answers that
+are unknown before fieldwork, so both outcomes are kept. The exception
+is a branch that compares one embedded field with a value
+(<code>=</code>, <code>!=</code>, <code>&gt;</code>, <code>&gt;=</code>,
+<code>&lt;</code>, <code>&lt;=</code>): the field holds one value along
+a path, so every branch on it agrees with that value, and a fixed value
+set earlier in the flow (including one a randomiser picks) decides the
+branch. A run of equality tests on one field (“<code>group</code> is 1”,
+“<code>group</code> is 2”, …) becomes one path per value plus a “none
+matches” path, because the field could hold any value. When you know the
+values a field can hold, declare them:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">qsf</span>, field_domains <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>The “none matches” path is then dropped unless a declared value
+matches no branch. The result is every block sequence a respondent could
+encounter.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/resolve_flow.html">resolve_flow</a></span><span class="op">(</span><span class="va">qsf</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 4</span></span></span>
 <span><span class="co">#&gt;   path_id block_ids  terminates_early decisions</span></span>
@@ -120,17 +132,24 @@ respondent could encounter.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>       2 <span style="color: #949494;">&lt;chr [3]&gt;</span>  TRUE             <span style="color: #949494;">&lt;lgl [2]&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>       3 <span style="color: #949494;">&lt;chr [12]&gt;</span> FALSE            <span style="color: #949494;">&lt;lgl [3]&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>       4 <span style="color: #949494;">&lt;chr [11]&gt;</span> FALSE            <span style="color: #949494;">&lt;lgl [3]&gt;</span></span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">report</span><span class="op">$</span><span class="va">paths</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 4</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">report</span><span class="op">$</span><span class="va">paths</span><span class="op">$</span><span class="va">status</span> <span class="op">==</span> <span class="st">"complete"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 2</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">report</span><span class="op">$</span><span class="va">paths</span><span class="op">$</span><span class="va">status</span> <span class="op">==</span> <span class="st">"screen_out"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 2</span></span></code></pre></div>
-<p>Block randomisers are treated as “all sub-blocks shown, in survey
-order” – the randomised subsets are not enumerated. The path space is
-enumerated up to <code>max_paths</code> (10000); a flow that would
-produce more raises an error rather than a partial answer.</p>
+<p>A block randomiser that shows <code>m</code> of its <code>M</code>
+elements (“present 1 of 3 blocks”) is enumerated as one path per
+combination of elements, each in survey order; order does not change
+burden. With even presentation each combination is equally likely, which
+matches the equal weight each path gets. When the number shown cannot be
+read, every element is treated as shown, with a warning. A randomiser
+holding only embedded-data assignments shows nothing; it adds paths only
+when a later branch tests a field it sets (one path per value it can
+assign). The path space is enumerated up to <code>max_paths</code>
+(10000); a flow that would produce more raises an error rather than a
+partial answer.</p>
 </div>
 <div class="section level2">
 <h2 id="display-logic">Display logic<a class="anchor" aria-label="anchor" href="#display-logic"></a>
@@ -140,7 +159,7 @@ into three sets: <strong>always shown</strong>, <strong>may be
 shown</strong> (gated by a condition that cannot be evaluated before
 fieldwork), and <strong>never shown on this path</strong> (the gate’s
 trigger question is not on the path).</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/resolve_paths.html">resolve_paths</a></span><span class="op">(</span><span class="va">qsf</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
 <span>  path_id    <span class="op">=</span> <span class="va">rp</span><span class="op">$</span><span class="va">path_id</span>,</span>
@@ -170,12 +189,17 @@ and enumerates the display-logic states the package can model.</p>
 <li>Conditional questions are grouped into <strong>coupling
 components</strong>: two questions couple if they share a gate, directly
 or through a chain of shared gates.</li>
-<li>A component with at most 5000 joint gate-states is enumerated
-<strong>in full</strong> – every joint state of its gates that the model
-represents, respecting single-choice mutual exclusion and
-AND-across-gates conditions. “In full” means exhaustive within the
-model; embedded-data conditions are still treated as free, and branch
-conditions are not checked against each other.</li>
+<li>A component with at most <code>max_condition_states</code> (default
+10000) joint gate-states is enumerated <strong>in full</strong> – every
+joint state of its gates that the model represents, respecting
+single-choice mutual exclusion and AND-across-gates conditions. A stored
+(embedded data) field compared with <code>EqualTo</code>,
+<code>NotEqualTo</code> or an inequality is enumerated over its
+distinguishable values, so conditions on different values of one field
+are mutually exclusive. “In full” means exhaustive within the model: a
+field compared with any other operator is still treated as a free
+true/false condition, and branch conditions are not checked against
+display logic.</li>
 <li>A larger component (dozens of questions keyed off one popular
 trigger such as employment status) falls back to a <strong>primary-gate
 approximation</strong>: each question is scored against its first gate,
@@ -185,7 +209,7 @@ the rest held permissive.</li>
 <code>?v=N</code> cap, with the iteration count treated as uniform over
 1 to N in the structural profile.</li>
 </ul>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pbp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/path_burden_profile.html">path_burden_profile</a></span><span class="op">(</span><span class="va">qsf</span><span class="op">)</span></span>
 <span><span class="va">pbp</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"path_id"</span>, <span class="st">"terminates_early"</span>, <span class="st">"burden_min"</span>,</span>
 <span>        <span class="st">"burden_median"</span>, <span class="st">"burden_max"</span><span class="op">)</span><span class="op">]</span></span>

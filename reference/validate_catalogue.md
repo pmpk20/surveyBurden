@@ -106,6 +106,16 @@ missing):
 
   Integer. Maximum loop iterations (`NA` if not in loop).
 
+- `filter_trigger`:
+
+  Logical. `TRUE` if the question's answer drives another question's
+  display logic (a GfS filter).
+
+- `branch_trigger`:
+
+  Logical. `TRUE` if the question's answer is tested by a branch in the
+  survey flow (GfS branching).
+
 - `flag`:
 
   Character. Confidence flag (`"auto"`, `"inferred"`, `"manual"`, or
@@ -140,16 +150,17 @@ cat <- data.frame(
 )
 validated <- validate_catalogue(cat)
 validated
-#> # A tibble: 3 × 26
+#> # A tibble: 3 × 28
 #>   question_id std_type      n_options n_rows n_cols text_words max_label_words
 #>   <chr>       <chr>             <int>  <int>  <int>      <int>           <int>
 #> 1 Q1          single_choice         5     NA     NA         NA              NA
 #> 2 Q2          open_text            NA     NA     NA         NA              NA
 #> 3 Q3          matrix               NA      4      5         NA              NA
-#> # ℹ 19 more variables: label_text <chr>, options_numeric <lgl>,
+#> # ℹ 21 more variables: label_text <chr>, options_numeric <lgl>,
 #> #   question_text <chr>, is_hidden <lgl>, is_dropdown <lgl>,
 #> #   is_multiline <lgl>, is_multi_answer <lgl>, has_display_logic <lgl>,
 #> #   display_logic_refs <list>, has_validation <lgl>, in_loop <lgl>,
-#> #   loop_max <int>, flag <chr>, qualtrics_type <chr>, selector <chr>,
-#> #   subselector <chr>, flow_order <int>, block_id <chr>, block_name <chr>
+#> #   loop_max <int>, filter_trigger <lgl>, branch_trigger <lgl>, flag <chr>,
+#> #   qualtrics_type <chr>, selector <chr>, subselector <chr>, flow_order <int>,
+#> #   block_id <chr>, block_name <chr>
 ```

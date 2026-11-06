@@ -75,7 +75,9 @@ separately. For a break-off, burden runs up to the block they left in.</p>
 <span>  furthest <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"answered"</span>, <span class="st">"column"</span><span class="op">)</span>,</span>
 <span>  furthest_col <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  loop_iterations <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"driver"</span>, <span class="st">"observed"</span><span class="op">)</span>,</span>
-<span>  embedded <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  embedded <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  overrides <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  choice_tasks <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -164,6 +166,19 @@ unrecognised values fall back to <code>"answered"</code>.</p></dd>
 names to response columns, e.g. <code>c(TotalVehicles = "total_vehicles")</code>.
 Overrides the automatic matching for the fields it names.</p></dd>
 
+
+<dt id="arg-overrides">overrides<a class="anchor" aria-label="anchor" href="#arg-overrides"></a></dt>
+<dd><p>Optional named numeric vector of GfS+ points that replace
+the computed score of the named questions, e.g. <code>c(QID51 = 10)</code>, for
+every respondent (whatever their <code>words_per_line</code>). See
+<code><a href="burden_report.html">burden_report()</a></code>.</p></dd>
+
+
+<dt id="arg-choice-tasks">choice_tasks<a class="anchor" aria-label="anchor" href="#arg-choice-tasks"></a></dt>
+<dd><p>Optional data frame declaring stated-choice tasks
+(<code>question_id</code>, <code>n_alternatives</code>, <code>n_attributes</code>), scored by the GfS
+stated-choice rule. See <code><a href="burden_report.html">burden_report()</a></code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -208,6 +223,11 @@ recovered.</p></dd>
 <dt><code>n_routing_conflicts</code></dt>
 <dd><p>Blocks with answers that the evaluated
 flow did not route the respondent into (the answers are trusted).</p></dd>
+
+<dt><code>n_randomiser_fallbacks</code></dt>
+<dd><p>Block randomisers whose shown
+elements came from the respondent's answers, for want of a
+display-order column (see Block randomisers).</p></dd>
 
 
 </dl><p>With <code>by = "block"</code>, a tibble with one row per respondent per live block,
@@ -314,6 +334,16 @@ give.</p>
 <p>Answers that contradict the evaluated flow (answers in a block the flow
 did not route the respondent into) are trusted: the block counts as routed
 in, and the respondent's <code>n_routing_conflicts</code> is incremented.</p>
+<p><strong>Block randomisers.</strong> A randomiser that shows every element needs no
+data. One that shows some of its elements ("present 1 of 3 blocks") is
+read from the export's display-order column, <code>FL_xx_DO</code> (<code>xx</code> from the
+randomiser's flow id), whose cell lists the elements shown, joined by
+<code>|</code>; an element can be named by its flow id, block id or block name.
+Where the column is missing, or a respondent's cell is blank or names no
+element, the elements shown are those holding a block the respondent
+answered, with a warning; such randomisers are counted in
+<code>n_randomiser_fallbacks</code>. A respondent who answered nothing in a shown
+element is then undercounted.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -345,15 +375,15 @@ completion times.</p></div>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Logic not settled by the data for 1 respondent: 2 question decisions and 0</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   branch decisions fell back to whether they answered.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> See `attr(x, "respondents")`.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 13</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 14</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   response_id finished outcome    points minutes items response_items pages</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> R_1         TRUE     complete      109    9.08    24             23    12</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> R_2         FALSE    breakoff       29    2.42     8              7     4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> R_3         TRUE     screen_out     12    1        2              1     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 5 more variables: furthest_order &lt;dbl&gt;, n_unresolved_items &lt;int&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 6 more variables: furthest_order &lt;dbl&gt;, n_unresolved_items &lt;int&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   n_unresolved_branches &lt;int&gt;, unresolved_loops &lt;lgl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   n_routing_conflicts &lt;int&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   n_routing_conflicts &lt;int&gt;, n_randomiser_fallbacks &lt;int&gt;</span></span>
 <span class="r-in"><span><span class="va">rb</span> <span class="op">&lt;-</span> <span class="fu">respondent_burden</span><span class="op">(</span><span class="va">qsf_path</span>, <span class="va">responses</span>, by <span class="op">=</span> <span class="st">"block"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Logic not settled by the data for 1 respondent: 2 question decisions and 0</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span>   branch decisions fell back to whether they answered.</span>

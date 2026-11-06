@@ -21,7 +21,9 @@ respondent_burden(
   furthest = c("answered", "column"),
   furthest_col = NULL,
   loop_iterations = c("driver", "observed"),
-  embedded = NULL
+  embedded = NULL,
+  overrides = NULL,
+  choice_tasks = NULL
 )
 ```
 
@@ -121,6 +123,20 @@ respondent_burden(
   response columns, e.g. `c(TotalVehicles = "total_vehicles")`.
   Overrides the automatic matching for the fields it names.
 
+- overrides:
+
+  Optional named numeric vector of GfS+ points that replace the computed
+  score of the named questions, e.g. `c(QID51 = 10)`, for every
+  respondent (whatever their `words_per_line`). See
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md).
+
+- choice_tasks:
+
+  Optional data frame declaring stated-choice tasks (`question_id`,
+  `n_alternatives`, `n_attributes`), scored by the GfS stated-choice
+  rule. See
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md).
+
 ## Value
 
 With `by = "respondent"`, a
@@ -176,6 +192,11 @@ row per respondent, in the order of `responses`:
 
   Blocks with answers that the evaluated flow did not route the
   respondent into (the answers are trusted).
+
+- `n_randomiser_fallbacks`:
+
+  Block randomisers whose shown elements came from the respondent's
+  answers, for want of a display-order column (see Block randomisers).
 
 With `by = "block"`, a tibble with one row per respondent per live
 block, in flow order:
@@ -302,6 +323,17 @@ Answers that contradict the evaluated flow (answers in a block the flow
 did not route the respondent into) are trusted: the block counts as
 routed in, and the respondent's `n_routing_conflicts` is incremented.
 
+**Block randomisers.** A randomiser that shows every element needs no
+data. One that shows some of its elements ("present 1 of 3 blocks") is
+read from the export's display-order column, `FL_xx_DO` (`xx` from the
+randomiser's flow id), whose cell lists the elements shown, joined by
+`|`; an element can be named by its flow id, block id or block name.
+Where the column is missing, or a respondent's cell is blank or names no
+element, the elements shown are those holding a block the respondent
+answered, with a warning; such randomisers are counted in
+`n_randomiser_fallbacks`. A respondent who answered nothing in a shown
+element is then undercounted.
+
 ## See also
 
 [`exposure_person_period()`](https://pmpk20.github.io/surveyBurden/reference/exposure_person_period.md)
@@ -333,15 +365,15 @@ respondent_burden(qsf_path, responses)
 #> ℹ Logic not settled by the data for 1 respondent: 2 question decisions and 0
 #>   branch decisions fell back to whether they answered.
 #> ℹ See `attr(x, "respondents")`.
-#> # A tibble: 3 × 13
+#> # A tibble: 3 × 14
 #>   response_id finished outcome    points minutes items response_items pages
 #>   <chr>       <lgl>    <chr>       <dbl>   <dbl> <int>          <int> <int>
 #> 1 R_1         TRUE     complete      109    9.08    24             23    12
 #> 2 R_2         FALSE    breakoff       29    2.42     8              7     4
 #> 3 R_3         TRUE     screen_out     12    1        2              1     2
-#> # ℹ 5 more variables: furthest_order <dbl>, n_unresolved_items <int>,
+#> # ℹ 6 more variables: furthest_order <dbl>, n_unresolved_items <int>,
 #> #   n_unresolved_branches <int>, unresolved_loops <lgl>,
-#> #   n_routing_conflicts <int>
+#> #   n_routing_conflicts <int>, n_randomiser_fallbacks <int>
 rb <- respondent_burden(qsf_path, responses, by = "block")
 #> ℹ Logic not settled by the data for 1 respondent: 2 question decisions and 0
 #>   branch decisions fell back to whether they answered.

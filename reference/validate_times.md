@@ -13,7 +13,9 @@ validate_times(
   observed,
   scheme = gfs_scheme(),
   trim = c(3, 180),
-  finished_only = TRUE
+  finished_only = TRUE,
+  overrides = NULL,
+  choice_tasks = NULL
 )
 ```
 
@@ -36,13 +38,31 @@ validate_times(
 - trim:
 
   Length-2 numeric: the completion-time range to keep, in minutes. Rows
-  outside it, or with a missing or non-finite time, are dropped.
+  outside it, or with a missing or non-finite time, are dropped, and the
+  printed summary says how many. The default `c(3, 180)` drops times too
+  short for anyone to have read the survey and times over three hours,
+  which usually mean the survey was left open. The headline rate uses
+  medians, so it moves little with the trim; widen it (e.g. `c(0, Inf)`)
+  to keep every finisher.
 
 - finished_only:
 
   If `TRUE` (default) and `observed` has a `Finished` column, keep only
   respondents who finished. A break-off's duration does not measure the
   time to complete the survey.
+
+- overrides:
+
+  Optional named numeric vector of GfS+ points that replace the computed
+  score of the named questions, e.g. `c(QID51 = 10)`; passed to
+  [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md).
+
+- choice_tasks:
+
+  Optional data frame declaring stated-choice tasks (`question_id`,
+  `n_alternatives`, `n_attributes`), scored by the GfS stated-choice
+  rule. Passed to
+  [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md).
 
 ## Value
 
@@ -75,18 +95,28 @@ A `burden_time_validation` list (printed as a short summary):
 
 - implied_points_per_minute:
 
+  The headline rate: median predicted points divided by median observed
+  minutes, over the kept respondents. Robust to a few very long
+  completion times.
+
+- ols_points_per_minute:
+
   `60 / b`, where `b` is the slope of the through-origin fit
-  `observed_seconds ~ 0 + predicted_points` (seconds per point).
-  Trim-sensitive; prefer a median-regression estimate from a dedicated
-  calibration on real completion times.
+  `observed_seconds ~ 0 + predicted_points` (seconds per point). Kept
+  for comparison; long completion times dominate it, so it is not the
+  headline. In version 0.2.0 this was `implied_points_per_minute`.
 
 - lm:
 
   The through-origin `lm` (kept for back-compatibility).
 
-- predicted_burden:
+- n_trimmed, trim:
 
-  Per-respondent points.
+  Rows dropped by `trim` (after `finished_only`), and the range used.
+
+- predicted_burden, observed_minutes:
+
+  Per-respondent points and observed minutes for the kept respondents.
 
 ## Details
 

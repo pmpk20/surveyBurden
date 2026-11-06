@@ -183,9 +183,10 @@ names(validated)
 #> [10] "options_numeric"    "question_text"      "is_hidden"         
 #> [13] "is_dropdown"        "is_multi_answer"    "has_display_logic" 
 #> [16] "display_logic_refs" "has_validation"     "in_loop"           
-#> [19] "loop_max"           "flag"               "qualtrics_type"    
-#> [22] "selector"           "subselector"        "flow_order"        
-#> [25] "block_id"           "block_name"
+#> [19] "loop_max"           "filter_trigger"     "branch_trigger"    
+#> [22] "flag"               "qualtrics_type"     "selector"          
+#> [25] "subselector"        "flow_order"         "block_id"          
+#> [28] "block_name"
 ```
 
 ## Worked example: scoring without a QSF

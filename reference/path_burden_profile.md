@@ -13,7 +13,10 @@ path_burden_profile(
   max_paths = 10000L,
   engine = NULL,
   parsed_dl = NULL,
-  max_condition_states = 10000L
+  max_condition_states = 10000L,
+  overrides = NULL,
+  choice_tasks = NULL,
+  field_domains = NULL
 )
 ```
 
@@ -55,6 +58,28 @@ path_burden_profile(
   other modelling assumptions. When precomputed results are supplied,
   use the same limit that generated those results.
 
+- overrides:
+
+  Optional named numeric vector of GfS+ points that replace the computed
+  score of the named questions, e.g. `c(QID51 = 10)`. See
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md).
+  Ignored, with a warning, when `engine` is supplied.
+
+- choice_tasks:
+
+  Optional data frame declaring stated-choice tasks (`question_id`,
+  `n_alternatives`, `n_attributes`), scored by the GfS stated-choice
+  rule. See
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md).
+  Ignored, with a warning, when `engine` is supplied.
+
+- field_domains:
+
+  Optional named list giving the values an embedded-data field can hold,
+  e.g. `list(SP_05 = 0:5)`. Passed to
+  [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md).
+  Ignored, with a warning, when `engine` is supplied.
+
 ## Value
 
 A [tibble](https://tibble.tidyverse.org/reference/tibble.html), one row
@@ -81,18 +106,24 @@ total weight there.
 
 Each display-logic trigger is a *gate*: a single-choice question
 contributes its referenced choices as mutually exclusive states; a
-multi-select or embedded field contributes binary states; a Loop & Merge
-block contributes iteration counts `1..max`. Conditional questions are
-grouped into coupling components (two questions couple if they share a
-gate, directly or through a chain of shared gates). A component with at
-most `max_condition_states` joint gate-states is **enumerated exactly**
-– every joint combination of its gates' states, respecting single-choice
-mutual exclusion and AND-across-gates conditions precisely. A component
-above that (many questions sharing one popular trigger, such as
-employment status) falls back to a primary-gate approximation for just
-that component: each question is scored against its first gate with the
-rest held permissive. Components are independent of each other and their
-contributions convolved into the profile for the path.
+multi-select contributes the subsets of its referenced choices; a stored
+(embedded data) field contributes one state per distinguishable value
+class of the comparisons made on it (each referenced value, the ranges
+between thresholds, any other value, empty), so conditions on different
+values of one field are mutually exclusive; a comparison the package
+cannot evaluate (such as `Contains`) is a free true/false gate; a Loop &
+Merge block contributes iteration counts `1..max`. Conditional questions
+are grouped into coupling components (two questions couple if they share
+a gate, directly or through a chain of shared gates). A component with
+at most `max_condition_states` joint gate-states is **enumerated
+exactly** – every joint combination of its gates' states, respecting
+single-choice mutual exclusion and AND-across-gates conditions
+precisely. A component above that (many questions sharing one popular
+trigger, such as employment status) falls back to a primary-gate
+approximation for just that component: each question is scored against
+its first gate with the rest held permissive. Components are independent
+of each other and their contributions convolved into the profile for the
+path.
 
 Remaining approximations: different components are treated as
 independent (the real coupling between, say, employment status and

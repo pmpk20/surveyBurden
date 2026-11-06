@@ -14,7 +14,13 @@ for the rule).
 ## Usage
 
 ``` r
-resolve_paths(qsf, max_paths = 10000L, catalogue = NULL, blocks = NULL)
+resolve_paths(
+  qsf,
+  max_paths = 10000L,
+  catalogue = NULL,
+  blocks = NULL,
+  field_domains = NULL
+)
 ```
 
 ## Arguments
@@ -24,7 +30,7 @@ resolve_paths(qsf, max_paths = 10000L, catalogue = NULL, blocks = NULL)
   A `qsf_raw` object from
   [`read_qsf()`](https://pmpk20.github.io/surveyBurden/reference/read_qsf.md).
 
-- max_paths:
+- max_paths, field_domains:
 
   Passed to
   [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md).

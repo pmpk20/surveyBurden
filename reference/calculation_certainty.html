@@ -76,7 +76,10 @@ assumptions.</p>
 <span>  scored <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  blocks <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  parsed_dl <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  max_condition_states <span class="op">=</span> <span class="fl">10000L</span></span>
+<span>  max_condition_states <span class="op">=</span> <span class="fl">10000L</span>,</span>
+<span>  overrides <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  choice_tasks <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  field_domains <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -111,6 +114,26 @@ primary-gate approximation. This is separate from <code>max_paths</code> and doe
 not remove other modelling assumptions. When precomputed results are
 supplied, use the same limit that generated those results.</p></dd>
 
+
+<dt id="arg-overrides">overrides<a class="anchor" aria-label="anchor" href="#arg-overrides"></a></dt>
+<dd><p>Optional named numeric vector of GfS+ points that replace
+the computed score of the named questions, e.g. <code>c(QID51 = 10)</code>; counted
+as <code>manual</code> in <code>scores</code>. See <code><a href="burden_report.html">burden_report()</a></code>.</p></dd>
+
+
+<dt id="arg-choice-tasks">choice_tasks<a class="anchor" aria-label="anchor" href="#arg-choice-tasks"></a></dt>
+<dd><p>Optional data frame declaring stated-choice tasks
+(<code>question_id</code>, <code>n_alternatives</code>, <code>n_attributes</code>), scored by the GfS
+stated-choice rule. Counted as <code>manual</code>. See
+<code><a href="burden_report.html">burden_report()</a></code>.</p></dd>
+
+
+<dt id="arg-field-domains">field_domains<a class="anchor" aria-label="anchor" href="#arg-field-domains"></a></dt>
+<dd><p>Optional named list giving the values an
+embedded-data field can hold, e.g. <code>list(SP_05 = 0:5)</code>. Passed to
+<code><a href="resolve_flow.html">resolve_flow()</a></code>: branches on a declared field take only outcomes those
+values produce, so an unreachable "none matches" path is dropped.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -124,13 +147,22 @@ Both outcomes of every branch are always enumerated, so a branch is not
 an approximation – but which outcome a given respondent takes is
 unknown before fieldwork.</p></dd>
 
+<dt>randomisers</dt>
+<dd><p>One row per <code>BlockRandomizer</code>: <code>flow_id</code>,
+<code>n_children</code>, <code>subset</code> (how many it shows; <code>NA</code> when not readable),
+<code>shows_blocks</code> (<code>FALSE</code> for a randomiser of embedded-data
+assignments) and <code>enumerated</code> (<code>TRUE</code> when the subset was read, so
+each combination of elements is a separate path).</p></dd>
+
 <dt>display_logic</dt>
 <dd><p><code>n_conditional</code> questions gated by an unresolved
 condition on some full path; <code>n_exact</code> scored by exact joint
 enumeration of their gate states; <code>n_approx</code> scored with the
-primary-gate approximation; component counts; and
+primary-gate approximation; component counts;
 <code>cross_component_independence</code> (<code>TRUE</code> when &gt;1 coupling component is
-convolved as independent).</p></dd>
+convolved as independent); and <code>n_binary_field_gates</code>, the stored
+fields compared with an operator the package cannot evaluate (such as
+<code>Contains</code>), each treated as a free true/false condition.</p></dd>
 
 <dt>loops</dt>
 <dd><p><code>n_known</code> loop blocks with an explicit iteration cap,

@@ -42,6 +42,8 @@ Classify each question and apply the GfS / Axhausen point weights.
   : GfS+ burden-scoring scheme
 - [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
   : Score per-question burden
+- [`suggest_choice_tasks()`](https://pmpk20.github.io/surveyBurden/reference/suggest_choice_tasks.md)
+  : Suggest questions that may be stated-choice tasks
 
 ## Resolve paths
 
@@ -76,6 +78,8 @@ The burden each respondent experienced, from their response data.
 
 - [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
   : Respondent burden from response data
+- [`read_responses()`](https://pmpk20.github.io/surveyBurden/reference/read_responses.md)
+  : Read a Qualtrics response export
 - [`exposure_person_period()`](https://pmpk20.github.io/surveyBurden/reference/exposure_person_period.md)
   : Person-period (hazard) data from respondent burden
 

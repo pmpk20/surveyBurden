@@ -61,6 +61,12 @@ is not in the scheme, "lines" of text are not in a QSF – the package
 applies an explicit, documented inference rule. `score_flag` and
 `score_basis` say which case each item is.
 
+With `scheme$apply_filter_branching = TRUE`, a question whose answer
+drives display logic or a flow branch also gains the GfS `filter` /
+`branching` points (see
+[`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)),
+flagged at least `"inferred"`.
+
 ## Examples
 
 ``` r

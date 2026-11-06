@@ -79,9 +79,8 @@ the approach.</p>
 <p><strong>What you need.</strong> A <code>.qsf</code>; for validation,
 the response export, with completion times.</p>
 <p><strong>What it cannot establish.</strong> An implied
-points-per-minute rate is rough, trim-sensitive and specific to one
-survey. Burden scores do not predict dropout, satisficing or data
-quality.</p>
+points-per-minute rate is rough and specific to one survey. Burden
+scores do not predict dropout, satisficing or data quality.</p>
 <p>This vignette covers two assumptions in the pipeline – words-to-lines
 and points-to-minutes – and the limitations of the approach as a whole.
 For the scoring rules see <code><a href="../articles/gfs-scoring.html">vignette("gfs-scoring")</a></code>.</p>
@@ -190,7 +189,7 @@ implied rate is sensitive to it.</li>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>ratio <span class="op">=</span> <span class="va">vt</span><span class="op">$</span><span class="va">ratio</span>, cor <span class="op">=</span> <span class="va">vt</span><span class="op">$</span><span class="va">cor</span>,</span>
 <span>        implied_ppm <span class="op">=</span> <span class="va">vt</span><span class="op">$</span><span class="va">implied_points_per_minute</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;       ratio         cor implied_ppm </span></span>
-<span><span class="co">#&gt;        0.92        0.03        9.41</span></span></code></pre></div>
+<span><span class="co">#&gt;        0.92        0.03       11.10</span></span></code></pre></div>
 <p>Reading the output:</p>
 <ul>
 <li>
@@ -201,10 +200,15 @@ in minutes.</li>
 observed minutes. Completion times vary for many reasons besides survey
 content, so expect it to be small on real data.</li>
 <li>
-<code>implied_points_per_minute</code> is <code>60 / b</code>, where
-<code>b</code> is the slope, in seconds per point, of a through-origin
-fit of observed seconds on predicted points. It is a rough,
-trim-sensitive rate for this survey, not a calibrated constant.</li>
+<code>implied_points_per_minute</code> is the median respondent
+burden divided by the median observed time, over the respondents kept.
+Medians keep a few respondents who left the survey open from dominating
+it. It is a rough rate for this survey, not a calibrated constant.</li>
+<li>
+<code>ols_points_per_minute</code> is the older estimate,
+<code>60 / b</code> from a through-origin fit of observed seconds on
+predicted points. Long completion times dominate it, so treat it as a
+comparison only.</li>
 </ul>
 <p>To use that rate:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -214,11 +218,11 @@ trim-sensitive rate for this survey, not a calibrated constant.</li>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 2</span></span></span>
 <span><span class="co">#&gt;   statistic minutes</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> min          11.3</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> p25          12.4</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> median       13.1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> p75          13.8</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> max          15.2</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> min          9.55</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> p25         10.5 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> median      11.1 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> p75         11.7 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> max         12.9</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">

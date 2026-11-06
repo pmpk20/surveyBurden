@@ -47,9 +47,26 @@ Table 1 items and the names used here:
 | Stated choice question, 3 alternatives | 3.0 | `sc_3_alt` |
 | Per SC variable, per question | 1.0 | `sc_per_variable` |
 
-Reference only: `rank_per_item`, `open_medium`, `please_specify`,
-`open_essay_per_extra`, `filter`, `branching`, `sc_2_alt`, `sc_3_alt`
-and `sc_per_variable` are transcribed for completeness but not read by
+Stated choice: `sc_2_alt`, `sc_3_alt` and `sc_per_variable` score the
+tasks you declare with the `choice_tasks` argument of
+[`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
+and the other burden functions. A QSF does not mark choice tasks, so
+they are never applied automatically;
+[`suggest_choice_tasks()`](https://pmpk20.github.io/surveyBurden/reference/suggest_choice_tasks.md)
+lists likely candidates.
+
+Filter and branching: `filter` and `branching` are added only when
+`apply_filter_branching` is `TRUE` (default `FALSE`). A question then
+earns `filter` if its answer drives another question's display logic and
+`branching` if its answer is tested by a branch in the survey flow, so
+at most both. Only answered questions earn them; embedded data fields,
+randomiser assignments, loop and quota conditions, and `Displayed`
+conditions do not. GfS budgets interviewer-administered surveys, where
+an interviewer applies each filter; in a web survey the software does,
+so the default leaves them out. Turn it on to match a manual GfS count.
+
+Reference only: `rank_per_item`, `open_medium`, `please_specify` and
+`open_essay_per_extra` are transcribed for completeness but not read by
 any automatic rule in
 [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md),
 so changing them does not change scores.
@@ -74,6 +91,16 @@ contain the quantity the scheme needs:
   does not depend on which axis the QSF stored as rows. A documented
   inference, not GfS; the vignette describes the alternatives that were
   considered.
+
+- `sc_per_extra_alt`:
+
+  1.0 – each stated-choice alternative beyond three. GfS Table 1 stops
+  at three alternatives (2.0, 3.0); this continues its one point per
+  alternative.
+
+- `apply_filter_branching`:
+
+  `FALSE` – switch for the GfS filter and branching points (see above).
 
 - `points_per_minute`:
 

@@ -59,7 +59,10 @@ inside the band and enumerates it.</p>
 <span>  max_paths <span class="op">=</span> <span class="fl">10000L</span>,</span>
 <span>  engine <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  parsed_dl <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  max_condition_states <span class="op">=</span> <span class="fl">10000L</span></span>
+<span>  max_condition_states <span class="op">=</span> <span class="fl">10000L</span>,</span>
+<span>  overrides <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  choice_tasks <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  field_domains <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -99,6 +102,25 @@ primary-gate approximation. This is separate from <code>max_paths</code> and doe
 not remove other modelling assumptions. When precomputed results are
 supplied, use the same limit that generated those results.</p></dd>
 
+
+<dt id="arg-overrides">overrides<a class="anchor" aria-label="anchor" href="#arg-overrides"></a></dt>
+<dd><p>Optional named numeric vector of GfS+ points that replace
+the computed score of the named questions, e.g. <code>c(QID51 = 10)</code>. See
+<code><a href="burden_report.html">burden_report()</a></code>. Ignored, with a warning, when <code>engine</code> is supplied.</p></dd>
+
+
+<dt id="arg-choice-tasks">choice_tasks<a class="anchor" aria-label="anchor" href="#arg-choice-tasks"></a></dt>
+<dd><p>Optional data frame declaring stated-choice tasks
+(<code>question_id</code>, <code>n_alternatives</code>, <code>n_attributes</code>), scored by the GfS
+stated-choice rule. See <code><a href="burden_report.html">burden_report()</a></code>. Ignored, with a warning, when
+<code>engine</code> is supplied.</p></dd>
+
+
+<dt id="arg-field-domains">field_domains<a class="anchor" aria-label="anchor" href="#arg-field-domains"></a></dt>
+<dd><p>Optional named list giving the values an
+embedded-data field can hold, e.g. <code>list(SP_05 = 0:5)</code>. Passed to
+<code><a href="resolve_flow.html">resolve_flow()</a></code>. Ignored, with a warning, when <code>engine</code> is supplied.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -122,9 +144,14 @@ population; for that, use response data with <code><a href="respondent_burden.ht
 <code><a href="burden_report.html">burden_report()</a></code> pools the complete paths' profiles, so each complete path
 carries equal total weight there.</p>
 <p>Each display-logic trigger is a <em>gate</em>: a single-choice question contributes
-its referenced choices as mutually exclusive states; a multi-select or
-embedded field contributes binary states; a Loop &amp; Merge block contributes
-iteration counts <code>1..max</code>. Conditional questions are grouped into coupling
+its referenced choices as mutually exclusive states; a multi-select
+contributes the subsets of its referenced choices; a stored (embedded data)
+field contributes one state per distinguishable value class of the
+comparisons made on it (each referenced value, the ranges between
+thresholds, any other value, empty), so conditions on different values of
+one field are mutually exclusive; a comparison the package cannot evaluate
+(such as <code>Contains</code>) is a free true/false gate; a Loop &amp; Merge block
+contributes iteration counts <code>1..max</code>. Conditional questions are grouped into coupling
 components (two questions couple if they share a gate, directly or through a
 chain of shared gates). A component with at most <code>max_condition_states</code> joint gate-states is
 <strong>enumerated exactly</strong> – every joint combination of its gates' states,

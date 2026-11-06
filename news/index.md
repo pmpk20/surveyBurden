@@ -2,6 +2,120 @@
 
 ## surveyBurden (development version)
 
+- Path enumeration now follows embedded-field values along each path. A
+  field tested by simple comparisons (`=`, `!=`, `>`, `>=`, `<`, `<=`)
+  holds one value on a path, so branches on it agree even when they are
+  not adjacent; a fixed value set in the flow, including one chosen by a
+  block randomiser, decides later branches until the field is set again;
+  a piped value makes it unknown again.
+
+- New `field_domains` argument in
+  [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md),
+  [`resolve_paths()`](https://pmpk20.github.io/surveyBurden/reference/resolve_paths.md),
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md),
+  [`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md),
+  [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md)
+  and
+  [`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md):
+  a named list of the values each field can hold
+  (e.g. `list(SP_05 = 0:5)`). Branches on a declared field are
+  enumerated only for those values, so the “none matches” path of a run
+  of equality tests is dropped when every value matches a branch.
+
+- [`validate_times()`](https://pmpk20.github.io/surveyBurden/reference/validate_times.md):
+  the headline `implied_points_per_minute` is now the median predicted
+  points divided by the median observed minutes over the kept
+  respondents. The previous through-origin regression rate, which a few
+  very long completion times dominate, is kept as
+  `ols_points_per_minute` (with `lm`) but no longer printed as the
+  headline. The print method now labels the rate and says how many rows
+  `trim` dropped; the result gains `n_trimmed`, `trim` and
+  `observed_minutes`. The default `trim = c(3, 180)` is unchanged and
+  now documented.
+
+- Block randomisers that show a subset of their elements (“present 1 of
+  3 blocks”, the QSF’s `SubSet`) are now enumerated as one path per
+  combination of elements, instead of every element being shown on one
+  path. This lowers the burden of affected paths, which was overstated.
+  When the subset cannot be read, every element is still treated as
+  shown, with a warning (now only in that case).
+  [`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md)
+  gains a `randomisers` table.
+
+- [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
+  now reads which elements of a block randomiser each respondent was
+  shown from the export’s display-order column (`FL_xx_DO`), when the
+  randomiser shows only some of its elements. Without the column, or
+  with a blank cell, the elements shown are taken from the blocks the
+  respondent answered, with a warning, and counted in the new
+  `n_randomiser_fallbacks` column. Previously every element was treated
+  as shown, which overstated burden. A randomiser that shows every
+  element no longer warns.
+
+- Display logic on a stored (embedded data) field is now evaluated
+  against the field’s value. Previously every comparison on a field
+  shared one true/false gate, so items shown for `grp == 1` and for
+  `grp == 2` were either both shown or both hidden. The field’s states
+  are now its distinguishable value classes (each referenced value, the
+  ranges between thresholds, any other value, empty), using the same
+  evaluation as flow branches, so such items are mutually exclusive.
+  Burden profiles and certainty counts can change for surveys with
+  field-based display logic. Comparisons the package cannot evaluate
+  (such as `Contains`) remain a free true/false gate, counted in
+  `calculation_certainty()$display_logic$n_binary_field_gates`.
+
+- Stated-choice tasks can now be scored with the GfS stated-choice rule.
+  Declare them with the new `choice_tasks` argument (a data frame of
+  `question_id`, `n_alternatives`, `n_attributes`) in
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md),
+  [`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md),
+  [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md),
+  [`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md),
+  [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
+  and
+  [`validate_times()`](https://pmpk20.github.io/surveyBurden/reference/validate_times.md).
+  A task scores 2.0 for two alternatives, 3.0 for three and 1.0 more per
+  alternative beyond three (new
+  [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)
+  element `sc_per_extra_alt`), plus 1.0 per attribute. Declared tasks
+  are flagged `"manual"`. Without `choice_tasks`, scores are unchanged.
+
+- New
+  [`suggest_choice_tasks()`](https://pmpk20.github.io/surveyBurden/reference/suggest_choice_tasks.md)
+  lists questions that look like stated-choice tasks (a single choice
+  with an HTML table in its stem or in the text item before it, or with
+  an image stem repeated in its block), with guessed alternative and
+  attribute counts, for you to check and pass to `choice_tasks`. It
+  never scores anything itself.
+
+- New
+  [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)
+  switch `apply_filter_branching` (default `FALSE`, so scores are
+  unchanged). When `TRUE`, a question whose answer drives another
+  question’s display logic gains the GfS `filter` points (0.5) and one
+  whose answer a flow branch tests gains the `branching` points (0.5).
+  Embedded data fields, randomiser assignments and `Displayed`
+  conditions earn nothing.
+  [`parse_qsf()`](https://pmpk20.github.io/surveyBurden/reference/parse_qsf.md)
+  gains the columns `filter_trigger` and `branch_trigger`;
+  [`validate_catalogue()`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md)
+  defaults them to `FALSE`.
+
+- New `overrides` argument in
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md),
+  [`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md),
+  [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md),
+  [`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md),
+  [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
+  and
+  [`validate_times()`](https://pmpk20.github.io/surveyBurden/reference/validate_times.md):
+  a named numeric vector of points, e.g. `c(QID51 = 10)`, that replaces
+  the computed score of the named questions after
+  [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md).
+  The new score carries into every total, profile and respondent figure.
+  Overridden items are flagged `"manual"` with basis `"user override"`.
+  An unknown question id is an error.
+
 - [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md),
   [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md)
   and

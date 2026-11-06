@@ -7,9 +7,9 @@ completion times, and the limitations of the approach.
 **What you need.** A `.qsf`; for validation, the response export, with
 completion times.
 
-**What it cannot establish.** An implied points-per-minute rate is
-rough, trim-sensitive and specific to one survey. Burden scores do not
-predict dropout, satisficing or data quality.
+**What it cannot establish.** An implied points-per-minute rate is rough
+and specific to one survey. Burden scores do not predict dropout,
+satisficing or data quality.
 
 This vignette covers two assumptions in the pipeline – words-to-lines
 and points-to-minutes – and the limitations of the approach as a whole.
@@ -130,7 +130,7 @@ c(rows = nrow(export), finished = sum(export$Finished), kept_after_trim = vt$n)
 round(c(ratio = vt$ratio, cor = vt$cor,
         implied_ppm = vt$implied_points_per_minute), 2)
 #>       ratio         cor implied_ppm 
-#>        0.92        0.03        9.41
+#>        0.92        0.03       11.10
 ```
 
 Reading the output:
@@ -139,10 +139,13 @@ Reading the output:
 - `cor` is the correlation of respondent burden with observed minutes.
   Completion times vary for many reasons besides survey content, so
   expect it to be small on real data.
-- `implied_points_per_minute` is `60 / b`, where `b` is the slope, in
-  seconds per point, of a through-origin fit of observed seconds on
-  predicted points. It is a rough, trim-sensitive rate for this survey,
-  not a calibrated constant.
+- `implied_points_per_minute` is the median respondent burden divided by
+  the median observed time, over the respondents kept. Medians keep a
+  few respondents who left the survey open from dominating it. It is a
+  rough rate for this survey, not a calibrated constant.
+- `ols_points_per_minute` is the older estimate, `60 / b` from a
+  through-origin fit of observed seconds on predicted points. Long
+  completion times dominate it, so treat it as a comparison only.
 
 To use that rate:
 
@@ -154,11 +157,11 @@ burden_report(demo, scheme = w, quiet = TRUE)$burden[, c("statistic", "minutes")
 #> # A tibble: 5 × 2
 #>   statistic minutes
 #>   <fct>       <dbl>
-#> 1 min          11.3
-#> 2 p25          12.4
-#> 3 median       13.1
-#> 4 p75          13.8
-#> 5 max          15.2
+#> 1 min          9.55
+#> 2 p25         10.5 
+#> 3 median      11.1 
+#> 4 p75         11.7 
+#> 5 max         12.9
 ```
 
 ## Limitations

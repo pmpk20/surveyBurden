@@ -47,13 +47,13 @@ report
 #> 
 #> ── Survey ──
 #> 
-#> Questions (live)     26
-#> Pages                12
-#> Blocks               12
-#> Branch points         3
-#> Randomisers           0
-#> Loop & Merge blocks   2
-#> Early-exit points     2
+#> Questions (live)        26
+#> Pages                   12
+#> Blocks                  12
+#> Branch points            3
+#> Randomisers              0
+#> Loop & Merge blocks      2
+#> End-of-survey elements   2
 #> 
 #> ── Paths ──
 #> 

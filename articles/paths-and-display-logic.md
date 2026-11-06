@@ -43,10 +43,25 @@ Contemporary web surveys are not a fixed sequence.
 [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md)
 walks the `SurveyFlow`, forking at every `Branch` into a condition-true
 and a condition-false continuation, and at every `EndSurvey` into a
-screen-out. Branch conditions are **not evaluated** – they depend on
-embedded data or prior answers that are unknown before fieldwork – so
-both outcomes are always kept. The result is every block sequence a
-respondent could encounter.
+screen-out. Branch conditions mostly depend on embedded data or prior
+answers that are unknown before fieldwork, so both outcomes are kept.
+The exception is a branch that compares one embedded field with a value
+(`=`, `!=`, `>`, `>=`, `<`, `<=`): the field holds one value along a
+path, so every branch on it agrees with that value, and a fixed value
+set earlier in the flow (including one a randomiser picks) decides the
+branch. A run of equality tests on one field (“`group` is 1”, “`group`
+is 2”, …) becomes one path per value plus a “none matches” path, because
+the field could hold any value. When you know the values a field can
+hold, declare them:
+
+``` r
+
+burden_report(qsf, field_domains = list(group = c("1", "2")))
+```
+
+The “none matches” path is then dropped unless a declared value matches
+no branch. The result is every block sequence a respondent could
+encounter.
 
 ``` r
 
@@ -70,8 +85,14 @@ sum(report$paths$status == "screen_out")
 #> [1] 2
 ```
 
-Block randomisers are treated as “all sub-blocks shown, in survey order”
-– the randomised subsets are not enumerated. The path space is
+A block randomiser that shows `m` of its `M` elements (“present 1 of 3
+blocks”) is enumerated as one path per combination of elements, each in
+survey order; order does not change burden. With even presentation each
+combination is equally likely, which matches the equal weight each path
+gets. When the number shown cannot be read, every element is treated as
+shown, with a warning. A randomiser holding only embedded-data
+assignments shows nothing; it adds paths only when a later branch tests
+a field it sets (one path per value it can assign). The path space is
 enumerated up to `max_paths` (10000); a flow that would produce more
 raises an error rather than a partial answer.
 
@@ -116,12 +137,16 @@ states the package can model.
 - Conditional questions are grouped into **coupling components**: two
   questions couple if they share a gate, directly or through a chain of
   shared gates.
-- A component with at most 5000 joint gate-states is enumerated **in
-  full** – every joint state of its gates that the model represents,
-  respecting single-choice mutual exclusion and AND-across-gates
-  conditions. “In full” means exhaustive within the model; embedded-data
-  conditions are still treated as free, and branch conditions are not
-  checked against each other.
+- A component with at most `max_condition_states` (default 10000) joint
+  gate-states is enumerated **in full** – every joint state of its gates
+  that the model represents, respecting single-choice mutual exclusion
+  and AND-across-gates conditions. A stored (embedded data) field
+  compared with `EqualTo`, `NotEqualTo` or an inequality is enumerated
+  over its distinguishable values, so conditions on different values of
+  one field are mutually exclusive. “In full” means exhaustive within
+  the model: a field compared with any other operator is still treated
+  as a free true/false condition, and branch conditions are not checked
+  against display logic.
 - A larger component (dozens of questions keyed off one popular trigger
   such as employment status) falls back to a **primary-gate
   approximation**: each question is scored against its first gate, the

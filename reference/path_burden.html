@@ -64,7 +64,10 @@ The true burden of any actual respondent on that path lies between.</p>
 <span>  scheme <span class="op">=</span> <span class="fu"><a href="gfs_scheme.html">gfs_scheme</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  max_paths <span class="op">=</span> <span class="fl">10000L</span>,</span>
 <span>  paths <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  scored <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  scored <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  overrides <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  choice_tasks <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  field_domains <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -88,6 +91,25 @@ The true burden of any actual respondent on that path lies between.</p>
 <dd><p>Optional precomputed <code><a href="resolve_paths.html">resolve_paths()</a></code> and
 <code><a href="score_burden.html">score_burden()</a></code> results for this <code>qsf</code> (internal reuse; <code>NULL</code> computes
 them here, leaving the public behaviour unchanged).</p></dd>
+
+
+<dt id="arg-overrides">overrides<a class="anchor" aria-label="anchor" href="#arg-overrides"></a></dt>
+<dd><p>Optional named numeric vector of GfS+ points that replace
+the computed score of the named questions, e.g. <code>c(QID51 = 10)</code>. See
+<code><a href="burden_report.html">burden_report()</a></code>.</p></dd>
+
+
+<dt id="arg-choice-tasks">choice_tasks<a class="anchor" aria-label="anchor" href="#arg-choice-tasks"></a></dt>
+<dd><p>Optional data frame declaring stated-choice tasks
+(<code>question_id</code>, <code>n_alternatives</code>, <code>n_attributes</code>), scored by the GfS
+stated-choice rule. See <code><a href="burden_report.html">burden_report()</a></code>.</p></dd>
+
+
+<dt id="arg-field-domains">field_domains<a class="anchor" aria-label="anchor" href="#arg-field-domains"></a></dt>
+<dd><p>Optional named list giving the values an
+embedded-data field can hold, e.g. <code>list(SP_05 = 0:5)</code>. Passed to
+<code><a href="resolve_flow.html">resolve_flow()</a></code>: branches on a declared field take only outcomes those
+values produce, so an unreachable "none matches" path is dropped.</p></dd>
 
 </dl></div>
     <div class="section level2">

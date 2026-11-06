@@ -20,7 +20,10 @@ calculation_certainty(
   scored = NULL,
   blocks = NULL,
   parsed_dl = NULL,
-  max_condition_states = 10000L
+  max_condition_states = 10000L,
+  overrides = NULL,
+  choice_tasks = NULL,
+  field_domains = NULL
 )
 ```
 
@@ -61,6 +64,28 @@ calculation_certainty(
   other modelling assumptions. When precomputed results are supplied,
   use the same limit that generated those results.
 
+- overrides:
+
+  Optional named numeric vector of GfS+ points that replace the computed
+  score of the named questions, e.g. `c(QID51 = 10)`; counted as
+  `manual` in `scores`. See
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md).
+
+- choice_tasks:
+
+  Optional data frame declaring stated-choice tasks (`question_id`,
+  `n_alternatives`, `n_attributes`), scored by the GfS stated-choice
+  rule. Counted as `manual`. See
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md).
+
+- field_domains:
+
+  Optional named list giving the values an embedded-data field can hold,
+  e.g. `list(SP_05 = 0:5)`. Passed to
+  [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md):
+  branches on a declared field take only outcomes those values produce,
+  so an unreachable "none matches" path is dropped.
+
 ## Value
 
 An object of class `calculation_certainty` (list):
@@ -77,13 +102,24 @@ An object of class `calculation_certainty` (list):
   approximation – but which outcome a given respondent takes is unknown
   before fieldwork.
 
+- randomisers:
+
+  One row per `BlockRandomizer`: `flow_id`, `n_children`, `subset` (how
+  many it shows; `NA` when not readable), `shows_blocks` (`FALSE` for a
+  randomiser of embedded-data assignments) and `enumerated` (`TRUE` when
+  the subset was read, so each combination of elements is a separate
+  path).
+
 - display_logic:
 
   `n_conditional` questions gated by an unresolved condition on some
   full path; `n_exact` scored by exact joint enumeration of their gate
   states; `n_approx` scored with the primary-gate approximation;
-  component counts; and `cross_component_independence` (`TRUE` when \>1
-  coupling component is convolved as independent).
+  component counts; `cross_component_independence` (`TRUE` when \>1
+  coupling component is convolved as independent); and
+  `n_binary_field_gates`, the stored fields compared with an operator
+  the package cannot evaluate (such as `Contains`), each treated as a
+  free true/false condition.
 
 - loops:
 

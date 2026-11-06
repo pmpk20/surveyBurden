@@ -293,7 +293,8 @@ them that take a response, and pages displayed.</li>
 <strong>diagnostics</strong> – <code>furthest_order</code>, and
 counts of logic the data could not settle
 (<code>n_unresolved_items</code>, <code>n_unresolved_branches</code>,
-<code>unresolved_loops</code>) or answers that contradict the flow
+<code>unresolved_loops</code>, <code>n_randomiser_fallbacks</code>) or
+answers that contradict the flow
 (<code>n_routing_conflicts</code>).</li>
 </ul>
 </div>
@@ -461,6 +462,13 @@ loop when it was answered, else from the iterations with answers
 <strong>Answers contradicting the flow</strong> (answers in a block
 the flow skipped) are trusted and counted in
 <code>n_routing_conflicts</code>.</li>
+<li>
+<strong>Block randomisers</strong> that show some of their elements
+(“present 1 of 3 blocks”) are read from the export’s display-order
+column (<code>FL_xx_DO</code>). Without it, the elements shown are taken
+from the blocks each respondent answered, with a warning, and counted in
+<code>n_randomiser_fallbacks</code>. Include the display-order columns
+in the export to avoid this.</li>
 </ul>
 </div>
 <div class="section level2">

@@ -74,7 +74,10 @@ summarises the burden across the survey's structural path space.</p>
 <span>  max_paths <span class="op">=</span> <span class="fl">10000L</span>,</span>
 <span>  certainty <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  quiet <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  max_condition_states <span class="op">=</span> <span class="fl">10000L</span></span>
+<span>  max_condition_states <span class="op">=</span> <span class="fl">10000L</span>,</span>
+<span>  overrides <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  choice_tasks <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  field_domains <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'burden_report'</span></span>
@@ -164,6 +167,41 @@ not remove other modelling assumptions. When precomputed results are
 supplied, use the same limit that generated those results.</p></dd>
 
 
+<dt id="arg-overrides">overrides<a class="anchor" aria-label="anchor" href="#arg-overrides"></a></dt>
+<dd><p>Optional named numeric vector of GfS+ points that replace
+the computed score of the named questions, e.g. <code>c(QID51 = 10)</code> to score
+a choice task at 10 points. Names are question ids as in <code>$items</code>; an
+unknown id is an error. Overrides are applied after <code><a href="score_burden.html">score_burden()</a></code>, so
+they carry into every figure in the report (items, blocks, paths,
+profile and respondents). Overridden items get <code>score_flag = "manual"</code>
+and <code>score_basis = "user override"</code>. The same argument is accepted by
+<code><a href="path_burden.html">path_burden()</a></code>, <code><a href="path_burden_profile.html">path_burden_profile()</a></code>, <code><a href="calculation_certainty.html">calculation_certainty()</a></code>,
+<code><a href="respondent_burden.html">respondent_burden()</a></code> and <code><a href="validate_times.html">validate_times()</a></code>.</p></dd>
+
+
+<dt id="arg-choice-tasks">choice_tasks<a class="anchor" aria-label="anchor" href="#arg-choice-tasks"></a></dt>
+<dd><p>Optional data frame declaring the survey's
+stated-choice tasks, one row per question: <code>question_id</code>,
+<code>n_alternatives</code> (count an opt-out such as "neither" as an alternative)
+and <code>n_attributes</code> (attributes shown per alternative). A QSF does not
+mark choice tasks, so they are not detected automatically;
+<code><a href="suggest_choice_tasks.html">suggest_choice_tasks()</a></code> lists likely candidates to check. Each declared
+task scores <code>sc_2_alt</code> (2 alternatives) or <code>sc_3_alt</code> (3) from
+<code><a href="gfs_scheme.html">gfs_scheme()</a></code>, plus <code>sc_per_extra_alt</code> for each alternative beyond
+three (an extrapolation past GfS Table 1), plus <code>sc_per_variable</code> per
+attribute: a 2-alternative, 4-attribute task scores 2 + 4 = 6 points.
+Declared tasks are flagged <code>"manual"</code>. <code>overrides</code> are applied after
+<code>choice_tasks</code>, so an override wins. The same argument is accepted by
+the functions that take <code>overrides</code>.</p></dd>
+
+
+<dt id="arg-field-domains">field_domains<a class="anchor" aria-label="anchor" href="#arg-field-domains"></a></dt>
+<dd><p>Optional named list giving the values an
+embedded-data field can hold, e.g. <code>list(SP_05 = 0:5)</code>. Passed to
+<code><a href="resolve_flow.html">resolve_flow()</a></code>: branches on a declared field take only outcomes those
+values produce, so an unreachable "none matches" path is dropped.</p></dd>
+
+
 <dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
 <dd><p>A <code>burden_report</code> from <code>burden_report()</code>.</p></dd>
 
@@ -246,9 +284,10 @@ uses the profile's range as the one range shown, whenever <code>profile = TRUE</
 <p><strong>Path-space cap.</strong> The structural path space is enumerated up to
 <code>max_paths</code> (default 10 000). A flow that would produce more raises an
 error rather than a partial answer; raise <code>max_paths</code> or treat it as a
-diagnostic finding (intractable routing). Block randomisers are treated as "all
-sub-blocks shown, in survey order" – the randomised subsets are not
-enumerated.</p>
+diagnostic finding (intractable routing). A block randomiser that shows
+<code>m</code> of its <code>M</code> elements is enumerated as <code>choose(M, m)</code> paths, one per
+combination, each in survey order; when the number shown cannot be read
+from the QSF, every element is treated as shown, with a warning.</p>
     </div>
 
     <div class="section level2">
@@ -258,16 +297,16 @@ enumerated.</p>
 <span class="r-in"><span>                         package <span class="op">=</span> <span class="st">"surveyBurden"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">br</span> <span class="op">&lt;-</span> <span class="fu">burden_report</span><span class="op">(</span><span class="va">qsf_path</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Reading survey</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Reading survey <span style="color: #B2B2B2;">[10ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Reading survey <span style="color: #B2B2B2;">[9ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Scoring questions and resolving paths</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Scoring questions and resolving paths <span style="color: #B2B2B2;">[125ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Scoring questions and resolving paths <span style="color: #B2B2B2;">[119ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Checking calculation certainty</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[31ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[37ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Enumerating display-logic combinations</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Enumerating display-logic combinations <span style="color: #B2B2B2;">[24ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Enumerating display-logic combinations <span style="color: #B2B2B2;">[20ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="va">br</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -278,13 +317,13 @@ enumerated.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Survey</span> ──</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Questions (live)     26</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Pages                12</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Blocks               12</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Branch points         3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Randomisers           0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Loop &amp; Merge blocks   2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Early-exit points     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Questions (live)        26</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Pages                   12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Blocks                  12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Branch points            3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Randomisers              0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Loop &amp; Merge blocks      2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> End-of-survey elements   2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Paths</span> ──</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -364,7 +403,7 @@ enumerated.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> p75          130   10.8  0.086<span style="text-decoration: underline;">7</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> max          143   11.9  0.095<span style="text-decoration: underline;">3</span></span>
 <span class="r-in"><span><span class="va">br</span><span class="op">$</span><span class="va">items</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="va">br</span><span class="op">$</span><span class="va">items</span><span class="op">$</span><span class="va">gfs_points</span><span class="op">)</span>, <span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 26 × 30</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 26 × 32</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    question_id block_id block_name question_text std_type selector n_rows n_cols</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> QID21       BL10     Attitudes  How much do … matrix   Likert        6      7</span>
@@ -378,7 +417,7 @@ enumerated.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> QID11       BL6      Other adu… What is this… single_… SAVR         <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> QID16       BL8      Vehicle d… What type of… single_… SAVR         <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 16 more rows</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 22 more variables: n_options &lt;int&gt;, gfs_points &lt;dbl&gt;, est_seconds &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 24 more variables: n_options &lt;int&gt;, gfs_points &lt;dbl&gt;, est_seconds &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   score_flag &lt;chr&gt;, score_basis &lt;chr&gt;, text_words &lt;int&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   max_label_words &lt;int&gt;, has_display_logic &lt;lgl&gt;, loop_max &lt;int&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   flow_order &lt;int&gt;, qualtrics_type &lt;chr&gt;, subselector &lt;chr&gt;,</span></span>

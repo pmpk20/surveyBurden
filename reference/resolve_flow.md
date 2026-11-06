@@ -15,7 +15,7 @@ probabilities.
 ## Usage
 
 ``` r
-resolve_flow(qsf, max_paths = 10000L)
+resolve_flow(qsf, max_paths = 10000L, field_domains = NULL)
 ```
 
 ## Arguments
@@ -29,6 +29,15 @@ resolve_flow(qsf, max_paths = 10000L)
 
   Cap on the number of distinct paths. If the flow would produce more,
   an error is raised rather than a partial result.
+
+- field_domains:
+
+  Optional named list giving, for an embedded-data field, every value it
+  can hold, e.g. `list(SP_05 = 0:5)` (values are compared as text or
+  numbers like Qualtrics does; `NA` stands for an empty field). Branches
+  on a declared field are enumerated only for those values. A value set
+  in the flow still takes precedence. Naming a field no branch tests
+  gives a warning.
 
 ## Value
 
@@ -56,15 +65,24 @@ per distinct path:
 
 ## Details
 
-Field values are unrestricted: a field may hold any value or be empty,
-so an outcome such as "neither `> 0` nor `= 0`" (a negative or empty
-field) is kept. The enumeration is therefore an upper bound under
-unrestricted field values. Where a survey's own code limits a field's
-values (for example, question JavaScript that always writes a count),
-some enumerated paths may be impossible in practice. `resolve_flow()`
-reports branch fields it finds assigned in question JavaScript, so these
-cases can be checked; it does not interpret the code, and it may not
-detect every assignment.
+A field holds one value along a path, so every branch on it agrees with
+that value, whether or not the branches are adjacent. A fixed value set
+in the flow (an embedded-data assignment, including one chosen by a
+block randomiser) decides the branches after it, until the field is set
+again; a piped or computed value (`${...}`) makes it unknown again.
+
+Otherwise field values are unrestricted: a field may hold any value or
+be empty, so an outcome such as "neither `> 0` nor `= 0`" (a negative or
+empty field) is kept, and a run of equality tests keeps a "none matches"
+path. The enumeration is therefore an upper bound under unrestricted
+field values. When a field can only hold certain values (for example a
+panel field coded 0 to 5), declare them in `field_domains` to drop the
+paths no declared value can produce. Where a survey's own code limits a
+field's values (for example, question JavaScript that always writes a
+count), some enumerated paths may be impossible in practice.
+`resolve_flow()` reports branch fields it finds assigned in question
+JavaScript, so these cases can be checked; it does not interpret the
+code, and it may not detect every assignment.
 
 Within-block display logic (whether an individual question is shown) is
 *not* resolved here; that is a separate step. Paths are at block
@@ -84,4 +102,7 @@ flow[, c("path_id", "terminates_early")]
 #> 2       2 TRUE            
 #> 3       3 FALSE           
 #> 4       4 FALSE           
+if (FALSE) { # \dontrun{
+resolve_flow(read_qsf("survey.qsf"), field_domains = list(group = c("1", "2")))
+} # }
 ```

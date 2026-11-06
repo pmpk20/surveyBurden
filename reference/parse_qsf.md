@@ -33,7 +33,9 @@ Columns: `question_id`, `flow_order`, `block_id`, `block_name`,
 `question_text` (HTML-stripped, truncated to 200 characters),
 `is_hidden` (`TRUE` if the question is hidden from the respondent via
 injected CSS/JS), `has_display_logic`, `display_logic_refs`,
-`has_validation`, `in_loop`, `loop_max`, `flag`.
+`has_validation`, `in_loop`, `loop_max`, `filter_trigger` (`TRUE` if the
+question's answer drives another question's display logic),
+`branch_trigger` (`TRUE` if a flow branch tests its answer), `flag`.
 
 ## Details
 

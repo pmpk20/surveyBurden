@@ -64,7 +64,9 @@ points-per-minute rate the data imply.</p>
 <span>  <span class="va">observed</span>,</span>
 <span>  scheme <span class="op">=</span> <span class="fu"><a href="gfs_scheme.html">gfs_scheme</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  trim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">180</span><span class="op">)</span>,</span>
-<span>  finished_only <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  finished_only <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  overrides <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  choice_tasks <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -88,13 +90,30 @@ export).</p></dd>
 <dt id="arg-trim">trim<a class="anchor" aria-label="anchor" href="#arg-trim"></a></dt>
 <dd><p>Length-2 numeric: the completion-time range to keep, in
 minutes. Rows outside it, or with a missing or non-finite time, are
-dropped.</p></dd>
+dropped, and the printed summary says how many. The default
+<code>c(3, 180)</code> drops times too short for anyone to have read the survey and
+times over three hours, which usually mean the survey was left open.
+The headline rate uses medians, so it moves little with the trim; widen
+it (e.g. <code>c(0, Inf)</code>) to keep every finisher.</p></dd>
 
 
 <dt id="arg-finished-only">finished_only<a class="anchor" aria-label="anchor" href="#arg-finished-only"></a></dt>
 <dd><p>If <code>TRUE</code> (default) and <code>observed</code> has a <code>Finished</code>
 column, keep only respondents who finished. A break-off's duration does
 not measure the time to complete the survey.</p></dd>
+
+
+<dt id="arg-overrides">overrides<a class="anchor" aria-label="anchor" href="#arg-overrides"></a></dt>
+<dd><p>Optional named numeric vector of GfS+ points that replace
+the computed score of the named questions, e.g. <code>c(QID51 = 10)</code>; passed
+to <code><a href="respondent_burden.html">respondent_burden()</a></code>.</p></dd>
+
+
+<dt id="arg-choice-tasks">choice_tasks<a class="anchor" aria-label="anchor" href="#arg-choice-tasks"></a></dt>
+<dd><p>Optional data frame declaring stated-choice tasks
+(<code>question_id</code>, <code>n_alternatives</code>, <code>n_attributes</code>), scored by the GfS
+stated-choice rule. Passed to
+<code><a href="respondent_burden.html">respondent_burden()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -120,16 +139,27 @@ from <code>lm</code> below – it is a through-origin pseudo-\(R^2\), much large
 and not a variance-explained figure.</p></dd>
 
 <dt>implied_points_per_minute</dt>
-<dd><p><code>60 / b</code>, where <code>b</code> is the slope of
-the through-origin fit <code>observed_seconds ~ 0 + predicted_points</code>
-(seconds per point). Trim-sensitive; prefer a median-regression
-estimate from a dedicated calibration on real completion times.</p></dd>
+<dd><p>The headline rate: median predicted
+points divided by median observed minutes, over the kept
+respondents. Robust to a few very long completion times.</p></dd>
+
+<dt>ols_points_per_minute</dt>
+<dd><p><code>60 / b</code>, where <code>b</code> is the slope of the
+through-origin fit <code>observed_seconds ~ 0 + predicted_points</code> (seconds
+per point). Kept for comparison; long completion times dominate it,
+so it is not the headline. In version 0.2.0 this was
+<code>implied_points_per_minute</code>.</p></dd>
 
 <dt>lm</dt>
 <dd><p>The through-origin <code>lm</code> (kept for back-compatibility).</p></dd>
 
-<dt>predicted_burden</dt>
-<dd><p>Per-respondent points.</p></dd>
+<dt>n_trimmed, trim</dt>
+<dd><p>Rows dropped by <code>trim</code> (after <code>finished_only</code>),
+and the range used.</p></dd>
+
+<dt>predicted_burden, observed_minutes</dt>
+<dd><p>Per-respondent points and
+observed minutes for the kept respondents.</p></dd>
 
 
 </dl></div>

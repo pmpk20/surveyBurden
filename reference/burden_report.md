@@ -21,7 +21,10 @@ burden_report(
   max_paths = 10000L,
   certainty = TRUE,
   quiet = FALSE,
-  max_condition_states = 10000L
+  max_condition_states = 10000L,
+  overrides = NULL,
+  choice_tasks = NULL,
+  field_domains = NULL
 )
 
 # S3 method for class 'burden_report'
@@ -117,6 +120,49 @@ summary(object, ...)
   approximation. This is separate from `max_paths` and does not remove
   other modelling assumptions. When precomputed results are supplied,
   use the same limit that generated those results.
+
+- overrides:
+
+  Optional named numeric vector of GfS+ points that replace the computed
+  score of the named questions, e.g. `c(QID51 = 10)` to score a choice
+  task at 10 points. Names are question ids as in `$items`; an unknown
+  id is an error. Overrides are applied after
+  [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md),
+  so they carry into every figure in the report (items, blocks, paths,
+  profile and respondents). Overridden items get `score_flag = "manual"`
+  and `score_basis = "user override"`. The same argument is accepted by
+  [`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md),
+  [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md),
+  [`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md),
+  [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
+  and
+  [`validate_times()`](https://pmpk20.github.io/surveyBurden/reference/validate_times.md).
+
+- choice_tasks:
+
+  Optional data frame declaring the survey's stated-choice tasks, one
+  row per question: `question_id`, `n_alternatives` (count an opt-out
+  such as "neither" as an alternative) and `n_attributes` (attributes
+  shown per alternative). A QSF does not mark choice tasks, so they are
+  not detected automatically;
+  [`suggest_choice_tasks()`](https://pmpk20.github.io/surveyBurden/reference/suggest_choice_tasks.md)
+  lists likely candidates to check. Each declared task scores `sc_2_alt`
+  (2 alternatives) or `sc_3_alt` (3) from
+  [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md),
+  plus `sc_per_extra_alt` for each alternative beyond three (an
+  extrapolation past GfS Table 1), plus `sc_per_variable` per attribute:
+  a 2-alternative, 4-attribute task scores 2 + 4 = 6 points. Declared
+  tasks are flagged `"manual"`. `overrides` are applied after
+  `choice_tasks`, so an override wins. The same argument is accepted by
+  the functions that take `overrides`.
+
+- field_domains:
+
+  Optional named list giving the values an embedded-data field can hold,
+  e.g. `list(SP_05 = 0:5)`. Passed to
+  [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md):
+  branches on a declared field take only outcomes those values produce,
+  so an unreachable "none matches" path is dropped.
 
 - object:
 
@@ -217,9 +263,10 @@ range shown, whenever `profile = TRUE`.**
 **Path-space cap.** The structural path space is enumerated up to
 `max_paths` (default 10 000). A flow that would produce more raises an
 error rather than a partial answer; raise `max_paths` or treat it as a
-diagnostic finding (intractable routing). Block randomisers are treated
-as "all sub-blocks shown, in survey order" – the randomised subsets are
-not enumerated.
+diagnostic finding (intractable routing). A block randomiser that shows
+`m` of its `M` elements is enumerated as `choose(M, m)` paths, one per
+combination, each in survey order; when the number shown cannot be read
+from the QSF, every element is treated as shown, with a warning.
 
 ## Examples
 
@@ -229,16 +276,16 @@ qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
                          package = "surveyBurden")
 br <- burden_report(qsf_path)
 #> ℹ Reading survey
-#> ✔ Reading survey [10ms]
+#> ✔ Reading survey [9ms]
 #> 
 #> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [125ms]
+#> ✔ Scoring questions and resolving paths [119ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [31ms]
+#> ✔ Checking calculation certainty [37ms]
 #> 
 #> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [24ms]
+#> ✔ Enumerating display-logic combinations [20ms]
 #> 
 br
 #> 
@@ -249,13 +296,13 @@ br
 #> 
 #> ── Survey ──
 #> 
-#> Questions (live)     26
-#> Pages                12
-#> Blocks               12
-#> Branch points         3
-#> Randomisers           0
-#> Loop & Merge blocks   2
-#> Early-exit points     2
+#> Questions (live)        26
+#> Pages                   12
+#> Blocks                  12
+#> Branch points            3
+#> Randomisers              0
+#> Loop & Merge blocks      2
+#> End-of-survey elements   2
 #> 
 #> ── Paths ──
 #> 
@@ -335,7 +382,7 @@ br$burden
 #> 4 p75          130   10.8  0.0867
 #> 5 max          143   11.9  0.0953
 br$items[order(-br$items$gfs_points), ]
-#> # A tibble: 26 × 30
+#> # A tibble: 26 × 32
 #>    question_id block_id block_name question_text std_type selector n_rows n_cols
 #>    <chr>       <chr>    <chr>      <chr>         <chr>    <chr>     <int>  <int>
 #>  1 QID21       BL10     Attitudes  How much do … matrix   Likert        6      7
@@ -349,7 +396,7 @@ br$items[order(-br$items$gfs_points), ]
 #>  9 QID11       BL6      Other adu… What is this… single_… SAVR         NA     NA
 #> 10 QID16       BL8      Vehicle d… What type of… single_… SAVR         NA     NA
 #> # ℹ 16 more rows
-#> # ℹ 22 more variables: n_options <int>, gfs_points <dbl>, est_seconds <dbl>,
+#> # ℹ 24 more variables: n_options <int>, gfs_points <dbl>, est_seconds <dbl>,
 #> #   score_flag <chr>, score_basis <chr>, text_words <int>,
 #> #   max_label_words <int>, has_display_logic <lgl>, loop_max <int>,
 #> #   flow_order <int>, qualtrics_type <chr>, subselector <chr>,

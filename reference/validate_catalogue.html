@@ -132,6 +132,14 @@ missing):</p><dl><dt><code>n_options</code></dt>
 <dt><code>loop_max</code></dt>
 <dd><p>Integer. Maximum loop iterations (<code>NA</code> if not in loop).</p></dd>
 
+<dt><code>filter_trigger</code></dt>
+<dd><p>Logical. <code>TRUE</code> if the question's answer drives
+another question's display logic (a GfS filter).</p></dd>
+
+<dt><code>branch_trigger</code></dt>
+<dd><p>Logical. <code>TRUE</code> if the question's answer is
+tested by a branch in the survey flow (GfS branching).</p></dd>
+
 <dt><code>flag</code></dt>
 <dd><p>Character. Confidence flag (<code>"auto"</code>, <code>"inferred"</code>,
 <code>"manual"</code>, or <code>"unknown"</code>).</p></dd>
@@ -163,18 +171,19 @@ scorer):</p><dl><dt><code>qualtrics_type</code></dt>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">validated</span> <span class="op">&lt;-</span> <span class="fu">validate_catalogue</span><span class="op">(</span><span class="va">cat</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">validated</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 26</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 28</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   question_id std_type      n_options n_rows n_cols text_words max_label_words</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> Q1          single_choice         5     <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>         <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> Q2          open_text            <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>         <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> Q3          matrix               <span style="color: #BB0000;">NA</span>      4      5         <span style="color: #BB0000;">NA</span>              <span style="color: #BB0000;">NA</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 19 more variables: label_text &lt;chr&gt;, options_numeric &lt;lgl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 21 more variables: label_text &lt;chr&gt;, options_numeric &lt;lgl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   question_text &lt;chr&gt;, is_hidden &lt;lgl&gt;, is_dropdown &lt;lgl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   is_multiline &lt;lgl&gt;, is_multi_answer &lt;lgl&gt;, has_display_logic &lt;lgl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   display_logic_refs &lt;list&gt;, has_validation &lt;lgl&gt;, in_loop &lt;lgl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   loop_max &lt;int&gt;, flag &lt;chr&gt;, qualtrics_type &lt;chr&gt;, selector &lt;chr&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   subselector &lt;chr&gt;, flow_order &lt;int&gt;, block_id &lt;chr&gt;, block_name &lt;chr&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   loop_max &lt;int&gt;, filter_trigger &lt;lgl&gt;, branch_trigger &lt;lgl&gt;, flag &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   qualtrics_type &lt;chr&gt;, selector &lt;chr&gt;, subselector &lt;chr&gt;, flow_order &lt;int&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   block_id &lt;chr&gt;, block_name &lt;chr&gt;</span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

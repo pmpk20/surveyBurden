@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/pmpk20/surveyBurden/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/pmpk20/surveyBurden/blob/v0.3.0/inst/CITATION)
 
 King P (2026). *surveyBurden: An R package for assessing the
 response-burden of web surveys*. R package version 0.3.0,

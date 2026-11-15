@@ -10,11 +10,14 @@ gfs_scheme()
 A named list of point values and conversion parameters.
 }
 \description{
-The default scoring backend. The original GfS point values are
-transcribed from Table 1 of Heimgartner and Axhausen (2024),
-"Predicting Response Rates Once Again" (\emph{Findings},
-\doi{10.32866/001c.125481}). The package extends the original scheme
-with documented inference rules for question types not in Table 1
+The default scoring backend. GfS stands for Gesellschaft für
+Sozialforschung (Society for Social Research), the Zürich organisation
+whose point system for budgeting face-to-face interviews Axhausen and
+colleagues adapted to self-administered surveys (Schmid and Axhausen
+2019, \doi{10.32866/7827}). The point values are transcribed from
+Table 1 of Heimgartner and Axhausen (2024), "Predicting Response Rates
+Once Again" (\emph{Findings}, \doi{10.32866/001c.125481}). The package adds
+documented inference rules for question types outside Table 1
 (dropdowns, sliders, multi-answer matrices), hence GfS+. Override any
 element and pass the result to \code{\link[=score_burden]{score_burden()}}.
 }

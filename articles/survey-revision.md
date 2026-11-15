@@ -16,11 +16,11 @@ library(surveyBurden)
 #>   survey -- Q1 --+               +-- Burden 0.3.0
 #>                   '-- Q4 --------'
 #> 
-#> An R package for assessing the response-burden of web surveys
+#> Measuring the Response Burden of Web Surveys
 #> Docs: https://pmpk20.github.io/surveyBurden/
 #> 
-#> Please cite: King P (2026). surveyBurden: An R package for assessing
-#> the response-burden of web surveys. R package version 0.3.0,
+#> Please cite: King P (2026). surveyBurden: Measuring the Response Burden
+#> of Web Surveys. R package version 0.3.0,
 #> https://github.com/pmpk20/surveyBurden.
 #> Use citation("surveyBurden") for BibTeX.
 demo <- system.file("extdata", "demo_travel_survey.qsf", package = "surveyBurden")

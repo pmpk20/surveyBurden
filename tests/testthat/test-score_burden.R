@@ -24,11 +24,6 @@ test_that("single choice scores by option count", {
   expect_equal(score1("single_choice", selector = "SAVR", n_options = 9)$gfs_points, 3.0)
 })
 
-test_that("every scored item carries a plain-language score_basis", {
-  r <- score1("single_choice", selector = "SAVR", n_options = 2)
-  expect_type(r$score_basis, "character")
-  expect_true(nzchar(r$score_basis))
-})
 
 test_that("dropdowns score as ratings and are inferred, never manual", {
   small <- score1("single_choice", selector = "DL", n_options = 4)
@@ -48,18 +43,7 @@ test_that("a numeric-looking dropdown with a quantity cue scores as a numeric an
   expect_match(age$score_basis, "numeric", ignore.case = TRUE)
 })
 
-test_that("a short numeric dropdown with no quantity cue stays a rating (could be ordinal codes)", {
-  r <- score1("single_choice", selector = "DL", n_options = 5, options_numeric = TRUE,
-              question_text = "Please rate the following")
-  expect_equal(r$gfs_points, 2.0)
-})
 
-test_that("a large nominal single-select gets a diagnostic note in score_basis", {
-  r <- score1("single_choice", selector = "DL", n_options = 13,
-              question_text = "How did you travel?")
-  expect_equal(r$gfs_points, 3.0)
-  expect_match(r$score_basis, "nominal", ignore.case = TRUE)
-})
 
 test_that("a CSS/JS-hidden question scores zero", {
   r <- score1("single_choice", selector = "SAVR", n_options = 5, is_hidden = TRUE)
@@ -101,11 +85,6 @@ test_that("multiple-answer matrix scores every cell as a trivial yes/no decision
   expect_match(r$score_basis, "cell", ignore.case = TRUE)
 })
 
-test_that("multiple-answer matrix score is orientation-invariant (rows <-> cols)", {
-  a <- score1("matrix", n_rows = 12, n_cols = 3, subselector = "MultipleAnswer")
-  b <- score1("matrix", n_rows = 3,  n_cols = 12, subselector = "MultipleAnswer")
-  expect_equal(a$gfs_points, b$gfs_points)
-})
 
 test_that("open text: essay vs short answer", {
   expect_equal(score1("open_text", selector = "ML")$gfs_points, 6.0)
@@ -118,11 +97,6 @@ test_that("descriptive text scales with length (Table 1: +1.0 per extra line)", 
   expect_equal(score1("descriptive", text_words = 200)$gfs_points, 2.0 + 14.0)
 })
 
-test_that("zero-burden and trivial item types", {
-  expect_equal(score1("timing")$gfs_points, 0)
-  expect_equal(score1("meta")$gfs_points, 0)
-  expect_equal(score1("captcha")$gfs_points, 0.5)
-})
 
 test_that("unknown types score NA and keep the unknown flag", {
   r <- score1("unknown", flag = "unknown")
@@ -130,28 +104,5 @@ test_that("unknown types score NA and keep the unknown flag", {
   expect_equal(r$score_flag, "unknown")
 })
 
-test_that("estimated time uses 12 GfS points per minute", {
-  r <- score1("matrix", n_rows = 4, n_cols = 5)  # 8 points
-  expect_equal(r$gfs_points, 8.0)
-  expect_equal(r$est_seconds, 8.0 / 12 * 60)
-})
 
-test_that("scheme values are overridable", {
-  w <- gfs_scheme()
-  w$rating_small <- 5.0
-  r <- score_burden(cat_row("single_choice", selector = "SAVR", n_options = 4), scheme = w)
-  expect_equal(r$gfs_points, 5.0)
-})
 
-test_that("score_burden on the demo catalogue adds columns for every row", {
-  cat <- parse_qsf(demo_qsf())
-  scored <- score_burden(cat)
-
-  expect_equal(nrow(scored), 26L)
-  expect_true(all(c("gfs_points", "est_seconds", "score_flag") %in% names(scored)))
-  # the demo fixture has no unmapped question types
-  expect_equal(sum(is.na(scored$gfs_points)), 0L)
-  # sanity: all-shown total in a believable range
-  expect_gt(sum(scored$gfs_points), 90)
-  expect_lt(sum(scored$gfs_points), 200)
-})

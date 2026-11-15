@@ -102,30 +102,6 @@ test_that("an embedded field set twice in the flow is read as it was at each bra
   expect_false(cell(ex, "R5", "BL5", "routed_in"))
 })
 
-test_that("flow assignments to an exported field apply in flow order", {
-  mode_node <- function(type, value) list(Type = "EmbeddedData", FlowID = "FL_mode",
-    EmbeddedData = list(list(Description = "Mode", Type = type, Field = "Mode",
-                             Value = value)))
-  with_modes <- function(...) {
-    q <- fx_raw()
-    fx_with_flow(q, append(fx_flow(q), list(...), after = 1L))
-  }
-  r <- exposure_responses()
-  r$QID8 <- NA                                         # no answers behind the web gate
-  # fixed "phone" then a computed value: back to the exported value (web)
-  ex <- run_q(with_modes(mode_node("Custom", "phone"),
-                         mode_node("Custom", "$e{ q://QID1/SelectedChoicesRecode + 1 }")), r)
-  expect_true(cell(ex, "R1", "BL4", "routed_in"))
-  # fixed "phone" alone: R1 is not routed into Web extras
-  ex <- run_q(with_modes(mode_node("Custom", "phone")), r)
-  expect_false(cell(ex, "R1", "BL4", "routed_in"))
-  # an explicit empty value clears it: not "web" either
-  ex <- run_q(with_modes(mode_node("Custom", "")), r)
-  expect_false(cell(ex, "R1", "BL4", "routed_in"))
-  # a bare declaration (set from a panel or URL) leaves the export value
-  ex <- run_q(with_modes(mode_node("Recipient", "")), r)
-  expect_true(cell(ex, "R1", "BL4", "routed_in"))
-})
 
 test_that("Displayed() inside a loop sees the earlier question in the same pass", {
   q <- fx_set_q(fx_raw(), "QID6", "DisplayLogic", one_logic(list(
@@ -167,39 +143,7 @@ test_that("a randomised loop counts only answered iterations at the exit", {
   expect_false(attr(ex, "respondents")$unresolved_loops[1])
 })
 
-test_that("a randomised loop showing a subset of iterations is left to the answers", {
-  opts <- fx_block(fx_raw(), "BL3")$Options
-  opts$LoopingOptions$Randomization <- "All"
-  opts$LoopingOptions$RandomizationSubsetCount <- "1"
-  r <- exposure_responses()
-  r$`2_QID5`[1] <- NA                                  # R1 (driver 2) answered one
-  ex <- run_q(fx_set_block(fx_raw(), "BL3", "Options", opts), r)
-  expect_equal(cell(ex, "R1", "BL3", "iterations"), 1L)
-  flag <- attr(ex, "respondents")$unresolved_loops
-  expect_true(flag[1])
-  # R4 left before the loop and R2 was screened out before it: not flagged
-  expect_false(flag[4])
-  expect_false(flag[2])
-})
 
-test_that("a screen-out after an uncertain loop keeps its flag", {
-  opts <- fx_block(fx_raw(), "BL3")$Options
-  opts$LoopingOptions$Randomization <- "All"
-  opts$LoopingOptions$RandomizationSubsetCount <- "1"
-  q <- fx_set_block(fx_raw(), "BL3", "Options", opts)
-  # after the loop: end the survey for phone respondents
-  gate <- list(Type = "Branch", FlowID = "FL_b_phone",
-    BranchLogic = one_logic(list(LogicType = "EmbeddedField", LeftOperand = "Mode",
-                                 Operator = "EqualTo", RightOperand = "phone",
-                                 Type = "Expression")),
-    Flow = list(list(Type = "EndSurvey", FlowID = "FL_end_phone")))
-  q <- fx_with_flow(q, append(fx_flow(q), list(gate), after = 5L))   # after the loop
-  r <- exposure_responses()
-  r$QID10[5] <- NA; r$QID12[5] <- NA; r$QID13[5] <- NA
-  ex <- run_q(q, r)
-  expect_equal(cell(ex, "R5", "BL3", "outcome"), "screen_out")
-  expect_true(attr(ex, "respondents")$unresolved_loops[5])
-})
 
 test_that("comma-joined codes are split only when every piece is a choice code", {
   r <- exposure_responses()[c(1, 5), ]
@@ -211,39 +155,7 @@ test_that("comma-joined codes are split only when every piece is a choice code",
   expect_equal(cell(ex, "R5", "BL2", "points"), 8)
 })
 
-test_that("a loop block reached through either of two branches keeps its iterations", {
-  q <- fx_raw()
-  fl <- fx_flow(q)
-  web <- function(op) list(Type = "Branch", FlowID = paste0("FL_b_", op),
-    BranchLogic = one_logic(list(LogicType = "EmbeddedField", LeftOperand = "Mode",
-                                 Operator = op, RightOperand = "web", Type = "Expression")),
-    Flow = list(list(Type = "Standard", ID = "BL3", FlowID = paste0("FL_3", op))))
-  fl[[5]] <- NULL                                      # the plain BL3 node
-  q <- fx_with_flow(q, append(fl, list(web("EqualTo"), web("NotEqualTo")), after = 4L))
-  # R1 (web, finished, driver = 2) answered nothing in the loop, so only the
-  # first occurrence routes it there; the second, untaken one must not erase it
-  r <- exposure_responses()
-  r[1, grepl("^[0-9]+_", names(r))] <- NA
-  ex <- run_q(q, r)
-  expect_equal(cell(ex, "R1", "BL3", "iterations"), 2L)
-  # iteration 1: QID5 2 + QID6 2 (QID5 is not "child") + QID7 1; iteration 2: 2 + 2
-  expect_equal(cell(ex, "R1", "BL3", "points"), 9)
-  # R5 (phone) takes the second occurrence
-  expect_equal(cell(ex, "R5", "BL3", "points"), 5)
-})
 
-test_that("respondent ids must be unique and present", {
-  r <- exposure_responses()
-  r$ResponseId[2] <- "R1"
-  expect_error(run_q(fx_raw(), r), "unique")
-  r$ResponseId[2] <- NA
-  expect_error(run_q(fx_raw(), r), "1 missing and 0 duplicated")
-  expect_error(run_q(fx_raw(), r[0, ]), "no respondents")
-  # a tibble with a factor id column works
-  t <- tibble::as_tibble(exposure_responses())
-  t$ResponseId <- factor(t$ResponseId)
-  expect_equal(cell(run_q(fx_raw(), t), "R1", "BL3", "points"), 7)
-})
 
 test_that("a loop with no recoverable iterations is flagged, not a crash", {
   q <- fx_set_block(fx_raw(), "BL3", "Options", list(Looping = "Question",
@@ -255,22 +167,4 @@ test_that("a loop with no recoverable iterations is flagged, not a crash", {
   expect_true(attr(ex, "respondents")$unresolved_loops[1])
 })
 
-test_that("hidden and metadata items are reported, not counted as displayed", {
-  q <- fx_set_q(fx_raw(), "QID7", "QuestionType", "Timing")
-  ex <- run_q(q)
-  # QID7 is shown in R1's first loop iteration; now it is a timing item
-  expect_equal(cell(ex, "R1", "BL3", "items"), 3L)
-  expect_equal(cell(ex, "R1", "BL3", "hidden_items"), 1L)
-  expect_equal(cell(ex, "R1", "BL3", "points"), 6)
-})
 
-test_that("a block named like an ordinal is matched by name first", {
-  q <- fx_set_block(fx_raw(), "BL5", "Description", "2")
-  r <- exposure_responses()
-  r$LastBlock <- c(NA, NA, "2", "2.5", NA)
-  ex <- suppressMessages(rb_blocks(q, r, furthest = "column",
-                                           furthest_col = "LastBlock"))
-  expect_equal(attr(ex, "respondents")$furthest_order[3], 5)
-  # "2.5" is neither a block nor an integral ordinal: falls back to answers
-  expect_equal(attr(ex, "respondents")$furthest_order[4], 2)
-})

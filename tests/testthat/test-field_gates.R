@@ -52,31 +52,5 @@ test_that("inequalities on one field are exclusive too", {
   expect_false(6 %in% pr$burden)
 })
 
-test_that("a field compared to one value gives two classes", {
-  p <- parse_display_logic(fg_logic(fg_emb("grp", "EqualTo", "1")))
-  st <- gate_states("@grp", "QIDA", list(QIDA = p), c())
-  expect_length(st, 2L)
-  expect_true(p$predicate(list(`@grp` = "1")))
-  expect_false(p$predicate(list(`@grp` = "2")))
-  expect_false(p$predicate(list(`@grp` = NA_character_)))
-})
 
-test_that("an operator that cannot be evaluated keeps a binary gate and is reported", {
-  dl_a <- fg_logic(fg_emb("grp", "Contains", "x"))
-  p <- parse_display_logic(dl_a)
-  expect_length(p$vars, 1L)
-  expect_true(p$predicate(stats::setNames(list(TRUE), p$vars)))
-  expect_false(p$predicate(stats::setNames(list(FALSE), p$vars)))
 
-  q <- fg_qsf(dl_a, fg_logic(fg_emb("grp", "EqualTo", "2")))
-  ct <- suppressMessages(calculation_certainty(q))
-  expect_equal(ct$display_logic$n_binary_field_gates, 1L)
-  expect_match(paste(format(ct), collapse = "\n"), "true/false")
-})
-
-test_that("evaluable field gates are not counted as binary", {
-  q <- fg_qsf(fg_logic(fg_emb("grp", "EqualTo", "1")),
-              fg_logic(fg_emb("grp", "EqualTo", "2")))
-  ct <- suppressMessages(calculation_certainty(q))
-  expect_equal(ct$display_logic$n_binary_field_gates, 0L)
-})

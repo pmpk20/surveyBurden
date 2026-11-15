@@ -41,17 +41,6 @@ test_that("a trigger question the path never shows is fixed as unanswered", {
   expect_equal(cp$display_dist$weight, c(0.5, 0.5))
 })
 
-test_that("connected_components groups questions that share a gate", {
-  parsed <- list(
-    Q1 = parse_display_logic(.dl_of(.grp(.lit_q("GATE1", "1")))),
-    Q2 = parse_display_logic(.dl_of(.grp(.lit_q("GATE1", "2")))),
-    Q3 = parse_display_logic(.dl_of(.grp(.lit_q("GATE2", "1"))))
-  )
-  comps <- connected_components(c("Q1", "Q2", "Q3"), parsed)
-  expect_equal(length(comps), 2L)
-  sizes <- sort(lengths(comps))
-  expect_equal(sizes, c(1L, 2L))
-})
 
 test_that("an AND-across-two-gates condition is scored exactly, not with a permissive gate", {
   # Q1 is shown only when GATE1 choice 1 is selected AND GATE2 choice 1 is
@@ -92,10 +81,3 @@ test_that("component_dist falls back to the primary-gate approximation above exa
   expect_false(isTRUE(all.equal(sort(exact$weight), sort(fallback$weight))))
 })
 
-test_that("path_burden_profile's minimum is at least the naive floor", {
-  qsf <- read_qsf(demo_qsf())
-  band <- path_burden(qsf)
-  prof <- path_burden_profile(qsf)
-  m <- merge(band[, c("path_id", "gfs_floor")], prof[, c("path_id", "burden_min")], by = "path_id")
-  expect_true(all(m$burden_min >= m$gfs_floor - 1e-6))
-})

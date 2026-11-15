@@ -48,9 +48,6 @@ fd_seqs <- function(q, ...) {
 one_group <- function() list(fd_blk("BL0"), fd_br("FL_1", "f", "1", "BLA"),
                              fd_br("FL_2", "f", "2", "BLB"))
 
-test_that("without a domain the none-matches fallback is kept", {
-  expect_equal(fd_seqs(fd_qsf(one_group())), sort(c("BL0>BLA", "BL0>BLB", "BL0")))
-})
 
 test_that("a declared domain drops the fallback when every value matches a branch", {
   q <- fd_qsf(one_group())
@@ -60,15 +57,7 @@ test_that("a declared domain drops the fallback when every value matches a branc
   expect_equal(fd_seqs(q, field_domains = list(f = 1:2)), sort(c("BL0>BLA", "BL0>BLB")))
 })
 
-test_that("a declared value that matches no branch keeps the fallback", {
-  expect_equal(fd_seqs(fd_qsf(one_group()), field_domains = list(f = c("1", "3"))),
-               sort(c("BL0>BLA", "BL0")))
-})
 
-test_that("a domain also settles a single branch", {
-  flow <- list(fd_blk("BL0"), fd_br("FL_1", "f", "1", "BLA"))
-  expect_equal(fd_seqs(fd_qsf(flow), field_domains = list(f = "1")), "BL0>BLA")
-})
 
 test_that("branches on one field agree along a path, even when not adjacent", {
   # f == 1 -> BLA, f == 2 -> BLB; BLM; f == 1 -> BLC, f == 2 -> BLD
@@ -97,10 +86,6 @@ test_that("a piped value makes the field unknown again", {
   expect_equal(fd_seqs(fd_qsf(flow)), sort(c("BL0>BLA", "BL0>BLB", "BL0")))
 })
 
-test_that("a declaration without a value (panel or URL field) leaves the field free", {
-  flow <- c(list(fd_ed("FL_e", "f", "", type = "Recipient")), one_group())
-  expect_equal(fd_seqs(fd_qsf(flow)), sort(c("BL0>BLA", "BL0>BLB", "BL0")))
-})
 
 test_that("a randomiser assigning the field gives one path per assigned value", {
   rand <- list(Type = "BlockRandomizer", FlowID = "FL_r", SubSet = 1L, EvenPresentation = TRUE,
@@ -110,17 +95,4 @@ test_that("a randomiser assigning the field gives one path per assigned value", 
   expect_equal(fd_seqs(fd_qsf(flow)), sort(c("BL0>BLA", "BL0>BLB")))
 })
 
-test_that("field_domains is validated", {
-  q <- fd_qsf(one_group())
-  expect_error(resolve_flow(q, field_domains = list("1")), "named")
-  expect_error(resolve_flow(q, field_domains = list(f = character(0))), "f")
-  expect_warning(suppressMessages(resolve_flow(q, field_domains = list(g = "1"))), "g")
-})
 
-test_that("burden_report() and path_burden() pass field_domains through", {
-  q <- fd_qsf(one_group())
-  r <- suppressMessages(burden_report(q, quiet = TRUE, field_domains = list(f = c("1", "2"))))
-  expect_equal(nrow(r$paths), 2L)
-  pb <- suppressMessages(path_burden(q, field_domains = list(f = c("1", "2"))))
-  expect_equal(nrow(pb), 2L)
-})

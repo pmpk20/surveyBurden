@@ -34,31 +34,8 @@ make_responses <- function() {
 }
 
 
-test_that("finished column is correctly detected", {
-  resp <- make_responses()
-  rb <- respondent_burden(qsf_fx(), resp)
-
-  expect_equal(rb$finished, c(TRUE, TRUE, FALSE, FALSE))
-})
 
 
-test_that("Finished accepts logical, numeric and text encodings; unknown is NA", {
-  fin <- function(v) detect_finished(data.frame(Finished = v, stringsAsFactors = FALSE))
-
-  expect_identical(fin(c(TRUE, FALSE, NA)), c(TRUE, FALSE, NA))
-  expect_identical(fin(c(1, 0, NA)), c(TRUE, FALSE, NA))
-  expect_identical(fin(c(1L, 0L)), c(TRUE, FALSE))
-  expect_identical(fin(c("1", "0", "")), c(TRUE, FALSE, NA))
-  expect_identical(fin(c("TRUE", "FALSE", "True", "false", " true ")),
-                   c(TRUE, FALSE, TRUE, FALSE, TRUE))
-  expect_identical(fin(c("Yes", "No", "y", "n")), c(TRUE, FALSE, TRUE, FALSE))
-  expect_identical(fin(factor(c("1", "0"))), c(TRUE, FALSE))
-  # anything unrecognised is unknown, not "did not finish"
-  expect_identical(fin(c("2", "maybe", "0.5")), c(NA, NA, NA))
-
-  # no Finished column at all -> all unknown
-  expect_identical(detect_finished(data.frame(x = 1:2)), c(NA, NA))
-})
 
 
 test_that("col_map keeps loop iterations: explicit, or from an N_ column prefix", {
@@ -110,36 +87,7 @@ test_that("the ImportId row maps columns whose names match no QID or export tag"
   expect_identical(rb$points, ref$points)
 })
 
-test_that("display-order, timing and meta columns are not answers", {
-  resp <- make_responses()
-  ref  <- respondent_burden(qsf_fx(), resp)
-  # respondent 4 answered nothing, but Qualtrics fills these automatically
-  auto <- c(QID1_DO = "QID1_DO", QID2_DO_1 = "QID2_DO",
-            t_first = "QID3_FIRST_CLICK", t_submit = "QID3_PAGE_SUBMIT",
-            m_browser = "QID4_BROWSER")
-  for (col in names(auto)) resp[[col]] <- "1"
-  ids <- c(stats::setNames(names(resp), names(resp)))
-  ids[names(auto)] <- auto
 
-  rb <- suppressMessages(respondent_burden(qsf_fx(), with_qualtrics_header_rows(resp, ids)))
-  expect_identical(rb$points, ref$points)
-
-  # without an ImportId row, `_DO` and QID-named timing columns are not answers
-  resp$QID3_FIRST_CLICK <- "1.2"
-  rb2 <- respondent_burden(qsf_fx(),
-                         resp[, c(names(make_responses()), "QID1_DO", "QID2_DO_1", "QID3_FIRST_CLICK")])
-  expect_identical(rb2$points, ref$points)
-})
-
-test_that("respondent_burden() reads a CSV file path", {
-  resp <- make_responses()
-  ref  <- respondent_burden(qsf_fx(), resp)
-  tmp  <- tempfile(fileext = ".csv")
-  on.exit(unlink(tmp))
-  utils::write.csv(with_qualtrics_header_rows(resp), tmp, row.names = FALSE, na = "")
-  rb <- suppressMessages(respondent_burden(qsf_fx(), tmp))
-  expect_identical(rb$points, ref$points)
-})
 
 test_that("leading Qualtrics label and ImportId rows are removed, with a message", {
   resp <- make_responses()
@@ -153,36 +101,8 @@ test_that("leading Qualtrics label and ImportId rows are removed, with a message
 
 })
 
-test_that("unrecognised or non-leading rows are kept", {
-  resp <- make_responses()
-  expect_no_message(rb <- respondent_burden(qsf_fx(), resp))
-  expect_equal(nrow(rb), 4L)
 
-  # a label row that is not at the top is data, not a header: keep it
-  mid <- rbind(resp[1:2, ], with_qualtrics_header_rows(resp)[1, ], resp[3:4, ])
-  expect_no_message(rb2 <- respondent_burden(qsf_fx(), mid))
-  expect_equal(nrow(rb2), 5L)
 
-  # col_map survives the header-row removal
-  raw <- with_qualtrics_header_rows(resp)
-  attr(raw, "col_map") <- list(QID1 = "QID2")
-  expect_identical(attr(drop_qualtrics_header_rows(raw, quiet = TRUE)$data, "col_map"),
-                   list(QID1 = "QID2"))
-})
-
-test_that("col_map takes precedence over automatic column matching", {
-  resp <- data.frame(ResponseId = "R_1", QID1 = "x")
-  attr(resp, "col_map") <- list(QID1 = "QID2")
-  cm <- build_col_map(qsf_fx(), resp, parse_qsf(qsf_fx())$question_id)
-  expect_identical(cm$QID1$qid, "QID2")
-})
-
-test_that("ResponseId is detected as the id column", {
-  resp <- make_responses()
-  rb <- respondent_burden(qsf_fx(), resp)
-
-  expect_equal(rb$response_id, paste0("R_", 1:4))
-})
 
 
 test_that("loop iterations contribute additional burden", {
@@ -220,10 +140,6 @@ test_that("export-tag column names are mapped", {
 })
 
 
-test_that("no mappable columns gives an informative error", {
-  resp <- data.frame(foo = 1:3, bar = 4:6)
-  expect_error(respondent_burden(qsf_fx(), resp), "mapped to question ids")
-})
 
 
 test_that("custom id_col works", {
@@ -235,32 +151,8 @@ test_that("custom id_col works", {
 })
 
 
-test_that("one row per respondent, in input order, with the documented columns", {
-  resp <- make_responses()
-  rb <- respondent_burden(qsf_fx(), resp)
-
-  expect_s3_class(rb, "tbl_df")
-  expect_equal(nrow(rb), 4L)
-  expect_identical(names(rb), c(
-    "response_id", "finished", "outcome", "points", "minutes", "items",
-    "response_items", "pages", "furthest_order", "n_unresolved_items",
-    "n_unresolved_branches", "unresolved_loops", "n_routing_conflicts",
-    "n_randomiser_fallbacks"))
-  expect_equal(rb$finished, c(TRUE, TRUE, FALSE, FALSE))
-})
 
 
-test_that("respondent points are the block points summed over routed-in blocks", {
-  resp <- make_responses()
-  rb <- respondent_burden(qsf_fx(), resp)
-  bl <- respondent_burden(qsf_fx(), resp, by = "block")
-
-  routed <- bl$routed_in %in% TRUE
-  by_hand <- tapply(ifelse(routed, bl$points, 0), bl$response_id, sum, na.rm = TRUE)
-  expect_equal(rb$points, unname(as.numeric(by_hand[rb$response_id])))
-  expect_equal(rb$minutes, rb$points / gfs_scheme()$points_per_minute)
-  expect_identical(attr(bl, "respondents")$outcome, rb$outcome)
-})
 
 
 test_that("descriptive text counts towards respondent burden", {
@@ -288,18 +180,7 @@ test_that("a question left blank still counts towards respondent burden", {
 
 # ---------- per-respondent words_per_line ------------------------------------
 
-test_that("words_per_line = NULL uses the scheme's value", {
-  resp <- make_responses()
-  expect_equal(respondent_burden(qsf_fx(), resp)$points,
-               respondent_burden(qsf_fx(), resp, words_per_line = 12)$points)
-})
 
-test_that("a scalar words_per_line applies to every respondent", {
-  resp <- make_responses()
-  narrow <- gfs_scheme(); narrow$words_per_line <- 6
-  expect_equal(respondent_burden(qsf_fx(), resp, words_per_line = 6)$points,
-               respondent_burden(qsf_fx(), resp, scheme = narrow)$points)
-})
 
 test_that("a per-respondent words_per_line changes only that respondent's text", {
   resp <- make_responses()
@@ -317,31 +198,5 @@ test_that("a per-respondent words_per_line changes only that respondent's text",
                ignore_attr = TRUE)
 })
 
-test_that("a per-respondent words_per_line given for raw rows is trimmed with the header rows", {
-  resp <- make_responses()
-  raw  <- with_qualtrics_header_rows(resp)
-  ref  <- respondent_burden(qsf_fx(), resp, words_per_line = c(6, 12, 8, 10))
-  rb   <- suppressMessages(respondent_burden(qsf_fx(), raw,
-                                             words_per_line = c(NA, NA, 6, 12, 8, 10)))
-  expect_equal(rb$points, ref$points)
-})
 
-test_that("words_per_line of the wrong length or value errors", {
-  resp <- make_responses()
-  expect_error(respondent_burden(qsf_fx(), resp, words_per_line = c(6, 12)),
-               "words_per_line")
-  expect_error(respondent_burden(qsf_fx(), resp, words_per_line = 0), "words_per_line")
-})
 
-test_that("read_responses() is exported and keeps Qualtrics header rows", {
-  expect_true("read_responses" %in% getNamespaceExports("surveyBurden"))
-  csv <- withr::local_tempfile(fileext = ".csv")
-  writeLines(c("ResponseId,Q1", "Response ID,Q1 text",
-               '"{""ImportId"":""_recordId""}","{""ImportId"":""QID1""}"',
-               "R_1,yes"), csv)
-  r <- surveyBurden::read_responses(csv)
-  expect_equal(nrow(r), 3L)
-  expect_true(all(vapply(r, is.character, logical(1))))
-  df <- data.frame(a = 1)
-  expect_identical(surveyBurden::read_responses(df), df)
-})

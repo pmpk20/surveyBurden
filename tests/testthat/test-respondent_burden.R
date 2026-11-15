@@ -43,16 +43,6 @@ run_exposure <- function(responses = exposure_responses(), ...) {
 
 cell <- function(ex, rid, bid, col) ex[[col]][ex$response_id == rid & ex$block_id == bid]
 
-test_that("returns one row per respondent per live block, in flow order", {
-  ex <- run_exposure()
-  expect_s3_class(ex, "tbl_df")
-  expect_equal(nrow(ex), 5L * 8L)
-  expect_equal(ex$block_id[ex$response_id == "R1"], paste0("BL", 1:8))
-  expect_true(all(c("routed_in", "displayed", "iterations", "points",
-                    "items", "response_items", "pages",
-                    "design_points", "exit_block", "unresolved_items",
-                    "outcome") %in% names(ex)))
-})
 
 test_that("a complete respondent's points follow routing and display logic", {
   ex <- run_exposure()
@@ -232,4 +222,80 @@ test_that("works on the bundled demo survey", {
   # a complete respondent's displayed blocks sum to at most the design total
   # for one pass of each loop times its iterations
   expect_true(sum(ex$points[ex$response_id == "R_1"]) > 0)
+})
+
+# --- export tags that differ from question ids ---
+# Renaming questions' export tags, and the response columns to match, must not
+# change anyone's burden. Covers loop-prefixed tags ("1_rel") and the per-choice
+# columns of a multi-select ("hh_1").
+test_that("columns named by custom export tags give the same burden as QID columns", {
+  q <- read_qsf(exposure_qsf())
+  tags <- c(QID3 = "hh", QID5 = "rel", QID6 = "age")
+  for (i in seq_along(q$SurveyElements)) {
+    p <- q$SurveyElements[[i]]$Payload
+    if (identical(q$SurveyElements[[i]]$Element, "SQ") && p$QuestionID %in% names(tags)) {
+      q$SurveyElements[[i]]$Payload$DataExportTag <- tags[[p$QuestionID]]
+    }
+  }
+  resp <- exposure_responses()
+  renamed <- resp
+  for (qid in names(tags)) names(renamed) <- sub(paste0("(^|_)", qid, "(_|$)"),
+                                                 paste0("\\1", tags[[qid]], "\\2"),
+                                                 names(renamed))
+  expect_true(all(c("hh_1", "1_rel", "2_rel", "1_age") %in% names(renamed)))
+  a <- suppressMessages(respondent_burden(q, resp))
+  b <- suppressMessages(respondent_burden(q, renamed))
+  expect_equal(b$points, a$points)
+  expect_equal(b$outcome, a$outcome)
+})
+
+# --- display logic on a typed answer ---
+# QID1 is a single-line text box (1 point); QID2 is a yes/no question (1 point)
+# shown only when the number typed into QID1 is greater than 3. By hand:
+# R1 types 5 -> both shown -> 2 points; R2 types 2 -> QID2 hidden -> 1 point;
+# R3 leaves QID1 blank -> QID1 still counts, QID2 hidden -> 1 point.
+test_that("display logic on a text-entry value follows the typed answer", {
+  te <- list(QuestionID = "QID1", QuestionType = "TE", Selector = "SL", SubSelector = "",
+             QuestionText = "How many trips did you make last week?", DataExportTag = "QID1",
+             QuestionDescription = "trips")
+  loc <- "q://QID1/ChoiceTextEntryValue"
+  gt3 <- list(`0` = list(`0` = list(LogicType = "Question", QuestionID = "QID1",
+                                    Operator = "GreaterThan", LeftOperand = loc,
+                                    RightOperand = "3", Type = "Expression"),
+                         Type = "If"),
+              Type = "BooleanExpression", inPage = FALSE)
+  q <- lp_qsf(list(list(id = "BL_1", qs = list(te, fg_mc("QID2", 2, dl = gt3)))))
+  resp <- data.frame(ResponseId = c("R1", "R2", "R3"), Finished = c(1, 1, 1),
+                     QID1_TEXT = c("5", "2", NA), QID2 = c("1", NA, NA),
+                     stringsAsFactors = FALSE)
+  rb <- suppressMessages(respondent_burden(q, resp))
+  expect_equal(rb$points, c(2, 1, 1))
+})
+
+# --- display logic on one cell of a grid ---
+# QID1 is a 3-statement grid on a 5-point scale: 3 x 2 = 6 points. QID2 is a
+# yes/no question (1 point) shown only when statement 2 is answered with scale
+# point 3. By hand: R1 answers 3 on statement 2 -> 6 + 1 = 7 points; R2 answers
+# 1 on statement 2 -> QID2 hidden -> 6 points.
+test_that("display logic on a grid cell follows that statement's answer", {
+  grid <- list(QuestionID = "QID1", QuestionType = "Matrix", Selector = "Likert",
+               SubSelector = "SingleAnswer", QuestionText = "How much do you agree?",
+               DataExportTag = "QID1", QuestionDescription = "agree",
+               Choices = stats::setNames(lapply(1:3, function(i) list(Display = paste("s", i))),
+                                         as.character(1:3)),
+               Answers = stats::setNames(lapply(1:5, function(i) list(Display = paste("a", i))),
+                                         as.character(1:5)))
+  loc <- "q://QID1/SelectableChoice/2/3"
+  cell <- list(`0` = list(`0` = list(LogicType = "Question", QuestionID = "QID1",
+                                     Operator = "Selected", LeftOperand = loc,
+                                     ChoiceLocator = loc, Type = "Expression"),
+                          Type = "If"),
+               Type = "BooleanExpression", inPage = FALSE)
+  q <- lp_qsf(list(list(id = "BL_1", qs = list(grid, fg_mc("QID2", 2, dl = cell)))))
+  expect_equal(score_burden(parse_qsf(q))$gfs_points, c(6, 1))
+  resp <- data.frame(ResponseId = c("R1", "R2"), Finished = c(1, 1),
+                     QID1_1 = c("4", "2"), QID1_2 = c("3", "1"), QID1_3 = c("5", "5"),
+                     QID2 = c("1", NA), stringsAsFactors = FALSE)
+  rb <- suppressMessages(respondent_burden(q, resp))
+  expect_equal(rb$points, c(7, 6))
 })

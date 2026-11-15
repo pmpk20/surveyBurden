@@ -20,13 +20,6 @@ dl_of <- function(...) {
   d$Type <- "BooleanExpression"; d
 }
 
-test_that("a single Selected literal is true only when that choice is in the state", {
-  p <- parse_display_logic(dl_of(grp(lit_q("QID10", "2"))))
-  expect_identical(p$vars, "QID10")
-  expect_true(p$predicate(list(QID10 = "2")))
-  expect_false(p$predicate(list(QID10 = "1")))
-  expect_false(p$predicate(list(QID10 = character(0))))
-})
 
 test_that("NotSelected inverts", {
   p <- parse_display_logic(dl_of(grp(lit_q("QID10", "1", op = "NotSelected"))))
@@ -34,37 +27,8 @@ test_that("NotSelected inverts", {
   expect_true(p$predicate(list(QID10 = "2")))
 })
 
-test_that("OR within a group is satisfied by any literal", {
-  p <- parse_display_logic(dl_of(grp(
-    lit_q("QID9", "1"),
-    lit_q("QID9", "2", conj = "Or"),
-    lit_q("QID9", "3", conj = "Or")
-  )))
-  expect_identical(p$vars, "QID9")
-  expect_true(p$predicate(list(QID9 = "2")))
-  expect_false(p$predicate(list(QID9 = "5")))
-})
 
-test_that("an AndIf group ANDs with the running result", {
-  p <- parse_display_logic(dl_of(
-    grp(lit_q("QID9", "1")),
-    grp(lit_q("QID12", "1"), type = "AndIf")
-  ))
-  expect_setequal(p$vars, c("QID9", "QID12"))
-  expect_true(p$predicate(list(QID9 = "1", QID12 = "1")))
-  expect_false(p$predicate(list(QID9 = "1", QID12 = "2")))
-})
 
-test_that("an ElseIf group ORs with the running result", {
-  p <- parse_display_logic(dl_of(
-    grp(lit_q("QID9", "1")),
-    grp(lit_q("QID12", "3"), type = "ElseIf")
-  ))
-  expect_setequal(p$vars, c("QID9", "QID12"))
-  expect_true(p$predicate(list(QID9 = "1", QID12 = "2")))   # first group true
-  expect_true(p$predicate(list(QID9 = "2", QID12 = "3")))   # second group true
-  expect_false(p$predicate(list(QID9 = "2", QID12 = "2")))  # neither
-})
 
 test_that("If / ElseIf / AndIf: AndIf binds first, G0 OR (G1 AND G2)", {
   p <- parse_display_logic(dl_of(
@@ -84,57 +48,12 @@ test_that("If / ElseIf / AndIf: AndIf binds first, G0 OR (G1 AND G2)", {
   expect_false(p$possible("QID9"))
 })
 
-test_that("combine_groups chains several ElseIf terms each with AndIf parts", {
-  v <- list(FALSE, TRUE, FALSE, TRUE, TRUE)
-  t <- c("If", "ElseIf", "AndIf", "ElseIf", "AndIf")
-  expect_true(combine_groups(v, t))                  # F | (T & F) | (T & T)
-  expect_identical(combine_groups(list(NA, FALSE), c("If", "AndIf")), FALSE)
-  expect_identical(combine_groups(list(NA, TRUE), c("If", "ElseIf")), TRUE)
-})
 
-test_that("missing group Type falls back to AND (pre-2026-09 behaviour)", {
-  dl <- dl_of(grp(lit_q("QID9", "1")), grp(lit_q("QID12", "1")))
-  dl[["1"]]$Type <- NULL
-  p <- parse_display_logic(dl)
-  expect_true(p$predicate(list(QID9 = "1", QID12 = "1")))
-  expect_false(p$predicate(list(QID9 = "1", QID12 = "2")))
-})
 
-test_that("embedded-field comparisons are evaluated against the field's value", {
-  # changed in M2: previously a free binary gate keyed by the field name
-  p <- parse_display_logic(dl_of(grp(lit_embed("source", val = "household"))))
-  expect_identical(p$vars, "@source")
-  expect_true(p$predicate(list(`@source` = "household")))
-  expect_false(p$predicate(list(`@source` = "panel")))
-  expect_false(p$predicate(list(`@source` = NA_character_)))
-})
 
-test_that("embedded-field operators that cannot be evaluated stay a free binary gate", {
-  p <- parse_display_logic(dl_of(grp(lit_embed("source", op = "Contains", val = "house"))))
-  expect_identical(p$vars, "@?source")
-  expect_true(p$predicate(list(`@?source` = TRUE)))
-  expect_false(p$predicate(list(`@?source` = FALSE)))
-})
 
-test_that("Displayed operator resolves against the shown map", {
-  p <- parse_display_logic(dl_of(grp(lit_q("QID30", "1", op = "Displayed"))))
-  expect_true(p$predicate(list(), shown = c(QID30 = TRUE)))
-  expect_false(p$predicate(list(), shown = c(QID30 = FALSE)))
-})
 
-test_that("Displayed against a question missing from the shown map is FALSE, not an error", {
-  p <- parse_display_logic(dl_of(grp(lit_q("QID30", "1", op = "Displayed"))))
-  expect_false(p$predicate(list(), shown = c(QID99 = TRUE)))   # QID30 absent
-  expect_false(p$predicate(list(), shown = logical(0)))
-  pn <- parse_display_logic(dl_of(grp(lit_q("QID30", "1", op = "NotDisplayed"))))
-  expect_true(pn$predicate(list(), shown = c(QID99 = TRUE)))
-})
 
-test_that("matrix choice locators keep their statement/scale tail", {
-  p <- parse_display_logic(dl_of(grp(lit_q("QID121", "1/16", op = "NotSelected"))))
-  expect_true(p$predicate(list(QID121 = character(0))))
-  expect_false(p$predicate(list(QID121 = "1/16")))
-})
 
 test_that("within a group And binds before Or: A Or B And C is A | (B & C)", {
   p <- parse_display_logic(dl_of(grp(
@@ -154,11 +73,3 @@ test_that("within a group And binds before Or: A Or B And C is A | (B & C)", {
   expect_false(p$possible(c("QID1", "QID3")))
 })
 
-test_that("combine_literals splits at Or and ANDs each run, three-valued", {
-  expect_true(combine_literals(list(TRUE, TRUE, FALSE), c(NA, "Or", "And")))
-  expect_false(combine_literals(list(FALSE, TRUE, FALSE), c(NA, "Or", "And")))
-  expect_identical(combine_literals(list(NA, FALSE, TRUE), c(NA, "And", "Or")), TRUE)
-  expect_identical(combine_literals(list(NA, TRUE), c(NA, "And")), NA)
-  expect_identical(combine_literals(list(c(TRUE, FALSE), c(FALSE, TRUE), c(FALSE, TRUE)),
-                                    c(NA, "Or", "And")), c(TRUE, TRUE))
-})

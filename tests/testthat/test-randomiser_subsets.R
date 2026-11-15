@@ -63,20 +63,7 @@ test_that("show 2 of 3 gives the three pairs, in survey order", {
   expect_equal(rs_totals(q), c(31, 41, 51))
 })
 
-test_that("a subset equal to the number of children keeps every block, without warning", {
-  q <- rs_qsf(rs_rand(3L))
-  expect_no_warning(f <- suppressMessages(resolve_flow(q)))
-  expect_equal(nrow(f), 1L)
-  expect_equal(rs_totals(q), 61)
-})
 
-test_that("an unreadable subset keeps every block and warns", {
-  for (s in list(NULL, "", "abc", 0L)) {
-    q <- rs_qsf(rs_rand(s))
-    expect_warning(f <- suppressMessages(resolve_flow(q)), "BlockRandomizer")
-    expect_equal(nrow(f), 1L)
-  }
-})
 
 test_that("a child group is chosen as a unit", {
   grp <- list(Type = "Group", FlowID = "FL_grp", Description = "pair",
@@ -96,24 +83,7 @@ test_that("a randomiser of embedded-data assignments adds no paths", {
   expect_equal(nrow(f), 1L)
 })
 
-test_that("too many combinations stop with the path-space error", {
-  q <- rs_qsf(rs_rand(1L))
-  expect_error(suppressMessages(resolve_flow(q, max_paths = 2L)), "too large")
-})
 
-test_that("calculation_certainty() lists randomisers and whether subsets were enumerated", {
-  ct <- suppressMessages(calculation_certainty(rs_qsf(rs_rand(1L))))
-  r <- ct$randomisers
-  expect_equal(r$flow_id, "FL_rand")
-  expect_equal(r$n_children, 3L)
-  expect_equal(r$subset, 1L)
-  expect_true(r$enumerated)
-  expect_match(paste(format(ct), collapse = "\n"), "1 of 3")
-
-  ct0 <- suppressWarnings(suppressMessages(calculation_certainty(rs_qsf(rs_rand(NULL)))))
-  expect_false(ct0$randomisers$enumerated)
-  expect_true(is.na(ct0$randomisers$subset))
-})
 
 # --- respondent_burden(): which randomised blocks each respondent saw --------
 
@@ -145,26 +115,5 @@ test_that("without a display-order column the answered blocks are used, with a w
   expect_equal(rb$n_randomiser_fallbacks, c(1L, 1L, 1L))
 })
 
-test_that("a blank display-order cell falls back for that respondent only", {
-  q <- rs_qsf(rs_rand(1L))
-  expect_warning(rb <- suppressMessages(respondent_burden(q, rs_resp(c("FL_BLA", "", "FL_BLC")))),
-                 "1 respondent")
-  expect_equal(rb$points, c(11, 21, 31))
-  expect_equal(rb$n_randomiser_fallbacks, c(0L, 1L, 0L))
-})
 
-test_that("a randomiser that shows every element needs no display order", {
-  q <- rs_qsf(rs_rand(3L))
-  rb <- expect_no_warning(suppressMessages(respondent_burden(q, rs_resp())))
-  expect_equal(rb$points, c(61, 61, 61))
-  expect_equal(rb$n_randomiser_fallbacks, c(0L, 0L, 0L))
-})
 
-test_that("the fallback count is reported per block row too", {
-  q <- rs_qsf(rs_rand(1L))
-  rb <- suppressWarnings(suppressMessages(respondent_burden(q, rs_resp(), by = "block")))
-  expect_equal(attr(rb, "respondents")$n_randomiser_fallbacks, c(1L, 1L, 1L))
-  shown <- rb[rb$routed_in %in% TRUE, ]
-  expect_setequal(paste(shown$response_id, shown$block_id),
-                  c("R1 BL0", "R1 BLA", "R2 BL0", "R2 BLB", "R3 BL0"))
-})

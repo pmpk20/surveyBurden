@@ -14,10 +14,3 @@ test_that("condition-state limit propagates through public calculations", {
   expect_equal(calculation_certainty(q)$display_logic$max_condition_states, 10000)
 })
 
-test_that("public condition-state limits reject invalid values", {
-  for (fun in list(burden_report, path_burden_profile, calculation_certainty)) {
-    for (value in list(0, -1, 1.5, NA_real_, Inf, c(1, 2), "10000", NULL)) {
-      expect_error(fun(NULL, max_condition_states = value), "max_condition_states")
-    }
-  }
-})

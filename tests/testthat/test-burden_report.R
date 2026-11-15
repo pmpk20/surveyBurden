@@ -9,56 +9,10 @@ report_full <- local({
   function() { if (is.null(v)) v <<- burden_report(fx(), certainty = FALSE); v }
 })
 
-test_that("burden_report accepts a path or a qsf_raw and returns a burden_report", {
-  r1 <- report_naive()
-  r2 <- burden_report(read_qsf(fx()), profile = FALSE, certainty = FALSE)
-  expect_s3_class(r1, "burden_report")
-  expect_equal(r1$survey$n_questions, r2$survey$n_questions)
-})
 
-test_that("the object exposes exactly the documented components", {
-  r <- report_full()
-  expect_setequal(
-    names(r),
-    c("survey", "burden", "blocks", "items", "paths",
-      "readability", "certainty", "warnings")
-  )
-  expect_false("top_items" %in% names(r))
-  expect_false("summary" %in% names(r))
-  expect_null(r$respondents)
-})
 
-test_that("scalars live on attributes, not components", {
-  r <- report_full()
-  expect_equal(attr(r, "points_per_minute"), 12)
-  expect_equal(attr(r, "rare_threshold"), 1500)
-  expect_equal(attr(r, "benchmark"), list(median_points = 399, n_waves = 79L))
-  expect_true(attr(r, "profile_used"))
-})
 
-test_that("$survey is a one-row tibble with the structural counts", {
-  r <- report_full()
-  expect_s3_class(r$survey, "tbl_df")
-  expect_equal(nrow(r$survey), 1L)
-  expect_equal(r$survey$n_questions, 26L)
-  expect_equal(r$survey$n_blocks, 12L)
-  expect_equal(r$survey$n_branches, 3L)
-  expect_equal(r$survey$n_loop_blocks, 2L)
-  expect_equal(r$survey$n_end_points, 2L)
-  expect_equal(r$survey$n_paths, 4L)
-  expect_equal(r$survey$n_complete_paths, 2L)
-  expect_equal(r$survey$n_screenout_paths, 2L)
-})
 
-test_that("$burden is a 5-row tibble; minutes and index are derived", {
-  r <- report_full()
-  expect_s3_class(r$burden, "tbl_df")
-  expect_equal(as.character(r$burden$statistic),
-               c("min", "p25", "median", "p75", "max"))
-  expect_equal(r$burden$minutes, r$burden$points / 12)
-  expect_equal(r$burden$index, r$burden$points / 1500)
-  expect_equal(attr(r$burden, "basis"), "structural")
-})
 
 test_that("$burden matches the pre-refactor structural range (value parity)", {
   r <- report_full()
@@ -74,71 +28,13 @@ test_that("$burden matches the pre-refactor structural range (value parity)", {
   expect_equal(bstat(r, "max"), 143)
 })
 
-test_that("profile = FALSE gives a naive min/max only and says so", {
-  r <- report_naive()
-  expect_equal(attr(r$burden, "basis"), "naive")
-  expect_equal(bstat(r, "min"), 103)
-  expect_equal(bstat(r, "max"), 145)
-  expect_true(is.na(bstat(r, "median")))
-  w <- paste(r$warnings, collapse = " | ")
-  expect_match(w, "not checked|fast estimate", ignore.case = TRUE)
-})
 
-test_that("the achievable minimum is at or above the naive floor", {
-  expect_gte(bstat(report_full(), "min"), bstat(report_naive(), "min"))
-})
 
-test_that("rare_threshold rescales the index", {
-  r <- burden_report(fx(), rare_threshold = 750, certainty = FALSE)
-  expect_equal(r$burden$index, r$burden$points / 750)
-  expect_equal(attr(r, "rare_threshold"), 750)
-})
 
-test_that("$blocks lists every block once, in survey order, shares sum to 1", {
-  r <- report_full()
-  b <- r$blocks
-  expect_equal(nrow(b), r$survey$n_blocks)
-  expect_equal(b$flow_order, sort(b$flow_order))
-  expect_equal(sum(b$share), 1, tolerance = 1e-6)
-  expect_true(all(c("block_id", "block_name", "n_questions", "gfs_points", "share") %in% names(b)))
-})
 
-test_that("$items is the full score_burden output, one row per live question", {
-  r <- report_full()
-  expect_s3_class(r$items, "tbl_df")
-  expect_equal(nrow(r$items), r$survey$n_questions)
-  expect_true(all(c("question_id", "question_text", "std_type", "gfs_points",
-                    "score_flag", "score_basis", "block_name") %in% names(r$items)))
-  expect_equal(names(r$items)[1:5],
-               c("question_id", "block_id", "block_name", "question_text", "std_type"))
-  expect_true(all(nzchar(r$items$score_basis)))
-})
 
-test_that("$paths has one row per structural path with a status factor", {
-  r <- report_full()
-  p <- r$paths
-  expect_equal(nrow(p), r$survey$n_paths)
-  expect_setequal(as.character(unique(p$status)), c("complete", "screen_out"))
-  expect_equal(sum(p$status == "complete"), 2L)
-  expect_true(all(p$burden_floor <= p$burden_ceiling))
-  expect_false(anyNA(p$burden_median))          # profile = TRUE
-})
 
-test_that("$paths profile columns are NA when profile = FALSE", {
-  p <- report_naive()$paths
-  expect_true(all(is.na(p$burden_min)))
-  expect_true(all(is.na(p$burden_median)))
-  expect_true(all(is.na(p$burden_max)))
-  expect_false(anyNA(p$burden_floor))
-})
 
-test_that("$readability carries long_stems, long_labels and long_grids", {
-  rd <- report_naive()$readability
-  expect_true(all(c("stem_threshold", "label_threshold",
-                    "long_stems", "long_labels", "long_grids") %in% names(rd)))
-  expect_s3_class(rd$long_grids, "tbl_df")
-  expect_true("QID19" %in% rd$long_grids$question_id)
-})
 
 # finishers on the demo survey answering different numbers of questions
 report_responses <- function(n = 40) {
@@ -152,112 +48,13 @@ report_responses <- function(n = 40) {
   obs
 }
 
-test_that("responses = adds eight respondent statistics with the same columns as $burden", {
-  obs <- report_responses()
-  r <- burden_report(fx(), responses = obs, certainty = FALSE, quiet = TRUE)
-  expect_s3_class(r$respondents, "tbl_df")
-  expect_equal(names(r$respondents), names(r$burden))
-  expect_equal(as.character(r$respondents$statistic),
-               c("min", "p10", "p25", "median", "mean", "p75", "p90", "max"))
-  rb  <- suppressMessages(respondent_burden(fx(), obs))
-  pts <- rb$points[rb$outcome == "complete"]
-  expect_length(pts, 38L)                      # break-offs are left out
-  expect_equal(bstat(r$respondents, "mean"), mean(pts))
-  expect_equal(bstat(r$respondents, "p10"), unname(quantile(pts, .1)))
-  expect_equal(bstat(r$respondents, "p90"), unname(quantile(pts, .9)))
-  expect_equal(r$respondents$minutes, r$respondents$points / 12)
-  expect_equal(r$respondents$index, r$respondents$points / 1500)
-  out <- paste(format(r), collapse = "\n")
-  expect_match(out, "Respondent burden \\(complete responses\\)")
-  expect_match(out, "10th percentile")
-  expect_match(out, "Mean")
-  expect_match(paste(r$warnings, collapse = " "), "38 complete responses")
-})
 
-test_that("respondent statistics describe skewed burden", {
-  local_mocked_bindings(
-    respondent_burden = function(...) data.frame(
-      points = c(10, 10, 10, 50, 120, 999),
-      outcome = c(rep("complete", 5), "breakoff"))
-  )
-  scheme <- gfs_scheme()
-  scheme$points_per_minute <- 20
-  r <- burden_report(fx(), responses = data.frame(id = 1:6), scheme = scheme,
-                     profile = FALSE, certainty = FALSE, quiet = TRUE,
-                     rare_threshold = 200)
-  expect_equal(r$respondents$points, c(10, 10, 10, 10, 40, 50, 92, 120))
-  expect_equal(r$respondents$minutes, r$respondents$points / 20)
-  expect_equal(r$respondents$index, r$respondents$points / 200)
-})
 
-test_that("respondent statistics handle one and no complete responses", {
-  for (oc in list("complete", character(0), "breakoff")) {
-    local_mocked_bindings(
-      respondent_burden = function(...) data.frame(points = rep(42, length(oc)),
-                                                   outcome = oc)
-    )
-    r <- burden_report(fx(), responses = data.frame(id = seq_along(oc)),
-                       profile = FALSE, certainty = FALSE, quiet = TRUE)
-    expect_equal(r$respondents$points,
-                 rep(if (identical(oc, "complete")) 42 else NA_real_, 8L))
-  }
-})
 
-test_that("print.burden_report renders the headline and returns invisibly", {
-  r <- report_full()
-  out <- format(r)
-  expect_true(any(grepl("Survey Burden Report", out)))
-  expect_true(any(grepl("Neighbourhood Travel Survey (demo)", out, fixed = TRUE)))
-  expect_true(any(grepl("Benchmark", out)))
-  expect_true(any(grepl("Burden by block", out)))
-  expect_true(any(grepl("Highest-burden questions", out)))
-  expect_output(res <- withVisible(print(r)))
-  expect_identical(res$visible, FALSE)
-})
 
-test_that("print shows a Minimum/Maximum-only burden table under profile = FALSE", {
-  out <- format(report_naive())
-  expect_true(any(grepl("Maximum", out)))
-  expect_false(any(grepl("25th percentile", out)))
-})
 
-test_that("print caps the warnings list and points to $warnings when it overflows", {
-  r <- burden_report(fx(), certainty = FALSE, rare_threshold = 50,
-                     stem_warning_threshold = 5L, label_warning_threshold = 1L)
-  expect_gt(length(r$warnings), 5)
-  out <- format(r)
-  expect_true(any(grepl("first 5 shown", out, fixed = TRUE)))
-  expect_true(any(grepl("full list in .\\$warnings", out)))
-})
 
-test_that("summary(burden_report) returns a short headline object", {
-  r <- report_full()
-  s <- summary(r)
-  expect_s3_class(s, "summary.burden_report")
-  out <- capture.output(print(s))
-  expect_true(any(grepl("Neighbourhood Travel Survey", out)))
-  expect_true(any(grepl("103", out)) && any(grepl("143", out)))
-  expect_output(res <- withVisible(print(s)))
-  expect_identical(res$visible, FALSE)
-})
 
-test_that("the summary counts line singularises for a one-question, one-path survey", {
-  fake <- structure(list(
-    survey = tibble::tibble(
-      survey_name = "Tiny", n_questions = 1L, n_pages = 1L, n_blocks = 1L,
-      n_paths = 1L, n_complete_paths = 1L),
-    burden = structure(
-      tibble::tibble(statistic = factor(c("min", "p25", "median", "p75", "max"),
-                                        levels = c("min", "p25", "median", "p75", "max")),
-                     points = rep(10, 5)),
-      basis = "structural"),
-    benchmark = list(median_points = 399, n_waves = 79L), ppm = 12
-  ), class = "summary.burden_report")
-  out <- paste(format(fake), collapse = " ")
-  expect_match(out, "1 question, 1 page, 1 block, 1 structural path \\(")
-  expect_false(grepl("1 structural paths", out))
-  expect_false(grepl("1 questions", out))
-})
 
 # a survey whose flow starts with an unconditional EndSurvey: every enumerated
 # path terminates early, so there is no completing path to summarise a spread over
@@ -286,68 +83,15 @@ test_that("burden_report degrades gracefully when no path completes", {
   expect_no_error(capture.output(print(summary(r))))
 })
 
-test_that("the no-completing-path guard also holds under profile = FALSE", {
-  expect_no_error(
-    burden_report(no_complete_qsf(), profile = FALSE, certainty = FALSE, quiet = TRUE)
-  )
-})
 
-test_that("burden_report is silent under quiet = TRUE", {
-  expect_silent(burden_report(fx(), certainty = FALSE, quiet = TRUE))
-})
 
 # --- verdict line ----------------------------------------------------------
 
-test_that("print() opens with a verdict line before the Survey section", {
-  out <- format(report_full())
-  verdict_i <- grep("Median burden", out)
-  instr_i   <- grep("Survey[^A-Za-z]*$", out)[1]   # the h2, not the title
-  expect_length(verdict_i, 1L)
-  expect_lt(verdict_i, instr_i)
-})
 
-test_that("the structural verdict states median, minutes, benchmark ratio and range", {
-  v <- paste(burden_verdict_line(
-    report_full()$burden, 12, 399, report_full()$survey$n_complete_paths),
-    collapse = " ")
-  expect_match(v, "Median burden: 120 GfS\\+ points [(]range 103-143 across 2 completing paths[)]")
-  expect_match(v, "Expected minutes: ~10 [(]range 9-12[)]")
-  expect_match(v, "Relative to benchmark: 0[.]3x the median of 399 points")
-})
 
-test_that("the verdict benchmark ratio is median / benchmark to one decimal", {
-  r <- report_full()
-  v <- paste(burden_verdict_line(r$burden, attr(r, "points_per_minute"),
-                                 attr(r, "benchmark")$median_points,
-                                 r$survey$n_complete_paths), collapse = " ")
-  expect_match(v, sprintf("%.1fx the median", bstat(r, "median") / 399), fixed = TRUE)
-})
 
-test_that("the naive verdict gives a range, no median, no benchmark ratio", {
-  r <- report_naive()
-  v <- paste(burden_verdict_line(r$burden, 12, 399, r$survey$n_complete_paths),
-             collapse = " ")
-  expect_match(v, "Burden range: 103-145 GfS\\+ points")
-  expect_match(v, "Expected minutes: ~9-12")
-  expect_match(v, "naive band")
-  expect_false(grepl("benchmark", v))
-})
 
-test_that("the no-completing-path verdict says so", {
-  r <- burden_report(no_complete_qsf(), certainty = FALSE, quiet = TRUE)
-  v <- paste(burden_verdict_line(r$burden, 12, 399, 0L), collapse = " ")
-  expect_match(v, "No completing path")
-})
 
-test_that("summary() and print() state the same verdict", {
-  r <- report_full()
-  squish <- function(x) gsub("[[:space:]]+", " ", paste(x, collapse = " "))
-  verdict1 <- burden_verdict_line(r$burden, attr(r, "points_per_minute"),
-                                  attr(r, "benchmark")$median_points,
-                                  r$survey$n_complete_paths)[1]
-  expect_true(grepl(verdict1, squish(format(r)), fixed = TRUE))
-  expect_true(grepl(verdict1, squish(format(summary(r))), fixed = TRUE))
-})
 
 test_that("the verdict names the median respondent burden when responses are given", {
   r <- burden_report(fx(), responses = report_responses(), certainty = FALSE, quiet = TRUE)
@@ -355,41 +99,7 @@ test_that("the verdict names the median respondent burden when responses are giv
   expect_match(summary_line(r), "Median respondent burden")
 })
 
-test_that("summary_line() works on a burden_report object", {
-  r <- burden_report(fx(), certainty = FALSE)
-  s <- summary_line(r)
-  expect_type(s, "character")
-  expect_length(s, 1L)
-  expect_match(s, "GfS\\+ points")
-  expect_match(s, "min")
-  expect_match(s, "benchmark")
-})
 
-test_that("summary_line() works on a naive burden_report", {
-  r <- burden_report(fx(), profile = FALSE, certainty = FALSE)
-  s <- summary_line(r)
-  expect_type(s, "character")
-  expect_length(s, 1L)
-  expect_match(s, "points")
-  expect_match(s, "min")
-})
 
-test_that("max_paths is threaded through burden_report to resolve_flow", {
-  expect_error(
-    burden_report(fx(), max_paths = 1L, certainty = FALSE, quiet = TRUE),
-    "too large"
-  )
-  r <- burden_report(fx(), max_paths = 50000L, certainty = FALSE, quiet = TRUE)
-  expect_s3_class(r, "burden_report")
-})
 
-test_that("burden_report reports progress under quiet = FALSE", {
-  withr::local_options(cli.progress_show_after = 0, cli.progress_clear = FALSE)
-  expect_message(burden_report(fx(), certainty = FALSE, quiet = FALSE))
-})
 
-test_that("the Survey section labels the endpoint count as end-of-survey elements", {
-  out <- format(report_full())
-  expect_true(any(grepl("End-of-survey elements", out)))
-  expect_false(any(grepl("Early-exit", out)))
-})

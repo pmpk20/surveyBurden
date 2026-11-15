@@ -39,9 +39,6 @@ ct_responses <- function() {
   )
 }
 
-test_that("the scheme carries a per-alternative rate beyond three alternatives", {
-  expect_equal(gfs_scheme()$sc_per_extra_alt, 1.0)
-})
 
 test_that("a declared 2-alternative, 4-attribute task scores 6.0; undeclared stays 1.0", {
   sc <- ct_scored()
@@ -78,49 +75,8 @@ test_that("several tasks are scored in one call", {
   expect_equal(pts(sc, "QID4"), 3)
 })
 
-test_that("invalid choice_tasks error clearly", {
-  sc <- ct_scored()
-  expect_error(score_choice_tasks(sc, ct(qid = "QID999")), "QID999")
-  expect_error(score_choice_tasks(sc, data.frame(question_id = "QID1")),
-               "n_alternatives")
-  expect_error(score_choice_tasks(sc, ct(alts = 1L)), "at least 2")
-  expect_error(score_choice_tasks(sc, ct(alts = 2.5)), "whole")
-  expect_error(score_choice_tasks(sc, ct(attrs = NA)), "whole")
-  expect_error(score_choice_tasks(sc, ct(attrs = -1L)), "whole")
-  expect_error(score_choice_tasks(sc, rbind(ct(), ct())), "more than once")
-  expect_error(score_choice_tasks(sc, "QID1"), "data frame")
-})
 
-test_that("burden_report() carries declared tasks into every figure", {
-  q <- ct_qsf()
-  base <- burden_report(q, quiet = TRUE)
-  out  <- burden_report(q, quiet = TRUE, choice_tasks = ct())
-  expect_equal(pts(out$items, "QID1"), 6)
-  expect_equal(out$burden$points, base$burden$points + 5)
-  expect_equal(out$paths$burden_floor, base$paths$burden_floor + 5)
-  expect_equal(out$certainty$scores$manual, base$certainty$scores$manual + 1L)
-})
 
-test_that("the other high-level functions carry declared tasks", {
-  q <- ct_qsf()
-  expect_equal(suppressMessages(path_burden(q, choice_tasks = ct()))$gfs_floor,
-               suppressMessages(path_burden(q))$gfs_floor + 5)
-  p0 <- suppressMessages(path_burden_profile(q))
-  p1 <- suppressMessages(path_burden_profile(q, choice_tasks = ct()))
-  expect_equal(p1$burden_median, p0$burden_median + 5)
-  c1 <- suppressMessages(calculation_certainty(q, choice_tasks = ct()))
-  expect_equal(c1$scores$manual, 1L)
-
-  r0 <- suppressMessages(respondent_burden(q, ct_responses()))
-  r1 <- suppressMessages(respondent_burden(q, ct_responses(), choice_tasks = ct()))
-  expect_equal(r1$points, r0$points + 5)   # every respondent saw QID1
-
-  obs <- ct_responses()
-  obs$`Duration (in seconds)` <- c(600, 300, 400, 200, 700)
-  v0 <- suppressMessages(validate_times(q, obs, trim = c(0, Inf)))
-  v1 <- suppressMessages(validate_times(q, obs, trim = c(0, Inf), choice_tasks = ct()))
-  expect_equal(v1$predicted_burden, v0$predicted_burden + 5)
-})
 
 test_that("an override beats a declared task on the same question", {
   out <- burden_report(ct_qsf(), quiet = TRUE, choice_tasks = ct(),

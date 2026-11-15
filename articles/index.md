@@ -16,5 +16,5 @@
   data](https://pmpk20.github.io/surveyBurden/articles/respondent-burden.md):
 - [Calibration and
   limitations](https://pmpk20.github.io/surveyBurden/articles/calibration.md):
-- [Extensions: scoring surveys without a
-  QSF](https://pmpk20.github.io/surveyBurden/articles/extensions.md):
+- [Extensions: scoring surveys from other
+  platforms](https://pmpk20.github.io/surveyBurden/articles/extensions.md):

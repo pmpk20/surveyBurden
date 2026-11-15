@@ -1,14 +1,14 @@
-# Extensions: scoring surveys without a QSF
+# Extensions: scoring surveys from other platforms
 
-**What this answers.** What you can do with a survey not built in
-Qualtrics, and what full support for another platform would take.
+**What this answers.** What you can do with a survey built on another
+platform, and what full support for that platform would take.
 
 **What you need.** A question catalogue describing your survey (schema
 below).
 
-**What it cannot establish.** Without routing and display-logic
-information, a catalogue gives per-question scores and a single-pass
-total, not a burden range or profile.
+**What to keep in mind.** A catalogue on its own gives per-question
+scores and a total for one pass through the survey. A burden range needs
+routing information, and a profile needs display logic.
 
 ``` r
 
@@ -27,11 +27,11 @@ library(surveyBurden)
 #> Use citation("surveyBurden") for BibTeX.
 ```
 
-surveyBurden reads Qualtrics `.qsf` files, but many surveys are built on
-other platforms (LimeSurvey, SurveyEngine, REDCap, and so on). This
-vignette documents where the Qualtrics-specific code ends, what you can
-already do with a survey from another platform, and what supporting a
-new platform fully would take.
+surveyBurden reads Qualtrics `.qsf` files, and many surveys are built on
+other platforms (LimeSurvey, SurveyEngine, REDCap and others). This
+article shows where the Qualtrics-specific code ends, what you can
+already do with a survey from another platform, and what full support
+for a new platform would take.
 
 In short:
 
@@ -39,11 +39,11 @@ In short:
 |----|----|----|
 | **Working now** | Per-question GfS+ scores and a survey total for any survey you can describe as a list of questions | [`validate_catalogue()`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md) then [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md) |
 | **Requires an adapter** | A floor/ceiling burden band per path | build a paths table yourself, then `path_burden(NULL, paths = , scored = )` |
-| **Future interface work** | Display-logic profiles, [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md), respondent burden, calculation certainty | these currently need a Qualtrics `qsf_raw` object |
+| **Future interface work** | Display-logic profiles, [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md), respondent burden, calculation certainty | these currently take a Qualtrics `qsf_raw` object |
 
 ## Three-layer architecture
 
-The package has three layers:
+The package has three layers.
 
     Layer 1:  Parser          (platform-specific)
               read_qsf() / fetch_qsf() → parse_qsf()
@@ -57,7 +57,7 @@ The package has three layers:
               score_burden() → path_burden() → burden_report()
 
 **Layer 1** reads a Qualtrics survey and produces a standardised
-*question catalogue*: a tibble with one row per live question, in flow
+*question catalogue*, a tibble with one row per live question, in flow
 order, with the structural fields the scorer needs. This is the
 intermediate representation.
 
@@ -68,8 +68,8 @@ the structural paths the flow allows. This layer reads the QSF’s
 Qualtrics-specific.
 
 **Layer 3** applies the GfS+ points to the catalogue, computes per-path
-burden bands and profiles, and assembles the report. Only part of it is
-independent of the QSF:
+burden bands and profiles, and assembles the report. Part of it works
+without the QSF.
 [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
 needs just the catalogue, and
 [`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md)
@@ -87,8 +87,8 @@ The catalogue is a tibble produced by
 one row per live question. Any parser that produces this schema can use
 [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
 directly. The functions further down the pipeline need more than the
-catalogue; see [What a new parser must
-provide](#what-a-new-parser-must-provide).
+catalogue, as [What a new parser must
+provide](#what-a-new-parser-must-provide) explains.
 
 ### Required columns
 
@@ -115,10 +115,10 @@ provide](#what-a-new-parser-must-provide).
 | `has_display_logic` | logical | Whether the question is conditionally shown |
 | `has_validation` | logical | Whether a response is forced |
 | `in_loop` | logical | Whether the question is inside a loop block |
-| `loop_max` | integer | Maximum loop iterations (`NA` if not in loop) |
+| `loop_max` | integer | Maximum loop iterations (`NA` outside a loop) |
 | `flag` | character | Confidence: `"auto"`, `"inferred"`, `"manual"`, `"unknown"` |
 
-### Provenance columns (not used by the scorer)
+### Provenance columns (kept for reference)
 
 | Column           | Type      | Description                          |
 |------------------|-----------|--------------------------------------|
@@ -129,14 +129,13 @@ provide](#what-a-new-parser-must-provide).
 | `block_id`       | character | Block identifier                     |
 | `block_name`     | character | Block description                    |
 
-The `qualtrics_type`, `selector`, and `subselector` columns are carried
-for debugging and provenance. The scorer does not read them; it uses
-`std_type` and the boolean columns (`is_dropdown`, `is_multiline`,
-`is_multi_answer`) instead.
+The `qualtrics_type`, `selector` and `subselector` columns are carried
+for debugging and provenance. The scorer reads `std_type` and the
+logical columns (`is_dropdown`, `is_multiline`, `is_multi_answer`).
 
 ### Standardised question types
 
-The `std_type` column uses the following vocabulary:
+The `std_type` column uses the following vocabulary.
 
 | `std_type` | Description | GfS+ scoring |
 |----|----|----|
@@ -148,19 +147,19 @@ The `std_type` column uses the following vocabulary:
 | `ranking` | Drag-and-drop or number ranking | Fixed |
 | `constant_sum` | Allocate a total across categories | As numeric answer |
 | `descriptive` | Instruction or transition text (no input) | By word count |
-| `timing` | Page-timing metadata (not shown) | 0 points |
-| `meta` | Browser/metadata capture (not shown) | 0 points |
+| `timing` | Page-timing metadata (hidden) | 0 points |
+| `meta` | Browser/metadata capture (hidden) | 0 points |
 | `captcha` | Bot-detection challenge | Fixed |
 
 A new parser maps its platform’s question types into this vocabulary.
-The mapping need not be one-to-one: several Qualtrics types map to
+The mapping can be many-to-one. Several Qualtrics types map to
 `single_choice`, for example.
 
 ## Validating a hand-built catalogue
 
 [`validate_catalogue()`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md)
 checks that a data frame has the columns the scorer needs, fills missing
-optional columns with safe defaults, and coerces the result to a tibble:
+optional columns with safe defaults, and coerces the result to a tibble.
 
 ``` r
 
@@ -193,8 +192,8 @@ names(validated)
 
 This example constructs a five-question catalogue by hand and runs it
 through
-[`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md).
-No QSF file is involved.
+[`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md),
+with no QSF file.
 
 ``` r
 
@@ -230,15 +229,14 @@ scored[, c("question_id", "std_type", "gfs_points",
 #> 5 Q5          descriptive            2 auto       transition/instruction text: …
 ```
 
-The function score_burden operates entirely on the question catalogue so
-that it does not know or care that these questions came from a
-hand-built data frame rather than a Qualtrics `.qsf`.
+[`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
+works entirely on the question catalogue, so it scores a hand-built data
+frame exactly as it scores a catalogue parsed from a Qualtrics `.qsf`.
 
 ### Survey-level burden
 
-If using the validate_catalogue approach to calculate the burden of a
-non-Qualtrics survey, you could sum the per-question scores for the
-survey-level total:
+For a survey scored this way, sum the per-question scores for the
+survey-level total.
 
 ``` r
 
@@ -249,17 +247,16 @@ cat(sprintf("Total: %.0f GfS+ points, ~%.0f minutes\n",
 #> Total: 43 GfS+ points, ~4 minutes
 ```
 
-This is the burden of one path that shows every question once. For a
-survey with conditional questions it is an upper bound on a single pass
-– the burden a respondent would face if every question were shown – but
-not if questions repeat in a loop: multiply looped questions by their
-iteration count yourself.
+This is the burden of one pass that shows every question once. For a
+survey with conditional questions, it is the burden a respondent would
+face if every question were shown. If questions repeat in a loop,
+multiply the looped questions by their iteration count yourself.
 
-### What this gives you and what it does not
+### What a hand-built catalogue gives you
 
 A hand-built catalogue scored with
 [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
-gives you:
+gives you
 
 - Per-question GfS+ burden points, using the same scoring rules as
   [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md).
@@ -268,20 +265,21 @@ gives you:
 - A per-question confidence flag (`score_flag`) saying how the score was
   reached.
 
-It does **not** give you:
+Three further outputs need more input.
 
-- A burden *range* across branching paths – that requires a paths table
-  (see the adapter below).
-- A display-logic profile – the structural min/median/max within a path.
-  That currently requires a Qualtrics survey.
-- Respondent burden –
+- A burden *range* across branching paths needs a paths table (see the
+  adapter below).
+- A display-logic profile, the structural minimum, median and maximum
+  within a path, currently needs a Qualtrics survey.
+- Respondent burden from
   [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
-  currently requires a Qualtrics survey as well as response data.
+  currently needs a Qualtrics survey as well as response data.
 
-The total from a hand-built catalogue is a defensible measure of survey
-burden for any survey that can be expressed as a list of questions with
-their types and option counts. It applies the same published GfS+ point
-scheme (Heimgartner and Axhausen, 2024) as the full Qualtrics pipeline.
+The total from a hand-built catalogue is a defensible measure of
+objective burden for any survey that can be written as a list of
+questions with their types and option counts. It applies the same GfS+
+point scheme, based on Heimgartner and Axhausen (2024), as the full
+Qualtrics pipeline.
 
 ## What a new parser must provide
 
@@ -291,17 +289,17 @@ A data frame matching the schema above, passed through
 [`validate_catalogue()`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md).
 This is all
 [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
-needs: per-question scores and a survey total work immediately, as in
+needs, so per-question scores and a survey total work immediately, as in
 the worked example.
 
 ### Requires an adapter: a paths table
 
 [`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md)
-gives a floor/ceiling band per path without a QSF if you pass it the
-scored catalogue and a paths table with one row per path: `path_id`,
-`terminates_early`, `block_ids` (list), `q_always` (list of question ids
-always shown on that path), `q_maybe` (list of question ids that may be
-shown) and `n_gates`.
+gives a floor and ceiling for each path from the scored catalogue and a
+paths table, with no QSF. The paths table has one row per path with the
+columns `path_id`, `terminates_early`, `block_ids` (list), `q_always`
+(list of question ids always shown on that path), `q_maybe` (list of
+question ids that may be shown) and `n_gates`.
 
 ``` r
 
@@ -322,66 +320,64 @@ path_burden(NULL, paths = paths, scored = scored)[,
 #> 2       2        41          43
 ```
 
-Building that table is the adapter’s job: enumerating the platform’s
-paths and deciding, for each, which questions are always or maybe shown.
-Loop multiplication in the ceiling uses the catalogue’s `loop_max`.
+Building that table is the adapter’s job. It enumerates the platform’s
+paths and decides, for each, which questions are always shown and which
+may be shown. Loop multiplication in the ceiling uses the catalogue’s
+`loop_max`.
 
 ### Future interface work: routing and display logic
 
-Everything beyond the band –
-[`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md),
+Everything beyond the floor and ceiling
+([`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md),
 [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md),
 [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
 and
-[`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md)
-– currently takes a `qsf_raw` object and reads its `SurveyFlow`, block
-and `DisplayLogic` elements directly. Supporting another platform there
-needs one of:
+[`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md))
+currently takes a `qsf_raw` object and reads its `SurveyFlow`, block and
+`DisplayLogic` elements directly. Supporting another platform there
+needs one of two routes.
 
-- **Translation**: convert the platform’s survey into a `qsf_raw`-shaped
-  object – flow nodes (`Standard`, `Branch`, `EndSurvey`,
+- **Translation.** Convert the platform’s survey into a `qsf_raw`-shaped
+  object, with flow nodes (`Standard`, `Branch`, `EndSurvey`,
   `BlockRandomizer`, `Group`, `EmbeddedData`), block definitions, and
   question payloads with Qualtrics-format `DisplayLogic` trees. This
-  works with the current code but is a substantial mapping.
-- **A platform-neutral interface** (not yet built): letting these
-  functions accept a catalogue, a paths table and parsed display-logic
-  predicates in place of `qsf_raw`.
+  works with the current code and is a substantial mapping.
+- **A platform-neutral interface** (planned). These functions would
+  accept a catalogue, a paths table and parsed display-logic predicates
+  in place of `qsf_raw`.
 
-Setting `has_display_logic = FALSE` for every question does **not** skip
-the display-logic profile: it tells the package the question is always
-shown, so conditional questions count on every path and burden is
-overstated. It removes conditionality from the model rather than
-modelling it.
+Setting `has_display_logic = FALSE` for every question tells the package
+that every question is always shown. Conditional questions then count on
+every path, which overstates burden.
 
 ## Where platform-specific code lives
 
 | Function | Layer | Platform-specific? |
 |----|----|----|
-| [`read_qsf()`](https://pmpk20.github.io/surveyBurden/reference/read_qsf.md) / [`fetch_qsf()`](https://pmpk20.github.io/surveyBurden/reference/fetch_qsf.md) | 1 | Yes – reads QSF format |
-| [`classify_question()`](https://pmpk20.github.io/surveyBurden/reference/classify_question.md) | 1 | Yes – maps Qualtrics type codes |
-| [`parse_qsf()`](https://pmpk20.github.io/surveyBurden/reference/parse_qsf.md) | 1 | Yes – orchestrates QSF parsing |
-| [`resolve_live_blocks()`](https://pmpk20.github.io/surveyBurden/reference/resolve_live_blocks.md) | 1-2 | Yes – reads QSF block definitions |
-| [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md) | 2 | Yes – walks QSF `SurveyFlow` nodes |
-| `parse_display_logic()` | 2 | Yes – reads QSF `DisplayLogic` trees |
-| [`validate_catalogue()`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md) | boundary | No – validates the intermediate representation |
-| [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md) | 3 | No – operates on the catalogue |
-| [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md) | 3 | No – scoring parameters |
-| [`classify_reachability()`](https://pmpk20.github.io/surveyBurden/reference/classify_reachability.md) | 2-3 | Partly – catalogue fields, but ruling questions out needs Qualtrics-format `DisplayLogic` trees |
+| [`read_qsf()`](https://pmpk20.github.io/surveyBurden/reference/read_qsf.md) / [`fetch_qsf()`](https://pmpk20.github.io/surveyBurden/reference/fetch_qsf.md) | 1 | Yes, reads QSF format |
+| [`classify_question()`](https://pmpk20.github.io/surveyBurden/reference/classify_question.md) | 1 | Yes, maps Qualtrics type codes |
+| [`parse_qsf()`](https://pmpk20.github.io/surveyBurden/reference/parse_qsf.md) | 1 | Yes, orchestrates QSF parsing |
+| [`resolve_live_blocks()`](https://pmpk20.github.io/surveyBurden/reference/resolve_live_blocks.md) | 1-2 | Yes, reads QSF block definitions |
+| [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md) | 2 | Yes, walks QSF `SurveyFlow` nodes |
+| `parse_display_logic()` | 2 | Yes, reads QSF `DisplayLogic` trees |
+| [`validate_catalogue()`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md) | boundary | No, validates the intermediate representation |
+| [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md) | 3 | No, works on the catalogue |
+| [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md) | 3 | No, scoring parameters |
+| [`classify_reachability()`](https://pmpk20.github.io/surveyBurden/reference/classify_reachability.md) | 2-3 | Partly. It uses catalogue fields, and ruling questions out needs Qualtrics-format `DisplayLogic` trees |
 | [`path_burden()`](https://pmpk20.github.io/surveyBurden/reference/path_burden.md) | 3 | No, given a paths table and the scored catalogue |
-| [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md) | 3 | Yes, at present – its engine reads blocks and display logic from `qsf_raw` |
-| [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md), [`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md) | 3 | Yes, at present – take `qsf_raw` |
-| [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md) | 3 | Orchestrator – takes `qsf_raw` and threads it through Layers 1-2 |
+| [`path_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_profile.md) | 3 | Yes at present, because its engine reads blocks and display logic from `qsf_raw` |
+| [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md), [`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md) | 3 | Yes at present, both take `qsf_raw` |
+| [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md) | 3 | Orchestrator, takes `qsf_raw` and passes it through Layers 1-2 |
 
 The boundary between platform-specific and platform-agnostic code
 currently sits at the question catalogue for scoring, and at a paths
-table for the floor/ceiling band. Everything else still reads the QSF.
+table for the floor and ceiling. Everything else reads the QSF.
 
 ## Design rationale
 
-surveyBurden is a Qualtrics-first tool and does not claim to be
-platform-agnostic. The scoring rules are already separate from the
-parser, so scoring another platform’s survey needs only a catalogue.
-Full support would additionally need:
+surveyBurden is a Qualtrics-first tool. The scoring rules are already
+separate from the parser, so scoring another platform’s survey needs
+only a catalogue. Full support would also need the following.
 
 1.  A parser that produces the question catalogue (the main work).
 2.  Routing: either translation into Qualtrics flow nodes, or the
@@ -389,7 +385,7 @@ Full support would additionally need:
 3.  Display logic, likewise, if the platform has per-question visibility
     conditions.
 
-For a platform with no branching, loops or conditional questions, the
+For a survey that shows every respondent the same questions once, the
 catalogue and
 [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
 already give the full answer.
@@ -397,6 +393,6 @@ already give the full answer.
 ## Next
 
 - [`vignette("gfs-scoring")`](https://pmpk20.github.io/surveyBurden/articles/gfs-scoring.md)
-  – the scoring rules the catalogue feeds.
+  gives the scoring rules the catalogue feeds.
 - [`?validate_catalogue`](https://pmpk20.github.io/surveyBurden/reference/validate_catalogue.md)
-  – the catalogue checks and defaults.
+  lists the catalogue checks and defaults.

@@ -3,18 +3,17 @@
 **What this answers.** How one question becomes a GfS+ point score, and
 which rule applies to each question type.
 
-**What you need.** A `.qsf` (or a question catalogue, see
+**What you need.** A `.qsf`, or a question catalogue (see
 [`vignette("extensions")`](https://pmpk20.github.io/surveyBurden/articles/extensions.md)).
 
-**What it cannot establish.** Scores are per question and per loop
-iteration; routing is applied later. The rules map questions onto the
-published scheme; they are not measurements of effort, and some Table 1
-weights are not applied automatically.
+**What to keep in mind.** Scores are per question and per loop
+iteration, and routing is applied later. The rules map each question
+onto the published scheme, which weighs response tasks by type and
+complexity. A few Table 1 weights apply only when you set them by hand.
 
-This article covers how one Qualtrics question becomes a GfS+ point
-score. For how those scores are combined across the survey’s paths see
-[`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md);
-for reading the finished report see
+For how scores combine across the survey’s paths see
+[`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md).
+For reading the finished report see
 [`vignette("reading-the-report")`](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md).
 
 ``` r
@@ -37,12 +36,23 @@ qsf <- read_qsf(demo)
 catalogue <- parse_qsf(qsf)
 ```
 
-surveyBurden implements and extends the published GfS scheme
-(Heimgartner and Axhausen 2024, Table 1). The original point weights are
-transcribed verbatim into
-[`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md);
-the package adds documented inference rules for Qualtrics question types
-that have no row in the original table, hence GfS+.
+## Where the scheme comes from
+
+GfS stands for Gesellschaft für Sozialforschung (Society for Social
+Research), a Zürich organisation that used a point system to budget
+face-to-face interviews. Axhausen and colleagues adapted it to
+self-administered surveys. Each question earns points by its type and
+complexity, and the points are added up, so longer or more complex
+surveys score higher (Schmid and Axhausen 2019). The survey literature
+calls this kind of measure objective burden, the work a survey asks of
+respondents measured from the questions themselves (Yan and Williams
+2022).
+
+surveyBurden transcribes the current table (Heimgartner and Axhausen
+2024, Table 1) verbatim into
+[`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md).
+It adds documented rules for Qualtrics question types that the table
+lacks, hence GfS+.
 
 ``` r
 
@@ -65,22 +75,21 @@ A few of the Table 1 weights, in points per response action:
 | rating scale, up to 5 options | 2 |
 | rating scale, more than 5 options | 3 |
 | first answer to an open question | 6 |
-| two-alternative stated-choice task | 2, plus 1 per attribute (declared tasks only – see below) |
+| two-alternative stated-choice task | 2, plus 1 per attribute (declared tasks only, see below) |
 
-The full table is in Heimgartner and Axhausen (2024); it is not
-reproduced here.
+Heimgartner and Axhausen (2024) give the full table.
 [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)
-transcribes every Table 1 weight, but the automatic scorer does not use
-all of them – see [What the automatic scorer
-applies](#what-the-automatic-scorer-applies).
+holds every Table 1 weight, and the automatic scorer uses most of them.
+[What the automatic scorer applies](#what-the-automatic-scorer-applies)
+lists which.
 
 ## Classification first
 
 [`classify_question()`](https://pmpk20.github.io/surveyBurden/reference/classify_question.md)
-maps each Qualtrics widget to a standard question type. The Qualtrics
-type alone is not enough: one `MC` widget can be a yes/no item, a rating
-scale, a dropdown, or a multi-select, depending on its selector and
-options.
+maps each Qualtrics widget to a standard question type. It reads the
+widget’s selector and options as well as its type, because one `MC`
+widget can be a yes/no item, a rating scale, a dropdown or a
+multi-select.
 
 ``` r
 
@@ -93,20 +102,20 @@ table(catalogue$std_type)
 ## Three layers
 
 [`score_burden()`](https://pmpk20.github.io/surveyBurden/reference/score_burden.md)
-then works in three layers:
+then works in three layers.
 
-1.  what Qualtrics says the widget is (for example `MC` with a dropdown
-    selector);
-2.  what response action that implies (choose one value from an ordered
-    list);
-3.  which Table 1 category best represents that action (a rating).
+1.  What Qualtrics says the widget is (for example `MC` with a dropdown
+    selector).
+2.  What response action that implies (choose one value from an ordered
+    list).
+3.  Which Table 1 category best represents that action (a rating).
 
-Where step 3 is fixed by the structure – a two-option choice is a closed
-yes/no item whatever it asks – the mapping is deterministic and the
-score is marked `auto`. Where the `.qsf` does not carry what the scheme
-needs, the package applies an **explicit, documented inference rule**
-and marks the item `inferred`. Every scored question carries a
-`score_basis` string recording the rule applied.
+Where the structure fixes step 3 (a two-option choice is a closed yes/no
+item whatever it asks), the mapping is deterministic and the score is
+marked `auto`. Where the scheme needs something the `.qsf` lacks, the
+package applies an **explicit, documented inference rule** and marks the
+item `inferred`. Every scored question carries a `score_basis` string
+recording the rule applied.
 
 ``` r
 
@@ -128,82 +137,79 @@ head(scored[order(-scored$gfs_points),
 #> 6 QID7        matrix                8 auto       matrix, 4 rows x GfS rating <=…
 ```
 
-`score_flag` has four values:
+`score_flag` takes four values.
 
-- `auto` – the GfS+ mapping is deterministic from the structure.
-- `inferred` – the structure is clear, but choosing the Table 1 category
-  involved an explicit judgement (a dropdown mapped to “rating” as the
-  closest category, a numeric-looking dropdown mapped to “simple
+- `auto` means the structure fixes the GfS+ mapping.
+- `inferred` means the structure is clear and choosing the Table 1
+  category took an explicit judgement (a dropdown mapped to “rating” as
+  the closest category, a numeric-looking dropdown mapped to “simple
   numerical answer”, a slider). The number is still determinate.
-- `manual` – a human should check; the mapping is genuinely uncertain.
-- `unknown` – an unmapped type, left unscored as `NA`. A survey with
-  unknown types produces an under-count, and
+- `manual` means the mapping is uncertain and a person should check it.
+- `unknown` marks an unmapped type, left unscored as `NA`. A survey with
+  unknown types is under-counted, and
   [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
-  warns.
+  warns about it.
 
-This is the distinction between **GfS-native** quantities (from the
-original scheme: question type, response action, number of alternatives
-– all specified by the scheme) and **package-derived** ones (estimated
-line counts, response-unit structure – inferred because the `.qsf` lacks
-them).
+The flags separate **GfS-native** quantities, which the original scheme
+specifies (question type, response action, number of alternatives), from
+**package-derived** ones, which the package estimates because the `.qsf`
+lacks them (line counts, response-unit structure).
 
-## Documented inference rules where Table 1 is silent
+## Documented inference rules for gaps in Table 1
 
-- **Instruction-text lines.** Table 1 counts rendered “lines” of
-  instruction text. A `.qsf` stores words, not a rendered width, so
-  lines are estimated as words / `words_per_line` (default 12). This is
-  a pragmatic conversion heuristic, not a calibrated constant; override
-  it with `burden_report(words_per_line = ...)`. See
+- **Instruction-text lines.** Table 1 counts rendered lines of
+  instruction text. A `.qsf` stores words, so the package estimates
+  lines as words / `words_per_line` (default 12). This is a practical
+  conversion that you can override with
+  `burden_report(words_per_line = ...)`. See
   [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md).
-- **Dropdowns** (`MC` with a `DL` selector) have no Table 1 row. They
-  are scored as a rating (2.0 for up to 5 options, 3.0 for more), or as
-  a simple numerical answer (1.0) when the options are numbers and the
+- **Dropdowns** (`MC` with a `DL` selector) lack a Table 1 row. They
+  score as a rating (2.0 for up to 5 options, 3.0 for more), or as a
+  simple numerical answer (1.0) when the options are numbers and the
   question asks for a quantity or a date.
-- **Sliders** are not in Table 1. They are scored as a numerical answer
-  when the axis label carries units, otherwise as a rating.
+- **Sliders** also lack a Table 1 row. They score as a numerical answer
+  when the axis label carries units, and as a rating otherwise.
 - **Hidden questions.** A question hidden from the respondent by
   injected CSS or JavaScript scores 0.
-- **Loop & Merge blocks.** Item scores are per iteration; the
+- **Loop & Merge blocks.** Item scores are per iteration, and the
   multiplication happens later, when paths are scored. The structural
-  profile spreads each loop’s iteration count evenly over 1 to the
-  block’s explicit cap (never 0); the naive ceiling uses the cap and the
-  naive floor one iteration. A loop with no explicit cap is not
-  multiplied at all – its questions count once – which can understate
-  the upper figures. Within-loop display logic is not enumerated.
+  profile spreads each loop’s iteration count evenly from 1 to the
+  block’s explicit cap. The naive ceiling uses the cap and the naive
+  floor one iteration. A loop without an explicit cap counts its
+  questions once, which can understate the upper figures. Display logic
+  inside a loop is left unenumerated.
 
-### Question stems are not separately scored
+### Question stems
 
-The GfS Table 1’s “question or transition, up to 3 lines = 2.0” is
-applied to standalone instruction blocks only, not the question text
-itself! It is unclear whether the GfS scheme intended the reading cost
-of a question to be absorbed into the item weight or counted separately.
-A question with a long disambiguation stem is, therefore, scored
-conservatively, and its stem length is reported separately as a
-readability diagnostic (see
+Table 1’s “question or transition, up to 3 lines = 2.0” applies to
+standalone instruction blocks only. The question text itself earns no
+separate points, because the GfS scheme leaves unclear whether a
+question’s reading cost belongs in the item weight or on its own. A
+question with a long stem is therefore scored conservatively, and its
+stem length appears separately as a readability diagnostic (see
 [`vignette("reading-the-report")`](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md)).
 
-### Multi-answer matrices have no Table 1 rule
+### Multi-answer matrices
 
-A grid where each cell allows multiple answers – “tick all that apply”
-across two axes – is scored as `rows x cols x 0.5`. Each cell is one
-trivial closed yes/no decision; GfS scores a closed yes/no at 1.0,
-discounted here for the working-memory efficiency of answering in a
-grid. This proxy is symmetric in rows and columns so it does not change
-with how Qualtrics happened to store the grid. It is a GfS+ extension,
-not part of the original GfS table. The weight is
-`gfs_scheme()$matrix_cell_multi`.
+Table 1 has no rule for a grid where each cell allows several answers
+(“tick all that apply” across two axes). surveyBurden scores it as
+`rows x cols x 0.5`. Each cell is one simple yes/no decision, which GfS
+scores at 1.0, discounted here because answering in a grid takes less
+working memory. The formula is symmetric in rows and columns, so the
+score stays the same however Qualtrics stored the grid. This rule is a
+GfS+ extension, and its weight is `gfs_scheme()$matrix_cell_multi`.
 
 ## What the automatic scorer applies
 
 Each standard question type gets one rule. This table is the complete
-list; `score_basis` names the rule used for each question.
+list, and `score_basis` names the rule used for each question.
 
 | Question type (`std_type`) | Automatic rule | Scheme entries used | Flag |
 |----|----|----|----|
 | `single_choice`, 2 options | closed yes/no | `yes_no` | auto |
 | `single_choice`, 3-5 / 6+ options | rating | `rating_small` / `rating_large` | auto |
 | `single_choice`, option count unknown | assumed a rating up to 5 | `rating_small` | inferred |
-| dropdown | rating by option count; a simple numerical answer when the options are numbers and the question asks for a quantity or date | `rating_small`, `rating_large`, `numeric_answer` | inferred |
+| dropdown | rating by option count, or a simple numerical answer when the options are numbers and the question asks for a quantity or date | `rating_small`, `rating_large`, `numeric_answer` | inferred |
 | `multi_choice`, n options | half-open: base + per extra option, switching at `multi_large_threshold` | `multi_small_*`, `multi_large_*` | auto |
 | `matrix`, single answer per row | rows x rating by column count | `rating_small` / `rating_large` | auto |
 | `matrix`, multiple answers per row | rows x cols x cell weight | `matrix_cell_multi` | inferred |
@@ -214,13 +220,13 @@ list; `score_basis` names the rule used for each question.
 | `constant_sum` | numerical answer | `numeric_answer` | inferred |
 | `descriptive` | base + per line beyond 3, lines = words / `words_per_line` | `descriptive_*`, `words_per_line` | auto |
 | `captcha` | fixed small cost | `captcha` | auto |
-| `timing`, `meta`, or hidden by CSS/JS | 0 | – | auto / inferred |
-| anything else | not scored: `NA`, counted as 0 in totals | – | unknown |
+| `timing`, `meta`, or hidden by CSS/JS | 0 |  | auto / inferred |
+| anything else | left as `NA`, counted as 0 in totals |  | unknown |
 
-**Stated-choice tasks.** A QSF does not mark a question as a choice
-task, so the scorer treats one as whatever widget Qualtrics used
-(usually a single choice). Declare your tasks with `choice_tasks`, a
-data frame of `question_id`, `n_alternatives` and `n_attributes`, in
+**Stated-choice tasks.** A QSF stores a choice task as an ordinary
+widget, so the scorer treats it as that widget (usually a single
+choice). Declare your tasks with `choice_tasks`, a data frame of
+`question_id`, `n_alternatives` and `n_attributes`, in
 [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
 or any other burden function. Each declared task scores 2 points for two
 alternatives, 3 for three and 1 more for each alternative beyond three
@@ -229,46 +235,47 @@ alternatives, 3 for three and 1 more for each alternative beyond three
 alternative.
 [`suggest_choice_tasks()`](https://pmpk20.github.io/surveyBurden/reference/suggest_choice_tasks.md)
 lists questions that look like choice tasks (an HTML table in the stem)
-for you to check; it never scores them itself.
+for you to check before you declare them.
 
 **Filter and branching points.** GfS adds 0.5 for a filter and 0.5 for a
-branching. These are off by default (`apply_filter_branching = FALSE`):
-GfS budgets interviewer-administered surveys, where the interviewer
-applies each filter, while in a web survey the software does. Set
-`s$apply_filter_branching <- TRUE` to match a manual GfS count: a
+branching. GfS budgets interviewer-administered surveys, where the
+interviewer applies each filter. In a web survey the software applies
+them, so these points are off by default
+(`apply_filter_branching = FALSE`). Set
+`s$apply_filter_branching <- TRUE` to match a manual GfS count. A
 question then earns 0.5 if its answer drives another question’s display
 logic and 0.5 if a flow branch tests it. Embedded data fields,
 randomiser assignments and `Displayed` conditions earn nothing.
 
-**Reference-only entries.** These Table 1 weights are in
+**Reference-only entries.**
 [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)
-for completeness, but no automatic rule reads them, so changing them
-does not change any score: `rank_per_item`, `open_medium`,
-`please_specify` and `open_essay_per_extra`. In practice:
+holds these Table 1 weights for completeness, and no automatic rule
+reads them, so changing them leaves every score the same. They are
+`rank_per_item`, `open_medium`, `please_specify` and
+`open_essay_per_extra`. In practice:
 
 - a ranking scores its first item only, so rankings of several items are
   under-scored;
-- “please specify” boxes and repeated open answers are scored as
-  whatever widget Qualtrics used for them (a text box), not with the
-  follow-up weights.
+- “please specify” boxes and repeated open answers score as the widget
+  Qualtrics used for them (a text box).
 
 Where your survey has these, check the affected questions’ `score_basis`
 and adjust by hand if needed.
 
 **What can make the reported figures too low.** Unscored (`unknown`)
-questions contribute 0, loops without an explicit cap are counted once,
-and the reference-only items above are under-scored.
+questions contribute 0, loops without an explicit cap count once, and
+the reference-only items above are under-scored.
 [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
-warns about unscored questions;
+warns about unscored questions, and
 [`calculation_certainty()`](https://pmpk20.github.io/surveyBurden/reference/calculation_certainty.md)
 counts loops with unknown caps.
 
 ## Overriding the weights
 
-Every weight in
+You can change any weight in
 [`gfs_scheme()`](https://pmpk20.github.io/surveyBurden/reference/gfs_scheme.md)
-can be changed and passed back in; only the entries a rule uses (table
-above) affect scores:
+and pass the scheme back in. Only the entries a rule uses (table above)
+affect scores.
 
 ``` r
 
@@ -281,14 +288,19 @@ score_burden(catalogue, scheme = w2)$gfs_points[1:5]
 ## Next
 
 - [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md)
-  – how scores combine across paths.
+  shows how scores combine across paths.
 - [`vignette("survey-revision")`](https://pmpk20.github.io/surveyBurden/articles/survey-revision.md)
-  – using scores to revise a draft.
+  uses scores to revise a draft.
 - [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md)
-  – converting points to minutes.
+  converts points to minutes.
 
 ## References
 
 - Heimgartner, D. and Axhausen, K. W. (2024). Predicting response rates
-  once again. *Findings*.
-  <https://findingspress.org/article/125481-predicting-response-rates-once-again>
+  once again. *Findings*. <https://doi.org/10.32866/001c.125481>
+- Schmid, B. and Axhausen, K. W. (2019). Predicting response rates of
+  all and recruited respondents: a first attempt. *Findings*.
+  <https://doi.org/10.32866/7827>
+- Yan, T. and Williams, D. (2022). Response burden: review and
+  conceptual framework. *Journal of Official Statistics* 38(4), 939–961.
+  <https://doi.org/10.2478/jos-2022-0041>

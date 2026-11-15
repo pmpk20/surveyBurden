@@ -1,14 +1,15 @@
 # Respondent burden from response data
 
-**What this answers.** How much burden each respondent experienced,
-after fielding, and where in the survey it fell.
+**What this answers.** How much burden each respondent was shown after
+fieldwork, and where in the survey it fell.
 
 **What you need.** The `.qsf` of the survey version that collected the
 data, and the response data (API or CSV export).
 
-**What it cannot establish.** Respondent burden is the GfS+ score of
-what the survey displayed. It does not measure reading time, effort as
-perceived, or how much of a question was completed.
+**What to keep in mind.** Respondent burden is the GfS+ score of what
+the survey displayed to each respondent, its objective burden. Reading
+time, perceived burden and how completely a question was answered need
+their own measures.
 
 ``` r
 
@@ -31,16 +32,16 @@ library(surveyBurden)
 describes a survey **before fieldwork**, from its design alone. Once
 responses are collected,
 [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
-gives the **respondent burden**: the GfS+ points of every item the
+gives the **respondent burden**, the GfS+ points of every item the
 survey displayed to each respondent.
 
 It walks the survey flow against each respondent’s own answers, in flow
 order, evaluating branch logic and every question’s display logic. An
-item counts when the survey displayed it, so:
+item counts when the survey displayed it. So
 
 - descriptive text counts;
-- a question displayed but left blank counts in full: skipping a
-  question is item non-response, not a lighter survey;
+- a question displayed but left blank counts in full, because skipping a
+  question is item non-response and the respondent was still shown it;
 - a partly answered matrix counts in full;
 - each Loop & Merge iteration counts separately;
 - for a respondent who broke off, burden runs up to the block they left
@@ -50,7 +51,7 @@ item counts when the survey displayed it, so:
 
 [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
 needs two inputs: the QSF (survey definition) and the responses. The
-most reliable source for the responses is the raw CSV export: its
+most reliable source for the responses is the raw CSV export. Its
 ImportId row names each column’s question, so columns are matched even
 when the survey uses custom export tags. Both can also come from the
 Qualtrics API.
@@ -78,11 +79,11 @@ rb <- respondent_burden(qsf, responses)
 rb
 ```
 
-The `label = FALSE` and `convert = FALSE` arguments are important: they
-ensure column values are the raw numeric recodes Qualtrics stores rather
-than labelled factor levels, which the display logic is evaluated
-against. `import_id = TRUE` names the columns by question id, so they
-match the QSF whatever export tags the survey uses.
+The `label = FALSE` and `convert = FALSE` arguments matter. They keep
+column values as the raw numeric recodes Qualtrics stores, which is what
+the display logic is evaluated against. `import_id = TRUE` names the
+columns by question id, so they match the QSF whatever export tags the
+survey uses.
 
 Both
 [`fetch_qsf()`](https://pmpk20.github.io/surveyBurden/reference/fetch_qsf.md)
@@ -99,7 +100,7 @@ You need two files: the response data (CSV) and the survey definition
 
 **Export response data.** In Qualtrics, go to the **Data & analysis**
 tab, then click **Export & Import \> Export Data**. Select **CSV**, tick
-**Export values** (not labels), and click **Download**.
+**Export values**, and click **Download**.
 
 ![Qualtrics CSV export dialog showing the CSV tab selected and Export
 values ticked.](export-data-csv.png)
@@ -123,24 +124,24 @@ rb <- respondent_burden(qsf, "my_responses.csv")   # the file path works directl
 nrow(rb)   # should equal your number of respondents
 ```
 
-A raw Qualtrics CSV export has two extra rows under the column names:
+A raw Qualtrics CSV export has two extra rows under the column names,
 the question labels and the `{"ImportId": ...}` row.
 [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
-removes these when it can recognise them – an ImportId cell, or a system
-column holding its own label (`ResponseId` = “Response ID”) – and says
-so. It only looks at the top rows and never guesses, so if you have
-edited the export (renamed or dropped those columns), remove the header
-rows yourself before scoring, and check that `nrow(rb)` matches your
-respondent count.
+removes them when it recognises them (an ImportId cell, or a system
+column holding its own label, such as `ResponseId` = “Response ID”), and
+says so. It checks only the top rows and removes only rows it
+recognises. If you have edited the export (renamed or dropped those
+columns), remove the header rows yourself before scoring, and check that
+`nrow(rb)` matches your respondent count.
 
-Use the QSF exported from the survey version that collected the data: a
-later edit to the survey can change question ids and scoring.
+Use the QSF exported from the survey version that collected the data,
+because a later edit to the survey can change question IDs and scoring.
 
 ## An example
 
 The example below simulates 400 respondents to the demo survey shipped
 with the package. Each answers every question the survey would display
-to them; some decline consent or live outside the study area and are
+to them. Some decline consent or live outside the study area and are
 screened out, and some break off part-way through.
 
 ``` r
@@ -221,27 +222,28 @@ head(rb[, c("response_id", "outcome", "points", "minutes",
 #> 6 R_006       breakoff       32    2.67    10              9     5
 ```
 
-Each row gives:
+Each row gives the following.
 
-- **`response_id`** – respondent identifier (auto-detected from
+- **`response_id`** is the respondent identifier (detected from
   `ResponseId`, or set with `id_col`).
-- **`finished`** and **`outcome`** – `"complete"`, `"breakoff"` or
+- **`finished`** and **`outcome`** give `"complete"`, `"breakoff"` or
   `"screen_out"` (the flow ended the survey early). Qualtrics records a
   screened-out response as finished.
-- **`points`** / **`minutes`** – respondent burden in GfS+ points, and
-  at the scheme’s points-per-minute rate.
-- **`items`**, **`response_items`**, **`pages`** – visible items
-  displayed, those of them that take a response, and pages displayed.
-- **diagnostics** – `furthest_order`, and counts of logic the data could
-  not settle (`n_unresolved_items`, `n_unresolved_branches`,
-  `unresolved_loops`, `n_randomiser_fallbacks`) or answers that
+- **`points`** and **`minutes`** give respondent burden in GfS+ points,
+  and in minutes at the scheme’s points-per-minute rate.
+- **`items`**, **`response_items`** and **`pages`** count the visible
+  items displayed, those of them that take a response, and the pages
+  displayed.
+- **Diagnostics** are `furthest_order`, counts of logic the data left
+  unsettled (`n_unresolved_items`, `n_unresolved_branches`,
+  `unresolved_loops`, `n_randomiser_fallbacks`), and answers that
   contradict the flow (`n_routing_conflicts`).
 
 ## Survey-level summaries
 
 Summarise complete responses for survey-level statistics. Break-offs and
-screen-outs carry only part of the survey, so leave them out of the
-headline:
+screen-outs cover only part of the survey, so keep the headline to
+complete responses.
 
 ``` r
 
@@ -264,30 +266,31 @@ responses.](respondent-burden_files/figure-html/burden-distribution-1.png)
 `burden_report(qsf, responses = sim)` adds the same summary to the
 report, as `$respondents`, next to the structural range.
 
-With a fielded survey with thousands of respondents, this gives the full
-empirical distribution of burden – useful for reporting in papers and
-for calibrating future survey designs.
+For a fielded survey with thousands of respondents, this gives the full
+observed distribution of burden, which you can report in papers and use
+to plan future surveys.
 
 ## Column name mapping
 
 The function maps response column names to QSF question IDs using these
-strategies, tried in order:
+strategies, tried in order.
 
-1.  **User-supplied `col_map`** – set `attr(responses, "col_map")` to a
+1.  **User-supplied `col_map`.** Set `attr(responses, "col_map")` to a
     named list mapping column names to QIDs. An entry here overrides the
     automatic strategies for that column.
 2.  **The ImportId row** of a raw Qualtrics CSV export, which names each
     column’s question whatever the column is called.
-3.  **Direct QID names** – column is named `QID15`, `QID15_1`, or
+3.  **Direct QID names.** The column is named `QID15`, `QID15_1` or
     `1_QID15` (loop iteration prefix). This is what
     `qualtRics::fetch_survey()` produces by default.
-4.  **Export tags** – column name matches a `DataExportTag` from the QSF
-    (e.g. `Q15`, `TravelMode`). Matching is case-insensitive, so
-    lowercase columns from preprocessed exports also work.
+4.  **Export tags.** The column name matches a `DataExportTag` from the
+    QSF (for example `Q15` or `TravelMode`). Matching is
+    case-insensitive, so lowercase columns from preprocessed exports
+    also work.
 
-A `col_map` is useful when working with response data that has been
-renamed or reformatted. For example, if you have a dictionary mapping
-custom column names to QIDs:
+A `col_map` helps with response data that has been renamed or
+reformatted. For example, with a dictionary mapping custom column names
+to QIDs:
 
 ``` r
 
@@ -299,9 +302,9 @@ rb <- respondent_burden(qsf, responses)
 ```
 
 For questions inside a Loop & Merge block, each column must also carry
-its loop iteration, or answers from different iterations are merged into
-one. Either keep an `N_` prefix on the column name (`2_adults_age` is
-iteration 2), or give the iteration in the map:
+its loop iteration, so that answers from different iterations stay
+separate. Either keep an `N_` prefix on the column name (`2_adults_age`
+is iteration 2), or give the iteration in the map.
 
 ``` r
 
@@ -314,8 +317,9 @@ attr(responses, "col_map") <- col_map
 
 ## Burden by block
 
-`by = "block"` returns one row per respondent per block: whether the
-flow routed them into it, and the burden displayed there.
+`by = "block"` returns one row per respondent per block. It records
+whether the flow routed the respondent into the block, and the burden
+displayed there.
 
 ``` r
 
@@ -339,25 +343,26 @@ ex[ex$response_id == "R_001",
 #> 12 Closing         TRUE      TRUE              NA      7
 ```
 
-`routed_in` is `FALSE` for a block the flow skipped and `NA` for blocks
-after a respondent’s exit, where the routing depends on answers that
-were never given. `displayed` is `FALSE` for a block routed into whose
-every question was hidden: Qualtrics skips such a block, so nobody can
-break off in it. `attr(ex, "respondents")` holds each respondent’s
-outcome and counts of any logic the data could not settle (an
-unsupported literal, or an embedded field set by question JavaScript and
-absent from the export), which fall back to whether the respondent
-answered.
+`routed_in` is `FALSE` for a block the flow skipped, and `NA` for blocks
+after a respondent’s break-off or screen-out, where the routing depends
+on answers the respondent left unanswered. `displayed` is `FALSE` for a
+block the respondent was routed into whose questions were all hidden.
+Qualtrics skips such a block, so break-off in it is impossible.
+`attr(ex, "respondents")` holds each respondent’s outcome and counts of
+logic the data left unsettled (an unsupported literal, or an embedded
+field set by question JavaScript and absent from the export). For these,
+the package falls back to whether the respondent answered.
 
 ## Modelling break-off
 
 [`exposure_person_period()`](https://pmpk20.github.io/surveyBurden/reference/exposure_person_period.md)
-keeps the blocks each respondent was at risk in (routed in and
-displayed, plus the block they left in) and adds the burden already
-displayed before each block. Two discrete-time hazard models then follow
-in a few lines: does a block’s own burden predict leaving in it, and,
-comparing respondents in the same block, does the burden accumulated so
-far?
+keeps the blocks in which each respondent could break off (blocks they
+were routed into and shown, plus the block where they broke off). It
+adds the burden already displayed before each block. Two discrete-time
+hazard models then take a few lines. The first asks whether a block’s
+own burden predicts break-off in that block. The second compares
+respondents in the same block and asks whether the burden accumulated so
+far predicts break-off.
 
 ``` r
 
@@ -391,34 +396,33 @@ round(coef(summary(m_accum))[2, , drop = FALSE], 3)
 #> I(points_before/100)   -0.016      1.923  -0.008    0.993
 ```
 
-The simulated respondents left at a block drawn at random, not in
-response to burden, so these estimates illustrate the workflow and say
-nothing about burden itself. With a fielded survey, cluster the standard
-errors by respondent, and keep in mind how few blocks there are when
-reading block-level effects.
+The simulated respondents broke off at a randomly drawn block, so these
+estimates illustrate the workflow only. With a fielded survey, cluster
+the standard errors by respondent, and keep in mind how few blocks there
+are when reading block-level effects.
 
-Some decisions are reported rather than hidden:
+The package reports the decisions it makes.
 
-- **Exit block.** By default the exit is the last block with an answer,
-  so someone who leaves on a newly displayed page without answering is
-  attributed to the previous block. Pass a last-seen block or question
-  column (`furthest = "column"`, `furthest_col = ...`) when the export
-  has one.
+- **Break-off block.** By default the break-off block is the last block
+  with an answer, so someone who breaks off on a newly displayed page
+  before answering is attributed to the previous block. Pass a last-seen
+  block or question column (`furthest = "column"`, `furthest_col = ...`)
+  when the export has one.
 - **Loop iterations** come from the question driving the loop when it
-  was answered, else from the iterations with answers
+  was answered, and otherwise from the iterations with answers
   (`loop_iterations = "observed"` forces the latter).
 - **Answers contradicting the flow** (answers in a block the flow
   skipped) are trusted and counted in `n_routing_conflicts`.
 - **Block randomisers** that show some of their elements (“present 1 of
   3 blocks”) are read from the export’s display-order column
-  (`FL_xx_DO`). Without it, the elements shown are taken from the blocks
-  each respondent answered, with a warning, and counted in
-  `n_randomiser_fallbacks`. Include the display-order columns in the
-  export to avoid this.
+  (`FL_xx_DO`). If that column is missing, the elements shown are taken
+  from the blocks each respondent answered, with a warning, and counted
+  in `n_randomiser_fallbacks`. Include the display-order columns in the
+  export for exact results.
 
 ## Next
 
 - [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md)
-  – checking respondent burden against completion times.
+  checks respondent burden against completion times.
 - [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md)
-  – the structural burden range before fieldwork.
+  explains the structural burden range before fieldwork.

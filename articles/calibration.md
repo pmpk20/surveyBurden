@@ -4,16 +4,16 @@
 line, points per minute) work, how to check predictions against observed
 completion times, and the limitations of the approach.
 
-**What you need.** A `.qsf`; for validation, the response export, with
-completion times.
+**What you need.** A `.qsf`, and for validation, the response export
+with completion times.
 
-**What it cannot establish.** An implied points-per-minute rate is rough
-and specific to one survey. Burden scores do not predict dropout,
-satisficing or data quality.
+**What to keep in mind.** An implied points-per-minute rate is rough and
+specific to one survey. Burden scores measure objective burden, and
+links to break-off, satisficing or data quality need their own analysis.
 
-This vignette covers two assumptions in the pipeline – words-to-lines
-and points-to-minutes – and the limitations of the approach as a whole.
-For the scoring rules see
+This article covers two assumptions in the pipeline, words-to-lines and
+points-to-minutes, and the limitations of the approach as a whole. For
+the scoring rules see
 [`vignette("gfs-scoring")`](https://pmpk20.github.io/surveyBurden/articles/gfs-scoring.md).
 
 ``` r
@@ -36,18 +36,16 @@ demo <- system.file("extdata", "demo_travel_survey.qsf", package = "surveyBurden
 
 ## words_per_line
 
-In the original GfS scheme, a score is provided for each additional line
-of text in the survey. However, a `.qsf` does not provide the number of
-additional lines of text, as this may vary with the survey mode.
-Instead, it returns the words per question. The package, therefore,
-assumes that the number of words that make an additional line
-(`words_per_line` = default 12). This is a practical proxy, that you can
-set if you wish, and means that assigned GfS+ points per
-descriptive-text in your survey should be read as approximate. This
-assumption only affects descriptive / instruction-text scores and every
-other question type is unaffected.
+The GfS scheme scores each additional line of descriptive text. A `.qsf`
+stores the words of each question, and the number of lines they fill
+varies with the screen. The package therefore assumes a number of words
+per line (`words_per_line`, default 12). This is a practical
+approximation that you can change, so read the GfS+ points for
+descriptive text as approximate. The assumption affects descriptive and
+instruction text only, and every other question type keeps the same
+score.
 
-You can set the words per line in your survey with:
+Set the words per line for your survey like this.
 
 ``` r
 
@@ -57,10 +55,10 @@ burden_report(demo, words_per_line = 8, quiet = TRUE)$burden$points[1:2]
 
 ## points_per_minute
 
-To convert GfS+ points to minutes of survey time, the GfS rule of thumb
-is 12 points per minute. As a rule of thumb, do not assume that it
-predicts the completion time, or applies to online surveys. You can
-either override it by setting `points_per_minute` on a weights object:
+The GfS rule of thumb converts points to minutes at 12 points per
+minute. Treat it as a rough guide to completion time, especially for
+online surveys. You can override it by setting `points_per_minute` on a
+weights object.
 
 ``` r
 
@@ -77,8 +75,8 @@ burden_report(demo, scheme = w, quiet = TRUE)$burden[, c("statistic", "minutes")
 #> 5 max          9.53
 ```
 
-Alternatively, if you are calculating burden after fieldwork then you
-can use the completion-time data of your survey to calculate
+After fieldwork, you can instead estimate a rate from your survey’s
+completion times with
 [`validate_times()`](https://pmpk20.github.io/surveyBurden/reference/validate_times.md)
 and use the rate it returns.
 
@@ -89,20 +87,20 @@ takes each respondent’s burden from
 [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
 and compares it with their completion time. It needs the response export
 itself, so that each respondent’s path can be reconstructed. Prepare the
-data first:
+data first.
 
 1.  **Keep completed responses.** With a `Finished` column, only
-    finishers are kept (`finished_only = TRUE`); without one, filter
-    yourself, since `trim` filters on duration alone.
-2.  **Provide a duration column.** Qualtrics’ own
-    `Duration (in seconds)` is read directly (also as
-    [`read.csv()`](https://rdrr.io/r/utils/read.table.html) renames it),
-    as are `completion_seconds` and `completion_mins`; the first found
-    wins. The two header rows of a raw CSV export are removed
-    automatically when recognisable.
+    finishers are kept (`finished_only = TRUE`). Without one, filter the
+    data yourself, because `trim` filters on duration alone.
+2.  **Provide a duration column.** The package reads Qualtrics’ own
+    `Duration (in seconds)` directly (also under the name
+    [`read.csv()`](https://rdrr.io/r/utils/read.table.html) gives it),
+    as well as `completion_seconds` and `completion_mins`, and uses the
+    first it finds. It removes the two header rows of a raw CSV export
+    automatically when it recognises them.
 3.  **Choose the trim.** The default keeps 3 to 180 minutes, to drop
     speeders and people who left the survey open. Report how many rows
-    it removed (`n` against your row count); the implied rate is
+    it removed (`n` against your row count), because the implied rate is
     sensitive to it.
 
 A simulated example:
@@ -133,21 +131,21 @@ round(c(ratio = vt$ratio, cor = vt$cor,
 #>        0.92        0.03       11.10
 ```
 
-Reading the output:
+How to read the output:
 
 - `ratio` is the predicted median over the observed median, in minutes.
 - `cor` is the correlation of respondent burden with observed minutes.
   Completion times vary for many reasons besides survey content, so
   expect it to be small on real data.
 - `implied_points_per_minute` is the median respondent burden divided by
-  the median observed time, over the respondents kept. Medians keep a
+  the median observed time, over the respondents kept. Medians stop a
   few respondents who left the survey open from dominating it. It is a
-  rough rate for this survey, not a calibrated constant.
+  rough rate for this survey.
 - `ols_points_per_minute` is the older estimate, `60 / b` from a
   through-origin fit of observed seconds on predicted points. Long
-  completion times dominate it, so treat it as a comparison only.
+  completion times dominate it, so use it as a comparison only.
 
-To use that rate:
+To use the implied rate:
 
 ``` r
 
@@ -166,45 +164,49 @@ burden_report(demo, scheme = w, quiet = TRUE)$burden[, c("statistic", "minutes")
 
 ## Limitations
 
-- The Qualtrics-to-GfS+ mapping is sometimes inferential. Where a
-  question type has no exact match in Table 1, the package applies a
-  documented rule and flags the question `inferred`.
-- The original GfS scheme predates modern web survey interfaces. It was
+- Some question types lack an exact match in Table 1. For these the
+  package applies a documented rule and flags the question `inferred`.
+- The original GfS scheme predates modern web survey interfaces and was
   calibrated on earlier survey practice.
-- Rendered text length cannot be recovered from a `.qsf`. The file
-  stores words, not an on-screen line count; `words_per_line` is a
-  configurable proxy for that missing count, not a measured constant.
+- A `.qsf` stores words, and the on-screen line count depends on the
+  display. `words_per_line` is a configurable approximation for that
+  count.
 - Display-logic reconstruction depends on what the `.qsf` encodes. Logic
-  controlled outside Qualtrics, or unusual constructs, may need manual
-  interpretation.
-- The structural profile is not a respondent distribution. Without
-  response data, each complete path gets equal total weight and, within
-  a path, each modelled display-logic state and loop count gets equal
-  weight. “Median” means the median of that model-weighted distribution,
-  not across respondents.
-- Structural paths are the block sequences the flow allows. Branch
-  conditions are not evaluated or checked against each other, so the
-  minimum or maximum may not be reachable by a real respondent.
-- Loop & Merge can make the path space large. The package unrolls to the
-  explicit cap and treats the iteration count as uniform.
+  controlled outside Qualtrics, and unusual constructs, may need
+  checking by hand.
+- The structural profile weights the design. Without response data, each
+  complete path gets equal total weight, and within a path each modelled
+  display-logic state and loop count gets equal weight. “Median” means
+  the median of that model-weighted distribution. Medians across
+  respondents come from response data.
+- Structural paths are the block sequences the flow allows. Most branch
+  conditions are kept both ways and treated independently, so the
+  minimum or maximum may come from a route whose conditions contradict
+  each other.
+- Loop & Merge can make the path space large. The package unrolls loops
+  to the explicit cap and treats the iteration count as uniform.
 - The points-to-minutes conversion is the original GfS rule of thumb,
   roughly 12 points per minute.
-- Burden scores are not predictions of completion time, dropout, or
-  satisficing. Those are empirical questions about respondent behaviour,
-  outside the scope of this package.
+- Burden scores measure objective burden. Completion time, break-off and
+  satisficing are respondent behaviours that need response data to
+  study.
+  [`validate_times()`](https://pmpk20.github.io/surveyBurden/reference/validate_times.md)
+  and
+  [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
+  provide the inputs.
 
 ## Next
 
 - [`vignette("reading-the-report")`](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md)
-  – reading the full report.
+  explains the full report.
 - [`vignette("respondent-burden")`](https://pmpk20.github.io/surveyBurden/articles/respondent-burden.md)
-  – respondent burden after fielding.
+  covers respondent burden after fieldwork.
 
 ## References
 
 - Heimgartner, D. and Axhausen, K. W. (2024). Predicting response rates
-  once again. *Findings*.
-  <https://findingspress.org/article/125481-predicting-response-rates-once-again>
+  once again. *Findings*. <https://doi.org/10.32866/001c.125481>
 - Yan, T. and Tourangeau, R. (2008). Fast times and easy questions: the
   effects of age, experience, and question complexity on web survey
-  response times. *Applied Cognitive Psychology*.
+  response times. *Applied Cognitive Psychology* 22(1), 51–68.
+  <https://doi.org/10.1002/acp.1331>

@@ -1,48 +1,58 @@
 # Get started with surveyBurden
 
-`surveyBurden` estimates **survey burden**: the response effort a
-programmed Qualtrics survey demands, worked out before fieldwork from
-the survey alone. It reads the survey, scores every question with the
-GfS+ point scheme (extending Heimgartner and Axhausen 2024),
-reconstructs the paths the flow and display logic allow, and reports how
-burden varies across those paths.
+surveyBurden measures how much work a survey asks of the people who
+answer it. It reads a programmed Qualtrics survey, scores every question
+in GfS+ points, follows the survey’s flow and display logic to find the
+paths through it, and reports how burden varies across those paths. All
+of this works from the survey alone, before fieldwork.
 
-In the terms of Yan and Williams (2022) this is the *survey* side of
-respondent burden – length, difficulty, and the effort the design
-requires. It is not the *perceived* burden a particular respondent
-reports feeling, and it is not a completion-time predictor.
+The survey literature calls this objective burden. It is the work a
+survey asks of respondents, measured from the questions themselves (how
+many there are and how much effort each takes to answer). Perceived
+burden, how burdensome respondents feel the survey to be, is measured
+separately, for example by asking respondents directly (Yan and Williams
+2022).
 
-This article gets you to a first report. Which function you need depends
-on what you have:
+GfS stands for Gesellschaft für Sozialforschung (Society for Social
+Research), the Zürich organisation whose point system for budgeting
+face-to-face interviews Axhausen and colleagues adapted to
+self-administered surveys (Schmid and Axhausen 2019). surveyBurden uses
+the current version of their table (Heimgartner and Axhausen 2024) and
+adds documented rules for further question types, hence the “+”.
+
+This article gets you to a first report. The function you need depends
+on what you have.
 
 | What you have | Start with | What you get | Guide |
 |----|----|----|----|
-| A Qualtrics survey (`.qsf` or API) | `burden_report(qsf)` | a model-based structural burden profile across the survey’s paths | [`vignette("reading-the-report")`](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md) |
-| A response export | `respondent_burden(qsf, responses)` | respondent burden: the GfS+ points displayed to each respondent | [`vignette("respondent-burden")`](https://pmpk20.github.io/surveyBurden/articles/respondent-burden.md) |
-| A response export with completion times | `validate_times(qsf, observed)` | a check of respondent burden against observed time, and a survey-specific rate | [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md) |
-| A draft you want to make lighter | [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md) before and after an edit | where the burden is, why, and how much a change removes | [`vignette("survey-revision")`](https://pmpk20.github.io/surveyBurden/articles/survey-revision.md) |
-| A survey from another platform | `score_burden(validate_catalogue(catalogue))` | per-question scores and a total | [`vignette("extensions")`](https://pmpk20.github.io/surveyBurden/articles/extensions.md) |
+| A Qualtrics survey (`.qsf` or API) | `burden_report(qsf)` | the full report, with burden across the survey’s paths | [`vignette("reading-the-report")`](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md) |
+| A response export | `respondent_burden(qsf, responses)` | the burden each respondent was shown | [`vignette("respondent-burden")`](https://pmpk20.github.io/surveyBurden/articles/respondent-burden.md) |
+| A response export with completion times | `validate_times(qsf, observed)` | a check of respondent burden against time taken, and a points-per-minute rate for your survey | [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md) |
+| A draft you want to shorten | [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md) before and after an edit | where the burden is, why, and how much an edit removes | [`vignette("survey-revision")`](https://pmpk20.github.io/surveyBurden/articles/survey-revision.md) |
+| A survey from another platform | `score_burden(validate_catalogue(catalogue))` | a score for each question and a survey total | [`vignette("extensions")`](https://pmpk20.github.io/surveyBurden/articles/extensions.md) |
 
-The other articles go deeper:
+The other articles go deeper.
 
 - [`vignette("reading-the-report")`](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md)
-  – what each part of the printed output means.
+  explains each part of the printed report.
 - [`vignette("survey-revision")`](https://pmpk20.github.io/surveyBurden/articles/survey-revision.md)
-  – finding the heaviest parts of a draft, changing them, and comparing
-  before and after.
+  finds the heaviest parts of a draft and compares burden before and
+  after an edit.
 - [`vignette("gfs-scoring")`](https://pmpk20.github.io/surveyBurden/articles/gfs-scoring.md)
-  – how a Qualtrics widget becomes points, and what the automatic scorer
-  does and does not apply.
+  shows how a Qualtrics question becomes points, and which rules the
+  automatic scorer applies.
 - [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md)
-  – flow, skip logic, and the structural-versus-respondent distinction.
+  covers flow, skip logic and the difference between a path and a
+  respondent’s path.
 - [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md)
-  – the `words_per_line` and points-per-minute assumptions, validating
-  against completion times, and the limitations.
+  covers the `words_per_line` and points-per-minute assumptions,
+  checking scores against completion times, and the limitations.
 - [`vignette("respondent-burden")`](https://pmpk20.github.io/surveyBurden/articles/respondent-burden.md)
-  – respondent burden from response data, and modelling break-off.
+  measures respondent burden from response data and prepares data for
+  modelling break-off.
 - [`vignette("extensions")`](https://pmpk20.github.io/surveyBurden/articles/extensions.md)
-  – what works for surveys without a QSF, and what full support for
-  another platform would take.
+  shows what works for surveys from other platforms, and what full
+  support for another platform would take.
 
 ## Install
 
@@ -77,9 +87,9 @@ runs the whole pipeline. Every code chunk in these articles runs against
 the small fictional “Neighbourhood Travel Survey” that ships with the
 package, so the numbers shown are the numbers the current package
 produces. To use your own survey, replace `demo` with a path to a `.qsf`
-file, a bare `SV_...` survey id, or a Qualtrics survey-builder URL (see
+file, a bare `SV_...` survey ID, or a Qualtrics survey-builder URL.
 [`?fetch_qsf`](https://pmpk20.github.io/surveyBurden/reference/fetch_qsf.md)
-for fetching through the Qualtrics API).
+explains fetching through the Qualtrics API.
 
 ``` r
 
@@ -164,42 +174,46 @@ report
 #> ! The point range above comes from the combinations of optional questions the package can model for this survey's flow and skip logic. Each complete path carries equal weight, and so does each modelled combination within a path; these are model weights, not how often respondents see each one, so this is a structural range, not a probability -- it does NOT mean "there's a 50% chance a respondent sees the median burden".
 ```
 
-The printout opens with a one-line **verdict**: the median
-completing-path burden in points and minutes, its ratio to the 399-point
-GfS benchmark, and the range across completing paths. Below it:
+The printout opens with a headline. It gives the median burden of the
+complete paths in points and minutes, its ratio to the 399-point median
+of the GfS benchmark, and the range across complete paths. The sections
+below it are these.
 
-- **Survey** – structural counts (questions, blocks, branch points, loop
-  blocks, early exits).
-- **Paths** – how many distinct paths the flow allows, and how many
-  complete rather than screen out.
-- **Burden** – the headline spread of path burden, in points, minutes
-  and an index (points / 1500, so 1 is a rare burden), with the
-  published benchmark underneath.
+- **Survey** counts the questions, blocks, branch points, loop blocks
+  and early exits.
+- **Paths** counts the distinct paths the flow allows, and how many run
+  to the end of the survey or end early at a screen-out.
+- **Burden** gives the spread of path burden in points, minutes and an
+  index. The index divides points by 1,500, the level above which
+  Heimgartner and Axhausen (2024) found surveys to be rare, so an index
+  of 1 marks a rare burden. The published benchmark is printed
+  underneath.
 - **Burden by block**, **Highest-burden questions**, **Readability
-  diagnostics**, **Calculation certainty**, **QC warnings**.
+  diagnostics**, **Calculation certainty** and **QC warnings** follow.
 
 [`vignette("reading-the-report")`](https://pmpk20.github.io/surveyBurden/articles/reading-the-report.md)
-walks each of these in turn.
+walks through each section.
 
-## Vocabulary
+## Terms used in these articles
 
-These terms are used throughout, with fixed meanings. The key
-distinction: a **path** is a possibility in the survey’s design; a
-**respondent’s path** is the one a respondent actually took.
+Each term below has one fixed meaning across the package and its guides.
+The most important distinction is between a **path**, which is a
+possibility in the survey’s design, and a respondent’s path, which is
+the route one person actually took.
 
 | term | meaning |
 |----|----|
-| **path** | one way through the survey that its flow allows: the blocks shown, given which branches are taken. Worked out from the survey design alone; no respondent is involved. |
-| **question burden** | the GfS+ point score for one question, from its type and structure |
-| **path burden** | the total question burden along one path. Display logic and loops can vary within a path, so a path has a spread of burdens rather than one number. |
-| **structural burden profile** | the burden values a path’s modelled display-logic states produce, with model weights (equal per state; each path’s weights sum to 1). Not a respondent probability distribution. |
-| **respondent burden** | the GfS+ points of every item displayed to one respondent, reconstructed from their responses: descriptive text and questions left blank included, each loop iteration counted ([`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)). |
-| **calculation certainty** | counts, for a given survey, of the parts of the calculation that are enumerated in full within the model and the parts that rest on documented approximations. A modelling diagnostic, not a check against the live survey. |
-| **readability diagnostics** | counts of long question stems, long matrix labels, and long grids. Reading-load signals, reported separately, never folded into the GfS+ score. |
+| **path** | one route through the survey that its flow allows. A path is the sequence of blocks shown, given which branches are taken. It is worked out from the survey design alone. |
+| **question burden** | the GfS+ points for one question, from its type and structure |
+| **path burden** | the total question burden along one path. Display logic and loops can vary within a path, so a path has a range of burdens. |
+| **structural burden profile** | the burden values a path’s modelled display-logic combinations produce, each with an equal model weight (each path’s weights sum to 1). The weights describe the design. Shares of respondents come from respondent burden after fieldwork. |
+| **respondent burden** | the GfS+ points of every item shown to one respondent, reconstructed from their responses. It includes descriptive text and questions left blank, and counts each loop iteration ([`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)). |
+| **calculation certainty** | for a given survey, how many parts of the calculation the model enumerates in full and how many rest on documented approximations. It diagnoses the model of the survey. |
+| **readability diagnostics** | counts of long question stems, long matrix labels and long grids. They signal reading load and are reported separately from the GfS+ score. |
 
 ## The report object
 
-`report` is a structured object, not printed text. Pull out each part:
+`report` is a structured R object, so you can pull out each part.
 
 ``` r
 
@@ -225,13 +239,13 @@ head(report$items[order(-report$items$gfs_points),
 #> 6 QID7        matrix                8 auto
 ```
 
-Other components: `report$survey` (the structural counts),
-`report$paths` (one row per structural path), `report$blocks` (burden by
-block), `report$readability`, `report$certainty` and `report$warnings`.
-Scalars such as the points-per-minute rate live on attributes:
-`attr(report, "points_per_minute")`.
+The other components are `report$survey` (the structural counts),
+`report$paths` (one row per path), `report$blocks` (burden by block),
+`report$readability`, `report$certainty` and `report$warnings`. Single
+settings such as the points-per-minute rate are stored as attributes,
+for example `attr(report, "points_per_minute")`.
 
-`summary(report)` prints just the headline:
+`summary(report)` prints the headline alone.
 
 ``` r
 
@@ -259,15 +273,18 @@ report$paths[, c("path_id", "status", "n_questions_floor",
 #> 4       4 complete                  20                  23        103        139
 ```
 
-The two screen-out paths end early after the area check; the two
-complete paths differ mainly in one branch-gated block. The spread from
-minimum to maximum is the effect of the survey’s optional questions and
-loop iterations, not measurement noise.
+The two screen-out paths end early after the area check. The two
+complete paths differ mainly in one block that a branch shows to some
+respondents. Within each path, the spread from minimum to maximum comes
+from the survey’s optional questions and loop iterations.
 
 ## References
 
 - Heimgartner, D. and Axhausen, K. W. (2024). Predicting response rates
-  once again. *Findings*.
-  <https://findingspress.org/article/125481-predicting-response-rates-once-again>
-- Yan, T. and Williams, D. (2022). Response burden: a review and
-  conceptual framework. *Journal of Official Statistics*.
+  once again. *Findings*. <https://doi.org/10.32866/001c.125481>
+- Schmid, B. and Axhausen, K. W. (2019). Predicting response rates of
+  all and recruited respondents: a first attempt. *Findings*.
+  <https://doi.org/10.32866/7827>
+- Yan, T. and Williams, D. (2022). Response burden: review and
+  conceptual framework. *Journal of Official Statistics* 38(4), 939–961.
+  <https://doi.org/10.2478/jos-2022-0041>

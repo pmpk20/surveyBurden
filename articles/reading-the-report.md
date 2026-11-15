@@ -8,15 +8,17 @@ output shows, and how to read it.
 [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
 on your survey’s `.qsf`.
 
-**What it cannot establish.** The report describes the modelled burden
-of the survey. It does not predict completion time, dropout or data
-quality, and its median is not the burden half of respondents face.
+**What to keep in mind.** The report describes the objective burden of
+the survey’s design, the work its questions ask of respondents.
+Completion time, break-off and data quality need response data, and the
+report’s median describes the design, with every complete path weighted
+equally.
 
-This article walks the printed
+This article walks through the printed
 [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
-output section by section: what each shows, how to read it, and when it
-is telling you something is wrong. For how the underlying numbers are
-produced see
+output section by section. It covers what each section shows, how to
+read it, and when it signals a problem. For how the underlying numbers
+are produced see
 [`vignette("gfs-scoring")`](https://pmpk20.github.io/surveyBurden/articles/gfs-scoring.md)
 and
 [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md).
@@ -118,17 +120,17 @@ report
 #> ! The point range above comes from the combinations of optional questions the package can model for this survey's flow and skip logic. Each complete path carries equal weight, and so does each modelled combination within a path; these are model weights, not how often respondents see each one, so this is a structural range, not a probability -- it does NOT mean "there's a 50% chance a respondent sees the median burden".
 ```
 
-## The verdict line
+## The headline
 
-The first line under the title is a plain-language summary: the median
-completing-path burden in GfS+ points and in minutes, its ratio to the
-399-point GfS benchmark, and the point range across the survey’s
-completing paths. When you supply `responses` it also reports the median
-respondent burden over complete responses (see
+The first line under the title summarises the survey in plain language.
+It gives the median burden of the complete paths in GfS+ points and in
+minutes, its ratio to the 399-point GfS benchmark, and the point range
+across the complete paths. When you supply `responses`, it also reports
+the median respondent burden over complete responses (see
 [`vignette("respondent-burden")`](https://pmpk20.github.io/surveyBurden/articles/respondent-burden.md)).
 
-`summary(report)` prints the same verdict with the structural counts and
-nothing else.
+`summary(report)` prints the same headline with the structural counts
+alone.
 
 ## Survey
 
@@ -143,12 +145,12 @@ report$survey
 #> #   n_complete_paths <int>, n_screenout_paths <int>
 ```
 
-Structural counts read straight from the survey (editing URL or QSF):
-live questions, blocks, branch points, block randomisers, Loop & Merge
-blocks, and early-exit (`EndSurvey`) points. These describe the
-programmed survey, not any respondent. A high branch or early-exit count
-means the survey routes people quite differently, so a single burden
-figure would describe few of them.
+These structural counts come straight from the survey (editing URL or
+QSF). They are live questions, blocks, branch points, block randomisers,
+Loop & Merge blocks and early-exit (`EndSurvey`) points, and they
+describe the programmed survey. A high branch or early-exit count means
+the survey routes people quite differently, so a single burden figure
+would describe few of them.
 
 ## Paths
 
@@ -165,19 +167,18 @@ report$paths[, c("path_id", "status", "n_blocks",
 #> 4       4 complete         11          103            139
 ```
 
-Each **structural path** is one distinct block sequence a respondent
-could take. `status` is `complete` (reaches a real submission) or
-`screen_out` (hits an `EndSurvey` first). `burden_floor` and
-`burden_ceiling` are the naive per-path bounds – only always-shown
-questions, loops run once, versus every reachable question with loops at
-their cap.
+Each **path** is one distinct block sequence a respondent could take.
+`status` is `complete` (the path reaches a real submission) or
+`screen_out` (it hits an `EndSurvey` first). `burden_floor` and
+`burden_ceiling` are simple bounds for each path. The floor counts only
+the questions always shown, with loops run once. The ceiling counts
+every reachable question, with loops at their cap.
 
-The printed “Display-logic trigger questions” line gives the range,
-across complete paths, of `n_gates`: the number of distinct questions on
-a path whose answers decide whether some other question is shown. It is
-a count of trigger questions, not of the display-logic combinations
-enumerated; one trigger question with five answer options can produce
-several combinations.
+The printed “Display-logic trigger questions” line gives the range of
+`n_gates` across complete paths. `n_gates` counts the distinct questions
+on a path whose answers decide whether some other question is shown. It
+counts trigger questions, and one trigger question with five answer
+options can produce several display-logic combinations.
 
 ## Burden
 
@@ -196,29 +197,31 @@ attr(report$burden, "basis")
 #> [1] "structural"
 ```
 
-- `points` is the GfS+ point total; `minutes` is `points` divided by the
-  points-per-minute rate (default 12); `index` is `points / 1500`, a 0–1
-  rescaling where 1.0 is the level Heimgartner and Axhausen’s sample
-  found rare.
+- `points` is the GfS+ point total. `minutes` is `points` divided by the
+  points-per-minute rate (default 12). `index` is `points / 1500`, where
+  1.0 is the level above which Heimgartner and Axhausen (2024) found
+  surveys to be rare. A survey can exceed 1.
 - `attr(, "basis")` is `"structural"` when the display-logic profile was
   enumerated (the default), `"naive"` when `profile = FALSE`, and
-  `"none"` when no path completes. The naive band scores each optional
-  question as independently hideable for the minimum and independently
-  shown for the maximum; that is faster, but its minimum can fall below
-  anything actually reachable and it reports no median. **Quote the
+  `"none"` when no path completes. The naive band treats each optional
+  question as hidden for the minimum and shown for the maximum,
+  independently of the others. It runs faster, but its minimum can fall
+  below any reachable combination and it reports no median. **Quote the
   structural basis.**
-- The **benchmark** line is the published GfS reference point: a median
+- The **benchmark** line is the published GfS reference point, a median
   of 399 points across the 79 scored survey waves in Heimgartner and
-  Axhausen (2024). The verdict line’s ratio is the survey’s median over
-  that 399.
+  Axhausen (2024). The headline’s ratio is the survey’s median divided
+  by 399.
 
-The median here is the middle value of the modelled skip-logic
-combinations, with each complete path given equal total weight – **not**
-the burden half of respondents exceed.
+The median here is the middle value of the modelled display-logic
+combinations, with each complete path given equal total weight. It
+describes the design. The burden that half of respondents exceeded comes
+from response data
+([`vignette("respondent-burden")`](https://pmpk20.github.io/surveyBurden/articles/respondent-burden.md)).
 [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md)
-returns to this.
+explains the weighting.
 
-Per-path structural figures are in `$paths`:
+`$paths` holds the structural figures for each path.
 
 ``` r
 
@@ -257,15 +260,16 @@ report$blocks[, c("block_name", "n_questions", "gfs_points", "share")]
 #> 12 Closing                   2          7 0.0619
 ```
 
-Question burden totalled by block, in survey order, with each block’s
-share of the all-questions-shown total. The printed bar chart is this
-`share` column. Use it to see which modules drive the length.
+This table totals question burden by block, in survey order, with each
+block’s share of the total when every question is shown. The printed bar
+chart is the `share` column. Use it to see which blocks make the survey
+long.
 
 ## Highest-burden questions
 
 The printed table lists the six questions with the largest single
-`gfs_points`. The full per-question detail is `report$items`, including
-the `score_basis` string that records the rule used for each:
+`gfs_points`. `report$items` holds the full detail for every question,
+including the `score_basis` string that records the rule used.
 
 ``` r
 
@@ -280,8 +284,8 @@ head(report$items[order(-report$items$gfs_points),
 #> 3 QID14       multi_choice         12 auto       multi-select, 6 options -> GfS…
 ```
 
-`score_flag` is `auto` (deterministic mapping), `inferred` (the mapping
-needed a documented judgement), `manual` or `unknown`. See
+`score_flag` is `auto` (the structure fixes the mapping), `inferred`
+(the mapping needed a documented judgement), `manual` or `unknown`. See
 [`vignette("gfs-scoring")`](https://pmpk20.github.io/surveyBurden/articles/gfs-scoring.md).
 
 ## Readability diagnostics
@@ -301,13 +305,13 @@ report$readability$long_grids[, c("question_id", "block_name", "n_rows")]
 #> 1 QID19       Travel          7
 ```
 
-Three counts: question stems over `stem_threshold` words (default 40),
-matrix row/option labels over `label_threshold` words (default 10), and
-matrix questions with more than 6 rows. These are **reading-load
-signals** reported separately – **none of them changes any GfS+ score**.
-A long grid or a wordy stem is flagged so it is visible without being
-silently included in the burden total. Long grids in particular invite
-satisficing (answering the same way down every row).
+This section gives three counts. They are question stems over
+`stem_threshold` words (default 40), matrix row or option labels over
+`label_threshold` words (default 10), and matrix questions with more
+than 6 rows. These are **reading-load signals**, reported alongside the
+GfS+ score and kept out of it, so a long grid or a wordy stem is visible
+on its own. Long grids invite satisficing (answering the same way down
+every row).
 
 ## Calculation certainty
 
@@ -351,25 +355,30 @@ report$certainty$scores
 #> [1] 0
 ```
 
-For each survey this counts which parts of the calculation rest on a
-documented approximation: how many complete paths have no unresolved
-display-logic question, how many conditional questions were enumerated
-in full (every state the model represents) versus approximated, whether
-every loop has a known cap, and the `auto` / `inferred` / `manual` /
-`unknown` split of the item scores. These are modelling diagnostics, not
-a certificate that the result matches the live survey: branch
-conditions, embedded-data conditions and unusual Qualtrics constructs
-are outside what they check. A result can be fully reproducible without
-every underlying interpretation being certain; this block makes the
-uncertain parts countable. Pass `certainty = FALSE` to skip it.
+For each survey, this section counts which parts of the calculation rest
+on a documented approximation. It reports
+
+- how many complete paths have every display-logic question resolved,
+- how many conditional questions were enumerated in full (every state
+  the model represents) and how many were approximated,
+- whether every loop has a known cap, and
+- how the item scores split between `auto`, `inferred`, `manual` and
+  `unknown`.
+
+These counts diagnose the model. Branch conditions, embedded-data
+conditions and unusual Qualtrics constructs fall outside what they
+check, so a full count certifies the model and leaves the live survey to
+you. A result can be fully reproducible while some interpretations stay
+uncertain, and this section makes the uncertain parts countable. Pass
+`certainty = FALSE` to skip it.
 
 ## QC warnings
 
-The printed report ends with plain-language flags: unscored question
-types (the reported burden is then an under-count), long stems, long
-labels, long grids, a high screen-out share, and a reminder that the
-structural range is not a respondent probability. The full vector is
-`report$warnings`.
+The printed report ends with plain-language flags. They cover unscored
+question types (which make the reported burden an under-count), long
+stems, long labels, long grids, a high screen-out share, and a reminder
+that the structural range uses model weights. `report$warnings` holds
+the full list.
 
 ``` r
 
@@ -380,14 +389,13 @@ report$warnings[1]
 ## Next
 
 - [`vignette("survey-revision")`](https://pmpk20.github.io/surveyBurden/articles/survey-revision.md)
-  – act on the heaviest blocks and questions.
+  acts on the heaviest blocks and questions.
 - [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md)
-  – how the paths and the burden spread are built.
+  shows how the paths and the burden spread are built.
 - [`vignette("calibration")`](https://pmpk20.github.io/surveyBurden/articles/calibration.md)
-  – the points-to-minutes assumption and the limitations.
+  covers the points-to-minutes assumption and the limitations.
 
 ## References
 
 - Heimgartner, D. and Axhausen, K. W. (2024). Predicting response rates
-  once again. *Findings*.
-  <https://findingspress.org/article/125481-predicting-response-rates-once-again>
+  once again. *Findings*. <https://doi.org/10.32866/001c.125481>

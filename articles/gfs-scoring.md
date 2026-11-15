@@ -177,7 +177,8 @@ lacks them (line counts, response-unit structure).
   block’s explicit cap. The naive ceiling uses the cap and the naive
   floor one iteration. A loop without an explicit cap counts its
   questions once, which can understate the upper figures. Display logic
-  inside a loop is left unenumerated.
+  inside a loop is evaluated in each iteration (see
+  [`vignette("paths-and-display-logic")`](https://pmpk20.github.io/surveyBurden/articles/paths-and-display-logic.md)).
 
 ### Question stems
 

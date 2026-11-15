@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
-title: "surveyBurden: An R package for assessing the response-burden of web surveys"
+title: "surveyBurden: Measuring the Response Burden of Web Surveys"
 version: 0.2.0
 abstract: >-
   An R package that estimates the response burden of a Qualtrics survey

@@ -1,3 +1,16 @@
+# surveyBurden (development version)
+
+* The maximum of the structural profile (`burden_max` in `path_burden_profile()`
+  and `$paths`, and the `max` row of `$burden`) is now the heaviest modelled
+  combination. It was taken from the cumulative weights with a small tolerance,
+  which skipped the heaviest combinations when a path had billions of
+  display-logic states and their weights were below about 1e-9. On one survey
+  the reported maximum rose from 1,310.5 to 1,355.5 points. Other quantiles and
+  surveys with fewer combinations are unchanged.
+* Removed the unused internal function `one_path_distribution()`.
+* The test suite now keeps tests that pin published figures or check results
+  worked out by hand (123 tests, from 401).
+
 # surveyBurden 0.3.0
 
 * Display logic inside Loop & Merge blocks is now evaluated in the

@@ -642,22 +642,6 @@ component_dist_fallback <- function(grp, parsed, gfs, stype, q_always, off = cha
   d
 }
 
-#' Burden distribution for one flow path (loops uniform over 1..max).
-#' @return tibble(burden, weight)
-#' @noRd
-one_path_distribution <- function(q_always, q_maybe, block_ids,
-                                  parsed, gfs, stype, qblock, loop_blocks,
-                                  memo = new.env(parent = emptyenv())) {
-  cp <- one_path_components(q_always, q_maybe, block_ids,
-                            parsed, gfs, stype, qblock, loop_blocks, memo)
-  d <- bw_df(cp$base, 1)
-  for (lp in cp$loops) {
-    d <- convolve_dist(d, bw_df(lp$per_iter * seq_len(lp$n), 1 / lp$n))
-  }
-  d <- convolve_dist(d, cp$display_dist)
-  tibble::tibble(burden = d$burden, weight = d$weight)
-}
-
 #' Burden contribution distribution from one gate and the questions it owns.
 #' @return data.frame(burden, weight)
 #' @noRd
@@ -744,11 +728,21 @@ gate_states <- function(v, deps, parsed, stype, off = character(0),
 lits_refs <- function(p, qid) p$refs[[qid]] %||% character(0)
 
 #' Weighted quantiles (step function, lower value).
+#'
+#' The maximum (`p = 1`) is the largest value with positive weight. Taking it
+#' from the cumulative weights instead would skip values whose combined weight
+#' falls inside the floating-point tolerance, which happens when a path has
+#' billions of display-logic combinations.
 #' @noRd
 weighted_quantile <- function(x, w, probs) {
+  keep <- w > 0
+  x <- x[keep]; w <- w[keep]
   o <- order(x); x <- x[o]; w <- w[o]
   cw <- cumsum(w) / sum(w)
-  vapply(probs, function(p) x[which(cw >= p - 1e-9)[1]], numeric(1))
+  vapply(probs, function(p) {
+    if (p >= 1) return(x[length(x)])
+    x[which(cw >= p - 1e-9)[1]]
+  }, numeric(1))
 }
 
 #' Convolve two (burden, weight) distributions; bin to keep size bounded.

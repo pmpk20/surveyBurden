@@ -3,6 +3,15 @@ test_that("weighted_quantile picks the right order statistics", {
   expect_equal(weighted_quantile(c(10, 20), c(3, 1), 0.5), 10)
 })
 
+test_that("the maximum is the heaviest value however small its weight", {
+  # A path with ~1e20 display-logic combinations gives its heaviest values
+  # weights of ~1e-20. The maximum must still be the heaviest value, and a
+  # value with zero weight must not count.
+  x <- c(100, 200, 300, 400)
+  expect_equal(weighted_quantile(x, c(1, 1, 1e-20, 0), c(0, 1)), c(100, 300))
+  expect_equal(weighted_quantile(x, c(0, 1, 1, 1e-20), 0), 200)
+})
+
 
 test_that("convolve_dist adds burdens and multiplies weights", {
   a <- data.frame(burden = c(0, 10), weight = c(1, 1))

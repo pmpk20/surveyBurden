@@ -471,7 +471,8 @@ branch_source_line <- function(nb, v, esc = identity) {
                                 if (length(quotas) == 1) "a quota" else "quotas",
                                 if (length(quotas) == 1) "is" else "are", lst(quotas)))
   if (!length(src)) src <- "conditions the package could not read"
-  if (length(src) > 1) src <- paste(paste(head(src, -1), collapse = ", "), "and", tail(src, 1))
+  n <- length(src)
+  if (n > 1) src <- paste(paste(src[-n], collapse = ", "), "and", src[n])
   sprintf("%d %s depend%s on %s. Every possible outcome of each branch is included.",
           nb, if (nb == 1) "branch" else "branches", if (nb == 1) "s" else "", src)
 }

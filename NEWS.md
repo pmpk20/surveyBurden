@@ -1,5 +1,6 @@
 # surveyBurden (development version)
 
+* New `plot_burden_profile()` draws each route's ex ante burden distribution from `path_burden_profile()` output (or a `burden_report()`): histogram of synthetic responses, interquartile range, median, range, and the pooled median. It handles screen-out routes, single-valued routes and surveys with many routes (`max_routes`). Needs the ggplot2 package (suggested). `burden_report()` objects now keep the structural profile they computed as an attribute.
 * The maximum of the structural profile (`burden_max` in `path_burden_profile()`
   and `$paths`, and the `max` row of `$burden`) is now the heaviest modelled
   combination. It was taken from the cumulative weights with a small tolerance,

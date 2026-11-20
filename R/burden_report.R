@@ -262,6 +262,7 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
 
   # ---- $burden --------------------------------------------------------
   probs <- c("min", "p25", "median", "p75", "max")
+  path_profile <- NULL
   if (no_complete) {
     # every structural path screens out: there is no completing path to
     # summarise a burden spread over. Report NA and flag it (below); the
@@ -276,6 +277,7 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
     paths_tbl$burden_min    <- pbp$burden_min[m]
     paths_tbl$burden_median <- pbp$burden_median[m]
     paths_tbl$burden_max    <- pbp$burden_max[m]
+    path_profile <- pbp
     pooled <- do.call(rbind, pbp$profile[!pbp$terminates_early])
     pts <- weighted_quantile(pooled$burden, pooled$weight, c(0, .25, .5, .75, 1))
     basis <- "structural"
@@ -414,6 +416,7 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
   attr(out, "rare_threshold")    <- rare_threshold
   attr(out, "benchmark")         <- list(median_points = 399, n_waves = 79L)
   attr(out, "profile_used")      <- isTRUE(profile)
+  attr(out, "path_profile")      <- path_profile
   attr(out, "gate_range")        <- gate_range
   class(out) <- "burden_report"
   out

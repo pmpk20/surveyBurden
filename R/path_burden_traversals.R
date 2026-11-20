@@ -26,6 +26,26 @@
 #' used per route is in `attr(x, "method")`. These are model weights, not
 #' observed frequencies.
 #'
+#' **Assumed answer frequencies.** `answer_weights` replaces selected question
+#' or stored-field state distributions. Question weights are conditional on
+#' being shown and independent across questions. A multi-select entry weights
+#' whole subsets, not individual choices independently. Omitted values have
+#' zero probability within a supplied entry; unspecified questions and fields
+#' retain their structural convention. Raw choice IDs are projected onto every
+#' referenced choice, without the unweighted six-reference subset limit.
+#' Weighted routing integrates compatible flow assignments before combining
+#' distinct routes; zero-probability routes are omitted. `complete_only`
+#' conditions on the remaining completion routes. Supported weighted flow
+#' predicates must be fully specified and use earlier unconditional non-loop
+#' question triggers or constant stored fields. Unsupported weighted flow logic
+#' fails explicitly. Output is labelled burden under assumed answer frequencies,
+#' rather than a forecast. The profile and report APIs do not use these weights.
+#' Weighted flow assignments may produce several components for one route;
+#' sampling and rule rejection operate within each component. The `method` and
+#' `rejected` attributes can therefore contain repeated path IDs in weighted
+#' mode. Each component retains its assigned total model weight after rule
+#' rejection, following the existing conditional-rejection convention.
+#'
 #' **Derived fields.** `field_rules` derives stored fields from the answers
 #' drawn in a traversal, for values that survey code (for example page
 #' JavaScript) computes and the survey file does not record. Each element,
@@ -60,7 +80,8 @@
 #' @inheritParams path_burden_profile
 #' @param qsf A `qsf_raw` object or a path accepted by [read_qsf()].
 #' @param method `"auto"`, `"exact"` or `"sample"`.
-#' @param n_draws Traversals sampled per route.
+#' @param n_draws Traversals sampled per route, or per fixed flow assignment
+#'   and route component when `answer_weights` affects flow routing.
 #' @param seed Random seed for sampling. The global random-number state is
 #'   restored afterwards.
 #' @param field_rules Optional named list of derivation rules (see Details).
@@ -72,6 +93,15 @@
 #'   `"summary"` (weighted quantiles only; draws are not kept).
 #' @param probs Quantile probabilities for `output = "summary"`.
 #' @param chunk Draws simulated at a time when sampling.
+#' @param answer_weights Optional named list of non-negative numeric weight
+#'   vectors. Names identify QSF question IDs or stored fields prefixed with
+#'   `@`. Vector names are raw choice IDs for single-choice questions, complete
+#'   `+`-joined choice subsets for multi-select questions, or raw stored-field
+#'   values. An empty state name means unanswered for a question or missing for
+#'   a stored field. Positive unanswered weight is incompatible with a forced
+#'   response when `respect_force_response = TRUE`. Weights are normalised;
+#'   `NULL` or `list()` retains the existing unweighted result. Joint profile
+#'   data frames are not supported.
 #'
 #' @return For `"long"`, a tibble with `traversal_id`, `path_id`, `weight`,
 #'   `block_id`, `flow_order` (the block's position in the survey flow),
@@ -89,6 +119,9 @@
 #'                           package = "surveyBurden"))
 #' x <- path_burden_traversals(q, method = "exact")
 #' head(x)
+#' weighted <- path_burden_traversals(q, method = "exact",
+#'   answer_weights = list(QID5 = c("1" = .4, "2" = .4, "3" = .1, "4" = .1)))
+#' head(weighted)
 #' }
 #' @export
 path_burden_traversals <- function(qsf, method = c("auto", "exact", "sample"),
@@ -100,7 +133,7 @@ path_burden_traversals <- function(qsf, method = c("auto", "exact", "sample"),
                                    respect_force_response = TRUE,
                                    output = c("long", "wide", "summary"),
                                    probs = c(0, .1, .25, .5, .75, .9, 1),
-                                   chunk = 10000L) {
+                                   chunk = 10000L, answer_weights = NULL) {
   method <- match.arg(method)
   output <- match.arg(output)
   qsf <- if (inherits(qsf, "qsf_raw")) qsf else read_qsf(qsf)
@@ -129,6 +162,27 @@ path_burden_traversals <- function(qsf, method = c("auto", "exact", "sample"),
   if (!length(sel)) cli::cli_abort("No routes to traverse.")
 
   ctx <- traversal_context(qsf, scored, blocks, rules, respect_force_response)
+  answer_weights <- normalise_answer_weights(answer_weights, qsf, ctx, field_domains)
+  components <- NULL
+  if (!is.null(answer_weights)) {
+    parsed_vars <- unique(unlist(lapply(ctx$parsed, `[[`, "vars")))
+    unsupported_aliases <- intersect(names(answer_weights),
+      sub("^@\\?", "@", parsed_vars[startsWith(parsed_vars, "@?")]))
+    if (length(unsupported_aliases)) {
+      cli::cli_abort("{.arg answer_weights} cannot evaluate the unsupported stored-field comparison for {.val {unsupported_aliases}}.")
+    }
+    ctx$answer_payloads <- index_questions(qsf)
+    components <- answer_weight_routes(qsf, ctx, paths, sel, answer_weights,
+                                       field_domains, max_paths)
+    positive <- vapply(components, function(component) component$mass > 0, logical(1))
+    components <- components[positive]
+    if (!length(components)) {
+      cli::cli_abort("No selected route has positive probability under {.arg answer_weights}.")
+    }
+    sel <- vapply(components, `[[`, integer(1), "path_index")
+    route_mass <- vapply(components, `[[`, numeric(1), "mass")
+    route_mass <- route_mass / sum(route_mass)
+  }
 
   if (exists(".Random.seed", envir = globalenv(), inherits = FALSE)) {
     old_seed <- get(".Random.seed", envir = globalenv())
@@ -144,7 +198,8 @@ path_burden_traversals <- function(qsf, method = c("auto", "exact", "sample"),
   unres <- list()
   for (k in seq_along(sel)) {
     i <- sel[k]
-    route <- route_spec(ctx, paths, i, loop_weights)
+    route <- route_spec(ctx, paths, i, loop_weights, answer_weights,
+                        if (is.null(components)) NULL else components[[k]]$fixed)
     unres[[k]] <- route$unresolved
     route_n_rule <- any(route$bids %in% n_targets)
     if (route_n_rule && method == "exact") {
@@ -170,10 +225,12 @@ path_burden_traversals <- function(qsf, method = c("auto", "exact", "sample"),
       if (!any(ok)) cli::cli_abort("Every traversal of path {paths$path_id[i]} was rejected by {.arg field_rules}.")
       rej[k] <- sum(res$w[!ok]) / sum(res$w)
       res <- subset_rows(res, ok)
-      res$w <- res$w / sum(res$w) / n_paths
+      res$w <- if (is.null(answer_weights)) res$w / sum(res$w) / n_paths else
+        res$w / sum(res$w) * route_mass[k]
     } else {
       res <- sample_route(ctx, route, n_draws, chunk, paths$path_id[i],
-                          w_each = 1 / (n_paths * n_draws),
+                          w_each = if (is.null(answer_weights)) 1 / (n_paths * n_draws) else
+                            route_mass[k] / n_draws,
                           blocks = if (output == "summary") blocks else NULL)
       rej[k] <- res$rejected_share
     }
@@ -198,6 +255,15 @@ path_burden_traversals <- function(qsf, method = c("auto", "exact", "sample"),
     "states and each loop iteration count (loop_weights, equal by default) are",
     "equally weighted branches; same-block loop triggers are drawn afresh per",
     "iteration. Model weights, not observed frequencies.")
+  if (!is.null(answer_weights)) {
+    attr(out, "answer_weights") <- answer_weights
+    attr(out, "convention") <- paste(
+      "Burden under assumed answer frequencies, conditional on the selected",
+      "routes. Question distributions apply when shown and are independent",
+      "across questions; multiselect states are whole subsets. Unspecified",
+      "states and loop counts retain their structural weighting convention.",
+      "These are assumptions, not a forecast or observed frequencies.")
+  }
   out
 }
 
@@ -277,7 +343,7 @@ traversal_context <- function(qsf, scored, blocks, rules, respect_force_response
 
 #' What one route needs: blocks, shown sets, triggers and their states.
 #' @noRd
-route_spec <- function(ctx, paths, i, loop_weights) {
+route_spec <- function(ctx, paths, i, loop_weights, answer_weights = NULL, fixed = NULL) {
   q_always <- paths$q_always[[i]]; q_maybe <- paths$q_maybe[[i]]
   bids <- paths$block_ids[[i]]
   bids <- bids[bids %in% ctx$blocks$block_id]
@@ -329,6 +395,36 @@ route_spec <- function(ctx, paths, i, loop_weights) {
   }), fields)
   fkind <- stats::setNames(vapply(fstates, function(s) if (all(s %in% c("TRUE", "FALSE"))) "free" else "field",
                                   character(1)), fields)
+  gprob <- fprob <- list()
+  if (!is.null(answer_weights)) {
+    for (v in intersect(c(gate_q, fields), union(names(answer_weights), names(fixed)))) {
+      weights <- if (v %in% names(fixed)) stats::setNames(1, fixed[[v]]) else answer_weights[[v]]
+      weights <- weights[weights > 0]
+      if (v %in% gate_q) {
+        refs <- if (v %in% inputs) ctx$choices[[v]] else
+          unique(unlist(lapply(cond, function(q) lits_refs(parsed[[q]], v))))
+        states <- vapply(strsplit(names(weights), "+", fixed = TRUE), function(s) {
+          paste(sort(intersect(s, refs)), collapse = "+")
+        }, character(1))
+        distribution <- traversal_weighted_states(states, weights)
+        gstates[[v]] <- distribution$states
+        gprob[[v]] <- distribution$prob
+      } else {
+        states <- names(weights)
+        states[states == ""] <- NA_KEY
+        known_comparison <- any(vapply(cond, function(q) {
+          length(parsed[[q]]$fields[[v]]) > 0L
+        }, logical(1)))
+        if (known_comparison) fkind[[v]] <- "field"
+        if (identical(fkind[[v]], "free")) {
+          states <- traversal_free_field_states(v, states, cond, ctx)
+        }
+        distribution <- traversal_weighted_states(states, weights)
+        fstates[[v]] <- distribution$states
+        fprob[[v]] <- distribution$prob
+      }
+    }
+  }
 
   lw <- lapply(bids, function(b) {
     n <- ctx$loop_max[[b]]
@@ -347,8 +443,43 @@ route_spec <- function(ctx, paths, i, loop_weights) {
   list(path_id = paths$path_id[i], bids = bids, q_always = q_always, q_maybe = q_maybe,
        route_q = c(q_always, q_maybe), cond = cond, gate_q = gate_q, gstates = gstates,
        fields = fields, fstates = fstates, fkind = fkind, loop_w = lw,
+       gprob = gprob, fprob = fprob,
        loop_shared = loop_shared,
        unresolved = if (length(unres)) unique(do.call(rbind, unres)) else NULL)
+}
+
+#' Combine raw answer values that imply the same structural state.
+#' @noRd
+traversal_weighted_states <- function(states, weights) {
+  positive <- weights > 0
+  states <- states[positive]; weights <- weights[positive]
+  support <- unique(states)
+  mass <- vapply(support, function(state) sum(weights[states == state]), numeric(1))
+  list(states = support, prob = mass / sum(mass))
+}
+
+#' Translate a value distribution for an existing free stored-field gate.
+#' @noRd
+traversal_free_field_states <- function(variable, states, cond, ctx) {
+  operand <- sub("^@\\??", "", variable)
+  find_literals <- function(node) {
+    if (!is.list(node)) return(list())
+    if (identical(node$LeftOperand, operand)) return(list(node))
+    unlist(lapply(node, find_literals), recursive = FALSE)
+  }
+  literals <- unlist(lapply(cond, function(q) find_literals(ctx$answer_payloads[[q]]$DisplayLogic)),
+                     recursive = FALSE)
+  if (!length(literals) || any(!vapply(literals, function(lit) lit$Operator %in% branch_ops, logical(1)))) {
+    cli::cli_abort("{.arg answer_weights} cannot evaluate the unsupported stored-field comparison for {.val {variable}}.")
+  }
+  outcomes <- lapply(literals, function(lit) vapply(states, function(state) {
+    isTRUE(eval_branch_op(lit$Operator, if (identical(state, NA_KEY)) NA_character_ else state,
+                          as.character(lit$RightOperand %||% "")))
+  }, logical(1)))
+  if (!all(vapply(outcomes, identical, logical(1), outcomes[[1]]))) {
+    cli::cli_abort("{.arg answer_weights} for {.val {variable}} cannot represent different comparison outcomes with one free gate.")
+  }
+  as.character(outcomes[[1]])
 }
 
 #' Keep a subset of traversal rows.
@@ -531,7 +662,7 @@ walk_route <- function(ctx, route, mode, n, max_traversals = Inf) {
       if (in_loop) { v <- col(jn); v[hid] <- ""; X$cols[[jn]] <<- v }
       # mark the shown rows: exact branching replicates and reorders rows
       X$cols[[".shown"]] <<- s
-      branch(q, s, route$gstates[[q]])
+      branch(q, s, route$gstates[[q]], route$gprob[[q]])
       if (in_loop) {
         s2 <- X$cols[[".shown"]]; v <- col(jn); v[s2] <- col(q)[s2]; X$cols[[jn]] <<- v
       }
@@ -548,7 +679,7 @@ walk_route <- function(ctx, route, mode, n, max_traversals = Inf) {
   }
 
   # stored fields and free gates: one state per traversal, drawn at the start
-  for (f in route$fields) branch(f, rep(TRUE, nrow_x()), route$fstates[[f]])
+  for (f in route$fields) branch(f, rep(TRUE, nrow_x()), route$fstates[[f]], route$fprob[[f]])
 
   for (k in seq_along(route$bids)) {
     b <- route$bids[k]

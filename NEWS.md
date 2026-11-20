@@ -1,5 +1,13 @@
 # surveyBurden (development version)
 
+* `path_burden_traversals()` accepts `answer_weights`, a named list of
+  assumed answer frequencies for question answers or stored fields. Results
+  are labelled "under assumed answer frequencies". Fixed answers, complete
+  multiple-answer subsets and compatible flow routes are weighted; hidden
+  questions remain unanswered and zero-weight routes are omitted. The default
+  output is unchanged. Joint profile data frames and weighting in
+  `path_burden_profile()` / `burden_report()` remain future work.
+
 * The maximum of the structural profile (`burden_max` in `path_burden_profile()`
   and `$paths`, and the `max` row of `$burden`) is now the heaviest modelled
   combination. It was taken from the cumulative weights with a small tolerance,

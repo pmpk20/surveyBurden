@@ -21,7 +21,8 @@ path_burden_traversals(
   respect_force_response = TRUE,
   output = c("long", "wide", "summary"),
   probs = c(0, 0.1, 0.25, 0.5, 0.75, 0.9, 1),
-  chunk = 10000L
+  chunk = 10000L,
+  answer_weights = NULL
 )
 }
 \arguments{
@@ -29,7 +30,8 @@ path_burden_traversals(
 
 \item{method}{\code{"auto"}, \code{"exact"} or \code{"sample"}.}
 
-\item{n_draws}{Traversals sampled per route.}
+\item{n_draws}{Traversals sampled per route, or per fixed flow assignment
+and route component when \code{answer_weights} affects flow routing.}
 
 \item{seed}{Random seed for sampling. The global random-number state is
 restored afterwards.}
@@ -76,6 +78,16 @@ choices cover all its choices. \code{FALSE} gives the 0.2.0 behaviour.}
 \item{probs}{Quantile probabilities for \code{output = "summary"}.}
 
 \item{chunk}{Draws simulated at a time when sampling.}
+
+\item{answer_weights}{Optional named list of non-negative numeric weight
+vectors. Names identify QSF question IDs or stored fields prefixed with
+\code{@}. Vector names are raw choice IDs for single-choice questions, complete
+\code{+}-joined choice subsets for multi-select questions, or raw stored-field
+values. An empty state name means unanswered for a question or missing for
+a stored field. Positive unanswered weight is incompatible with a forced
+response when \code{respect_force_response = TRUE}. Weights are normalised;
+\code{NULL} or \code{list()} retains the existing unweighted result. Joint profile
+data frames are not supported.}
 }
 \value{
 For \code{"long"}, a tibble with \code{traversal_id}, \code{path_id}, \code{weight},
@@ -116,6 +128,26 @@ traversals is at most \code{max_traversals}, and samples otherwise. The method
 used per route is in \code{attr(x, "method")}. These are model weights, not
 observed frequencies.
 
+\strong{Assumed answer frequencies.} \code{answer_weights} replaces selected question
+or stored-field state distributions. Question weights are conditional on
+being shown and independent across questions. A multi-select entry weights
+whole subsets, not individual choices independently. Omitted values have
+zero probability within a supplied entry; unspecified questions and fields
+retain their structural convention. Raw choice IDs are projected onto every
+referenced choice, without the unweighted six-reference subset limit.
+Weighted routing integrates compatible flow assignments before combining
+distinct routes; zero-probability routes are omitted. \code{complete_only}
+conditions on the remaining completion routes. Supported weighted flow
+predicates must be fully specified and use earlier unconditional non-loop
+question triggers or constant stored fields. Unsupported weighted flow logic
+fails explicitly. Output is labelled burden under assumed answer frequencies,
+rather than a forecast. The profile and report APIs do not use these weights.
+Weighted flow assignments may produce several components for one route;
+sampling and rule rejection operate within each component. The \code{method} and
+\code{rejected} attributes can therefore contain repeated path IDs in weighted
+mode. Each component retains its assigned total model weight after rule
+rejection, following the existing conditional-rejection convention.
+
 \strong{Derived fields.} \code{field_rules} derives stored fields from the answers
 drawn in a traversal, for values that survey code (for example page
 JavaScript) computes and the survey file does not record. Each element,
@@ -153,5 +185,8 @@ q <- read_qsf(system.file("extdata", "demo_travel_survey.qsf",
                           package = "surveyBurden"))
 x <- path_burden_traversals(q, method = "exact")
 head(x)
+weighted <- path_burden_traversals(q, method = "exact",
+  answer_weights = list(QID5 = c("1" = .4, "2" = .4, "3" = .1, "4" = .1)))
+head(weighted)
 }
 }

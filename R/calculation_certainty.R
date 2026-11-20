@@ -280,10 +280,7 @@ certainty_lines <- function(x) {
     v <- unique(unlist(strsplit(x$branches$trigger, " / ", fixed = TRUE)))
     v <- v[v != "(unparsed)"]
     nb <- nrow(x$branches)
-    routes <- c(routes, sprintf(
-      "%d %s depend%s on answers given during the survey%s. Both outcomes of each branch are included.",
-      nb, pl(nb, "branch", "branches"), if (nb == 1) "s" else "",
-      if (length(v)) paste0(" (", esc(paste(v, collapse = ", ")), ")") else ""))
+    routes <- c(routes, branch_source_line(nb, v, esc))
   }
 
   # display logic
@@ -367,10 +364,7 @@ certainty_lines <- function(x) {
     v <- unique(unlist(strsplit(x$branches$trigger, " / ", fixed = TRUE)))
     v <- v[v != "(unparsed)"]
     nb <- nrow(x$branches)
-    routes <- c(routes, sprintf(
-      "%d %s depend%s on answers given during the survey%s. Both outcomes of each branch are included.",
-      nb, pl(nb, "branch", "branches"), if (nb == 1) "s" else "",
-      if (length(v)) paste0(" (", esc(paste(v, collapse = ", ")), ")") else ""))
+    routes <- c(routes, branch_source_line(nb, v, esc))
   }
 
   # display logic
@@ -456,4 +450,28 @@ print_calculation_certainty_body <- function(x) {
   cli::cli_text(ln$scores)
 
   invisible(x)
+}
+
+#' One plain-English line saying what the survey's branches depend on:
+#' answers to questions asked in the survey, stored values (panel variables,
+#' embedded data) or quota results. `v` holds branch trigger names, where
+#' stored values start with "@" and quotas look like "@qo://QO_x/QuotaMet".
+#' @noRd
+branch_source_line <- function(nb, v, esc = identity) {
+  is_field <- startsWith(v, "@")
+  is_quota <- is_field & grepl("^@qo://", v)
+  quotas <- unique(sub("^@qo://([^/]+).*$", "\\1", v[is_quota]))
+  fields <- unique(sub("^@", "", v[is_field & !is_quota]))
+  qs     <- unique(v[!is_field])
+  lst <- function(x) esc(paste(x, collapse = ", "))
+  src <- c(
+    if (length(qs))     sprintf("answers to questions in the survey (%s)", lst(qs)),
+    if (length(fields)) sprintf("stored values such as panel variables (%s)", lst(fields)),
+    if (length(quotas)) sprintf("whether %s %s full (%s)",
+                                if (length(quotas) == 1) "a quota" else "quotas",
+                                if (length(quotas) == 1) "is" else "are", lst(quotas)))
+  if (!length(src)) src <- "conditions the package could not read"
+  if (length(src) > 1) src <- paste(paste(head(src, -1), collapse = ", "), "and", tail(src, 1))
+  sprintf("%d %s depend%s on %s. Every possible outcome of each branch is included.",
+          nb, if (nb == 1) "branch" else "branches", if (nb == 1) "s" else "", src)
 }

@@ -25,7 +25,7 @@ test_that("an unmapped question type scores NA and burden_report warns it is an 
   r <- suppressWarnings(burden_report(sx(), profile = FALSE, certainty = FALSE))
   w <- paste(r$warnings, collapse = " | ")
   expect_match(w, "could not be scored", ignore.case = TRUE)
-  expect_match(w, "UNDER-count", ignore.case = TRUE)
+  expect_match(w, "under-counted", ignore.case = TRUE)
   expect_match(w, "QID_sbs")
 })
 

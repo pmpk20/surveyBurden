@@ -491,10 +491,10 @@ respondent_blocks <- function(qsf, responses, scheme = gfs_scheme(), id_col = NU
   }
   if (sum(respondents$n_unresolved_items) + sum(respondents$n_unresolved_branches) > 0L) {
     cli::cli_inform(c(
-      i = paste("Logic not settled by the data for {sum(respondents$n_unresolved_items > 0 |",
+      i = paste("The data did not settle the survey logic for {sum(respondents$n_unresolved_items > 0 |",
                 "respondents$n_unresolved_branches > 0)} respondent{?s}: {sum(respondents$n_unresolved_items)}",
                 "question decision{?s} and {sum(respondents$n_unresolved_branches)} branch decision{?s}",
-                "fell back to whether they answered."),
+                "were decided by whether they answered."),
       i = "See {.code attr(x, \"respondents\")}."
     ))
   }

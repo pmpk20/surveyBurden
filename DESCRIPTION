@@ -21,6 +21,7 @@ Depends:
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Suggests:
+    ggplot2,
     httr2,
     knitr,
     rmarkdown,

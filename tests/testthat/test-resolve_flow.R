@@ -57,7 +57,7 @@ test_that("path explosion is capped with a clear error", {
     lapply(1:20, function(i) n_branch(paste0("BR", i), n_block(paste0("X", i)))),
     list(n_block("END"))
   )
-  expect_error(enumerate_paths(many, max_paths = 500), "path space")
+  expect_error(enumerate_paths(many, max_paths = 500), "too many routes")
 })
 
 # --- mutually exclusive branch detection ---

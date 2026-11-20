@@ -1,5 +1,7 @@
 # surveyBurden (development version)
 
+* New `plot_burden_profile()` draws each route's ex ante burden distribution from `path_burden_profile()` output (or a `burden_report()`): histogram of synthetic responses, interquartile range, median, range, and the pooled median. Each route's histogram is scaled to the same maximum height and every bin is outlined. Routes with a single value are drawn as a dot. Complete routes are labelled "Route 1" to "Route n" in `path_id` order, and routes that end early "Ending early 1" and so on; the plot data keeps the original `path_id`. If no route is complete, the routes that end early are drawn. The footer describes only what is drawn. It handles surveys with many routes (`max_routes`). Needs the ggplot2 package (suggested). `burden_report()` objects now keep the route profile they computed as an attribute.
+* Printed output is now in plain English. `calculation_certainty()`, `burden_report()` (print, `summary()` and its warnings) and related messages say "route" instead of "path" and no longer use "structural", "trigger", "component", "convolved", "primary-gate" or "enumerated". Function and column names, returned values and all computed numbers are unchanged.
 * The maximum of the structural profile (`burden_max` in `path_burden_profile()`
   and `$paths`, and the `max` row of `$burden`) is now the heaviest modelled
   combination. It was taken from the cumulative weights with a small tolerance,

@@ -251,19 +251,187 @@ format.calculation_certainty <- function(x, ...) {
   cli::cli_fmt(print_calculation_certainty_body(x), collapse = FALSE)
 }
 
-print_calculation_certainty_body <- function(x) {
+# Plain-language lines shared by print.calculation_certainty() and the
+# certainty section of print.burden_report(). Returns a named list of
+# character vectors (routes, display, loops, scores). Braces are doubled so
+# the text can go through cli.
+certainty_lines <- function(x) {
   p <- x$paths; d <- x$display_logic; l <- x$loops; s <- x$scores
+  esc <- function(v) gsub("}", "}}", gsub("{", "{{", v, fixed = TRUE), fixed = TRUE)
+  num <- function(v) format(v, big.mark = ",", scientific = FALSE, trim = TRUE)
+  pl  <- function(n, one, many) if (n == 1) one else many
+
+  # routes
+  routes <- if (p$n_full == 0L) {
+    "There are no complete routes."
+  } else {
+    on <- if (p$n_with_unresolved == 0L) {
+      "No item is shown only if earlier answers meet a display condition."
+    } else {
+      who <- if (p$n_full == 1L) "it" else if (p$n_with_unresolved == p$n_full) {
+        if (p$n_full == 2L) "both" else "all of them"
+      } else sprintf("%d of them", p$n_with_unresolved)
+      sprintf("On %s, some items are shown only if earlier answers meet a display condition.",
+              who)
+    }
+    c(sprintf("%d complete %s. %s", p$n_full, pl(p$n_full, "route", "routes"), on))
+  }
+  if (nrow(x$branches) > 0) {
+    v <- unique(unlist(strsplit(x$branches$trigger, " / ", fixed = TRUE)))
+    v <- v[v != "(unparsed)"]
+    nb <- nrow(x$branches)
+    routes <- c(routes, sprintf(
+      "%d %s depend%s on answers given during the survey%s. Both outcomes of each branch are included.",
+      nb, pl(nb, "branch", "branches"), if (nb == 1) "s" else "",
+      if (length(v)) paste0(" (", esc(paste(v, collapse = ", ")), ")") else ""))
+  }
+
+  # display logic
+  display <- if (d$n_conditional == 0L) {
+    "No item has display logic that depends on earlier answers."
+  } else {
+    n <- d$n_conditional
+    lim <- sprintf("(limit %s combinations per linked set)", num(d$max_condition_states))
+    first <- sprintf("%d %s display logic.", n, pl(n, "item has", "items have"))
+    ev <- if (d$n_exact == n) {
+      sprintf("%s evaluated for every combination of answers %s.",
+              if (n == 1) "It was" else sprintf("All %d were", n), lim)
+    } else {
+      sprintf("%d %s evaluated for every combination of answers %s.",
+              d$n_exact, pl(d$n_exact, "was", "were"), lim)
+    }
+    ap <- if (d$n_approx == 0L) "None was approximated."
+          else sprintf("%d %s approximated.", d$n_approx, pl(d$n_approx, "was", "were"))
+    c(first, ev, ap)
+  }
+  if (isTRUE(d$cross_component_independence)) {
+    display <- c(display, sprintf(
+      "The %d unlinked sets of display conditions are combined as if independent.",
+      d$n_components))
+  }
+  if (isTRUE(d$n_binary_field_gates > 0L)) {
+    display <- c(display, sprintf(
+      "%d stored %s used in a test the package cannot evaluate. Each is treated as true or false, and both outcomes are included.",
+      d$n_binary_field_gates, pl(d$n_binary_field_gates, "field is", "fields are")))
+  }
+
+  # loops
+  loops <- if (l$n_known + l$n_unknown == 0L) {
+    "There are no Loop & Merge blocks."
+  } else {
+    out <- character(0)
+    if (l$n_known > 0L) {
+      b <- sprintf("%s: 0 to %s repetitions.", esc(l$bounds$block_name), l$bounds$max_iter)
+      out <- c(out, paste(c(sprintf("%d Loop & Merge %s a fixed maximum.", l$n_known,
+                                    pl(l$n_known, "block has", "blocks have")), b),
+                          collapse = " "))
+    }
+    if (l$n_unknown > 0L) {
+      out <- c(out, sprintf("%d Loop & Merge %s no fixed maximum.", l$n_unknown,
+                            pl(l$n_unknown, "block has", "blocks have")))
+    }
+    out
+  }
+
+  scores <- sprintf("%d %s scored automatically, %d by inference, %d from user input, %d unscored.",
+                    s$auto, pl(s$auto, "item", "items"), s$inferred, s$manual, s$unknown)
+  list(routes = routes, display = display, loops = loops, scores = scores)
+}
+
+# Plain-language lines shared by print.calculation_certainty() and the
+# certainty section of print.burden_report(). Returns a named list of
+# character vectors (routes, display, loops, scores). Braces are doubled so
+# the text can go through cli.
+certainty_lines <- function(x) {
+  p <- x$paths; d <- x$display_logic; l <- x$loops; s <- x$scores
+  esc <- function(v) gsub("}", "}}", gsub("{", "{{", v, fixed = TRUE), fixed = TRUE)
+  num <- function(v) format(v, big.mark = ",", scientific = FALSE, trim = TRUE)
+  pl  <- function(n, one, many) if (n == 1) one else many
+
+  # routes
+  routes <- if (p$n_full == 0L) {
+    "There are no complete routes."
+  } else {
+    on <- if (p$n_with_unresolved == 0L) {
+      "No item is shown only if earlier answers meet a display condition."
+    } else {
+      who <- if (p$n_full == 1L) "it" else if (p$n_with_unresolved == p$n_full) {
+        if (p$n_full == 2L) "both" else "all of them"
+      } else sprintf("%d of them", p$n_with_unresolved)
+      sprintf("On %s, some items are shown only if earlier answers meet a display condition.",
+              who)
+    }
+    c(sprintf("%d complete %s. %s", p$n_full, pl(p$n_full, "route", "routes"), on))
+  }
+  if (nrow(x$branches) > 0) {
+    v <- unique(unlist(strsplit(x$branches$trigger, " / ", fixed = TRUE)))
+    v <- v[v != "(unparsed)"]
+    nb <- nrow(x$branches)
+    routes <- c(routes, sprintf(
+      "%d %s depend%s on answers given during the survey%s. Both outcomes of each branch are included.",
+      nb, pl(nb, "branch", "branches"), if (nb == 1) "s" else "",
+      if (length(v)) paste0(" (", esc(paste(v, collapse = ", ")), ")") else ""))
+  }
+
+  # display logic
+  display <- if (d$n_conditional == 0L) {
+    "No item has display logic that depends on earlier answers."
+  } else {
+    n <- d$n_conditional
+    lim <- sprintf("(limit %s combinations per linked set)", num(d$max_condition_states))
+    first <- sprintf("%d %s display logic.", n, pl(n, "item has", "items have"))
+    ev <- if (d$n_exact == n) {
+      sprintf("%s evaluated for every combination of answers %s.",
+              if (n == 1) "It was" else sprintf("All %d were", n), lim)
+    } else {
+      sprintf("%d %s evaluated for every combination of answers %s.",
+              d$n_exact, pl(d$n_exact, "was", "were"), lim)
+    }
+    ap <- if (d$n_approx == 0L) "None was approximated."
+          else sprintf("%d %s approximated.", d$n_approx, pl(d$n_approx, "was", "were"))
+    c(first, ev, ap)
+  }
+  if (isTRUE(d$cross_component_independence)) {
+    display <- c(display, sprintf(
+      "The %d unlinked sets of display conditions are combined as if independent.",
+      d$n_components))
+  }
+  if (isTRUE(d$n_binary_field_gates > 0L)) {
+    display <- c(display, sprintf(
+      "%d stored %s used in a test the package cannot evaluate. Each is treated as true or false, and both outcomes are included.",
+      d$n_binary_field_gates, pl(d$n_binary_field_gates, "field is", "fields are")))
+  }
+
+  # loops
+  loops <- if (l$n_known + l$n_unknown == 0L) {
+    "There are no Loop & Merge blocks."
+  } else {
+    out <- character(0)
+    if (l$n_known > 0L) {
+      b <- sprintf("%s: 0 to %s repetitions.", esc(l$bounds$block_name), l$bounds$max_iter)
+      out <- c(out, paste(c(sprintf("%d Loop & Merge %s a fixed maximum.", l$n_known,
+                                    pl(l$n_known, "block has", "blocks have")), b),
+                          collapse = " "))
+    }
+    if (l$n_unknown > 0L) {
+      out <- c(out, sprintf("%d Loop & Merge %s no fixed maximum.", l$n_unknown,
+                            pl(l$n_unknown, "block has", "blocks have")))
+    }
+    out
+  }
+
+  scores <- sprintf("%d %s scored automatically, %d by inference, %d from user input, %d unscored.",
+                    s$auto, pl(s$auto, "item", "items"), s$inferred, s$manual, s$unknown)
+  list(routes = routes, display = display, loops = loops, scores = scores)
+}
+
+print_calculation_certainty_body <- function(x) {
+  ln <- certainty_lines(x)
 
   cli::cli_h1("Calculation certainty: {x$survey_name}")
 
-  cli::cli_h2("Paths")
-  cli::cli_text("{p$n_exact} of {p$n_full} complete paths have no unresolved display-logic question; {p$n_with_unresolved} carry at least one.")
-  if (nrow(x$branches) > 0) {
-    cli::cli_text("{nrow(x$branches)} flow branches; both outcomes of each are enumerated, but which one a given respondent takes is unknown before fieldwork:")
-    for (i in seq_len(nrow(x$branches))) {
-      cli::cli_text("  {x$branches$flow_id[i]}: trigger {x$branches$trigger[i]}")
-    }
-  }
+  cli::cli_h2("Routes")
+  for (t in ln$routes) cli::cli_text(t)
 
   rb <- x$randomisers
   if (!is.null(rb)) rb <- rb[rb$shows_blocks, ]
@@ -271,32 +439,21 @@ print_calculation_certainty_body <- function(x) {
     cli::cli_h2("Randomisers")
     for (i in seq_len(nrow(rb))) {
       if (rb$enumerated[i]) {
-        cli::cli_text("  {rb$flow_id[i]}: shows {min(rb$subset[i], rb$n_children[i])} of {rb$n_children[i]} elements; each combination is a separate path.")
+        cli::cli_text("  {rb$flow_id[i]}: shows {min(rb$subset[i], rb$n_children[i])} of {rb$n_children[i]} elements. Each combination is a separate route.")
       } else {
-        cli::cli_text("  {rb$flow_id[i]}: number shown not readable; all {rb$n_children[i]} elements treated as shown.")
+        cli::cli_text("  {rb$flow_id[i]}: the number shown could not be read. All {rb$n_children[i]} elements are treated as shown.")
       }
     }
   }
 
   cli::cli_h2("Display logic")
-  cli::cli_text("Joint enumeration limit: {d$max_condition_states} condition states per component.")
-  cli::cli_text("{d$n_conditional} conditional questions on some path: {d$n_exact} scored by exact joint enumeration, {d$n_approx} with the primary-gate approximation.")
-  cli::cli_text("{d$n_components} coupling components ({d$n_exact_components} exact, {d$n_approx_components} approximated).")
-  if (isTRUE(d$cross_component_independence)) {
-    cli::cli_text("Separate components are convolved as independent (assumption).")
-  }
-  if (isTRUE(d$n_binary_field_gates > 0L)) {
-    cli::cli_text("{d$n_binary_field_gates} stored field{?s} compared with an operator the package cannot evaluate: each is treated as a free true/false condition (both outcomes enumerated).")
-  }
+  for (t in ln$display) cli::cli_text(t)
 
   cli::cli_h2("Loops")
-  cli::cli_text("{l$n_known} loop blocks with an explicit iteration cap; {l$n_unknown} with a dynamic/unknown bound.")
-  for (i in seq_len(nrow(l$bounds))) {
-    cli::cli_text("  {l$bounds$block_name[i]}: 0-{l$bounds$max_iter[i]} iterations")
-  }
+  for (t in ln$loops) cli::cli_text(t)
 
   cli::cli_h2("Item scores")
-  cli::cli_text("{s$auto} scored with full confidence (auto); {s$inferred} by structural inference (inferred); {s$manual} need manual verification; {s$unknown} unmapped.")
+  cli::cli_text(ln$scores)
 
   invisible(x)
 }

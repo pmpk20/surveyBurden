@@ -139,7 +139,7 @@ test_that("unresolvable logic falls back to answers and is reported", {
   expect_equal(resp$n_unresolved_items, c(1L, 0L, 0L, 0L, 1L))
   expect_equal(resp$outcome, c("complete", "screen_out", "breakoff", "breakoff", "complete"))
   expect_message(rb_blocks(exposure_qsf(), exposure_responses()),
-                 "not settled")
+                 "did not settle")
 })
 
 test_that("an embedded field mapped explicitly overrides automatic matching", {

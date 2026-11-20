@@ -175,7 +175,7 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
   qsf <- if (inherits(x, "qsf_raw")) x else read_qsf(x)
   if (!is.null(words_per_line)) scheme$words_per_line <- words_per_line
 
-  step("Scoring questions and resolving paths")
+  step("Scoring questions and working out routes")
   # Parse / score / resolve the survey once here and thread the results
   # through the pipeline; every function below accepts them precomputed and
   # falls back to computing its own when called directly.
@@ -271,7 +271,7 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
     basis      <- "none"
     gate_range <- c(NA_integer_, NA_integer_)
   } else if (isTRUE(profile)) {
-    step("Enumerating display-logic combinations")
+    step("Working through display-logic combinations")
     pbp   <- path_burden_profile(qsf, scheme = scheme, engine = engine)
     m     <- match(paths_tbl$path_id, pbp$path_id)
     paths_tbl$burden_min    <- pbp$burden_min[m]
@@ -322,57 +322,54 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
   if (nrow(unmapped) > 0) {
     n_um <- nrow(unmapped)
     warnings <- c(warnings, sprintf(
-      "%d question%s could not be scored (unrecognised Qualtrics type: %s) and contribute%s 0 to every burden figure here -- the reported burden is an UNDER-count for any path that shows %s: %s",
+      "%d question%s could not be scored (unrecognised Qualtrics type: %s). %s counted as 0 points in every burden figure. Burden is under-counted on any route that shows %s: %s",
       n_um, if (n_um == 1) "" else "s",
       paste(sort(unique(unmapped$qualtrics_type)), collapse = ", "),
-      if (n_um == 1) "s" else "",
+      if (n_um == 1) "It is" else "They are",
       if (n_um == 1) "it" else "them",
       paste(unmapped$question_id, collapse = ", ")))
   }
   if (nrow(ls) > 0) {
     warnings <- c(warnings, sprintf(
-      "%d question stem%s exceed%s %d words (reading load, not scored as GfS+ burden): %s",
+      "%d question stem%s exceed%s %d words. This is reading load and is not scored as GfS+ burden: %s",
       nrow(ls), if (nrow(ls) == 1) "" else "s", if (nrow(ls) == 1) "s" else "",
       stem_warning_threshold, paste(ls$question_id, collapse = ", ")))
   }
   if (nrow(ll) > 0) {
     warnings <- c(warnings, sprintf(
-      "%d matrix question%s have a response/row label longer than %d words (reading load, not scored): %s",
-      nrow(ll), if (nrow(ll) == 1) "" else "s",
+      "%d matrix question%s %s a response or row label longer than %d words. This is reading load and is not scored: %s",
+      nrow(ll), if (nrow(ll) == 1) "" else "s", if (nrow(ll) == 1) "has" else "have",
       label_warning_threshold, paste(ll$question_id, collapse = ", ")))
   }
   if (nrow(lg) > 0) {
     warnings <- c(warnings, sprintf(
-      "%d matrix/grid question%s ha%s more than 6 rows. Long grids invite satisficing (respondents picking the same answer down the column instead of reading each row): %s",
+      "%d matrix or grid question%s ha%s more than 6 rows. Long grids invite satisficing. That is when respondents pick the same answer down the column instead of reading each row: %s",
       nrow(lg), if (nrow(lg) == 1) "" else "s", if (nrow(lg) == 1) "s" else "ve",
       paste(lg$question_id, collapse = ", ")))
   }
   if (no_complete) {
     warnings <- c(warnings, sprintf(
-      "This survey has no completing path: all %d structural paths screen out (the survey ends early on every one). No burden spread is reported; the per-path burden for each screen-out path is in `$paths`.",
+      "No route is complete. All %d routes end the survey early. No burden range is reported. Burden for each route is in `$paths`.",
       nrow(pb)))
   } else if (any(pb$terminates_early)) {
     warnings <- c(warnings, sprintf(
-      "%d of %d structural paths are screen-outs (the survey ends early there) rather than complete responses.",
+      "%d of %d routes end the survey early instead of reaching the end.",
       sum(pb$terminates_early), nrow(pb)))
   }
   if (identical(basis, "naive")) {
     warnings <- c(warnings, sprintf(
-      "Display logic on each complete path depends on %d-%d trigger questions, and their combinations were not enumerated (profile = FALSE); the range below is a fast estimate and its minimum may not actually be reachable.",
+      "Display logic on each complete route depends on %d-%d questions. Their combinations were not worked through (profile = FALSE). The range shown is a fast estimate and its minimum may not be reachable.",
       gate_range[1], gate_range[2]))
   } else if (identical(basis, "structural")) {
     if (burden_tbl$points[burden_tbl$statistic == "max"] > rare_threshold) {
       warnings <- c(warnings, sprintf(
-        "The heaviest reachable burden (%.0f pts) is above %.0f points, the level Heimgartner & Axhausen (2024) found rare among the %d survey waves they scored with the GfS method (their sample median: 399 pts).",
+        "The heaviest reachable burden (%.0f points) is above %.0f points. Heimgartner & Axhausen (2024) found this level rare among the %d survey waves they scored with the GfS method (their sample median: 399 points).",
         burden_tbl$points[burden_tbl$statistic == "max"], rare_threshold, 79L))
     }
     warnings <- c(warnings, paste(
-      "The point range above comes from the combinations of optional questions",
-      "the package can model for this survey's flow and skip logic. Each complete",
-      "path carries equal weight, and so does each modelled combination within a",
-      "path; these are model weights, not how often respondents see each one, so",
-      "this is a structural range, not a probability -- it does NOT mean",
-      "\"there's a 50% chance a respondent sees the median burden\"."))
+      "The range above covers every combination of answers the package can",
+      "model, with each route and each combination weighted equally.",
+      "It does not show how many respondents will see each burden value."))
   }
 
   # ---- $respondents (optional) -------------------------------------
@@ -391,7 +388,7 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
       index     = as.numeric(qp) / rare_threshold
     )
     warnings <- c(warnings, sprintf(
-      "Respondent burden uses %d complete responses, so (unlike the structural range) each path counts as often as respondents took it.",
+      "Respondent burden uses %d complete responses. Unlike the range above, each route counts as often as respondents took it.",
       length(pts)))
   }
 
@@ -460,7 +457,7 @@ burden_verdict_line <- function(burden, ppm, benchmark_median, n_complete,
   pl    <- if (identical(n_complete, 1L)) "" else "s"
 
   if (identical(basis, "none")) {
-    return("No completing path: every structural path screens out. Per-path burden is in {.code $paths}.")
+    return("No route is complete: every route ends early. Burden for each route is in {.code $paths}.")
   }
 
   mn   <- round(pt("min"));       mx   <- round(pt("max"))
@@ -468,7 +465,7 @@ burden_verdict_line <- function(burden, ppm, benchmark_median, n_complete,
 
   if (identical(basis, "naive")) {
     return(c(
-      sprintf("Burden range: %d-%d GfS+ points across %d completing path%s (naive band; median not computed).",
+      sprintf("Burden range: %d-%d GfS+ points across %d complete route%s (rough range only; median not computed).",
               mn, mx, n_complete, pl),
       sprintf("Expected minutes: ~%d-%d.", mn_m, mx_m)))
   }
@@ -477,7 +474,7 @@ burden_verdict_line <- function(burden, ppm, benchmark_median, n_complete,
   med_m <- round(pt("median") / ppm)
   ratio <- sprintf("%.1f", pt("median") / benchmark_median)
   lines <- c(
-    sprintf("Median burden: %d GfS+ points (range %d-%d across %d completing path%s).",
+    sprintf("Median burden: %d GfS+ points (range %d-%d across %d complete route%s).",
             med, mn, mx, n_complete, pl),
     sprintf("Expected minutes: ~%d (range %d-%d).", med_m, mn_m, mx_m),
     sprintf("Relative to benchmark: %sx the median of %d points.",
@@ -517,10 +514,10 @@ print_burden_report_body <- function(x) {
     c("End-of-survey elements", ins$n_end_points)
   ))[-c(1, 2)])
 
-  cli::cli_h2("Paths")
-  cli::cli_text("Structural paths: {ins$n_paths} ({ins$n_complete_paths} complete, {ins$n_screenout_paths} screen-out)")
+  cli::cli_h2("Routes")
+  cli::cli_text("Routes: {ins$n_paths} ({ins$n_complete_paths} complete, {ins$n_screenout_paths} end early)")
   if (ins$n_complete_paths > 0L) {
-    cli::cli_text("Display-logic trigger questions: {gr[1]}-{gr[2]} per complete path")
+    cli::cli_text("Questions that control display logic: {gr[1]}-{gr[2]} per complete route")
   }
 
   cli::cli_h2("Burden ({ppm} GfS+ points ~ 1 minute; index = points / {rt})")
@@ -529,7 +526,7 @@ print_burden_report_body <- function(x) {
             median = "Median", mean = "Mean", p75 = "75th percentile",
             p90 = "90th percentile", max = "Maximum")
   if (identical(attr(b, "basis"), "none")) {
-    cli::cli_text("No completing path: every structural path screens out. Per-path burden is in {.code $paths}.")
+    cli::cli_text("No route is complete: every route ends early. Burden for each route is in {.code $paths}.")
   } else {
     if (identical(attr(b, "basis"), "naive")) b <- b[b$statistic %in% c("min", "max"), ]
     cli::cli_verbatim(render_table(rbind(
@@ -580,12 +577,8 @@ print_burden_report_body <- function(x) {
 
   ct <- x$certainty
   if (!is.null(ct)) {
-    cp <- ct$paths; cd <- ct$display_logic; cl <- ct$loops; cs <- ct$scores
     cli::cli_h2("Calculation certainty")
-    cli::cli_text("Paths: {cp$n_exact}/{cp$n_full} have no unresolved display-logic question; {cp$n_with_unresolved} carry at least one.")
-    cli::cli_text("Display logic: {cd$n_exact}/{cd$n_conditional} conditional questions enumerated in full within the model, {cd$n_approx} approximated.")
-    cli::cli_text("Joint enumeration limit: {cd$max_condition_states} condition states per component.")
-    cli::cli_text("Loops: {cl$n_known} with a known cap, {cl$n_unknown} unknown.  Item scores: {cs$auto} auto / {cs$inferred} inferred / {cs$manual} manual.")
+    for (t in unlist(certainty_lines(ct), use.names = FALSE)) cli::cli_text(t)
   }
 
   n_w <- length(x$warnings)
@@ -614,7 +607,7 @@ format.summary.burden_report <- function(x, ...) {
   ins <- x$survey
   cli::cli_fmt({
     cli::cli_h1("{ins$survey_name}")
-    cli::cli_text("{ins$n_questions} question{?s}, {ins$n_pages} page{?s}, {ins$n_blocks} block{?s}, {ins$n_paths} structural path{?s} ({ins$n_complete_paths} complete).")
+    cli::cli_text("{ins$n_questions} question{?s}, {ins$n_pages} page{?s}, {ins$n_blocks} block{?s}, {ins$n_paths} route{?s} ({ins$n_complete_paths} complete).")
     for (ln in burden_verdict_line(x$burden, x$ppm, x$benchmark$median_points,
                                    ins$n_complete_paths)) {
       cli::cli_text(ln)

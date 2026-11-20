@@ -77,9 +77,9 @@ resolve_flow <- function(qsf, max_paths = 10000L, field_domains = NULL) {
   if (nrow(js)) {
     where <- paste(sprintf("%s (%s)", js$field, js$questions), collapse = "; ")
     cli::cli_inform(c(
-      i = paste("Branch field(s) assigned in question JavaScript: {where}.",
-                "Their possible values were not inferred; enumerated paths may",
-                "include outcomes excluded by that code.")
+      i = paste("Branch field(s) set by JavaScript in a question: {where}.",
+                "Their possible values were not worked out. The routes may",
+                "include outcomes that the code rules out.")
     ))
   }
   enumerate_paths(nodes, max_paths = max_paths, field_domains = field_domains)
@@ -484,7 +484,7 @@ enumerate_paths <- function(nodes, max_paths = 10000L, field_domains = list()) {
   if (length(joint_notes)) {
     joint_notes <- paste(unique(joint_notes), collapse = "; ")
     cli::cli_inform(c(
-      i = "Branches on the same embedded field evaluated jointly (feasible of 2^k outcomes): {joint_notes}."
+      i = "Branches on the same embedded field were evaluated together (outcomes that can occur, out of all 2^k): {joint_notes}."
     ))
   }
 
@@ -492,7 +492,7 @@ enumerate_paths <- function(nodes, max_paths = 10000L, field_domains = list()) {
   if (length(web_services)) {
     cli::cli_inform(c(
       i = paste("{length(web_services)} web-service call{?s} in the flow set embedded",
-                "fields from an external response; branches on those fields are enumerated both ways."),
+                "fields from an outside response. Both outcomes of branches on those fields are included."),
       i = "Flow node{?s}: {.val {web_services}}"
     ))
   }
@@ -501,7 +501,7 @@ enumerate_paths <- function(nodes, max_paths = 10000L, field_domains = list()) {
   if (length(randomisers)) {
     cli::cli_warn(c(
       paste("{length(randomisers)} BlockRandomizer{?s} in the flow without a readable",
-            "number of elements to show; treating all sub-blocks as shown, in survey order."),
+            "number of elements to show. All sub-blocks are treated as shown, in survey order."),
       i = "Affected flow node{?s}: {.val {randomisers}}"
     ))
   }
@@ -521,9 +521,9 @@ enumerate_paths <- function(nodes, max_paths = 10000L, field_domains = list()) {
 #' @noRd
 path_space_abort <- function(max_paths, nodes) {
   cli::cli_abort(c(
-    "This survey's path space is too large to enumerate.",
-    i = "More than {max_paths} distinct paths; the flow has {count_branches(nodes)} branches.",
-    i = "Raise {.arg max_paths} (e.g. {.code burden_report(x, max_paths = 50000)}) or treat this as a diagnostic finding (intractable routing)."
+    "This survey has too many routes to list.",
+    i = "There are more than {max_paths} distinct routes. The flow has {count_branches(nodes)} branches.",
+    i = "Raise {.arg max_paths} (e.g. {.code burden_report(x, max_paths = 50000)}) or treat this as a finding that the routing is too complex."
   ))
 }
 

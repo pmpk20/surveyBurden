@@ -78,7 +78,7 @@ test_that("burden_report degrades gracefully when no path completes", {
   expect_true(all(is.na(r$burden$points)))
   expect_equal(attr(r$burden, "basis"), "none")
   expect_match(paste(r$warnings, collapse = " "),
-               "no completing path", ignore.case = TRUE)
+               "No route is complete", ignore.case = TRUE)
   expect_no_error(format(r))
   expect_no_error(capture.output(print(summary(r))))
 })
@@ -103,3 +103,17 @@ test_that("the verdict names the median respondent burden when responses are giv
 
 
 
+
+test_that("printed output uses plain words, not the old jargon", {
+  r <- burden_report(fx(), quiet = TRUE)
+  txt <- paste(format(r), collapse = "\n")
+  expect_match(txt, "Routes: ")
+  expect_match(txt, "Questions that control display logic")
+  for (w in c("structural", "trigger", "convolved", "primary-gate", "enumerated", "path"))
+    expect_false(grepl(w, txt, ignore.case = TRUE), info = w)
+  cc <- paste(format(calculation_certainty(read_qsf(demo_qsf()))), collapse = "\n")
+  expect_match(cc, "2 complete routes", fixed = TRUE)
+  expect_match(cc, "None was approximated.", fixed = TRUE)
+  expect_match(cc, "Other adults: 0 to 5 repetitions", fixed = TRUE)
+  expect_match(cc, "19 items scored automatically, 7 by inference, 0 from user input, 0 unscored.", fixed = TRUE)
+})

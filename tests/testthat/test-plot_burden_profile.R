@@ -35,7 +35,7 @@ test_that("a profile result and a report draw the same plot data", {
   expect_equal(row_labels(p1), row_labels(p2))
   expect_equal(pooled_line(p1), pooled_line(p2))
   r0 <- burden_report(q, profile = FALSE, quiet = TRUE)
-  expect_error(plot_burden_profile(r0), "no structural profile")
+  expect_error(plot_burden_profile(r0), "no route profile")
 })
 
 test_that("max_routes keeps a pooled row and an even spread, and says so", {
@@ -53,9 +53,9 @@ test_that("max_routes keeps a pooled row and an even spread, and says so", {
 test_that("screen-outs are left out by default and marked when included", {
   skip_if_not_installed("ggplot2")
   x <- toy_profile(3, early = 2)
-  expect_equal(row_labels(plot_burden_profile(x)), c("Route 1", "Route 3"))
+  expect_equal(row_labels(plot_burden_profile(x)), c("Route 1", "Route 2"))
   p <- plot_burden_profile(x, include_screenouts = TRUE)
-  expect_true("Route 2 (screen-out)" %in% row_labels(p))
+  expect_true("Ending early 1" %in% row_labels(p))
   # the pooled line still uses complete routes only
   expect_equal(pooled_line(p), pooled_line(plot_burden_profile(x)))
 })
@@ -83,4 +83,55 @@ test_that("binwidth is 10 points for wide ranges and smaller for narrow ones (ra
   expect_equal(b(p), 10)
   expect_equal(b(plot_burden_profile(toy_profile(2))), 0.5)
   expect_equal(b(plot_burden_profile(wide, binwidth = 25)), 25)
+})
+
+# helpers for the layer-level checks
+layer_of <- function(p, geom) {
+  i <- which(vapply(p$layers, function(l) inherits(l$geom, geom), logical(1)))
+  ggplot2::layer_data(p, i[1])
+}
+
+test_that("each route's histogram is scaled to the same maximum height and every bin is outlined", {
+  skip_if_not_installed("ggplot2")
+  x <- toy_profile(3)
+  x$profile[[2]] <- tibble::tibble(burden = c(100, 140, 180), weight = c(8, 1, 1))
+  d <- layer_of(plot_burden_profile(x), "GeomRect")
+  top <- tapply(d$ymax - d$ymin, round(d$ymin + 0.4), max)
+  expect_equal(as.numeric(top), rep(0.8, 3))
+  expect_true(all(d$colour == "black"))
+})
+
+test_that("labels number the complete routes 1..n and the early routes separately, keeping path_id", {
+  skip_if_not_installed("ggplot2")
+  x <- toy_profile(6, early = c(2, 5))
+  x$path_id <- c(4L, 6L, 8L, 33L, 35L, 40L)
+  p <- plot_burden_profile(x, include_screenouts = TRUE)
+  expect_equal(row_labels(p), c("Route 1", "Route 2", "Route 3", "Route 4",
+                                "Ending early 1", "Ending early 2"))
+  expect_equal(p$data$path_id[order(-p$data$row)], c(4L, 8L, 33L, 40L, 6L, 35L))
+  # subsetting keeps the numbers of all complete routes
+  lab <- suppressMessages(row_labels(plot_burden_profile(x, max_routes = 2)))
+  expect_true(all(lab[-1] %in% c("Route 1", "Route 2", "Route 3", "Route 4")))
+  expect_true("Route 4" %in% lab)
+})
+
+test_that("single-valued routes are drawn as a dot with no histogram, and the footer says so", {
+  skip_if_not_installed("ggplot2")
+  x <- toy_profile(3)
+  x$profile[[2]] <- tibble::tibble(burden = 150, weight = 1)
+  p <- plot_burden_profile(x)
+  d <- layer_of(p, "GeomRect")
+  expect_equal(nrow(d), 4L)   # routes 1 and 3 have two bins each; route 2 none
+  expect_match(p$labels$caption, "single burden value")
+  expect_match(p$labels$caption, "Open circle")
+})
+
+test_that("when no route is complete the early routes are drawn and the footer omits the pooled line", {
+  skip_if_not_installed("ggplot2")
+  x <- toy_profile(3, early = 1:3)
+  expect_message(p <- plot_burden_profile(x), "No route is complete")
+  expect_equal(row_labels(p), c("Ending early 1", "Ending early 2", "Ending early 3"))
+  expect_null(pooled_line(p))
+  expect_false(grepl("red line", p$labels$caption))
+  expect_false(grepl("single burden value", p$labels$caption))
 })

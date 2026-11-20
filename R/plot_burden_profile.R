@@ -4,37 +4,56 @@
 #' the synthetic responses of [path_burden_profile()]: every modelled
 #' combination of display conditions, weighted as in the profile. One row per
 #' route. Bars are the share of the route's synthetic responses in each bin of
-#' GfS+ points; the thick black line spans the 25th to 75th percentile, the
-#' open circle is the route median and the thin grey line is the route range.
-#' The dotted red vertical line is the pooled median of the complete routes,
-#' with routes equally weighted, which is the median [burden_report()] reports
-#' in `$burden`. The right-hand label gives each route's median.
+#' GfS+ points, each bin outlined in black. Every route's tallest bar is drawn
+#' at the same height, so the shape of each route can be read, but bar heights
+#' are not comparable between routes. The thick black line spans the 25th to
+#' 75th percentile, the open circle is the route median and the thin grey line
+#' is the route range. The dotted red vertical line is the pooled median of
+#' the complete routes, with routes equally weighted, which is the median
+#' [burden_report()] reports in `$burden`. The right-hand label gives each
+#' route's median.
 #'
 #' These are model-weighted distributions over synthetic responses, not
 #' distributions over respondents (see [path_burden_profile()]). A route whose
-#' display logic cannot change its burden has one value, drawn as a single bar.
+#' display logic cannot change its burden has one value. It is drawn as a
+#' filled dot with no histogram, and the footer note says so.
+#'
+#' **Route labels.** Complete routes are numbered 1 to n in `path_id` order and
+#' labelled "Route 1", "Route 2", and so on. Routes that end early (when
+#' `include_screenouts = TRUE`) are numbered separately and labelled "Ending
+#' early 1", and so on. The number in a label is therefore not the `path_id`
+#' in `report$paths`, which also counts routes that end early. To match them,
+#' use the plot data (`plot_burden_profile(x)$data`). It has one row per drawn
+#' route, with its label and its original `path_id` (`NA` for the pooled row).
+#' The numbering covers all complete routes, so it does not change when
+#' `max_routes` shows only some of them.
 #'
 #' With more than `max_routes` routes the plot cannot show every route
 #' legibly. It then shows the pooled distribution of all routes in the top row
 #' and `max_routes` routes spread evenly across the ordering of route medians
 #' (so the lightest and heaviest are both included), and says so in a message.
 #'
+#' If no route is complete, the routes that end early are drawn instead, with
+#' a message, and the pooled median line is left out.
+#'
 #' @param x A [path_burden_profile()] result, or a [burden_report()] object
 #'   built with `profile = TRUE` (it keeps the profile it computed).
 #' @param include_screenouts If `FALSE` (default) only complete routes are
-#'   drawn. If `TRUE`, routes that terminate early (screen-outs) are drawn too,
-#'   in grey and marked "(screen-out)". The pooled median line always uses
+#'   drawn. If `TRUE`, routes that end early (screen-outs) are drawn too, in
+#'   grey and labelled "Ending early k". The pooled median line always uses
 #'   complete routes only, as [burden_report()] does.
 #' @param max_routes Most routes to draw (default 20). Beyond this, a pooled
 #'   row and an evenly spaced selection of routes are shown (see Details).
 #'   Use `Inf` to draw every route.
 #' @param labels Optional route labels: a character vector named by `path_id`,
 #'   or an unnamed vector with one label per row of `x`. Routes without a
-#'   label get `"Route <path_id>"`.
+#'   label get the numbered labels described in Details.
 #' @param binwidth Width of the histogram bins in GfS+ points. `NULL` (default)
 #'   uses 10 points, or less when the overall range is under 100 points.
 #'
-#' @return A `ggplot` object (not printed). Requires the ggplot2 package.
+#' @return A `ggplot` object (not printed). Its data has one row per drawn
+#'   route, with `path_id`, `label`, `early` and the summary statistics.
+#'   Requires the ggplot2 package.
 #'
 #' @examples
 #' \donttest{
@@ -69,7 +88,7 @@ plot_burden_profile <- function(x, include_screenouts = FALSE, max_routes = 20L,
     prof <- attr(x, "path_profile")
     if (is.null(prof)) {
       cli::cli_abort(c(
-        "This {.cls burden_report} holds no structural profile.",
+        "This {.cls burden_report} holds no route profile.",
         i = "Build it with {.code profile = TRUE}, or pass the result of {.fn path_burden_profile}."
       ))
     }
@@ -80,9 +99,16 @@ plot_burden_profile <- function(x, include_screenouts = FALSE, max_routes = 20L,
     cli::cli_abort("{.arg x} must be a {.fn path_burden_profile} result or a {.fn burden_report} object.")
   }
 
-  # one entry per route; weights normalised so each route sums to 1
+  # One entry per route; weights normalised so each route sums to 1.
+  # Complete routes are numbered 1..n in path_id order and routes that end
+  # early are numbered separately, so labels have no gaps. The numbering is
+  # fixed here, before any subsetting, so labels stay stable.
   n_all <- nrow(x)
-  lab <- paste("Route", x$path_id)
+  early_all <- vapply(x$terminates_early, isTRUE, logical(1))
+  num <- integer(n_all)
+  num[!early_all] <- rank(x$path_id[!early_all], ties.method = "first")
+  num[early_all]  <- rank(x$path_id[early_all], ties.method = "first")
+  lab <- ifelse(early_all, paste("Ending early", num), paste("Route", num))
   if (!is.null(labels)) {
     if (!is.null(names(labels))) {
       m <- match(as.character(x$path_id), names(labels))
@@ -95,9 +121,11 @@ plot_burden_profile <- function(x, include_screenouts = FALSE, max_routes = 20L,
   }
   routes <- lapply(seq_len(n_all), function(i) {
     d <- x$profile[[i]]
-    list(label = lab[i], early = isTRUE(x$terminates_early[i]),
+    list(path_id = x$path_id[i], label = lab[i], early = early_all[i],
          burden = d$burden, weight = d$weight / sum(d$weight))
   })
+  # draw complete routes first, then those that end early, each in path_id order
+  routes <- routes[order(early_all, x$path_id)]
   complete <- !vapply(routes, `[[`, logical(1), "early")
 
   # pooled over complete routes, routes equally weighted (as burden_report())
@@ -107,13 +135,14 @@ plot_burden_profile <- function(x, include_screenouts = FALSE, max_routes = 20L,
   }
   pooled <- if (any(complete)) pool(routes[complete]) else NULL
 
-  shown <- if (isTRUE(include_screenouts)) routes else routes[complete]
-  if (!length(shown)) {
-    cli::cli_abort(c(
-      "There are no complete routes to plot.",
-      i = "Use {.code include_screenouts = TRUE} to draw screen-out routes."
+  if (!any(complete) && !isTRUE(include_screenouts)) {
+    cli::cli_inform(c(
+      "No route is complete, so every route ends early.",
+      i = "Drawing the routes that end early."
     ))
+    include_screenouts <- TRUE
   }
+  shown <- if (isTRUE(include_screenouts)) routes else routes[complete]
 
   has_pooled_row <- length(shown) > max_routes
   if (has_pooled_row) {
@@ -126,7 +155,8 @@ plot_burden_profile <- function(x, include_screenouts = FALSE, max_routes = 20L,
       "The survey has {n_routes} routes, more than {.arg max_routes} = {max_routes}.",
       i = "Drawing the pooled distribution of all routes and {length(pick)} routes spaced evenly by route median, lightest to heaviest."
     ))
-    top <- c(pool(shown), list(label = sprintf("All %d routes (pooled)", n_routes),
+    top <- c(pool(shown), list(path_id = NA_integer_,
+                               label = sprintf("All %d routes (pooled)", n_routes),
                                early = FALSE))
     shown <- c(list(top), shown[pick])
   }
@@ -135,12 +165,13 @@ plot_burden_profile <- function(x, include_screenouts = FALSE, max_routes = 20L,
   rows <- do.call(rbind, lapply(seq_len(n), function(i) {
     r <- shown[[i]]
     q <- weighted_quantile(r$burden, r$weight, c(0, .25, .5, .75, 1))
-    data.frame(row = n - i + 1, label = r$label, early = r$early,
-               pooled = has_pooled_row && i == 1L,
+    data.frame(row = n - i + 1, path_id = r$path_id, label = r$label,
+               early = r$early, pooled = has_pooled_row && i == 1L,
+               single = length(unique(r$burden)) == 1L,
                pmin = q[1], p25 = q[2], med = q[3], p75 = q[4], pmax = q[5],
                stringsAsFactors = FALSE)
   }))
-  rows$label <- ifelse(rows$early, paste(rows$label, "(screen-out)"), rows$label)
+  rows$fill <- ifelse(rows$early, "#BDBDBD", ifelse(rows$pooled, "#4F6D8F", "#6F93B8"))
 
   all_b <- unlist(lapply(shown, `[[`, "burden"))
   span <- diff(range(all_b))
@@ -151,42 +182,46 @@ plot_burden_profile <- function(x, include_screenouts = FALSE, max_routes = 20L,
     }
   }
 
-  # histogram: share of each row's synthetic responses per bin
+  # Histogram: share of each row's synthetic responses per bin, scaled so
+  # every row's tallest bar has the same height. Single-valued rows get a
+  # dot instead.
   hist_df <- do.call(rbind, lapply(seq_len(n), function(i) {
     r <- shown[[i]]
+    rw <- rows[rows$row == n - i + 1, ]
+    if (rw$single) return(NULL)
     # bins of one point or less are centred on the values, so a lone value
     # sits in the middle of its bar rather than on its edge
     off <- if (binwidth <= 1) binwidth / 2 else 0
     bin <- floor((r$burden + off) / binwidth + 1e-9) * binwidth - off
     h <- stats::aggregate(list(share = r$weight), list(bin = bin), sum)
     h$share <- h$share / sum(h$share)
-    h$row <- n - i + 1
-    h$fill <- if (rows$early[n - i + 1 == rows$row]) "#BDBDBD" else
-      if (rows$pooled[n - i + 1 == rows$row]) "#4F6D8F" else "#6F93B8"
+    h$row <- rw$row
+    h$fill <- rw$fill
+    h$ytop <- h$row - 0.4 + 0.8 * h$share / max(h$share)
+    h$xmax <- h$bin + binwidth
     h
   }))
-  # one height scale for the routes; the pooled row, whose bars are much
-  # lower, is scaled to its own maximum
-  is_pooled <- hist_df$row %in% rows$row[rows$pooled]
-  top_share <- ifelse(is_pooled, max(hist_df$share[is_pooled], 0),
-                      max(hist_df$share[!is_pooled], 0))
-  hist_df$ytop <- hist_df$row - 0.4 + 0.8 * hist_df$share / top_share
-  hist_df$xmax <- hist_df$bin + binwidth
+  multi <- rows[!rows$single, ]
+  single <- rows[rows$single, ]
 
-  lo <- min(hist_df$bin)
-  hi <- max(hist_df$xmax)
+  lo <- min(c(hist_df$bin, rows$pmin))
+  hi <- max(c(hist_df$xmax, rows$pmax))
   pad <- max(hi - lo, binwidth * 5)
   x_lim <- c(lo - 0.02 * pad, hi + 0.28 * pad)
   rows$lab_x <- hi + 0.03 * pad
   breaks <- pretty(c(lo, hi), n = 6)
   breaks <- breaks[breaks >= lo & breaks <= hi]
   fmt <- function(v) format(round(v, 1), trim = TRUE, drop0trailing = TRUE)
-  rows$text <- sprintf("median %s", fmt(rows$med))
-  rows$y0 <- rows$row - 0.4
-  rows$ylab <- rows$row - 0.15
+  rows$text <- ifelse(rows$single, sprintf("value %s", fmt(rows$med)),
+                      sprintf("median %s", fmt(rows$med)))
+  # summary marks sit on the bottom edge of the row; a single value sits mid-row
+  rows$y0 <- ifelse(rows$single, rows$row, rows$row - 0.4)
+  rows$ylab <- ifelse(rows$single, rows$row, rows$row - 0.15)
+  multi <- rows[!rows$single, ]
+  single <- rows[rows$single, ]
 
   col_med <- "#B2182B"
-  p <- ggplot2::ggplot()
+  p <- ggplot2::ggplot(rows)
   if (!is.null(pooled)) {
     pm <- weighted_quantile(pooled$burden, pooled$weight, .5)
     p <- p +
@@ -196,18 +231,47 @@ plot_burden_profile <- function(x, include_screenouts = FALSE, max_routes = 20L,
                         label = sprintf("All complete routes: median %s", fmt(pm)),
                         size = 2.6, colour = col_med)
   }
+  if (nrow(multi)) {
+    p <- p +
+      ggplot2::geom_rect(data = hist_df, colour = "black", linewidth = 0.15,
+                         ggplot2::aes(xmin = bin, xmax = xmax, ymin = row - 0.4,
+                                      ymax = ytop, fill = fill)) +
+      ggplot2::geom_segment(data = multi, colour = "#9AA7B4", linewidth = 0.3,
+                            ggplot2::aes(x = pmin, xend = pmax, y = y0, yend = y0)) +
+      ggplot2::geom_segment(data = multi, colour = "black", linewidth = 1.1,
+                            ggplot2::aes(x = p25, xend = p75, y = y0, yend = y0)) +
+      ggplot2::geom_point(data = multi, shape = 21, size = 1.8, fill = "white",
+                          colour = "black", stroke = 0.6,
+                          ggplot2::aes(x = med, y = y0))
+  }
+  if (nrow(single)) {
+    p <- p +
+      ggplot2::geom_point(data = single, shape = 21, size = 2.4, colour = "black",
+                          stroke = 0.5, ggplot2::aes(x = med, y = y0, fill = fill))
+  }
+
+  # footer: describe only what is drawn
+  note <- character(0)
+  if (nrow(multi)) {
+    note <- c(note, paste0(
+      "Bars: share of the route's synthetic responses in each ", fmt(binwidth),
+      "-point bin, with each route's tallest bar scaled to the same height. ",
+      "Black line: 25th-75th percentile. Open circle: route median. ",
+      "Grey line: route range."))
+  }
+  if (nrow(single)) {
+    note <- c(note, paste0(
+      "Filled dot: a route with a single burden value, so no histogram is drawn",
+      if (nrow(multi)) "." else " (every route shown has one value)."))
+  }
+  if (any(rows$early)) note <- c(note, "Grey: routes that end early.")
+  if (!is.null(pooled)) {
+    note <- c(note, "Dotted red line: pooled median of complete routes.")
+  }
+  caption <- paste(strwrap(paste(note, collapse = " "), width = 115), collapse = "\n")
+
   p +
-    ggplot2::geom_rect(data = hist_df, colour = NA,
-                       ggplot2::aes(xmin = bin, xmax = xmax, ymin = row - 0.4,
-                                    ymax = ytop, fill = fill)) +
     ggplot2::scale_fill_identity() +
-    ggplot2::geom_segment(data = rows, colour = "#9AA7B4", linewidth = 0.3,
-                          ggplot2::aes(x = pmin, xend = pmax, y = y0, yend = y0)) +
-    ggplot2::geom_segment(data = rows, colour = "black", linewidth = 1.1,
-                          ggplot2::aes(x = p25, xend = p75, y = y0, yend = y0)) +
-    ggplot2::geom_point(data = rows, shape = 21, size = 1.8, fill = "white",
-                        colour = "black", stroke = 0.6,
-                        ggplot2::aes(x = med, y = y0)) +
     ggplot2::geom_text(data = rows, hjust = 0, size = 2.5, colour = "#444444",
                        ggplot2::aes(x = lab_x, y = ylab, label = text)) +
     ggplot2::scale_y_continuous(breaks = rows$row, labels = rows$label,
@@ -217,10 +281,7 @@ plot_burden_profile <- function(x, include_screenouts = FALSE, max_routes = 20L,
     ggplot2::labs(
       title = "Ex ante burden across synthetic responses, by route",
       x = "GfS+ points for one synthetic response", y = NULL,
-      caption = paste0(
-        "Bars: share of the route's synthetic responses in each ", fmt(binwidth),
-        "-point bin. Black line: 25th-75th percentile; open circle: route median;\n",
-        "grey line: route range; dotted red line: pooled median of complete routes.")) +
+      caption = caption) +
     ggplot2::theme_minimal(base_size = 9) +
     ggplot2::theme(
       plot.title = ggplot2::element_text(face = "bold"),

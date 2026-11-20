@@ -162,8 +162,8 @@ report
 #> 
 #> 2 complete routes. On both, some items are shown only if earlier answers meet a
 #> display condition.
-#> 3 branches depend on answers given during the survey (QID2, QID3, QID6). Both
-#> outcomes of each branch are included.
+#> 3 branches depend on answers to questions in the survey (QID2, QID3, QID6).
+#> Every possible outcome of each branch is included.
 #> 6 items have display logic.
 #> All 6 were evaluated for every combination of answers (limit 10,000
 #> combinations per linked set).

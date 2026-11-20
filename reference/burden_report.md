@@ -293,16 +293,16 @@ qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
                          package = "surveyBurden")
 br <- burden_report(qsf_path)
 #> ℹ Reading survey
-#> ✔ Reading survey [7ms]
+#> ✔ Reading survey [9ms]
 #> 
 #> ℹ Scoring questions and working out routes
-#> ✔ Scoring questions and working out routes [95ms]
+#> ✔ Scoring questions and working out routes [129ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [24ms]
+#> ✔ Checking calculation certainty [36ms]
 #> 
 #> ℹ Working through display-logic combinations
-#> ✔ Working through display-logic combinations [14ms]
+#> ✔ Working through display-logic combinations [20ms]
 #> 
 br
 #> 
@@ -372,8 +372,8 @@ br
 #> 
 #> 2 complete routes. On both, some items are shown only if earlier answers meet a
 #> display condition.
-#> 3 branches depend on answers given during the survey (QID2, QID3, QID6). Both
-#> outcomes of each branch are included.
+#> 3 branches depend on answers to questions in the survey (QID2, QID3, QID6).
+#> Every possible outcome of each branch is included.
 #> 6 items have display logic.
 #> All 6 were evaluated for every combination of answers (limit 10,000
 #> combinations per linked set).

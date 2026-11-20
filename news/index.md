@@ -31,8 +31,10 @@
   (print, [`summary()`](https://rdrr.io/r/base/summary.html) and its
   warnings) and related messages say “route” instead of “path” and no
   longer use “structural”, “trigger”, “component”, “convolved”,
-  “primary-gate” or “enumerated”. Function and column names, returned
-  values and all computed numbers are unchanged.
+  “primary-gate” or “enumerated”. The certainty summary says whether
+  branches depend on answers to questions in the survey, on stored
+  values such as panel variables, or on quotas. Function and column
+  names, returned values and all computed numbers are unchanged.
 - [`path_burden_traversals()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_traversals.md)
   accepts `answer_weights`, a named list of assumed answer frequencies
   for question answers or stored fields. Results are labelled “under

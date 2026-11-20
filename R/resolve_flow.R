@@ -69,6 +69,11 @@ resolve_flow <- function(qsf, max_paths = 10000L, field_domains = NULL) {
   }
   field_domains <- validate_field_domains(field_domains)
   nodes <- qsf_flow(qsf)[["Flow"]]
+  dead <- blocks_after_end(qsf)
+  if (length(dead)) {
+    cli::cli_inform(c(i = paste("{length(dead)} block{?s} come{?s/} after the end of the survey and {?is/are}",
+                                "never shown, so {?it is/they are} left out: {.val {dead}}.")))
+  }
   unused <- setdiff(names(field_domains), branch_fields(nodes))
   if (length(unused)) {
     cli::cli_warn("{.arg field_domains} names {cli::qty(length(unused))}{?a field/fields} no branch tests, so {?it is/they are} ignored: {.val {unused}}.")

@@ -63,6 +63,9 @@ resolve_live_blocks <- function(qsf) {
   })
 
   out <- do.call(rbind, rows)
+  if (is.null(out) || !nrow(out)) {
+    cli::cli_abort("The survey ends before any block is shown, so there is nothing to score.")
+  }
   out$flow_order <- seq_len(nrow(out))
   out
 }

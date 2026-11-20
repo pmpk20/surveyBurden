@@ -56,14 +56,17 @@ report_responses <- function(n = 40) {
 
 
 
-# a survey whose flow starts with an unconditional EndSurvey: every enumerated
-# path terminates early, so there is no completing path to summarise a spread over
+# a survey where every value of a panel field leads to an end of survey: every
+# route ends early, so there is no complete route to summarise a spread over
 no_complete_qsf <- function() {
   q <- read_qsf(demo_qsf())
   fl <- which(vapply(q$SurveyElements,
                      function(e) identical(e$Element, "FL"), logical(1)))
+  screen <- function(v) list(Type = "Branch", FlowID = paste0("F_scr", v),
+                             Description = "screen", BranchLogic = fg_logic(fg_emb("grp", "EqualTo", v)),
+                             Flow = list(list(Type = "EndSurvey", FlowID = paste0("F_end", v))))
   q$SurveyElements[[fl]]$Payload$Flow <- c(
-    list(list(Type = "EndSurvey", FlowID = "F_kill")),
+    list(screen("1"), screen("2")),
     q$SurveyElements[[fl]]$Payload$Flow
   )
   q
@@ -72,7 +75,8 @@ no_complete_qsf <- function() {
 test_that("burden_report degrades gracefully when no path completes", {
   q <- no_complete_qsf()
 
-  expect_no_error(r <- burden_report(q, certainty = FALSE, quiet = TRUE))
+  expect_no_error(r <- burden_report(q, certainty = FALSE, quiet = TRUE,
+                                     field_domains = list(grp = c("1", "2"))))
   expect_s3_class(r, "burden_report")
   expect_equal(r$survey$n_complete_paths, 0L)
   expect_true(all(is.na(r$burden$points)))
@@ -81,6 +85,16 @@ test_that("burden_report degrades gracefully when no path completes", {
                "No route is complete", ignore.case = TRUE)
   expect_no_error(format(r))
   expect_no_error(capture.output(print(summary(r))))
+})
+
+test_that("a survey that ends before any block gives a clear error", {
+  q <- read_qsf(demo_qsf())
+  fl <- which(vapply(q$SurveyElements,
+                     function(e) identical(e$Element, "FL"), logical(1)))
+  q$SurveyElements[[fl]]$Payload$Flow <- c(
+    list(list(Type = "EndSurvey", FlowID = "F_kill")),
+    q$SurveyElements[[fl]]$Payload$Flow)
+  expect_error(suppressMessages(burden_report(q, quiet = TRUE)), "ends before any block")
 })
 
 

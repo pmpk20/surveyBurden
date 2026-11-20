@@ -347,6 +347,14 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
       nrow(lg), if (nrow(lg) == 1) "" else "s", if (nrow(lg) == 1) "s" else "ve",
       paste(lg$question_id, collapse = ", ")))
   }
+  dead <- blocks_after_end(qsf)
+  if (length(dead)) {
+    warnings <- c(warnings, sprintf(
+      "%d block%s after the end of the survey %s never shown and %s left out: %s",
+      length(dead), if (length(dead) == 1) "" else "s",
+      if (length(dead) == 1) "is" else "are", if (length(dead) == 1) "is" else "are",
+      paste(dead, collapse = ", ")))
+  }
   if (no_complete) {
     warnings <- c(warnings, sprintf(
       "No route is complete. All %d routes end the survey early. No burden range is reported. Burden for each route is in `$paths`.",

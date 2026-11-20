@@ -179,3 +179,19 @@ test_that("a web-service call shows nothing and is noted only when it sets field
   setter <- ping; setter$ResponseMap <- list(list(key = "score", value = "$.score"))
   expect_message(enumerate_paths(list(n_block("A"), setter)), "web-service call")
 })
+
+test_that("blocks after a top-level end of survey are left out, not read as early exits", {
+  q <- read_qsf(demo_qsf())
+  base <- burden_report(q, quiet = TRUE)
+  i <- which(vapply(q$SurveyElements, function(e) identical(e$Element, "FL"), logical(1)))
+  fl <- q$SurveyElements[[i]]$Payload$Flow
+  stray <- Find(function(n) is.list(n) && n$Type %in% c("Standard", "Block"), fl)
+  q$SurveyElements[[i]]$Payload$Flow <- c(fl, list(n_end(), stray))
+
+  rep <- suppressMessages(burden_report(q, quiet = TRUE))
+  expect_equal(rep$burden$points, base$burden$points)
+  expect_equal(rep$survey$n_complete_paths, base$survey$n_complete_paths)
+  expect_true(any(grepl("after the end of the survey", rep$warnings)))
+  expect_equal(surveyBurden:::blocks_after_end(q), stray$ID)
+  expect_length(surveyBurden:::blocks_after_end(read_qsf(demo_qsf())), 0L)
+})

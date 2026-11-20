@@ -13,7 +13,7 @@ question; the block they left in is always kept."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">surveyBurden</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -89,8 +89,8 @@ row of a break-off, else 0; screen-outs and completes are censored),
 <span class="r-in"><span>  QID6 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"4"</span><span class="op">)</span>, QID9 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="cn">NA</span><span class="op">)</span>, QID26 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="cn">NA</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pp</span> <span class="op">&lt;-</span> <span class="fu">exposure_person_period</span><span class="op">(</span><span class="fu"><a href="respondent_burden.html">respondent_burden</a></span><span class="op">(</span><span class="va">qsf_path</span>, <span class="va">responses</span>, by <span class="op">=</span> <span class="st">"block"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Logic not settled by the data for 1 respondent: 3 question decisions and 0</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   branch decisions fell back to whether they answered.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> The data did not settle the survey logic for 1 respondent: 3 question</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   decisions and 0 branch decisions were decided by whether they answered.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> See `attr(x, "respondents")`.</span>
 <span class="r-in"><span><span class="va">pp</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"response_id"</span>, <span class="st">"block_name"</span>, <span class="st">"period"</span>, <span class="st">"event"</span>, <span class="st">"points_before"</span><span class="op">)</span><span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 15 × 5</span></span>

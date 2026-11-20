@@ -293,21 +293,21 @@ qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
                          package = "surveyBurden")
 br <- burden_report(qsf_path)
 #> ℹ Reading survey
-#> ✔ Reading survey [8ms]
+#> ✔ Reading survey [7ms]
 #> 
-#> ℹ Scoring questions and resolving paths
-#> ✔ Scoring questions and resolving paths [106ms]
+#> ℹ Scoring questions and working out routes
+#> ✔ Scoring questions and working out routes [95ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [29ms]
+#> ✔ Checking calculation certainty [24ms]
 #> 
-#> ℹ Enumerating display-logic combinations
-#> ✔ Enumerating display-logic combinations [16ms]
+#> ℹ Working through display-logic combinations
+#> ✔ Working through display-logic combinations [14ms]
 #> 
 br
 #> 
 #> ── Survey Burden Report: Neighbourhood Travel Survey (demo) ────────────────────
-#> Median burden: 120 GfS+ points (range 103-143 across 2 completing paths).
+#> Median burden: 120 GfS+ points (range 103-143 across 2 complete routes).
 #> Expected minutes: ~10 (range 9-12).
 #> Relative to benchmark: 0.3x the median of 399 points.
 #> 
@@ -321,10 +321,10 @@ br
 #> Loop & Merge blocks      2
 #> End-of-survey elements   2
 #> 
-#> ── Paths ──
+#> ── Routes ──
 #> 
-#> Structural paths: 4 (2 complete, 2 screen-out)
-#> Display-logic trigger questions: 3-4 per complete path
+#> Routes: 4 (2 complete, 2 end early)
+#> Questions that control display logic: 3-4 per complete route
 #> 
 #> ── Burden (12 GfS+ points ~ 1 minute; index = points / 1500) ──
 #> 
@@ -370,23 +370,29 @@ br
 #> 
 #> ── Calculation certainty ──
 #> 
-#> Paths: 0/2 have no unresolved display-logic question; 2 carry at least one.
-#> Display logic: 6/6 conditional questions enumerated in full within the model, 0
-#> approximated.
-#> Joint enumeration limit: 10000 condition states per component.
-#> Loops: 2 with a known cap, 0 unknown.  Item scores: 19 auto / 7 inferred / 0
-#> manual.
+#> 2 complete routes. On both, some items are shown only if earlier answers meet a
+#> display condition.
+#> 3 branches depend on answers given during the survey (QID2, QID3, QID6). Both
+#> outcomes of each branch are included.
+#> 6 items have display logic.
+#> All 6 were evaluated for every combination of answers (limit 10,000
+#> combinations per linked set).
+#> None was approximated.
+#> The 4 unlinked sets of display conditions are combined as if independent.
+#> 2 Loop & Merge blocks have a fixed maximum. Other adults: 0 to 5 repetitions.
+#> Vehicle details: 0 to 3 repetitions.
+#> 19 items scored automatically, 7 by inference, 0 from user input, 0 unscored.
 #> 
 #> ── QC warnings (3) ──
 #> 
-#> ! 1 matrix/grid question has more than 6 rows. Long grids invite satisficing (respondents picking the same answer down the column instead of reading each row): QID19
-#> ! 2 of 4 structural paths are screen-outs (the survey ends early there) rather than complete responses.
-#> ! The point range above comes from the combinations of optional questions the package can model for this survey's flow and skip logic. Each complete path carries equal weight, and so does each modelled combination within a path; these are model weights, not how often respondents see each one, so this is a structural range, not a probability -- it does NOT mean "there's a 50% chance a respondent sees the median burden".
+#> ! 1 matrix or grid question has more than 6 rows. Long grids invite satisficing. That is when respondents pick the same answer down the column instead of reading each row: QID19
+#> ! 2 of 4 routes end the survey early instead of reaching the end.
+#> ! The range above covers every combination of answers the package can model, with each route and each combination weighted equally. It does not show how many respondents will see each burden value.
 summary(br)
 #> 
 #> ── Neighbourhood Travel Survey (demo) ──────────────────────────────────────────
-#> 26 questions, 12 pages, 12 blocks, 4 structural paths (2 complete).
-#> Median burden: 120 GfS+ points (range 103-143 across 2 completing paths).
+#> 26 questions, 12 pages, 12 blocks, 4 routes (2 complete).
+#> Median burden: 120 GfS+ points (range 103-143 across 2 complete routes).
 #> Expected minutes: ~10 (range 9-12).
 #> Relative to benchmark: 0.3x the median of 399 points.
 br$burden

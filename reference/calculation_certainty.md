@@ -176,33 +176,28 @@ calculation_certainty(qsf_path)
 #> 
 #> ── Calculation certainty: Neighbourhood Travel Survey (demo) ───────────────────
 #> 
-#> ── Paths ──
+#> ── Routes ──
 #> 
-#> 0 of 2 complete paths have no unresolved display-logic question; 2 carry at
-#> least one.
-#> 3 flow branches; both outcomes of each are enumerated, but which one a given
-#> respondent takes is unknown before fieldwork:
-#> FL_b_consent: trigger QID2
-#> FL_b_area: trigger QID3
-#> FL_b_work: trigger QID6
+#> 2 complete routes. On both, some items are shown only if earlier answers meet a
+#> display condition.
+#> 3 branches depend on answers given during the survey (QID2, QID3, QID6). Both
+#> outcomes of each branch are included.
 #> 
 #> ── Display logic ──
 #> 
-#> Joint enumeration limit: 10000 condition states per component.
-#> 6 conditional questions on some path: 6 scored by exact joint enumeration, 0
-#> with the primary-gate approximation.
-#> 4 coupling components (4 exact, 0 approximated).
-#> Separate components are convolved as independent (assumption).
+#> 6 items have display logic.
+#> All 6 were evaluated for every combination of answers (limit 10,000
+#> combinations per linked set).
+#> None was approximated.
+#> The 4 unlinked sets of display conditions are combined as if independent.
 #> 
 #> ── Loops ──
 #> 
-#> 2 loop blocks with an explicit iteration cap; 0 with a dynamic/unknown bound.
-#> Other adults: 0-5 iterations
-#> Vehicle details: 0-3 iterations
+#> 2 Loop & Merge blocks have a fixed maximum. Other adults: 0 to 5 repetitions.
+#> Vehicle details: 0 to 3 repetitions.
 #> 
 #> ── Item scores ──
 #> 
-#> 19 scored with full confidence (auto); 7 by structural inference (inferred); 0
-#> need manual verification; 0 unmapped.
+#> 19 items scored automatically, 7 by inference, 0 from user input, 0 unscored.
 # }
 ```

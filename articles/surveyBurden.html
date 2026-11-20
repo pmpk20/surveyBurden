@@ -19,7 +19,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">surveyBurden</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -179,14 +179,14 @@ take.</li>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/pmpk20/surveyBurden" class="external-link">surveyBurden</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;                   .-- Q2 -- Q3 --.</span></span>
-<span><span class="co">#&gt;   survey -- Q1 --+               +-- Burden 0.3.0</span></span>
+<span><span class="co">#&gt;   survey -- Q1 --+               +-- Burden 0.3.1</span></span>
 <span><span class="co">#&gt;                   '-- Q4 --------'</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Measuring the Response Burden of Web Surveys</span></span>
 <span><span class="co">#&gt; Docs: https://pmpk20.github.io/surveyBurden/</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Please cite: King P (2026). surveyBurden: Measuring the Response Burden</span></span>
-<span><span class="co">#&gt; of Web Surveys. R package version 0.3.0,</span></span>
+<span><span class="co">#&gt; of Web Surveys. R package version 0.3.1,</span></span>
 <span><span class="co">#&gt; https://github.com/pmpk20/surveyBurden.</span></span>
 <span><span class="co">#&gt; Use citation("surveyBurden") for BibTeX.</span></span>
 <span><span class="va">demo</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"demo_travel_survey.qsf"</span>, package <span class="op">=</span> <span class="st">"surveyBurden"</span><span class="op">)</span></span></code></pre></div>
@@ -202,7 +202,7 @@ numbers the current package produces. To use your own survey, replace
 <span><span class="va">report</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Burden Report: Neighbourhood Travel Survey (demo)</span> <span style="color: #00BBBB;">────────────────────</span></span></span>
-<span><span class="co">#&gt; Median burden: 120 GfS+ points (range 103-143 across 2 completing paths).</span></span>
+<span><span class="co">#&gt; Median burden: 120 GfS+ points (range 103-143 across 2 complete routes).</span></span>
 <span><span class="co">#&gt; Expected minutes: ~10 (range 9-12).</span></span>
 <span><span class="co">#&gt; Relative to benchmark: 0.3x the median of 399 points.</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -216,10 +216,10 @@ numbers the current package produces. To use your own survey, replace
 <span><span class="co">#&gt; Loop &amp; Merge blocks      2</span></span>
 <span><span class="co">#&gt; End-of-survey elements   2</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── <span style="font-weight: bold;">Paths</span> ──</span></span>
+<span><span class="co">#&gt; ── <span style="font-weight: bold;">Routes</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Structural paths: 4 (2 complete, 2 screen-out)</span></span>
-<span><span class="co">#&gt; Display-logic trigger questions: 3-4 per complete path</span></span>
+<span><span class="co">#&gt; Routes: 4 (2 complete, 2 end early)</span></span>
+<span><span class="co">#&gt; Questions that control display logic: 3-4 per complete route</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Burden (12 GfS+ points ~ 1 minute; index = points / 1500)</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -265,18 +265,24 @@ numbers the current package produces. To use your own survey, replace
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Calculation certainty</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Paths: 0/2 have no unresolved display-logic question; 2 carry at least one.</span></span>
-<span><span class="co">#&gt; Display logic: 6/6 conditional questions enumerated in full within the model, 0</span></span>
-<span><span class="co">#&gt; approximated.</span></span>
-<span><span class="co">#&gt; Joint enumeration limit: 10000 condition states per component.</span></span>
-<span><span class="co">#&gt; Loops: 2 with a known cap, 0 unknown.  Item scores: 19 auto / 7 inferred / 0</span></span>
-<span><span class="co">#&gt; manual.</span></span>
+<span><span class="co">#&gt; 2 complete routes. On both, some items are shown only if earlier answers meet a</span></span>
+<span><span class="co">#&gt; display condition.</span></span>
+<span><span class="co">#&gt; 3 branches depend on answers given during the survey (QID2, QID3, QID6). Both</span></span>
+<span><span class="co">#&gt; outcomes of each branch are included.</span></span>
+<span><span class="co">#&gt; 6 items have display logic.</span></span>
+<span><span class="co">#&gt; All 6 were evaluated for every combination of answers (limit 10,000</span></span>
+<span><span class="co">#&gt; combinations per linked set).</span></span>
+<span><span class="co">#&gt; None was approximated.</span></span>
+<span><span class="co">#&gt; The 4 unlinked sets of display conditions are combined as if independent.</span></span>
+<span><span class="co">#&gt; 2 Loop &amp; Merge blocks have a fixed maximum. Other adults: 0 to 5 repetitions.</span></span>
+<span><span class="co">#&gt; Vehicle details: 0 to 3 repetitions.</span></span>
+<span><span class="co">#&gt; 19 items scored automatically, 7 by inference, 0 from user input, 0 unscored.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">QC warnings (3)</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 1 matrix/grid question has more than 6 rows. Long grids invite satisficing (respondents picking the same answer down the column instead of reading each row): QID19</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 2 of 4 structural paths are screen-outs (the survey ends early there) rather than complete responses.</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> The point range above comes from the combinations of optional questions the package can model for this survey's flow and skip logic. Each complete path carries equal weight, and so does each modelled combination within a path; these are model weights, not how often respondents see each one, so this is a structural range, not a probability -- it does NOT mean "there's a 50% chance a respondent sees the median burden".</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 1 matrix or grid question has more than 6 rows. Long grids invite satisficing. That is when respondents pick the same answer down the column instead of reading each row: QID19</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> 2 of 4 routes end the survey early instead of reaching the end.</span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> The range above covers every combination of answers the package can model, with each route and each combination weighted equally. It does not show how many respondents will see each burden value.</span></span></code></pre></div>
 <p>The printout opens with a headline. It gives the median burden of the
 complete paths in points and minutes, its ratio to the 399-point median
 of the GfS benchmark, and the range across complete paths. The sections
@@ -404,8 +410,8 @@ points-per-minute rate are stored as attributes, for example
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">report</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Neighbourhood Travel Survey (demo)</span> <span style="color: #00BBBB;">──────────────────────────────────────────</span></span></span>
-<span><span class="co">#&gt; 26 questions, 12 pages, 12 blocks, 4 structural paths (2 complete).</span></span>
-<span><span class="co">#&gt; Median burden: 120 GfS+ points (range 103-143 across 2 completing paths).</span></span>
+<span><span class="co">#&gt; 26 questions, 12 pages, 12 blocks, 4 routes (2 complete).</span></span>
+<span><span class="co">#&gt; Median burden: 120 GfS+ points (range 103-143 across 2 complete routes).</span></span>
 <span><span class="co">#&gt; Expected minutes: ~10 (range 9-12).</span></span>
 <span><span class="co">#&gt; Relative to benchmark: 0.3x the median of 399 points.</span></span></code></pre></div>
 </div>

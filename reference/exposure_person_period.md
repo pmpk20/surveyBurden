@@ -41,8 +41,8 @@ responses <- data.frame(
   QID6 = c("1", "4"), QID9 = c("1", NA), QID26 = c("1", NA)
 )
 pp <- exposure_person_period(respondent_burden(qsf_path, responses, by = "block"))
-#> ℹ Logic not settled by the data for 1 respondent: 3 question decisions and 0
-#>   branch decisions fell back to whether they answered.
+#> ℹ The data did not settle the survey logic for 1 respondent: 3 question
+#>   decisions and 0 branch decisions were decided by whether they answered.
 #> ℹ See `attr(x, "respondents")`.
 pp[, c("response_id", "block_name", "period", "event", "points_before")]
 #> # A tibble: 15 × 5

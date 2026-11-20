@@ -15,14 +15,14 @@ routing information, and a profile needs display logic.
 library(surveyBurden)
 #> 
 #>                   .-- Q2 -- Q3 --.
-#>   survey -- Q1 --+               +-- Burden 0.3.0
+#>   survey -- Q1 --+               +-- Burden 0.3.1
 #>                   '-- Q4 --------'
 #> 
 #> Measuring the Response Burden of Web Surveys
 #> Docs: https://pmpk20.github.io/surveyBurden/
 #> 
 #> Please cite: King P (2026). surveyBurden: Measuring the Response Burden
-#> of Web Surveys. R package version 0.3.0,
+#> of Web Surveys. R package version 0.3.1,
 #> https://github.com/pmpk20/surveyBurden.
 #> Use citation("surveyBurden") for BibTeX.
 ```

@@ -27,7 +27,8 @@ path_burden_traversals(
   respect_force_response = TRUE,
   output = c("long", "wide", "summary"),
   probs = c(0, 0.1, 0.25, 0.5, 0.75, 0.9, 1),
-  chunk = 10000L
+  chunk = 10000L,
+  answer_weights = NULL
 )
 ```
 
@@ -44,7 +45,8 @@ path_burden_traversals(
 
 - n_draws:
 
-  Traversals sampled per route.
+  Traversals sampled per route, or per fixed flow assignment and route
+  component when `answer_weights` affects flow routing.
 
 - seed:
 
@@ -125,6 +127,19 @@ path_burden_traversals(
 
   Draws simulated at a time when sampling.
 
+- answer_weights:
+
+  Optional named list of non-negative numeric weight vectors. Names
+  identify QSF question IDs or stored fields prefixed with `@`. Vector
+  names are raw choice IDs for single-choice questions, complete
+  `+`-joined choice subsets for multi-select questions, or raw
+  stored-field values. An empty state name means unanswered for a
+  question or missing for a stored field. Positive unanswered weight is
+  incompatible with a forced response when
+  `respect_force_response = TRUE`. Weights are normalised; `NULL` or
+  [`list()`](https://rdrr.io/r/base/list.html) retains the existing
+  unweighted result. Joint profile data frames are not supported.
+
 ## Value
 
 For `"long"`, a tibble with `traversal_id`, `path_id`, `weight`,
@@ -159,6 +174,28 @@ With `method = "sample"`, `n_draws` traversals are drawn per route
 `"auto"` enumerates when the number of traversals is at most
 `max_traversals`, and samples otherwise. The method used per route is in
 `attr(x, "method")`. These are model weights, not observed frequencies.
+
+**Assumed answer frequencies.** `answer_weights` replaces selected
+question or stored-field state distributions. Question weights are
+conditional on being shown and independent across questions. A
+multi-select entry weights whole subsets, not individual choices
+independently. Omitted values have zero probability within a supplied
+entry; unspecified questions and fields retain their structural
+convention. Raw choice IDs are projected onto every referenced choice,
+without the unweighted six-reference subset limit. Weighted routing
+integrates compatible flow assignments before combining distinct routes;
+zero-probability routes are omitted. `complete_only` conditions on the
+remaining completion routes. Supported weighted flow predicates must be
+fully specified and use earlier unconditional non-loop question triggers
+or constant stored fields. Unsupported weighted flow logic fails
+explicitly. Output is labelled burden under assumed answer frequencies,
+rather than a forecast. The profile and report APIs do not use these
+weights. Weighted flow assignments may produce several components for
+one route; sampling and rule rejection operate within each component.
+The `method` and `rejected` attributes can therefore contain repeated
+path IDs in weighted mode. Each component retains its assigned total
+model weight after rule rejection, following the existing
+conditional-rejection convention.
 
 **Derived fields.** `field_rules` derives stored fields from the answers
 drawn in a traversal, for values that survey code (for example page
@@ -201,6 +238,19 @@ q <- read_qsf(system.file("extdata", "demo_travel_survey.qsf",
                           package = "surveyBurden"))
 x <- path_burden_traversals(q, method = "exact")
 head(x)
+#> # A tibble: 6 × 10
+#>   traversal_id path_id  weight block_id flow_order iterations points items
+#>          <int>   <int>   <dbl> <chr>         <int>      <int>  <dbl> <int>
+#> 1            1       3 0.00139 BL1               1         NA     11     1
+#> 2            1       3 0.00139 BL2               2         NA      1     1
+#> 3            1       3 0.00139 BL3               3         NA      2     1
+#> 4            1       3 0.00139 BL4               4         NA     15     5
+#> 5            1       3 0.00139 BL5               5         NA      3     2
+#> 6            1       3 0.00139 BL6               6          1      4     2
+#> # ℹ 2 more variables: response_items <int>, pages <int>
+weighted <- path_burden_traversals(q, method = "exact",
+  answer_weights = list(QID5 = c("1" = .4, "2" = .4, "3" = .1, "4" = .1)))
+head(weighted)
 #> # A tibble: 6 × 10
 #>   traversal_id path_id  weight block_id flow_order iterations points items
 #>          <int>   <int>   <dbl> <chr>         <int>      <int>  <dbl> <int>

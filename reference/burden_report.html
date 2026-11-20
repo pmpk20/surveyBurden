@@ -15,7 +15,7 @@ summarises the burden across the survey's structural path space."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">surveyBurden</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -314,21 +314,21 @@ from the QSF, every element is treated as shown, with a warning.</p>
 <span class="r-in"><span>                         package <span class="op">=</span> <span class="st">"surveyBurden"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">br</span> <span class="op">&lt;-</span> <span class="fu">burden_report</span><span class="op">(</span><span class="va">qsf_path</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Reading survey</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Reading survey <span style="color: #B2B2B2;">[8ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Reading survey <span style="color: #B2B2B2;">[7ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Scoring questions and resolving paths</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Scoring questions and resolving paths <span style="color: #B2B2B2;">[106ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Scoring questions and working out routes</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Scoring questions and working out routes <span style="color: #B2B2B2;">[95ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Checking calculation certainty</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[29ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[24ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Enumerating display-logic combinations</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Enumerating display-logic combinations <span style="color: #B2B2B2;">[16ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Working through display-logic combinations</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Working through display-logic combinations <span style="color: #B2B2B2;">[14ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="va">br</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Survey Burden Report: Neighbourhood Travel Survey (demo)</span> <span style="color: #00BBBB;">────────────────────</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Median burden: 120 GfS+ points (range 103-143 across 2 completing paths).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Median burden: 120 GfS+ points (range 103-143 across 2 complete routes).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Expected minutes: ~10 (range 9-12).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Relative to benchmark: 0.3x the median of 399 points.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -342,10 +342,10 @@ from the QSF, every element is treated as shown, with a warning.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Loop &amp; Merge blocks      2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> End-of-survey elements   2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Paths</span> ──</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Routes</span> ──</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Structural paths: 4 (2 complete, 2 screen-out)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Display-logic trigger questions: 3-4 per complete path</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Routes: 4 (2 complete, 2 end early)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Questions that control display logic: 3-4 per complete route</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Burden (12 GfS+ points ~ 1 minute; index = points / 1500)</span> ──</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -391,23 +391,29 @@ from the QSF, every element is treated as shown, with a warning.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Calculation certainty</span> ──</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Paths: 0/2 have no unresolved display-logic question; 2 carry at least one.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Display logic: 6/6 conditional questions enumerated in full within the model, 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> approximated.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Joint enumeration limit: 10000 condition states per component.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Loops: 2 with a known cap, 0 unknown.  Item scores: 19 auto / 7 inferred / 0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> manual.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 complete routes. On both, some items are shown only if earlier answers meet a</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> display condition.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 branches depend on answers given during the survey (QID2, QID3, QID6). Both</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> outcomes of each branch are included.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 items have display logic.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> All 6 were evaluated for every combination of answers (limit 10,000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> combinations per linked set).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> None was approximated.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> The 4 unlinked sets of display conditions are combined as if independent.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 Loop &amp; Merge blocks have a fixed maximum. Other adults: 0 to 5 repetitions.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Vehicle details: 0 to 3 repetitions.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19 items scored automatically, 7 by inference, 0 from user input, 0 unscored.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">QC warnings (3)</span> ──</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> 1 matrix/grid question has more than 6 rows. Long grids invite satisficing (respondents picking the same answer down the column instead of reading each row): QID19</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> 2 of 4 structural paths are screen-outs (the survey ends early there) rather than complete responses.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> The point range above comes from the combinations of optional questions the package can model for this survey's flow and skip logic. Each complete path carries equal weight, and so does each modelled combination within a path; these are model weights, not how often respondents see each one, so this is a structural range, not a probability -- it does NOT mean "there's a 50% chance a respondent sees the median burden".</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> 1 matrix or grid question has more than 6 rows. Long grids invite satisficing. That is when respondents pick the same answer down the column instead of reading each row: QID19</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> 2 of 4 routes end the survey early instead of reaching the end.</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> The range above covers every combination of answers the package can model, with each route and each combination weighted equally. It does not show how many respondents will see each burden value.</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">br</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Neighbourhood Travel Survey (demo)</span> <span style="color: #00BBBB;">──────────────────────────────────────────</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 26 questions, 12 pages, 12 blocks, 4 structural paths (2 complete).</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Median burden: 120 GfS+ points (range 103-143 across 2 completing paths).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 26 questions, 12 pages, 12 blocks, 4 routes (2 complete).</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Median burden: 120 GfS+ points (range 103-143 across 2 complete routes).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Expected minutes: ~10 (range 9-12).</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Relative to benchmark: 0.3x the median of 399 points.</span>
 <span class="r-in"><span><span class="va">br</span><span class="op">$</span><span class="va">burden</span></span></span>

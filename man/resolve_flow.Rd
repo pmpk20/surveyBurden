@@ -70,8 +70,5 @@ qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
                          package = "surveyBurden")
 flow <- resolve_flow(read_qsf(qsf_path))
 flow[, c("path_id", "terminates_early")]
-\dontrun{
-resolve_flow(read_qsf("survey.qsf"), field_domains = list(group = c("1", "2")))
-}
 
 }

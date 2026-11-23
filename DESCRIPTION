@@ -8,10 +8,10 @@ Description: Measures the objective burden of a survey, the work it asks of
     respondents. Each question is scored with the GfS+ point scheme, which
     extends the response burden points of Heimgartner and Axhausen (2024)
     <doi:10.32866/001c.125481>. The package follows a survey's routing and
-    display logic to give the burden along each path, and reconstructs the
-    burden shown to each respondent from response data. It reads Qualtrics
-    surveys (.qsf export or API) and also scores a table of questions from
-    any platform.
+    display logic to give the burden along each route before fieldwork, and
+    reconstructs the burden shown to each respondent from response data
+    after fieldwork. It reads 'Qualtrics' surveys (.qsf export or API) and
+    also scores a table of questions from any platform.
 License: MIT + file LICENSE
 Language: en-GB
 URL: https://github.com/pmpk20/surveyBurden, https://pmpk20.github.io/surveyBurden/

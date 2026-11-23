@@ -89,11 +89,24 @@ ImportId rows at the top of a raw Qualtrics CSV export are removed, with a
 message, when recognisable.
 }
 \examples{
-\dontrun{
-# Requires observed completion-time data
-vt <- validate_times("survey.qsf", "export.csv")
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+# Two finished respondents with their completion times (toy data)
+observed <- data.frame(
+  ResponseId = c("R_1", "R_2"),
+  Finished   = c(1, 1),
+  QID2  = c("1", "1"),
+  QID3  = c("1", "2"),
+  QID4  = c("2", "3"),
+  QID6  = c("1", "4"),
+  QID9  = c("2", NA),
+  QID10 = c("1", NA),
+  QID22 = c("3", "2"),
+  QID26 = c("1", "2"),
+  completion_seconds = c(720, 540)
+)
+vt <- validate_times(qsf_path, observed)
 vt
 vt$implied_points_per_minute
-}
 
 }

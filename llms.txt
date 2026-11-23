@@ -335,9 +335,9 @@ and so on).
 ## Contributing
 
 Bug reports, questions and pull requests are welcome. See
-[`.github/CONTRIBUTING.md`](https://pmpk20.github.io/surveyBurden/CONTRIBUTING.md).
+[`.github/CONTRIBUTING.md`](https://github.com/pmpk20/surveyBurden/blob/main/.github/CONTRIBUTING.md).
 Contributors are expected to follow the [Code of
-Conduct](https://pmpk20.github.io/surveyBurden/CODE_OF_CONDUCT.md).
+Conduct](https://github.com/pmpk20/surveyBurden/blob/main/CODE_OF_CONDUCT.md).
 
 surveyBurden is an independent project, separate from Qualtrics and
 every other survey platform. Support comes from this repository.
@@ -345,7 +345,7 @@ every other survey platform. Support comes from this repository.
 ## Citation
 
 Run `citation("surveyBurden")`, or see
-[`CITATION.cff`](https://pmpk20.github.io/surveyBurden/CITATION.cff).
+[`CITATION.cff`](https://github.com/pmpk20/surveyBurden/blob/main/CITATION.cff).
 
 ## Licence
 

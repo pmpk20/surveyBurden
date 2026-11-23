@@ -177,12 +177,38 @@ message, when recognisable.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="co"># Requires observed completion-time data</span></span></span>
-<span class="r-in"><span><span class="va">vt</span> <span class="op">&lt;-</span> <span class="fu">validate_times</span><span class="op">(</span><span class="st">"survey.qsf"</span>, <span class="st">"export.csv"</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">qsf_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"demo_travel_survey.qsf"</span>,</span></span>
+<span class="r-in"><span>                         package <span class="op">=</span> <span class="st">"surveyBurden"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># Two finished respondents with their completion times (toy data)</span></span></span>
+<span class="r-in"><span><span class="va">observed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  ResponseId <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"R_1"</span>, <span class="st">"R_2"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  Finished   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  QID2  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"1"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  QID3  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  QID4  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2"</span>, <span class="st">"3"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  QID6  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"4"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  QID9  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2"</span>, <span class="cn">NA</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  QID10 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="cn">NA</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  QID22 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"3"</span>, <span class="st">"2"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  QID26 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  completion_seconds <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">720</span>, <span class="fl">540</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">vt</span> <span class="op">&lt;-</span> <span class="fu">validate_times</span><span class="op">(</span><span class="va">qsf_path</span>, <span class="va">observed</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">vt</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── <span style="font-weight: bold;">Predicted vs observed completion time</span> ──</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 2 respondents; respondent burden at 12 points per minute.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Completion times outside 3 to 180 minutes or missing: 0 dropped.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>                    10%  25%   50%   75%   90%</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ---------------------------------------------</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Observed minutes   9.3  9.8  10.5  11.2  11.7</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Predicted minutes  3.6  4.5   6.0   7.4   8.3</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Median ratio (predicted / observed): 0.57</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Correlation (points vs minutes): 1.00</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Implied points per minute (median points / median minutes): 6.8</span>
 <span class="r-in"><span><span class="va">vt</span><span class="op">$</span><span class="va">implied_points_per_minute</span></span></span>
-<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 6.809524</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

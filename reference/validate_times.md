@@ -136,10 +136,36 @@ a message, when recognisable.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-# Requires observed completion-time data
-vt <- validate_times("survey.qsf", "export.csv")
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                         package = "surveyBurden")
+# Two finished respondents with their completion times (toy data)
+observed <- data.frame(
+  ResponseId = c("R_1", "R_2"),
+  Finished   = c(1, 1),
+  QID2  = c("1", "1"),
+  QID3  = c("1", "2"),
+  QID4  = c("2", "3"),
+  QID6  = c("1", "4"),
+  QID9  = c("2", NA),
+  QID10 = c("1", NA),
+  QID22 = c("3", "2"),
+  QID26 = c("1", "2"),
+  completion_seconds = c(720, 540)
+)
+vt <- validate_times(qsf_path, observed)
 vt
+#> 
+#> ── Predicted vs observed completion time ──
+#> 
+#> 2 respondents; respondent burden at 12 points per minute.
+#> Completion times outside 3 to 180 minutes or missing: 0 dropped.
+#>                    10%  25%   50%   75%   90%
+#> ---------------------------------------------
+#> Observed minutes   9.3  9.8  10.5  11.2  11.7
+#> Predicted minutes  3.6  4.5   6.0   7.4   8.3
+#> Median ratio (predicted / observed): 0.57
+#> Correlation (points vs minutes): 1.00
+#> Implied points per minute (median points / median minutes): 6.8
 vt$implied_points_per_minute
-} # }
+#> [1] 6.809524
 ```

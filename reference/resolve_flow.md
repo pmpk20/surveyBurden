@@ -102,7 +102,4 @@ flow[, c("path_id", "terminates_early")]
 #> 2       2 TRUE            
 #> 3       3 FALSE           
 #> 4       4 FALSE           
-if (FALSE) { # \dontrun{
-resolve_flow(read_qsf("survey.qsf"), field_domains = list(group = c("1", "2")))
-} # }
 ```

@@ -8,6 +8,9 @@
 
 * 'Qualtrics' is the name of a commercial survey platform; the package reads
   its survey files (.qsf).
+* Words flagged as possibly misspelled in DESCRIPTION are correct: Axhausen
+  and Heimgartner are author surnames, GfS is the acronym of the scoring
+  scheme's originator, and qsf is the Qualtrics survey file extension.
 * One example (`fetch_qsf()`) is wrapped in `\dontrun{}` because it needs a
   user's Qualtrics API credentials and network access. All other examples run.
 * The Qualtrics API path is exercised only in tests that are skipped when

@@ -195,13 +195,13 @@ Every function has a help page (`?burden_report`, `?score_burden` and so on).
 
 ## Contributing
 
-Bug reports, questions and pull requests are welcome. See [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md). Contributors are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+Bug reports, questions and pull requests are welcome. See [`.github/CONTRIBUTING.md`](https://github.com/pmpk20/surveyBurden/blob/main/.github/CONTRIBUTING.md). Contributors are expected to follow the [Code of Conduct](https://github.com/pmpk20/surveyBurden/blob/main/CODE_OF_CONDUCT.md).
 
 surveyBurden is an independent project, separate from Qualtrics and every other survey platform. Support comes from this repository.
 
 ## Citation
 
-Run `citation("surveyBurden")`, or see [`CITATION.cff`](CITATION.cff).
+Run `citation("surveyBurden")`, or see [`CITATION.cff`](https://github.com/pmpk20/surveyBurden/blob/main/CITATION.cff).
 
 ## Licence
 

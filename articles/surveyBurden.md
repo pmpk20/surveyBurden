@@ -98,7 +98,7 @@ report
 #> 
 #> ── Survey Burden Report: Neighbourhood Travel Survey (demo) ────────────────────
 #> Median burden: 120 GfS+ points (range 103-143 across 2 complete routes).
-#> Expected minutes: ~10 (range 9-12).
+#> Expected duration in minutes: ~10 (range 9-12).
 #> Relative to benchmark: 0.3x the median of 399 points.
 #> 
 #> ── Survey ──
@@ -260,7 +260,7 @@ summary(report)
 #> ── Neighbourhood Travel Survey (demo) ──────────────────────────────────────────
 #> 26 questions, 12 pages, 12 blocks, 4 routes (2 complete).
 #> Median burden: 120 GfS+ points (range 103-143 across 2 complete routes).
-#> Expected minutes: ~10 (range 9-12).
+#> Expected duration in minutes: ~10 (range 9-12).
 #> Relative to benchmark: 0.3x the median of 399 points.
 ```
 

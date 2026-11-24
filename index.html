@@ -99,7 +99,7 @@
 <pre><code><span><span class="co">#&gt; ── Neighbourhood Travel Survey (demo) ──────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; 26 questions, 12 pages, 12 blocks, 4 structural paths (2 complete).</span></span>
 <span><span class="co">#&gt; Median burden: 120 GfS+ points (range 103-143 across 2 completing paths).</span></span>
-<span><span class="co">#&gt; Expected minutes: ~10 (range 9-12).</span></span>
+<span><span class="co">#&gt; Expected duration in minutes: ~10 (range 9-12).</span></span>
 <span><span class="co">#&gt; Relative to benchmark: 0.3x the median of 399 points.</span></span></code></pre>
 <p>The survey has four paths through it. Two are screen-outs, where the survey ends early, and two run to the end. Burden along the complete paths runs from 103 to 143 points. The range comes from optional questions that the survey’s display logic shows to some respondents and hides from others.</p>
 <p>Printing <code>report</code> gives the full version. It adds burden by block, the heaviest questions, readability checks, calculation certainty (which parts of the calculation are exact and which are approximated), and warnings. For example, the demo survey’s heaviest question is the 6 × 7 agreement grid from the worked example above, and its heaviest block is the travel block, with 23% of all question points. <code><a href="articles/reading-the-report.html">vignette("reading-the-report")</a></code> explains each section of the printout.</p>

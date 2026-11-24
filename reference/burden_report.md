@@ -293,22 +293,22 @@ qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
                          package = "surveyBurden")
 br <- burden_report(qsf_path)
 #> ℹ Reading survey
-#> ✔ Reading survey [9ms]
+#> ✔ Reading survey [6ms]
 #> 
 #> ℹ Scoring questions and working out routes
-#> ✔ Scoring questions and working out routes [122ms]
+#> ✔ Scoring questions and working out routes [77ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [33ms]
+#> ✔ Checking calculation certainty [20ms]
 #> 
 #> ℹ Working through display-logic combinations
-#> ✔ Working through display-logic combinations [18ms]
+#> ✔ Working through display-logic combinations [10ms]
 #> 
 br
 #> 
 #> ── Survey Burden Report: Neighbourhood Travel Survey (demo) ────────────────────
 #> Median burden: 120 GfS+ points (range 103-143 across 2 complete routes).
-#> Expected minutes: ~10 (range 9-12).
+#> Expected duration in minutes: ~10 (range 9-12).
 #> Relative to benchmark: 0.3x the median of 399 points.
 #> 
 #> ── Survey ──
@@ -393,7 +393,7 @@ summary(br)
 #> ── Neighbourhood Travel Survey (demo) ──────────────────────────────────────────
 #> 26 questions, 12 pages, 12 blocks, 4 routes (2 complete).
 #> Median burden: 120 GfS+ points (range 103-143 across 2 complete routes).
-#> Expected minutes: ~10 (range 9-12).
+#> Expected duration in minutes: ~10 (range 9-12).
 #> Relative to benchmark: 0.3x the median of 399 points.
 br$burden
 #> # A tibble: 5 × 4

@@ -34,7 +34,8 @@
   “primary-gate” or “enumerated”. The certainty summary says whether
   branches depend on answers to questions in the survey, on stored
   values such as panel variables, or on quotas. Function and column
-  names, returned values and all computed numbers are unchanged.
+  names, returned values and all computed numbers are unchanged. The
+  duration line reads “Expected duration in minutes”.
 - [`path_burden_traversals()`](https://pmpk20.github.io/surveyBurden/reference/path_burden_traversals.md)
   accepts `answer_weights`, a named list of assumed answer frequencies
   for question answers or stored fields. Results are labelled “under

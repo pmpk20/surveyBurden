@@ -62,9 +62,9 @@ score_burden <- function(catalogue, scheme = gfs_scheme()) {
     hit <- (f | b) & !is.na(gfs) & !(catalogue$is_hidden %in% TRUE) &
       !catalogue$std_type %in% c("descriptive", "timing", "meta", "captcha")
     gfs[hit] <- gfs[hit] + scheme$filter * f[hit] + scheme$branching * b[hit]
-    role <- ifelse(f & b, sprintf("GfS filter %.1f + branching %.1f", scheme$filter, scheme$branching),
-                   ifelse(f, sprintf("GfS filter %.1f", scheme$filter),
-                          sprintf("GfS branching %.1f", scheme$branching)))
+    role <- ifelse(f & b, sprintf("GfS+ filter %.1f + branching %.1f", scheme$filter, scheme$branching),
+                   ifelse(f, sprintf("GfS+ filter %.1f", scheme$filter),
+                          sprintf("GfS+ branching %.1f", scheme$branching)))
     basis[hit] <- paste0(basis[hit], "; + ", role[hit],
                          " (its answer drives later routing)")
     flag[hit] <- vapply(flag[hit], escalate, character(1), to = "inferred")
@@ -156,7 +156,7 @@ score_choice_tasks <- function(scored, choice_tasks, scheme = gfs_scheme()) {
     "declared stated choice: %d alternatives (%.1f%s) + %d attributes x %.1f",
     as.integer(alts), alt_pts,
     ifelse(alts > 3,
-           sprintf(" = %.1f + %.1f per alternative beyond 3, beyond GfS Table 1",
+           sprintf(" = %.1f + %.1f per alternative beyond 3, beyond GfS+ Table 1",
                    scheme$sc_3_alt, scheme$sc_per_extra_alt), ""),
     as.integer(attrs), scheme$sc_per_variable)
   set_item_scores(scored, match(ids, scored$question_id), pts, basis, scheme)
@@ -229,15 +229,15 @@ score_item <- function(r, w) {
       quantity <- grepl(cue, qtext, perl = TRUE) || grepl(cue, ltext, perl = TRUE)
       if (options_numeric && (quantity || (!is.na(no) && no >= 10))) {
         return(out(w$numeric_answer,
-                   "dropdown of numeric options with a quantity/date cue -> GfS simple numerical answer",
+                   "dropdown of numeric options with a quantity/date cue -> GfS+ simple numerical answer",
                    escalate(flag, "inferred")))
       }
       pts   <- if (is.na(no) || no <= 5) w$rating_small else w$rating_large
-      basis <- sprintf("dropdown, %s options -> mapped to GfS %s rating (closest Table 1 category)",
+      basis <- sprintf("dropdown, %s options -> mapped to GfS+ %s rating (closest Table 1 category)",
                        if (is.na(no)) "unknown" else no,
                        if (is.na(no) || no <= 5) "<=5" else ">5")
       if (!is.na(no) && no > 8 && !options_numeric) {
-        basis <- paste0(basis, "; nominal_large_choice_set -- scan-and-recognise load not credited by GfS")
+        basis <- paste0(basis, "; nominal_large_choice_set -- scan-and-recognise load not credited by GfS+")
       }
       return(out(pts, basis, escalate(flag, "inferred")))
     }
@@ -245,10 +245,10 @@ score_item <- function(r, w) {
       return(out(w$rating_small, "single choice, option count unknown -> assumed a rating <=5",
                  escalate(flag, "inferred")))
     }
-    if (no <= 2) return(out(w$yes_no, "single choice, 2 options -> GfS closed yes/no"))
-    if (no <= 5) return(out(w$rating_small, sprintf("single choice, %s options -> GfS rating <=5", no)))
-    basis <- sprintf("single choice, %s options -> GfS rating >5", no)
-    if (no > 8) basis <- paste0(basis, "; nominal_large_choice_set -- not separately credited by GfS")
+    if (no <= 2) return(out(w$yes_no, "single choice, 2 options -> GfS+ closed yes/no"))
+    if (no <= 5) return(out(w$rating_small, sprintf("single choice, %s options -> GfS+ rating <=5", no)))
+    basis <- sprintf("single choice, %s options -> GfS+ rating >5", no)
+    if (no > 8) basis <- paste0(basis, "; nominal_large_choice_set -- not separately credited by GfS+")
     return(out(w$rating_large, basis))
   }
 
@@ -256,11 +256,11 @@ score_item <- function(r, w) {
     n <- if (is.na(no) || no < 1) 1L else no
     if (n < w$multi_large_threshold) {
       return(out(w$multi_small_base + w$multi_small_per_option * (n - 1),
-                 sprintf("multi-select, %s options -> GfS half-open <8: %.1f + %.1f each additional",
+                 sprintf("multi-select, %s options -> GfS+ half-open <8: %.1f + %.1f each additional",
                          n, w$multi_small_base, w$multi_small_per_option)))
     }
     return(out(w$multi_large_base + w$multi_large_per_option * (n - 1),
-               sprintf("multi-select, %s options -> GfS half-open >=8: %.1f + %.1f each additional",
+               sprintf("multi-select, %s options -> GfS+ half-open >=8: %.1f + %.1f each additional",
                        n, w$multi_large_base, w$multi_large_per_option)))
   }
 
@@ -273,20 +273,20 @@ score_item <- function(r, w) {
       cols  <- if (is.na(r$n_cols)) 1L else r$n_cols
       cells <- rows * cols
       return(out(cells * w$matrix_cell_multi,
-                 sprintf("multiple-answer grid, %s x %s = %s cells x %.1f (each cell a trivial yes/no; documented inference, not GfS)",
+                 sprintf("multiple-answer grid, %s x %s = %s cells x %.1f (each cell a trivial yes/no; documented inference, not GfS+)",
                          rows, cols, cells, w$matrix_cell_multi),
                  escalate(flag, "inferred")))
     }
     per <- if (!is.na(r$n_cols) && r$n_cols > 5) w$rating_large else w$rating_small
     return(out(rows * per,
-               sprintf("matrix, %s rows x GfS rating %s (%.1f per row)",
+               sprintf("matrix, %s rows x GfS+ rating %s (%.1f per row)",
                        rows, if (!is.na(r$n_cols) && r$n_cols > 5) ">5" else "<=5", per)))
   }
 
   if (identical(st, "open_text")) {
     essay <- is_multiline
-    if (essay) return(out(w$open_essay, "multi-line text -> GfS first answer to an open question"))
-    return(out(w$open_short, "single-line text -> GfS answer to a sub-question (<=5 words)"))
+    if (essay) return(out(w$open_essay, "multi-line text -> GfS+ first answer to an open question"))
+    return(out(w$open_short, "single-line text -> GfS+ answer to a sub-question (<=5 words)"))
   }
 
   if (identical(st, "slider")) {
@@ -294,15 +294,15 @@ score_item <- function(r, w) {
     # a numerical answer; a graded slider (agree..disagree) is a rating.
     if (grepl(cue, ltext, perl = TRUE) || grepl(cue, qtext, perl = TRUE)) {
       return(out(w$numeric_answer,
-                 "slider with a magnitude/units label -> mapped to GfS simple numerical answer",
+                 "slider with a magnitude/units label -> mapped to GfS+ simple numerical answer",
                  escalate(flag, "inferred")))
     }
     return(out(w$slider,
-               "slider, no magnitude label -> mapped to GfS rating (closest Table 1 category)",
+               "slider, no magnitude label -> mapped to GfS+ rating (closest Table 1 category)",
                escalate(flag, "inferred")))
   }
 
-  if (identical(st, "ranking"))      return(out(w$rank_base, "ranking -> GfS best-of ranking (first item)"))
+  if (identical(st, "ranking"))      return(out(w$rank_base, "ranking -> GfS+ best-of ranking (first item)"))
   if (identical(st, "constant_sum")) return(out(w$numeric_answer,
                                                 "constant sum -> approximated as a numerical answer",
                                                 escalate(flag, "inferred")))

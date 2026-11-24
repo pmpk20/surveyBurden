@@ -59,7 +59,7 @@ test_that("three alternatives use sc_3_alt; more add 1.0 each beyond three", {
   expect_equal(pts(score_choice_tasks(sc, ct(alts = 3L, attrs = 2L)), "QID1"), 3 + 2)
   big <- score_choice_tasks(sc, ct(alts = 5L, attrs = 3L))
   expect_equal(pts(big, "QID1"), 5 + 3)
-  expect_match(big$score_basis[big$question_id == "QID1"], "beyond GfS Table 1")
+  expect_match(big$score_basis[big$question_id == "QID1"], "beyond GfS\\+ Table 1")
   # the rates come from the scheme
   s <- gfs_scheme(); s$sc_per_variable <- 0.5; s$sc_per_extra_alt <- 2
   expect_equal(pts(score_choice_tasks(sc, ct(alts = 4L, attrs = 2L), s), "QID1"),

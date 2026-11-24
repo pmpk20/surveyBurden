@@ -371,7 +371,7 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
   } else if (identical(basis, "structural")) {
     if (burden_tbl$points[burden_tbl$statistic == "max"] > rare_threshold) {
       warnings <- c(warnings, sprintf(
-        "The heaviest reachable burden (%.0f points) is above %.0f points. Heimgartner & Axhausen (2024) found this level rare among the %d survey waves they scored with the GfS method (their sample median: 399 points).",
+        "The heaviest reachable burden (%.0f points) is above %.0f points. Heimgartner & Axhausen (2024) found this level rare among the %d survey waves they scored (their sample median: 399 points).",
         burden_tbl$points[burden_tbl$statistic == "max"], rare_threshold, 79L))
     }
     warnings <- c(warnings, paste(
@@ -538,20 +538,20 @@ print_burden_report_body <- function(x) {
   } else {
     if (identical(attr(b, "basis"), "naive")) b <- b[b$statistic %in% c("min", "max"), ]
     cli::cli_verbatim(render_table(rbind(
-      c("Statistic", "Points", "Expected Minutes", "Index"),
+      c("Statistic", "Points", "Expected Duration (min)", "Index"),
       cbind(labs[as.character(b$statistic)],
             formatC(b$points,  format = "f", digits = 0),
             formatC(b$minutes, format = "f", digits = 0),
             formatC(b$index,   format = "f", digits = 2))
     )))
   }
-  cli::cli_text("Benchmark: median {bm$median_points} points across {bm$n_waves} GfS-scored waves (Heimgartner & Axhausen 2024).")
+  cli::cli_text("Benchmark: median {bm$median_points} points across {bm$n_waves} survey waves (Heimgartner & Axhausen 2024).")
 
   if (!is.null(x$respondents)) {
     p <- x$respondents
     cli::cli_h2("Respondent burden (complete responses)")
     cli::cli_verbatim(render_table(rbind(
-      c("Statistic", "Points", "Expected Minutes", "Index"),
+      c("Statistic", "Points", "Expected Duration (min)", "Index"),
       cbind(labs[as.character(p$statistic)],
             formatC(p$points,  format = "f", digits = 0),
             formatC(p$minutes, format = "f", digits = 0),

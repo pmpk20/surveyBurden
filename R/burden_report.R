@@ -475,7 +475,7 @@ burden_verdict_line <- function(burden, ppm, benchmark_median, n_complete,
     return(c(
       sprintf("Burden range: %d-%d GfS+ points across %d complete route%s (rough range only; median not computed).",
               mn, mx, n_complete, pl),
-      sprintf("Expected minutes: ~%d-%d.", mn_m, mx_m)))
+      sprintf("Expected duration in minutes: ~%d-%d.", mn_m, mx_m)))
   }
 
   med   <- round(pt("median"))
@@ -484,7 +484,7 @@ burden_verdict_line <- function(burden, ppm, benchmark_median, n_complete,
   lines <- c(
     sprintf("Median burden: %d GfS+ points (range %d-%d across %d complete route%s).",
             med, mn, mx, n_complete, pl),
-    sprintf("Expected minutes: ~%d (range %d-%d).", med_m, mn_m, mx_m),
+    sprintf("Expected duration in minutes: ~%d (range %d-%d).", med_m, mn_m, mx_m),
     sprintf("Relative to benchmark: %sx the median of %d points.",
             ratio, round(benchmark_median)))
 

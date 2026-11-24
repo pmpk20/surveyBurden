@@ -130,10 +130,10 @@ reflect the question’s design, through a rule you accept.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">it</span><span class="op">[</span><span class="va">it</span><span class="op">$</span><span class="va">question_id</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"QID21"</span>, <span class="st">"QID19"</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"question_id"</span>, <span class="st">"score_flag"</span>, <span class="st">"score_basis"</span><span class="op">)</span><span class="op">]</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 3</span></span></span>
-<span><span class="co">#&gt;   question_id score_flag score_basis                                  </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> QID19       auto       matrix, 7 rows x GfS rating &lt;=5 (2.0 per row)</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> QID21       auto       matrix, 6 rows x GfS rating &gt;5 (3.0 per row)</span></span></code></pre></div>
+<span><span class="co">#&gt;   question_id score_flag score_basis                                   </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> QID19       auto       matrix, 7 rows x GfS+ rating &lt;=5 (2.0 per row)</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> QID21       auto       matrix, 6 rows x GfS+ rating &gt;5 (3.0 per row)</span></span></code></pre></div>
 <p>Both are <code>auto</code>. A single-answer matrix scores one rating
 per row, and a rating with more than 5 options scores 3 points against 2
 for up to 5 (see <code><a href="../articles/gfs-scoring.html">vignette("gfs-scoring")</a></code>). So

@@ -125,14 +125,14 @@ are produced see <code><a href="../articles/gfs-scoring.html">vignette("gfs-scor
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Burden (12 GfS+ points ~ 1 minute; index = points / 1500)</span> ──</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Statistic        Points  Expected Minutes  Index</span></span>
-<span><span class="co">#&gt; ------------------------------------------------</span></span>
-<span><span class="co">#&gt; Minimum             103                 9   0.07</span></span>
-<span><span class="co">#&gt; 25th percentile     114                10   0.08</span></span>
-<span><span class="co">#&gt; Median              120                10   0.08</span></span>
-<span><span class="co">#&gt; 75th percentile     126                10   0.08</span></span>
-<span><span class="co">#&gt; Maximum             143                12   0.10</span></span>
-<span><span class="co">#&gt; Benchmark: median 399 points across 79 GfS-scored waves (Heimgartner &amp; Axhausen</span></span>
+<span><span class="co">#&gt; Statistic        Points  Expected Duration (min)  Index</span></span>
+<span><span class="co">#&gt; -------------------------------------------------------</span></span>
+<span><span class="co">#&gt; Minimum             103                        9   0.07</span></span>
+<span><span class="co">#&gt; 25th percentile     114                       10   0.08</span></span>
+<span><span class="co">#&gt; Median              120                       10   0.08</span></span>
+<span><span class="co">#&gt; 75th percentile     126                       10   0.08</span></span>
+<span><span class="co">#&gt; Maximum             143                       12   0.10</span></span>
+<span><span class="co">#&gt; Benchmark: median 399 points across 79 survey waves (Heimgartner &amp; Axhausen</span></span>
 <span><span class="co">#&gt; 2024).</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── <span style="font-weight: bold;">Burden by block (survey order; share of all-question points)</span> ──</span></span>
@@ -339,8 +339,8 @@ records the rule used.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 5</span></span></span>
 <span><span class="co">#&gt;   question_id std_type     gfs_points score_flag score_basis                    </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> QID21       matrix               18 auto       matrix, 6 rows x GfS rating &gt;5…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> QID19       matrix               14 auto       matrix, 7 rows x GfS rating &lt;=…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> QID21       matrix               18 auto       matrix, 6 rows x GfS+ rating &gt;…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> QID19       matrix               14 auto       matrix, 7 rows x GfS+ rating &lt;…</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> QID14       multi_choice         12 auto       multi-select, 6 options -&gt; GfS…</span></span></code></pre></div>
 <p><code>score_flag</code> is <code>auto</code> (the structure fixes the
 mapping), <code>inferred</code> (the mapping needed a documented

@@ -293,16 +293,16 @@ qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
                          package = "surveyBurden")
 br <- burden_report(qsf_path)
 #> ℹ Reading survey
-#> ✔ Reading survey [6ms]
+#> ✔ Reading survey [7ms]
 #> 
 #> ℹ Scoring questions and working out routes
-#> ✔ Scoring questions and working out routes [77ms]
+#> ✔ Scoring questions and working out routes [89ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [20ms]
+#> ✔ Checking calculation certainty [23ms]
 #> 
 #> ℹ Working through display-logic combinations
-#> ✔ Working through display-logic combinations [10ms]
+#> ✔ Working through display-logic combinations [13ms]
 #> 
 br
 #> 
@@ -328,14 +328,14 @@ br
 #> 
 #> ── Burden (12 GfS+ points ~ 1 minute; index = points / 1500) ──
 #> 
-#> Statistic        Points  Expected Minutes  Index
-#> ------------------------------------------------
-#> Minimum             103                 9   0.07
-#> 25th percentile     114                10   0.08
-#> Median              120                10   0.08
-#> 75th percentile     126                10   0.08
-#> Maximum             143                12   0.10
-#> Benchmark: median 399 points across 79 GfS-scored waves (Heimgartner & Axhausen
+#> Statistic        Points  Expected Duration (min)  Index
+#> -------------------------------------------------------
+#> Minimum             103                        9   0.07
+#> 25th percentile     114                       10   0.08
+#> Median              120                       10   0.08
+#> 75th percentile     126                       10   0.08
+#> Maximum             143                       12   0.10
+#> Benchmark: median 399 points across 79 survey waves (Heimgartner & Axhausen
 #> 2024).
 #> 
 #> ── Burden by block (survey order; share of all-question points) ──

@@ -67,10 +67,10 @@ reflect the question’s design, through a rule you accept.
 
 it[it$question_id %in% c("QID21", "QID19"), c("question_id", "score_flag", "score_basis")]
 #> # A tibble: 2 × 3
-#>   question_id score_flag score_basis                                  
-#>   <chr>       <chr>      <chr>                                        
-#> 1 QID19       auto       matrix, 7 rows x GfS rating <=5 (2.0 per row)
-#> 2 QID21       auto       matrix, 6 rows x GfS rating >5 (3.0 per row)
+#>   question_id score_flag score_basis                                   
+#>   <chr>       <chr>      <chr>                                         
+#> 1 QID19       auto       matrix, 7 rows x GfS+ rating <=5 (2.0 per row)
+#> 2 QID21       auto       matrix, 6 rows x GfS+ rating >5 (3.0 per row)
 ```
 
 Both are `auto`. A single-answer matrix scores one rating per row, and a

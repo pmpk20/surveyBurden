@@ -64,14 +64,14 @@ report
 #> 
 #> ── Burden (12 GfS+ points ~ 1 minute; index = points / 1500) ──
 #> 
-#> Statistic        Points  Expected Minutes  Index
-#> ------------------------------------------------
-#> Minimum             103                 9   0.07
-#> 25th percentile     114                10   0.08
-#> Median              120                10   0.08
-#> 75th percentile     126                10   0.08
-#> Maximum             143                12   0.10
-#> Benchmark: median 399 points across 79 GfS-scored waves (Heimgartner & Axhausen
+#> Statistic        Points  Expected Duration (min)  Index
+#> -------------------------------------------------------
+#> Minimum             103                        9   0.07
+#> 25th percentile     114                       10   0.08
+#> Median              120                       10   0.08
+#> 75th percentile     126                       10   0.08
+#> Maximum             143                       12   0.10
+#> Benchmark: median 399 points across 79 survey waves (Heimgartner & Axhausen
 #> 2024).
 #> 
 #> ── Burden by block (survey order; share of all-question points) ──
@@ -285,8 +285,8 @@ head(report$items[order(-report$items$gfs_points),
 #> # A tibble: 3 × 5
 #>   question_id std_type     gfs_points score_flag score_basis                    
 #>   <chr>       <chr>             <dbl> <chr>      <chr>                          
-#> 1 QID21       matrix               18 auto       matrix, 6 rows x GfS rating >5…
-#> 2 QID19       matrix               14 auto       matrix, 7 rows x GfS rating <=…
+#> 1 QID21       matrix               18 auto       matrix, 6 rows x GfS+ rating >…
+#> 2 QID19       matrix               14 auto       matrix, 7 rows x GfS+ rating <…
 #> 3 QID14       multi_choice         12 auto       multi-select, 6 options -> GfS…
 ```
 

@@ -118,14 +118,14 @@ report
 #> 
 #> ── Burden (12 GfS+ points ~ 1 minute; index = points / 1500) ──
 #> 
-#> Statistic        Points  Expected Minutes  Index
-#> ------------------------------------------------
-#> Minimum             103                 9   0.07
-#> 25th percentile     114                10   0.08
-#> Median              120                10   0.08
-#> 75th percentile     126                10   0.08
-#> Maximum             143                12   0.10
-#> Benchmark: median 399 points across 79 GfS-scored waves (Heimgartner & Axhausen
+#> Statistic        Points  Expected Duration (min)  Index
+#> -------------------------------------------------------
+#> Minimum             103                        9   0.07
+#> 25th percentile     114                       10   0.08
+#> Median              120                       10   0.08
+#> 75th percentile     126                       10   0.08
+#> Maximum             143                       12   0.10
+#> Benchmark: median 399 points across 79 survey waves (Heimgartner & Axhausen
 #> 2024).
 #> 
 #> ── Burden by block (survey order; share of all-question points) ──

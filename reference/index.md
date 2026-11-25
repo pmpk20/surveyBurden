@@ -75,6 +75,8 @@ Turn the resolved paths into per-path burden.
   : Burden by block for each structural traversal of the survey
 - [`plot_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/plot_burden_profile.md)
   : Plot the ex ante burden distribution of each route
+- [`plot_route_flowchart()`](https://pmpk20.github.io/surveyBurden/reference/plot_route_flowchart.md)
+  : Draw the block-level routes through a Qualtrics survey
 - [`traversal_stability()`](https://pmpk20.github.io/surveyBurden/reference/traversal_stability.md)
   : Monte Carlo stability of sampled traversal quantiles across seeds
 

@@ -344,6 +344,24 @@
 <p>Every function has a help page (<code><a href="reference/burden_report.html">?burden_report</a></code>, <code><a href="reference/score_burden.html">?score_burden</a></code> and so on).</p>
 </div>
 <div class="section level2">
+<h2 id="route-flowchart">Route flowchart<a class="anchor" aria-label="anchor" href="#route-flowchart"></a>
+</h2>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">qsf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"demo_travel_survey.qsf"</span>, package <span class="op">=</span> <span class="st">"surveyBurden"</span><span class="op">)</span></span>
+<span><span class="va">chart</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/plot_route_flowchart.html">plot_route_flowchart</a></span><span class="op">(</span><span class="va">qsf</span>, direction <span class="op">=</span> <span class="st">"TB"</span><span class="op">)</span></span>
+<span><span class="va">chart</span></span>
+<span><span class="co"># A lighter chart keeps block points and counts, without route medians:</span></span>
+<span><span class="fu"><a href="reference/plot_route_flowchart.html">plot_route_flowchart</a></span><span class="op">(</span><span class="va">qsf</span>, include_medians <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="co"># A fetched definition can go straight to the chart:</span></span>
+<span><span class="co"># fetch_qsf("SV_xxxxxxxxxxxxxxx") |&gt; plot_route_flowchart()</span></span>
+<span><span class="co"># Reports retain the flow, routes and their original scoring settings:</span></span>
+<span><span class="fu"><a href="reference/plot_route_flowchart.html">plot_route_flowchart</a></span><span class="op">(</span><span class="fu"><a href="reference/burden_report.html">burden_report</a></span><span class="op">(</span><span class="va">qsf</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># Save at the suggested size, including as vector PDF:</span></span>
+<span><span class="va">size</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">chart</span>, <span class="st">"size_in"</span><span class="op">)</span></span>
+<span><span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggsave</a></span><span class="op">(</span><span class="st">"routes.pdf"</span>, <span class="va">chart</span>, width <span class="op">=</span> <span class="va">size</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, height <span class="op">=</span> <span class="va">size</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<p>Boxes show blocks and GfS+ points; diamonds show branch conditions. Line widths count routes, not respondents or probabilities. End boxes give route counts and the median of their route medians. Use <code>highlight_route</code> with an original <code>path_id</code>, <code>merge_chains = FALSE</code> for individual blocks, or <code>LR</code> for a wide chart. Randomiser arms show selected elements, not their temporal order; dashed arrows mark loops. Within-block display logic is not drawn. Unsupported logic is labelled as untranslated. If <code>max_routes</code> is exceeded, the chart still draws the flow with uniform lines and no counts or medians. Text scales with its boxes when the figure is resized. The suggested export size fits the drawing, including labels and loop arrows, without large blank areas above and below it. Large surveys need a larger export size to keep labels readable. To redraw a full chart without repeating its calculations, retain <code>attr(chart, "burden_report")</code> and pass that report to the plot function.</p>
+</div>
+<div class="section level2">
 <h2 id="limitations">Limitations<a class="anchor" aria-label="anchor" href="#limitations"></a>
 </h2>
 <ul>

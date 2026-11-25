@@ -230,7 +230,9 @@ choices cover all its choices. <code>FALSE</code> gives the 0.2.0 behaviour.</p>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An object of class <code>burden_report</code>: a list of tibbles under stable
-names. Print it for the formatted summary, or read its components:</p><dl><dt>survey</dt>
+names. The <code>route_flowchart</code> attribute retains the survey and routes
+for <code><a href="plot_route_flowchart.html">plot_route_flowchart()</a></code>, using this report's scoring settings.
+Print it for the formatted summary, or read its components:</p><dl><dt>survey</dt>
 <dd><p>One-row tibble of structural counts: <code>survey_name</code>,
 <code>n_questions</code>, <code>n_pages</code>, <code>n_blocks</code>, <code>n_branches</code>, <code>n_randomisers</code>,
 <code>n_loop_blocks</code>, <code>n_end_points</code>, <code>n_paths</code>, <code>n_complete_paths</code>,
@@ -314,16 +316,16 @@ from the QSF, every element is treated as shown, with a warning.</p>
 <span class="r-in"><span>                         package <span class="op">=</span> <span class="st">"surveyBurden"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">br</span> <span class="op">&lt;-</span> <span class="fu">burden_report</span><span class="op">(</span><span class="va">qsf_path</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Reading survey</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Reading survey <span style="color: #B2B2B2;">[7ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Reading survey <span style="color: #B2B2B2;">[6ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Scoring questions and working out routes</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Scoring questions and working out routes <span style="color: #B2B2B2;">[101ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Scoring questions and working out routes <span style="color: #B2B2B2;">[49ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Checking calculation certainty</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[28ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Checking calculation certainty <span style="color: #B2B2B2;">[16ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Working through display-logic combinations</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Working through display-logic combinations <span style="color: #B2B2B2;">[15ms]</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">✔</span> Working through display-logic combinations <span style="color: #B2B2B2;">[25ms]</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span><span class="va">br</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

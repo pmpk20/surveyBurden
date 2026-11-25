@@ -192,7 +192,10 @@ summary(object, ...)
 ## Value
 
 An object of class `burden_report`: a list of tibbles under stable
-names. Print it for the formatted summary, or read its components:
+names. The `route_flowchart` attribute retains the survey and routes for
+[`plot_route_flowchart()`](https://pmpk20.github.io/surveyBurden/reference/plot_route_flowchart.md),
+using this report's scoring settings. Print it for the formatted
+summary, or read its components:
 
 - survey:
 
@@ -293,16 +296,16 @@ qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
                          package = "surveyBurden")
 br <- burden_report(qsf_path)
 #> ℹ Reading survey
-#> ✔ Reading survey [7ms]
+#> ✔ Reading survey [6ms]
 #> 
 #> ℹ Scoring questions and working out routes
-#> ✔ Scoring questions and working out routes [101ms]
+#> ✔ Scoring questions and working out routes [49ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [28ms]
+#> ✔ Checking calculation certainty [16ms]
 #> 
 #> ℹ Working through display-logic combinations
-#> ✔ Working through display-logic combinations [15ms]
+#> ✔ Working through display-logic combinations [25ms]
 #> 
 br
 #> 

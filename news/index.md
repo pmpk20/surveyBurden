@@ -2,6 +2,29 @@
 
 ## surveyBurden 0.3.1
 
+- New
+  [`plot_route_flowchart()`](https://pmpk20.github.io/surveyBurden/reference/plot_route_flowchart.md)
+  draws a survey’s routing as a flowchart: blocks with their GfS+
+  points, branch conditions in plain English, randomiser selections,
+  loops, and the end of survey and screen-outs with route counts and
+  median burden. Line widths show how many routes use each connection.
+  It accepts a `.qsf` file, a survey read with
+  [`read_qsf()`](https://pmpk20.github.io/surveyBurden/reference/read_qsf.md),
+  or a
+  [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md).
+  If the survey has more routes than the enumeration cap, it draws the
+  flow without route counts or medians. Needs the ggplot2 package
+  (suggested).
+- [`burden_report()`](https://pmpk20.github.io/surveyBurden/reference/burden_report.md)
+  objects keep the survey and route information needed to draw the
+  flowchart from the report alone.
+  [`resolve_flow()`](https://pmpk20.github.io/surveyBurden/reference/resolve_flow.md)
+  adds a `flow_ids` column listing the flow elements each route visits.
+- Adjacent branches inside a randomiser that shows a subset of its
+  elements are now kept as separate selection units. Previously the
+  route resolver could combine them before choosing the subset, giving
+  wrong block combinations for such surveys. Surveys without this
+  pattern are unaffected.
 - `burden_report(responses = )` now applies `choice_tasks` and
   `overrides` when scoring respondents, so its respondent summary
   matches

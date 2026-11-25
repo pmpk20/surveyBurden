@@ -31,16 +31,16 @@ qsf_path <- system.file("extdata", "demo_simple_linear.qsf",
                         package = "surveyBurden")
 summary_line(burden_report(qsf_path))
 #> ℹ Reading survey
-#> ✔ Reading survey [5ms]
+#> ✔ Reading survey [4ms]
 #> 
 #> ℹ Scoring questions and working out routes
-#> ✔ Scoring questions and working out routes [28ms]
+#> ✔ Scoring questions and working out routes [24ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [17ms]
+#> ✔ Checking calculation certainty [11ms]
 #> 
 #> ℹ Working through display-logic combinations
-#> ✔ Working through display-logic combinations [13ms]
+#> ✔ Working through display-logic combinations [9ms]
 #> 
 #> [1] "Median burden: 40 GfS+ points (range 40-40 across 1 complete route). Expected duration in minutes: ~3 (range 3-3). Relative to benchmark: 0.1x the median of 399 points."
 ```

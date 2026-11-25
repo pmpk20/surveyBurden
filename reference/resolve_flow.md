@@ -48,6 +48,12 @@ per distinct path:
 
   Integer id.
 
+- flow_ids:
+
+  List column: visited flow-element identifiers for the retained
+  combination of branch outcomes, in flow order. Randomiser selections
+  use survey order, not their random presentation order.
+
 - block_ids:
 
   List column: ordered `BL_...` ids the path shows.

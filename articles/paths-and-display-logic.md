@@ -70,13 +70,13 @@ could encounter.
 ``` r
 
 resolve_flow(qsf)
-#> # A tibble: 4 × 4
-#>   path_id block_ids  terminates_early decisions
-#>     <int> <list>     <lgl>            <list>   
-#> 1       1 <chr [2]>  TRUE             <lgl [1]>
-#> 2       2 <chr [3]>  TRUE             <lgl [2]>
-#> 3       3 <chr [12]> FALSE            <lgl [3]>
-#> 4       4 <chr [11]> FALSE            <lgl [3]>
+#> # A tibble: 4 × 5
+#>   path_id block_ids  terminates_early flow_ids   decisions
+#>     <int> <list>     <lgl>            <list>     <list>   
+#> 1       1 <chr [2]>  TRUE             <chr [5]>  <lgl [1]>
+#> 2       2 <chr [3]>  TRUE             <chr [7]>  <lgl [2]>
+#> 3       3 <chr [12]> FALSE            <chr [16]> <lgl [3]>
+#> 4       4 <chr [11]> FALSE            <chr [15]> <lgl [3]>
 ```
 
 ``` r

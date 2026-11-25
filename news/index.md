@@ -2,6 +2,12 @@
 
 ## surveyBurden 0.3.1
 
+- `burden_report(responses = )` now applies `choice_tasks` and
+  `overrides` when scoring respondents, so its respondent summary
+  matches
+  [`respondent_burden()`](https://pmpk20.github.io/surveyBurden/reference/respondent_burden.md)
+  with the same settings. Previously the respondent summary ignored
+  them.
 - New
   [`plot_burden_profile()`](https://pmpk20.github.io/surveyBurden/reference/plot_burden_profile.md)
   draws each route’s ex ante burden distribution from

@@ -34,13 +34,13 @@ summary_line(burden_report(qsf_path))
 #> ✔ Reading survey [6ms]
 #> 
 #> ℹ Scoring questions and working out routes
-#> ✔ Scoring questions and working out routes [37ms]
+#> ✔ Scoring questions and working out routes [35ms]
 #> 
 #> ℹ Checking calculation certainty
-#> ✔ Checking calculation certainty [23ms]
+#> ✔ Checking calculation certainty [21ms]
 #> 
 #> ℹ Working through display-logic combinations
-#> ✔ Working through display-logic combinations [18ms]
+#> ✔ Working through display-logic combinations [17ms]
 #> 
 #> [1] "Median burden: 40 GfS+ points (range 40-40 across 1 complete route). Expected duration in minutes: ~3 (range 3-3). Relative to benchmark: 0.1x the median of 399 points."
 ```

@@ -1,8 +1,16 @@
+## Resubmission
+
+This is a resubmission. The previous upload included a hidden `.git` file
+(a git worktree pointer), flagged by the incoming pre-tests. It is now excluded
+in `.Rbuildignore`; the rebuilt tarball contains no hidden files. No other
+changes.
+
 ## R CMD check results
 
 0 errors | 0 warnings | 1 note
 
-* This is a new submission.
+* This is a new submission. The same NOTE lists possibly misspelled words in
+  DESCRIPTION; these are explained below.
 
 ## Notes
 

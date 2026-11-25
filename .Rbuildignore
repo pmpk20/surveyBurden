@@ -32,3 +32,5 @@
 ^literature$
 ^handoffs$
 ^tests/testthat/test-private-surveys\.R$
+^llms\.txt$
+^\.git$

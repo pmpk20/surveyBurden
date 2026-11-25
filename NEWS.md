@@ -1,27 +1,8 @@
-# surveyBurden (development version)
-
-* Flowchart text now scales with its measured boxes. Canvas bounds include
-  connectors and loops, default expansion is removed, and export height fits
-  the panel plus its measured title, caption and margins. Layer gaps are smaller.
-* The survey-to-flowchart call resolves routes once and skips unused certainty
-  diagnostics. `include_medians = FALSE` keeps block points and route counts
-  without a full burden report. Reports remain reusable for fast redraws;
-  a report computed for a chart is retained in its `burden_report` attribute.
-
-* Adjacent branches inside a randomiser remain separate selection units.
-  Previously the route resolver could combine them before choosing a subset,
-  producing the wrong block combinations.
-
-* Target version: 0.4.0. New `plot_route_flowchart()` draws block-level survey
-  routing, branch conditions, randomiser selections, loops and terminations.
-  It accepts a QSF or a report. Route counts set line widths; exceeding the
-  enumeration cap leaves a structural chart without counts or medians.
-* Reports retain their survey and route context. `resolve_flow()` adds
-  `flow_ids` to identify visited flow elements. Boolean labels preserve
-  groups and AND-before-OR precedence; unsupported conditions remain explicit.
-
 # surveyBurden 0.3.1
 
+* New `plot_route_flowchart()` draws a survey's routing as a flowchart: blocks with their GfS+ points, branch conditions in plain English, randomiser selections, loops, and the end of survey and screen-outs with route counts and median burden. Line widths show how many routes use each connection. It accepts a `.qsf` file, a survey read with `read_qsf()`, or a `burden_report()`. If the survey has more routes than the enumeration cap, it draws the flow without route counts or medians. Needs the ggplot2 package (suggested).
+* `burden_report()` objects keep the survey and route information needed to draw the flowchart from the report alone. `resolve_flow()` adds a `flow_ids` column listing the flow elements each route visits.
+* Adjacent branches inside a randomiser that shows a subset of its elements are now kept as separate selection units. Previously the route resolver could combine them before choosing the subset, giving wrong block combinations for such surveys. Surveys without this pattern are unaffected.
 * `burden_report(responses = )` now applies `choice_tasks` and `overrides` when scoring respondents, so its respondent summary matches `respondent_burden()` with the same settings. Previously the respondent summary ignored them.
 * New `plot_burden_profile()` draws each route's ex ante burden distribution from `path_burden_profile()` output (or a `burden_report()`): histogram of synthetic responses, interquartile range, median, range, and the pooled median. Each route's histogram is scaled to the same maximum height and every bin is outlined. Routes with a single value are drawn as a dot. Complete routes are labelled "Route 1" to "Route n" in `path_id` order, and routes that end early "Ending early 1" and so on; the plot data keeps the original `path_id`. If no route is complete, the routes that end early are drawn. The footer describes only what is drawn. It handles surveys with many routes (`max_routes`). Needs the ggplot2 package (suggested). `burden_report()` objects now keep the route profile they computed as an attribute.
 * Blocks placed after an unconditional end of survey at the top level of the flow are now left out, with a message and a report warning naming them. Qualtrics never shows them, but they made every route count as ending early (one exported survey reported no complete route; it now reports 12 of 26). A survey that ends before any block now stops with a clear error.

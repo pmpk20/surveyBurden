@@ -43,8 +43,8 @@ layout_flowchart <- function(model, direction = c("LR", "TB"), wrap = 24) {
     }
     chain[[k]] <- c(ks, paste0("n", v))
   }
-  seg <- do.call(rbind, lapply(chain, function(ch) data.frame(a = head(ch, -1), b = ch[-1])))
-  nodes$ord <- ave(seq_len(nrow(nodes)), nodes$layer, FUN = seq_along)
+  seg <- do.call(rbind, lapply(chain, function(ch) data.frame(a = utils::head(ch, -1), b = ch[-1])))
+  nodes$ord <- stats::ave(seq_len(nrow(nodes)), nodes$layer, FUN = seq_along)
   for (sweep in 1:6) {
     down <- sweep %% 2 == 1
     for (l in sort(unique(nodes$layer), decreasing = !down)) {

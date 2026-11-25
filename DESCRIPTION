@@ -1,6 +1,6 @@
 Package: surveyBurden
 Title: Measuring the Response Burden of Web Surveys
-Version: 0.4.0
+Version: 0.3.1
 Authors@R: 
     person("Peter", "King", , "p.king1@leeds.ac.uk", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0001-8550-466X"))
@@ -32,6 +32,7 @@ Config/testthat/edition: 3
 VignetteBuilder: knitr
 Imports:
     cli,
+    grid,
     jsonlite,
     tibble
 Config/roxygen2/version: 8.1.0

@@ -2,8 +2,9 @@
 
 This is a resubmission. The previous upload included a hidden `.git` file
 (a git worktree pointer), flagged by the incoming pre-tests. It is now excluded
-in `.Rbuildignore`; the rebuilt tarball contains no hidden files. No other
-changes.
+in `.Rbuildignore`; the rebuilt tarball contains no hidden files. The
+resubmission also adds one function, `plot_route_flowchart()` (see NEWS.md),
+with tests.
 
 ## R CMD check results
 

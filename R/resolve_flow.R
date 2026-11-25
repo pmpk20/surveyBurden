@@ -229,8 +229,6 @@ flow_has_blocks <- function(nodes) {
     if ((n[["Type"]] %||% "") %in% c("Standard", "Block")) return(TRUE)
     if (identical(n[["Type"]], "ExclusiveBranchGroup") &&
         flow_has_blocks(n$branches)) return(TRUE)
-    if (identical(n[["Type"]], "ExclusiveBranchGroup") &&
-        flow_has_blocks(n$branches)) return(TRUE)
     if (is.list(n[["Flow"]]) && flow_has_blocks(n[["Flow"]])) return(TRUE)
   }
   FALSE

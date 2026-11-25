@@ -192,7 +192,7 @@ flow_graph <- function(qsf, routes = NULL, report = NULL,
         out <- list()
         for (child in n$Flow) {
           cr <- if (counted) rr[vapply(match(rr, routes$path_id), function(r) {
-            child$FlowID %in% routes$flow_ids[[r]]
+            isTRUE((child$FlowID %||% "") %in% routes$flow_ids[[r]])
           }, logical(1))] else rr
           out <- c(out, walk(list(child), list(pred(id, cr, "selected")), cr))
         }
@@ -210,7 +210,7 @@ flow_graph <- function(qsf, routes = NULL, report = NULL,
         if (length(missing)) link(list(pred(id, missing)), j, missing)
         ps <- list(pred(j, continuing))
       } else if (is.list(n$Flow)) {
-        ps <- walk(n$Flow, ps, rr)
+        ps <- walk(n$Flow, ps, rr, top = top && type %in% c("Group", "Authenticator"))
       }
       if (length(ps)) rr <- unique(unlist(lapply(ps, `[[`, "rr"))) else rr <- integer()
       if (!length(ps)) return(list())

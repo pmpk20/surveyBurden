@@ -383,7 +383,9 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
   # ---- $respondents (optional) -------------------------------------
   respondents <- NULL
   if (!is.null(responses)) {
-    rb <- suppressMessages(respondent_burden(qsf, responses, scheme = scheme))
+    rb <- suppressMessages(respondent_burden(qsf, responses, scheme = scheme,
+                                             overrides = overrides,
+                                             choice_tasks = choice_tasks))
     stats_lab <- c("min", "p10", "p25", "median", "mean", "p75", "p90", "max")
     pts <- rb$points[rb$outcome == "complete"]
     qp <- if (length(pts)) stats::quantile(pts, c(0, .1, .25, .5, .75, .9, 1))

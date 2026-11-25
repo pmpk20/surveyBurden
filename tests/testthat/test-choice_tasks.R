@@ -84,3 +84,20 @@ test_that("an override beats a declared task on the same question", {
   expect_equal(pts(out$items, "QID1"), 9)
   expect_equal(out$items$score_basis[out$items$question_id == "QID1"], "user override")
 })
+
+test_that("burden_report(responses =) applies declared tasks and overrides to respondents", {
+  med <- function(rb) stats::median(rb$points[rb$outcome == "complete"])
+  base <- respondent_burden(ct_qsf(), ct_responses())
+  with_ct <- respondent_burden(ct_qsf(), ct_responses(), choice_tasks = ct())
+  with_ov <- respondent_burden(ct_qsf(), ct_responses(), overrides = c(QID2 = 9))
+  expect_gt(med(with_ct), med(base))
+
+  r_ct <- burden_report(ct_qsf(), responses = ct_responses(), quiet = TRUE,
+                        profile = FALSE, certainty = FALSE, choice_tasks = ct())
+  expect_equal(r_ct$respondents$points[r_ct$respondents$statistic == "median"],
+               med(with_ct))
+  r_ov <- burden_report(ct_qsf(), responses = ct_responses(), quiet = TRUE,
+                        profile = FALSE, certainty = FALSE, overrides = c(QID2 = 9))
+  expect_equal(r_ov$respondents$points[r_ov$respondents$statistic == "median"],
+               med(with_ov))
+})

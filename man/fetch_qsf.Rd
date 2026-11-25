@@ -36,6 +36,6 @@ environment, or pass them as arguments. The token needs the
 \examples{
 \dontrun{
 Sys.setenv(QUALTRICS_API_KEY = "...", QUALTRICS_BASE_URL = "https://fra1.qualtrics.com")
-r <- burden_report(fetch_qsf("SV_0xIVRCCRgC1lt8a"))
+r <- burden_report(fetch_qsf("SV_xxxxxxxxxxxxxxx"))
 }
 }

@@ -279,6 +279,10 @@ path_burden_traversals <- function(qsf, method = c("auto", "exact", "sample"),
 #' @param ... Passed to [path_burden_traversals()].
 #' @return A list: `per_seed` (tibble `seed`, `p10`, `median`, `p90`) and
 #'   `range` (tibble with rows `min`, `max`, `spread`).
+#' @examples
+#' qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+#'                         package = "surveyBurden")
+#' traversal_stability(qsf_path, seeds = 1:2, n_draws = 200)
 #' @export
 traversal_stability <- function(qsf, seeds = 1:5, n_draws = 10000L, ...) {
   rows <- lapply(seeds, function(s) {

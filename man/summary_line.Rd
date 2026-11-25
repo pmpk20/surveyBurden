@@ -17,3 +17,8 @@ A single character string.
 \description{
 One-sentence summary of a burden object
 }
+\examples{
+qsf_path <- system.file("extdata", "demo_simple_linear.qsf",
+                        package = "surveyBurden")
+summary_line(burden_report(qsf_path))
+}

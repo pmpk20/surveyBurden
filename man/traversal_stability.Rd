@@ -24,3 +24,8 @@ Reruns \code{\link[=path_burden_traversals]{path_burden_traversals()}} with \cod
 and reports the weighted 10th, 50th and 90th percentiles of the traversal
 totals (GfS+ points), with their range across seeds.
 }
+\examples{
+qsf_path <- system.file("extdata", "demo_travel_survey.qsf",
+                        package = "surveyBurden")
+traversal_stability(qsf_path, seeds = 1:2, n_draws = 200)
+}

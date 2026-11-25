@@ -634,6 +634,10 @@ print.summary.burden_report <- function(x, ...) {
 #' @param x A [burden_report()] object.
 #' @param ... Unused.
 #' @return A single character string.
+#' @examples
+#' qsf_path <- system.file("extdata", "demo_simple_linear.qsf",
+#'                         package = "surveyBurden")
+#' summary_line(burden_report(qsf_path))
 #' @export
 summary_line <- function(x, ...) UseMethod("summary_line")
 

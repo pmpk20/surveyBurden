@@ -21,3 +21,9 @@
 
 * local: Windows 11, R 4.5.0
 * win-builder: R-devel
+* GitHub Actions: macOS (release), Windows (release), Ubuntu (devel, release,
+  oldrel-1)
+
+## Reverse dependencies
+
+There are currently no downstream dependencies for this package.

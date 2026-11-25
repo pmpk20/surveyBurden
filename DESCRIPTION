@@ -2,7 +2,7 @@ Package: surveyBurden
 Title: Measuring the Response Burden of Web Surveys
 Version: 0.3.1
 Authors@R: 
-    person("Peter", "King", , "p.king1@leeds.ac.uk", role = c("aut", "cre"),
+    person("Peter", "King", , "p.king1@leeds.ac.uk", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0001-8550-466X"))
 Description: Measures the objective burden of a survey, the work it asks of
     respondents. Each question is scored with the GfS+ point scheme, which

@@ -31,3 +31,4 @@
 ^Papers$
 ^literature$
 ^handoffs$
+^tests/testthat/test-private-surveys\.R$

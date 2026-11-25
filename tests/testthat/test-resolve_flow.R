@@ -129,43 +129,6 @@ test_that("complementary > 0 and = 0 branches are never both taken", {
 
 
 
-# --- integration: Zeitkostenstudie ---
-test_that("Zeitkostenstudie SP gets 525 paths with exclusive branch detection", {
-  skip_on_cran()
-  qsf_file <- file.path(
-    "C:/Users/earpkin/OneDrive - University of Leeds/Careers/surveyBurden",
-    "misc/qualtrics_files/Zeitkostenstudie_2020_SP.qsf"
-  )
-  skip_if_not(file.exists(qsf_file), "Zeitkostenstudie QSF not available")
-  qsf <- read_qsf(qsf_file)
-  paths <- suppressMessages(resolve_flow(qsf))
-  # 4 groups: SP_05(6), SP_67(2), SP_8(4), SP_9(4) -> (6+1)*(2+1)*(4+1)*(4+1)
-  expect_equal(nrow(paths), 525L)
-  expect_equal(sum(paths$terminates_early), 0L)
-  # declared exhaustive: no "none matches" path, 6 * 2 * 4 * 4
-  dom <- list(SP_05 = 0:5, SP_67 = 6:7, SP_8 = c(8, 88, 888, 8888), SP_9 = c(9, 99, 999, 9999))
-  expect_equal(nrow(suppressMessages(resolve_flow(qsf, field_domains = dom))), 192L)
-})
-
-# --- integration: INFUZE Part A (owner / non-owner gates on a vehicle count) ---
-test_that("INFUZE Part A: owner and non-owner blocks are never both on a path", {
-  skip_on_cran()
-  qsf_file <- file.path(
-    "C:/Users/earpkin/OneDrive - University of Leeds/Careers/surveyBurden",
-    "misc/INFUZE_CORE_SURVEY_April_2026_Part_A (3).qsf"
-  )
-  skip_if_not(file.exists(qsf_file), "INFUZE Part A QSF not available")
-  qsf <- read_qsf(qsf_file)
-  paths <- suppressMessages(resolve_flow(qsf))
-  expect_equal(nrow(paths), 52L)
-  expect_equal(sum(!paths$terminates_early), 24L)
-  # no path shows both the owner and the non-owner blocks
-  ids <- c("BL_bJC1A4335LeSSb4", "BL_9FhvpgzsEDuYw3Y")
-  expect_false(any(vapply(paths$block_ids, function(b) all(ids %in% b), logical(1))))
-  # the vehicle count is written by QID45's JavaScript, and is reported
-  expect_message(resolve_flow(qsf), "TotalVehiclesLoop (QID45)", fixed = TRUE)
-})
-
 # --- integration: the demo travel survey flow ---
 
 

@@ -2,7 +2,7 @@
 
 ## Authors
 
-- **Peter King**. Author, maintainer.
+- **Peter King**. Author, maintainer, copyright holder.
   [](https://orcid.org/0000-0001-8550-466X)
 
 ## Citation

@@ -129,7 +129,9 @@ choices cover all its choices. \code{FALSE} gives the 0.2.0 behaviour.}
 }
 \value{
 An object of class \code{burden_report}: a list of tibbles under stable
-names. Print it for the formatted summary, or read its components:
+names. The \code{route_flowchart} attribute retains the survey and routes
+for \code{\link[=plot_route_flowchart]{plot_route_flowchart()}}, using this report's scoring settings.
+Print it for the formatted summary, or read its components:
 \describe{
 \item{survey}{One-row tibble of structural counts: \code{survey_name},
 \code{n_questions}, \code{n_pages}, \code{n_blocks}, \code{n_branches}, \code{n_randomisers},

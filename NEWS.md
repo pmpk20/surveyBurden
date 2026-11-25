@@ -1,3 +1,25 @@
+# surveyBurden (development version)
+
+* Flowchart text now scales with its measured boxes. Canvas bounds include
+  connectors and loops, default expansion is removed, and export height fits
+  the panel plus its measured title, caption and margins. Layer gaps are smaller.
+* The survey-to-flowchart call resolves routes once and skips unused certainty
+  diagnostics. `include_medians = FALSE` keeps block points and route counts
+  without a full burden report. Reports remain reusable for fast redraws;
+  a report computed for a chart is retained in its `burden_report` attribute.
+
+* Adjacent branches inside a randomiser remain separate selection units.
+  Previously the route resolver could combine them before choosing a subset,
+  producing the wrong block combinations.
+
+* Target version: 0.4.0. New `plot_route_flowchart()` draws block-level survey
+  routing, branch conditions, randomiser selections, loops and terminations.
+  It accepts a QSF or a report. Route counts set line widths; exceeding the
+  enumeration cap leaves a structural chart without counts or medians.
+* Reports retain their survey and route context. `resolve_flow()` adds
+  `flow_ids` to identify visited flow elements. Boolean labels preserve
+  groups and AND-before-OR precedence; unsupported conditions remain explicit.
+
 # surveyBurden 0.3.1
 
 * `burden_report(responses = )` now applies `choice_tasks` and `overrides` when scoring respondents, so its respondent summary matches `respondent_burden()` with the same settings. Previously the respondent summary ignored them.

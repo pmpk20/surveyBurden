@@ -23,6 +23,9 @@ no branch tests gives a warning.}
 A \link[tibble:tibble]{tibble}, one row per distinct path:
 \describe{
 \item{path_id}{Integer id.}
+\item{flow_ids}{List column: visited flow-element identifiers for the
+retained combination of branch outcomes, in flow order. Randomiser
+selections use survey order, not their random presentation order.}
 \item{block_ids}{List column: ordered \code{BL_...} ids the path shows.}
 \item{terminates_early}{\code{TRUE} if the path hits an \code{EndSurvey} before the
 end of the flow (a screen-out or quota termination).}

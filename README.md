@@ -185,6 +185,37 @@ report$blocks  # burden by block, in survey order, with each block's share
 
 Every function has a help page (`?burden_report`, `?score_burden` and so on).
 
+## Route flowchart
+
+```r
+qsf <- system.file("extdata", "demo_travel_survey.qsf", package = "surveyBurden")
+chart <- plot_route_flowchart(qsf, direction = "TB")
+chart
+# A lighter chart keeps block points and counts, without route medians:
+plot_route_flowchart(qsf, include_medians = FALSE)
+# A fetched definition can go straight to the chart:
+# fetch_qsf("SV_xxxxxxxxxxxxxxx") |> plot_route_flowchart()
+# Reports retain the flow, routes and their original scoring settings:
+plot_route_flowchart(burden_report(qsf))
+# Save at the suggested size, including as vector PDF:
+size <- attr(chart, "size_in")
+ggplot2::ggsave("routes.pdf", chart, width = size[1], height = size[2])
+```
+
+Boxes show blocks and GfS+ points; diamonds show branch conditions. Line
+widths count routes, not respondents or probabilities. End boxes give route
+counts and the median of their route medians. Use `highlight_route` with an
+original `path_id`, `merge_chains = FALSE` for individual blocks, or `LR` for
+a wide chart. Randomiser arms show selected elements, not their temporal
+order; dashed arrows mark loops. Within-block display logic is not drawn.
+Unsupported logic is labelled as untranslated. If `max_routes` is exceeded,
+the chart still draws the flow with uniform lines and no counts or medians.
+Text scales with its boxes when the figure is resized. The suggested export
+size fits the drawing, including labels and loop arrows, without large blank
+areas above and below it. Large surveys need a larger export size to keep
+labels readable. To redraw a full chart without repeating its calculations,
+retain `attr(chart, "burden_report")` and pass that report to the plot function.
+
 ## Limitations
 
 -   Some question types fall outside the published GfS table. For these the package applies a documented rule and flags the question as `inferred`.

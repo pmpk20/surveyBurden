@@ -45,6 +45,9 @@
 #' @return A [tibble][tibble::tibble], one row per distinct path:
 #'   \describe{
 #'     \item{path_id}{Integer id.}
+#'     \item{flow_ids}{List column: visited flow-element identifiers for the
+#'       retained combination of branch outcomes, in flow order. Randomiser
+#'       selections use survey order, not their random presentation order.}
 #'     \item{block_ids}{List column: ordered `BL_...` ids the path shows.}
 #'     \item{terminates_early}{`TRUE` if the path hits an `EndSurvey` before the
 #'       end of the flow (a screen-out or quota termination).}
@@ -224,6 +227,10 @@ flow_has_blocks <- function(nodes) {
   for (n in nodes) {
     if (!is.list(n)) next
     if ((n[["Type"]] %||% "") %in% c("Standard", "Block")) return(TRUE)
+    if (identical(n[["Type"]], "ExclusiveBranchGroup") &&
+        flow_has_blocks(n$branches)) return(TRUE)
+    if (identical(n[["Type"]], "ExclusiveBranchGroup") &&
+        flow_has_blocks(n$branches)) return(TRUE)
     if (is.list(n[["Flow"]]) && flow_has_blocks(n[["Flow"]])) return(TRUE)
   }
   FALSE
@@ -243,7 +250,11 @@ collapse_exclusive_branches <- function(nodes) {
     tp <- n[["Type"]] %||% ""
     if (tp %in% c("Group", "Authenticator", "BlockRandomizer", "Branch") &&
         is.list(n[["Flow"]])) {
-      n[["Flow"]] <- collapse_exclusive_branches(n[["Flow"]])
+      # Randomiser children are selection units. Never combine adjacent
+      # branch children into one unit before applying SubSet.
+      n[["Flow"]] <- if (tp == "BlockRandomizer") {
+        lapply(n[["Flow"]], function(child) collapse_exclusive_branches(list(child))[[1]])
+      } else collapse_exclusive_branches(n[["Flow"]])
     }
     n
   })
@@ -280,7 +291,7 @@ collapse_exclusive_branches <- function(nodes) {
         field    = key$field,
         ops      = vapply(keys, `[[`, "", "op"),
         values   = vapply(keys, `[[`, "", "value"),
-        FlowID   = paste0("XG:", paste(fids, collapse = "+"))
+        FlowID   = if (length(fids) == 1L) fids else paste0("XG:", paste(fids, collapse = "+"))
       )
     } else {
       out[[length(out) + 1L]] <- node
@@ -474,6 +485,12 @@ enumerate_paths <- function(nodes, max_paths = 10000L, field_domains = list()) {
       outcomes(rest, st)
     }
 
+    # Retain visited flow occurrences for route-chart selection counts.
+    # This is annotation only: the structural-route deduplication is unchanged.
+    res <- lapply(res, function(o) {
+      o$flow_ids <- c(node$FlowID %||% character(), o$flow_ids)
+      o
+    })
     res <- dedupe(res)
     if (length(res) > max_paths) path_space_abort(max_paths, nodes)
     memo[[key]] <- res
@@ -512,6 +529,7 @@ enumerate_paths <- function(nodes, max_paths = 10000L, field_domains = list()) {
     path_id          = seq_along(paths),
     block_ids        = lapply(paths, function(p) p$blocks),
     terminates_early = vapply(paths, function(p) p$early, logical(1)),
+    flow_ids = lapply(paths, function(p) p$flow_ids %||% character()),
     decisions        = lapply(paths, function(p) {
       d <- p$decisions
       if (length(d) == 0L) logical(0) else unlist(d)
@@ -526,7 +544,7 @@ path_space_abort <- function(max_paths, nodes) {
     "This survey has too many routes to list.",
     i = "There are more than {max_paths} distinct routes. The flow has {count_branches(nodes)} branches.",
     i = "Raise {.arg max_paths} (e.g. {.code burden_report(x, max_paths = 50000)}) or treat this as a finding that the routing is too complex."
-  ))
+  ), class = "surveyBurden_route_cap")
 }
 
 #' How many of its children a BlockRandomizer shows (`SubSet`, a number or a

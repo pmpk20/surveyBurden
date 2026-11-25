@@ -56,7 +56,9 @@
 #' from the QSF, every element is treated as shown, with a warning.
 #'
 #' @return An object of class `burden_report`: a list of tibbles under stable
-#'   names. Print it for the formatted summary, or read its components:
+#'   names. The `route_flowchart` attribute retains the survey and routes
+#'   for [plot_route_flowchart()], using this report's scoring settings.
+#'   Print it for the formatted summary, or read its components:
 #'   \describe{
 #'     \item{survey}{One-row tibble of structural counts: `survey_name`,
 #'       `n_questions`, `n_pages`, `n_blocks`, `n_branches`, `n_randomisers`,
@@ -425,6 +427,8 @@ burden_report <- function(x, scheme = gfs_scheme(), profile = TRUE,
   attr(out, "profile_used")      <- isTRUE(profile)
   attr(out, "path_profile")      <- path_profile
   attr(out, "gate_range")        <- gate_range
+  attr(out, "route_flowchart") <- list(qsf = qsf,
+    routes = paths[, c("path_id", "block_ids", "terminates_early", "decisions", "flow_ids")])
   class(out) <- "burden_report"
   out
 }

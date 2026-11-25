@@ -51,6 +51,7 @@ reference:
       - path_burden_profile
       - path_burden_traversals
       - plot_burden_profile
+      - plot_route_flowchart
       - traversal_stability
   - title: Respondent burden
     desc: The burden each respondent experienced, from their response data.

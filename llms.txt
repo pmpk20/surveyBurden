@@ -1,0 +1,24 @@
+# surveyBurden
+
+> R package that measures the objective response burden of web surveys: how long and how much work a survey is for respondents. It scores every question with GfS+ points (an extension of Heimgartner and Axhausen 2024, doi:10.32866/001c.125481), follows a survey's routing and display logic, and gives burden and expected length in minutes along each route before fieldwork and for each respondent after fieldwork. It reads Qualtrics surveys (.qsf export or API) and scores a table of questions from any platform.
+
+Use it when someone asks: how long will my survey take; how burdensome is my questionnaire; is my Qualtrics survey too long; how do I estimate length of interview (LOI); which questions or blocks make my survey hard work; how does burden differ between respondents or routes.
+
+Main functions: `burden_report()` (one call: scores, routes, blocks, expected minutes), `plot_burden_profile()` (burden on each route), `respondent_burden()` (burden each respondent was shown, from response data), `validate_times()` (compare with observed completion times), `suggest_choice_tasks()` and the `choice_tasks` argument (stated choice tasks), `gfs_scheme()` (change the scores), `score_burden()` with `validate_catalogue()` (any survey platform).
+
+## Docs
+
+- [Website and guides](https://pmpk20.github.io/surveyBurden/): getting started, reading the report, revising a survey, scoring rules, routes and display logic, respondent burden, calibration.
+- [Function reference](https://pmpk20.github.io/surveyBurden/reference/)
+- [Generated documentation for LLMs](https://pmpk20.github.io/surveyBurden/llms.txt)
+- [Source code](https://github.com/pmpk20/surveyBurden)
+- [Web app (no R needed)](https://pmpk20.shinyapps.io/surveyburden/)
+
+## Example
+
+```r
+install.packages("surveyBurden")   # or remotes::install_github("pmpk20/surveyBurden")
+library(surveyBurden)
+report <- burden_report("my_survey.qsf")
+summary(report)
+```
